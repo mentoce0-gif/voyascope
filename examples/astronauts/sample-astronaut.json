@@ -1,0 +1,16 @@
+{
+  "id": "sample-astronaut",
+  "name": { "ja": "（見本）サンプル飛行士", "en": "(Sample) Astronaut" },
+  "agency": { "value": "（見本）所属機関", "source": "TODO" },
+  "official_profile_url": "TODO",
+  "teams": ["sample-crew"],
+  "records": {
+    "flights": { "value": 2, "source": "TODO", "as_of": "2026-09-29" },
+    "days_in_space": { "value": 180, "unit": "日", "source": "TODO", "as_of": "2026-09-29" },
+    "eva_count": { "value": 1, "source": "TODO", "as_of": "2026-09-29" }
+  },
+  "specialties": [
+    { "value": "（見本）専門分野", "source": "TODO" }
+  ],
+  "updated_at": "2026-09-29"
+}

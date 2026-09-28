@@ -1,0 +1,12 @@
+{
+  "name": "voyascope",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate.mjs curation",
+    "validate:examples": "node scripts/validate.mjs examples"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1"
+  }
+}
