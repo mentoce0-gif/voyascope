@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyascope.local/schema/team.schema.json",
+  "title": "チームカード（ミッション・遠征）",
+  "type": "object",
+  "required": ["id", "name", "vehicle", "crew", "official_links", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "name": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "正式なミッション名・遠征名"
+    },
+    "vehicle": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "乗機（機体に名前があればそれも）"
+    },
+    "destination": {
+      "$ref": "common.schema.json#/$defs/id",
+      "description": "向かう先の機体（spacecraft/ の id）"
+    },
+    "launch_date": { "$ref": "common.schema.json#/$defs/fact" },
+    "return_date": { "$ref": "common.schema.json#/$defs/fact" },
+    "crew": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["astronaut", "role"],
+        "additionalProperties": false,
+        "properties": {
+          "astronaut": { "$ref": "common.schema.json#/$defs/id" },
+          "role": {
+            "$ref": "common.schema.json#/$defs/fact",
+            "description": "コマンダー、パイロット、ミッションスペシャリストなど"
+          }
+        }
+      }
+    },
+    "patch": {
+      "type": "object",
+      "description": "ミッションパッチ。利用条件の確認が済むまで使わない",
+      "required": ["url", "license_checked"],
+      "additionalProperties": false,
+      "properties": {
+        "url": { "$ref": "common.schema.json#/$defs/source" },
+        "license_checked": { "const": true }
+      }
+    },
+    "official_links": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": { "$ref": "common.schema.json#/$defs/link" }
+    },
+    "updated_at": { "$ref": "common.schema.json#/$defs/date" }
+  }
+}

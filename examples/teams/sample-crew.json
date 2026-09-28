@@ -1,0 +1,14 @@
+{
+  "id": "sample-crew",
+  "name": { "value": "（見本）Crew-00", "source": "TODO" },
+  "vehicle": { "value": "（見本）宇宙船の名前", "source": "TODO" },
+  "destination": "iss",
+  "launch_date": { "value": "2026-01-01", "source": "TODO" },
+  "crew": [
+    { "astronaut": "sample-astronaut", "role": { "value": "コマンダー", "source": "TODO" } }
+  ],
+  "official_links": [
+    { "label": "ミッション公式ページ", "url": "TODO" }
+  ],
+  "updated_at": "2026-09-29"
+}

@@ -1,0 +1,10 @@
+{
+  "$comment": "実績バッジ。records の数値から自動で付与する。memorial:true の人物には表示しない。条件の数値は仮。",
+  "badges": [
+    { "id": "reached-space", "label": "宇宙到達", "field": "records.flights", "gte": 1 },
+    { "id": "third-flight", "label": "3度目の宇宙", "field": "records.flights", "gte": 3 },
+    { "id": "eva-debut", "label": "船外活動デビュー", "field": "records.eva_count", "gte": 1 },
+    { "id": "days-100", "label": "通算100日突破", "field": "records.days_in_space", "gte": 100 },
+    { "id": "days-365", "label": "通算1年突破", "field": "records.days_in_space", "gte": 365 }
+  ]
+}

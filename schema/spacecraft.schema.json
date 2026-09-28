@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyascope.local/schema/spacecraft.schema.json",
+  "title": "機体カード（衛星・宇宙船・宇宙基地）",
+  "$comment": "創作が許されるのは catchphrase だけ。得意技・弱点は遊び心のある言い回しにしてよいが、元になった事実の出典が必須。",
+  "type": "object",
+  "required": ["id", "norad_id", "name", "class", "operator", "operator_type", "launch_date", "mission", "official_links", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "norad_id": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "CelesTrak などのリンク自動生成に使う"
+    },
+    "name": { "$ref": "common.schema.json#/$defs/bilingualName" },
+    "class": {
+      "enum": ["crewed_station", "crewed_vehicle", "science", "earth_observation", "weather", "navigation", "communication", "technology", "other"],
+      "description": "カード上のクラス表示"
+    },
+    "operator": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "運用主体（機関名・企業名。複数なら配列）"
+    },
+    "operator_type": {
+      "description": "RULES.md ルール4：軍が関わる機体も事実として記載する",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": {
+            "properties": {
+              "value": { "enum": ["civil", "commercial", "military", "mixed"] }
+            }
+          }
+        }
+      ]
+    },
+    "launch_date": { "$ref": "common.schema.json#/$defs/fact" },
+    "mission": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "公表されている任務。公表されていなければ { \"undisclosed\": true }"
+    },
+    "stats": {
+      "type": "object",
+      "description": "ゲージとランクはここから自動計算する（手で盛らない）",
+      "additionalProperties": false,
+      "properties": {
+        "altitude_km": { "$ref": "common.schema.json#/$defs/fact" },
+        "speed_km_s": { "$ref": "common.schema.json#/$defs/fact" },
+        "period_min": { "$ref": "common.schema.json#/$defs/fact" },
+        "mass_kg": { "$ref": "common.schema.json#/$defs/fact" },
+        "length_m": { "$ref": "common.schema.json#/$defs/fact" }
+      }
+    },
+    "catchphrase": {
+      "type": "string",
+      "maxLength": 40,
+      "description": "機体だけに付ける創作のキャッチコピー"
+    },
+    "special_move": {
+      "type": "object",
+      "required": ["text", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string", "maxLength": 30 },
+        "source": { "$ref": "common.schema.json#/$defs/source" }
+      }
+    },
+    "weakness": {
+      "type": "object",
+      "required": ["text", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string", "maxLength": 30 },
+        "source": { "$ref": "common.schema.json#/$defs/source" }
+      }
+    },
+    "official_links": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "description": "lv2：公式ページ。lv3（CelesTrak等）は norad_id から自動生成する",
+      "items": { "$ref": "common.schema.json#/$defs/link" }
+    },
+    "current_team": {
+      "$ref": "common.schema.json#/$defs/id",
+      "description": "搭乗中のチーム（teams/ の id）"
+    },
+    "updated_at": { "$ref": "common.schema.json#/$defs/date" }
+  }
+}

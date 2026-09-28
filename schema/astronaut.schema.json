@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyascope.local/schema/astronaut.schema.json",
+  "title": "飛行士カード",
+  "$comment": "RULES.md 人物の扱い：キャッチコピー・セリフ・能力値・写真・私生活の欄は意図的に存在しない。additionalProperties:false で追加も防ぐ。",
+  "type": "object",
+  "required": ["id", "name", "agency", "official_profile_url", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "name": { "$ref": "common.schema.json#/$defs/bilingualName" },
+    "agency": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "所属機関"
+    },
+    "official_profile_url": {
+      "$ref": "common.schema.json#/$defs/source",
+      "description": "所属機関の公式プロフィール。写真はここで見てもらう"
+    },
+    "teams": {
+      "type": "array",
+      "description": "参加したチーム（teams/ の id）。役職はチーム側に書く",
+      "items": { "$ref": "common.schema.json#/$defs/id" }
+    },
+    "records": {
+      "type": "object",
+      "description": "実績バッジの計算元。格付けには使わない",
+      "additionalProperties": false,
+      "properties": {
+        "flights": { "$ref": "common.schema.json#/$defs/fact" },
+        "days_in_space": { "$ref": "common.schema.json#/$defs/fact" },
+        "eva_count": { "$ref": "common.schema.json#/$defs/fact" },
+        "eva_hours": { "$ref": "common.schema.json#/$defs/fact" }
+      }
+    },
+    "specialties": {
+      "type": "array",
+      "description": "公式プロフィールに書かれた専門分野",
+      "items": { "$ref": "common.schema.json#/$defs/fact" }
+    },
+    "memorial": {
+      "type": "boolean",
+      "description": "true の場合、バッジなどのゲーム演出を出さず、敬意をもって表示する"
+    },
+    "updated_at": { "$ref": "common.schema.json#/$defs/date" }
+  }
+}
