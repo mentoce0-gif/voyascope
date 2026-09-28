@@ -1,0 +1,26 @@
+{
+  "id": "iss",
+  "norad_id": 25544,
+  "name": { "ja": "国際宇宙ステーション", "en": "International Space Station" },
+  "class": "crewed_station",
+  "operator": { "value": ["NASA", "Roscosmos", "JAXA", "ESA", "CSA"], "source": "TODO" },
+  "operator_type": { "value": "civil", "source": "TODO" },
+  "launch_date": { "value": "1998-11-20", "note": "最初のモジュールの打ち上げ", "source": "TODO" },
+  "mission": { "value": "微小重力を使った実験・研究", "source": "TODO" },
+  "stats": {
+    "altitude_km": { "value": 400, "unit": "km", "note": "おおよその値", "source": "TODO" },
+    "speed_km_s": { "value": 7.7, "unit": "km/s", "source": "TODO" },
+    "period_min": { "value": 90, "unit": "min", "note": "おおよその値", "source": "TODO" },
+    "mass_kg": { "value": 420000, "unit": "kg", "source": "TODO" },
+    "length_m": { "value": 109, "unit": "m", "source": "TODO" }
+  },
+  "catchphrase": "90分で地球を1周する、空飛ぶ研究所",
+  "special_move": { "text": "1日に16回の日の出", "source": "TODO" },
+  "weakness": { "text": "空気抵抗でじわじわ高度が落ちる", "source": "TODO" },
+  "official_links": [
+    { "label": "NASA", "url": "TODO" },
+    { "label": "JAXA きぼう", "url": "TODO" }
+  ],
+  "current_team": "sample-crew",
+  "updated_at": "2026-09-29"
+}
