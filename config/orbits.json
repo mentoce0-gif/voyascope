@@ -1,0 +1,6 @@
+{
+  "$comment": "軌道データを自動で取り直す機体の一覧。CelesTrak の方針（必要なデータだけ取る）に合わせ、アプリで表示する機体だけを書く。id は web/data/orbits/<id>.json のファイル名になる。",
+  "objects": [
+    { "id": "iss", "norad_id": 25544 }
+  ]
+}

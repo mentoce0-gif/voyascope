@@ -24,6 +24,11 @@ export function dateTimeJa(d) {
   return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} (${tzLabel})`;
 }
 
+// 「9月29日 15:17」のような短い表示（閲覧者の時刻で）
+export function dateTimeShortJa(d) {
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours()}:${pad(d.getMinutes())}`;
+}
+
 export function durationJa(ms) {
   const sign = ms < 0 ? "−" : "+";
   let s = Math.floor(Math.abs(ms) / 1000);
