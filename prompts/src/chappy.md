@@ -122,6 +122,16 @@ ISS の窓や船外カメラの映像（ライブ配信）を、アプリの画�
 - 埋め込むときに必要なクレジット表記や、禁止されていること（ロゴの扱い、公認と誤解される表現など）
 - 配信が止まっているときに表示すべきこと（公式が案内している代わりの表示など）があれば
 
+
+**C12　機体カード（1機ずつ）**
+「今回のタスク：C12 ひまわり9号」のように、機体を1つ指定して頼む。`schema/spacecraft.schema.json` に沿って、公式ソースで確認する。
+- `norad_id`（NORAD 番号。CelesTrak の衛星カタログなど公的データで確認）
+- `name`（ja は日本の公式の愛称を優先。en は公式の英語名）、`class`、`operator`、`operator_type`、`launch_date`、`mission`
+- `stats`：`altitude_km`（静止軌道なら約35,786 km のように公式の値）、`period_min`、`mass_kg`、`length_m`（公式に書かれているものだけ。なければ省略）
+- `official_links`（運用機関の公式ページ。最大3）
+- 運用中かどうか（公式の運用状況のページ）。運用を終えていたら、その日付と出典
+- `catchphrase`・`special_move`・`weakness` は書かない（Claude Code とオーナーが決める）
+
 ---
 
 ## プロジェクトのルール（RULES.md 全文）
