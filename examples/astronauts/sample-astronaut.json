@@ -2,6 +2,7 @@
   "id": "sample-astronaut",
   "name": { "ja": "（見本）サンプル飛行士", "en": "(Sample) Astronaut" },
   "agency": { "value": "（見本）所属機関", "source": "TODO" },
+  "nationality": { "value": "（見本）国名", "source": "TODO" },
   "official_profile_url": "TODO",
   "teams": ["sample-crew"],
   "records": {
