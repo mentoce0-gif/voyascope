@@ -49,6 +49,8 @@ const index = {
   })),
 };
 outputs.push(["web/data/craft-index.json", JSON.stringify(index, null, 2) + "\n"]);
+// 今夜の通過（県単位）に使う代表地点
+outputs.push(["web/data/prefectures.json", readFileSync("config/prefectures.json", "utf8")]);
 
 const check = process.argv.includes("--check");
 let stale = 0;

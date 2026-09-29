@@ -583,6 +583,64 @@ body { overflow: hidden; }
   border-radius: 3px;
 }
 
+/* 今夜・頭の上 */
+.tonight {
+  margin: -2px -2px 12px;
+  padding: 10px 10px 8px;
+  border: 1px solid rgba(255, 181, 71, 0.4);
+  border-radius: 8px;
+  background: rgba(255, 181, 71, 0.05);
+}
+.tonight-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.tonight-title { margin: 0; font-size: 0.95rem; color: var(--amber); letter-spacing: 0.08em; }
+.pref-select {
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--text);
+  background: var(--navy-700);
+  border: 1px solid var(--mint-dim);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+.tonight-body { margin-top: 8px; }
+.tonight-body p { margin: 0.3rem 0; }
+.pass-when { font-size: 1.05rem; font-weight: 700; }
+.pass-time { color: var(--amber); }
+.pass-dir { font-size: 0.9rem; }
+.pass-dir strong { color: var(--mint); }
+.pass-height { margin-top: 2px; }
+.sky-chart { display: block; width: 100%; max-width: 220px; margin: 6px auto 4px; }
+.sky-horizon { fill: rgba(8, 26, 54, 0.9); stroke: var(--mint-dim); stroke-width: 1; }
+.sky-ring { fill: none; stroke: rgba(94, 242, 194, 0.18); stroke-width: 0.8; }
+.sky-dir { fill: var(--mint); font-size: 11px; text-anchor: middle; font-family: var(--font-body); }
+.sky-zenith { fill: var(--text-dim); font-size: 8px; font-family: var(--font-body); }
+.sky-path { fill: none; stroke: var(--amber); stroke-width: 2.2; }
+.sky-arrowhead { fill: var(--amber); }
+.sky-start { fill: var(--amber); }
+.sky-end { fill: var(--amber); }
+.sky-label { fill: var(--amber); font-size: 9px; text-anchor: middle; font-family: var(--font-body); }
+.pass-jump { width: 100%; margin-top: 4px; }
+.pass-more { list-style: none; margin: 8px 0 0; padding: 6px 0 0; border-top: 1px solid var(--panel-border); display: grid; gap: 4px; font-size: 0.8rem; }
+.pass-more li { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+.tonight-note { margin-top: 8px !important; line-height: 1.5; }
+.tonight-chip {
+  appearance: none;
+  margin-left: auto;
+  margin-right: 12px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--amber-dim);
+  background: rgba(255, 181, 71, 0.08);
+  color: var(--amber);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 46vw;
+}
+
 /* ---------- このアプリについて（ダイアログ） ---------- */
 dialog.card {
   width: min(560px, calc(100vw - 2 * var(--gutter)));
@@ -609,6 +667,8 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   .top-bar { padding: calc(env(safe-area-inset-top) + 8px) 12px 6px; }
   .brand { font-size: 1rem; letter-spacing: 0.2em; }
   .brand-sub { display: none; }
+  .tonight-chip { order: 3; flex-basis: 100%; margin: 4px 0 0; max-width: none; text-align: left; }
+  .top-bar { flex-wrap: wrap; }
   .clock-block { font-size: 0.72rem; gap: 6px; flex-direction: column; align-items: flex-end; }
   .side-panel {
     top: auto;

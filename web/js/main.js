@@ -5,6 +5,8 @@ import { landPath, renderMinimap } from "./minimap.js";
 import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
 import { esc, dateTimeShortJa, dateTimeJa, durationJa } from "./format.js";
+import { findVisiblePasses, observerOf } from "./passes.js";
+import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
 
 const COLORS = {
   navy: "#07142b",
@@ -57,7 +59,11 @@ async function loadJson(path) {
 }
 
 async function loadAll() {
-  const [index, land] = await Promise.all([loadJson("data/craft-index.json"), loadJson("data/land-110m.geojson")]);
+  const [index, land, prefs] = await Promise.all([
+    loadJson("data/craft-index.json"),
+    loadJson("data/land-110m.geojson"),
+    loadJson("data/prefectures.json"),
+  ]);
   const craft = await Promise.all(
     index.craft.map(async (c) => {
       const [card, orbit, crewData] = await Promise.all([
@@ -68,11 +74,11 @@ async function loadAll() {
       return { id: c.id, card, orbit, crewData };
     }),
   );
-  return { craft: craft.filter((c) => c.orbit), land };
+  return { craft: craft.filter((c) => c.orbit), land, prefectures: prefs.prefectures };
 }
 
 // ---------- 観測画面 ----------
-function startApp({ craft, land }) {
+function startApp({ craft, land, prefectures }) {
   const clock = new SimClock();
 
   // 機体ごとの準備（軌道・家族・地球の上の印）
@@ -172,6 +178,8 @@ function startApp({ craft, land }) {
   // 下のバーの実際の高さを、パネルや注記の位置に使う
   const bottomBar = $(".bottom-bar");
   new ResizeObserver(() => $("#app").style.setProperty("--bottom-h", `${bottomBar.offsetHeight}px`)).observe(bottomBar);
+  const topBar = $(".top-bar");
+  new ResizeObserver(() => $("#app").style.setProperty("--top-h", `${topBar.offsetHeight}px`)).observe(topBar);
 
   const first = craft[0] && positionAt(craft[0].satrec, clock.now());
   globe.pointOfView({ lat: first?.lat ?? 25, lng: first?.lng ?? 135, altitude: isNarrow() ? 5 : 3.2 }, 0);
@@ -347,6 +355,52 @@ function startApp({ craft, land }) {
   });
   controls.addEventListener("start", () => follow && setFollow(false));
 
+  // ---------- 今夜・頭の上（ISS の見える通過） ----------
+  const iss = craft.find((c) => c.id === "iss");
+  const prefSelect = $("#pref-select");
+  const tonightBody = $("#tonight-body");
+  const tonightChip = $("#tonight-chip");
+  let pref = prefectures.find((p) => p.code === loadPrefecture()) ?? null;
+  let passes = [];
+  let passesAt = 0;
+  renderPrefSelect(prefSelect, prefectures, pref?.code);
+  // タイムライン（+24時間まで）に入る通過だけ「見る」ボタンを出す
+  const jumpable = (p) => p.start.getTime() - Date.now() < 24 * 3600e3 - 5 * 60e3;
+  const updateTonight = () => {
+    const now = new Date();
+    passes = pref && iss ? findVisiblePasses(iss.satrec, observerOf(pref), now, { days: 5, limit: 3 }) : [];
+    passesAt = now.getTime();
+    renderTonight(tonightBody, { pref, passes, now, jumpable });
+    $("#tonight-label").textContent = pref ? `今夜・${pref.name}` : "今夜・頭の上";
+    tonightChip.hidden = !pref;
+    if (pref) {
+      tonightChip.textContent = passes.length
+        ? `${pref.name}　ISS ${whenWord(passes[0].start, now)} ${clockWord(passes[0].start)}`
+        : `${pref.name}　ISS 見える通過なし（5日間）`;
+    }
+  };
+  prefSelect.addEventListener("change", () => {
+    pref = prefectures.find((p) => p.code === prefSelect.value) ?? null;
+    savePrefecture(pref?.code);
+    updateTonight();
+  });
+  tonightBody.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-jump]");
+    const p = b && passes[Number(b.dataset.jump)];
+    if (!p || !iss) return;
+    clock.live();
+    clock.jumpToOffset(p.start.getTime() - Date.now() - 60e3);
+    syncControls();
+    select(iss);
+    setFollow(true);
+  });
+  tonightChip.addEventListener("click", () => {
+    listPanel.classList.add("open");
+    if (isNarrow()) closeDetail();
+    listPanel.scrollTop = 0;
+  });
+  updateTonight();
+
   // ---------- このアプリについて ----------
   const about = $("#about");
   about.addEventListener("click", (e) => {
@@ -394,6 +448,8 @@ function startApp({ craft, land }) {
         if (n) n.textContent = c.pos ? `約 ${Math.round(c.pos.altKm).toLocaleString("ja-JP")} km` : "--";
       }
       updateDetailLive();
+      // 通過の予報は10分ごと、または次の通過が終わったら作り直す
+      if (pref && (Date.now() - passesAt > 600e3 || (passes[0] && passes[0].end.getTime() < Date.now()))) updateTonight();
 
       const ageDays = Math.max(...craft.map((c) => Math.abs(now - new Date(c.orbit.epoch)) / 86400000));
       let warning = "";
