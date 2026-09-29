@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>VOYASCOPE — 今、宇宙を旅する者たち。</title>
+  <meta name="description" content="地球のまわりを飛ぶ宇宙船の「今」を覗く観測端末。非公式ファンメイド作品です。">
+  <meta name="theme-color" content="#07142b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 起動画面 -->
+  <section id="boot" class="crt" aria-label="起動画面">
+    <canvas id="noise" aria-hidden="true"></canvas>
+    <div class="boot-inner">
+      <p class="boot-sys mono" aria-hidden="true">OBSERVATION TERMINAL // BOOT</p>
+      <h1 class="logo mono">VOYASCOPE</h1>
+      <p class="subtitle">今、宇宙を旅する者たち。</p>
+      <button id="start" class="btn btn-primary mono" type="button" disabled>
+        <span id="start-label">LOADING…</span>
+      </button>
+      <p id="boot-status" class="boot-status mono" role="status">データを読み込んでいます</p>
+      <p class="unofficial">※非公式ファンメイド作品です。<br>JAXA・NASA などの宇宙機関・運用者とは関係ありません。</p>
+    </div>
+  </section>
+
+  <!-- 観測画面 -->
+  <main id="app" hidden>
+    <div id="globe" aria-label="地球と ISS の現在位置"></div>
+    <div class="crt-overlay" aria-hidden="true"></div>
+
+    <header class="hud hud-top">
+      <div class="brand mono">VOYASCOPE</div>
+      <div class="clock mono">
+        <div><span class="k">観測時刻</span> <span id="sim-time">--</span></div>
+        <div id="sim-offset" class="offset"></div>
+      </div>
+    </header>
+
+    <aside class="hud hud-telemetry mono" aria-label="ISS の計器表示">
+      <div class="tele-title">TARGET <span class="amber">ISS</span></div>
+      <dl>
+        <dt>緯度</dt><dd id="t-lat">--</dd>
+        <dt>経度</dt><dd id="t-lng">--</dd>
+        <dt>高度</dt><dd id="t-alt">--</dd>
+        <dt>速さ</dt><dd id="t-spd">--</dd>
+      </dl>
+      <p class="hint">ISS をタップするとカードが開きます</p>
+      <button type="button" id="card-open" class="btn mono card-open">カードを開く</button>
+    </aside>
+
+    <footer class="hud hud-bottom">
+      <div class="timectl" role="group" aria-label="時間の早送り">
+        <span class="k mono">時間</span>
+        <button type="button" class="btn speed mono" data-speed="1" aria-pressed="true">×1</button>
+        <button type="button" class="btn speed mono" data-speed="60" aria-pressed="false">×60</button>
+        <button type="button" class="btn speed mono" data-speed="600" aria-pressed="false">×600</button>
+        <button type="button" id="now" class="btn mono">現在時刻に戻る</button>
+        <button type="button" id="follow" class="btn mono" aria-pressed="false" title="カメラが ISS を追いかけます">追尾</button>
+      </div>
+      <div class="footnote">
+        <span id="tle-info" class="mono">軌道データ：--</span>
+        <span class="sep">／</span>
+        <span>※非公式ファンメイド作品です</span>
+        <button type="button" id="about-open" class="linklike">このアプリについて</button>
+      </div>
+      <p id="tle-warning" class="warning" hidden></p>
+    </footer>
+  </main>
+
+  <!-- ISS のキャラカード -->
+  <dialog id="card" class="card" aria-labelledby="card-name">
+    <div class="card-inner">
+      <button type="button" class="close mono" data-close aria-label="カードを閉じる">×</button>
+      <div id="card-body"></div>
+      <p class="card-foot">※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
+    </div>
+  </dialog>
+
+  <!-- このアプリについて -->
+  <dialog id="about" class="card" aria-labelledby="about-title">
+    <div class="card-inner">
+      <button type="button" class="close mono" data-close aria-label="閉じる">×</button>
+      <h2 id="about-title">このアプリについて</h2>
+      <p><strong>VOYASCOPE は非公式のファンメイド作品です。</strong>JAXA・NASA をはじめとする宇宙機関・運用者とは関係ありません。</p>
+      <h3>ISS の位置はどうやって出しているの？</h3>
+      <p>ISS の軌道の形を表す数字のセット（<b>TLE</b>）を公開データの CelesTrak から取得し、<b>SGP4</b>（人工衛星の位置を計算する方法）で、あなたのブラウザの中で計算しています。</p>
+      <p>軌道データは時間がたつと少しずつずれていきます。いまは取得したときのデータを使い続けているので、実際の位置と差が出ることがあります。</p>
+      <p id="about-tle" class="mono small"></p>
+      <h3>使っているもの</h3>
+      <ul class="small">
+        <li>軌道データ：CelesTrak（公開データ）</li>
+        <li>位置計算：satellite.js（MIT License）</li>
+        <li>3D表示：globe.gl／three.js（MIT License）</li>
+        <li>陸地の形：Natural Earth（パブリックドメイン）／world-atlas（ISC License）</li>
+      </ul>
+      <p class="small">軌道データや画像などの権利は、それぞれの提供元にあります。</p>
+    </div>
+  </dialog>
+
+  <script src="vendor/globe.gl.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
