@@ -3,10 +3,11 @@
   "norad_id": 25544,
   "name": { "ja": "国際宇宙ステーション", "en": "International Space Station" },
   "class": "crewed_station",
-  "operator": { "value": ["NASA", "Roscosmos", "JAXA", "ESA", "CSA"], "source": "TODO" },
-  "operator_type": { "value": "civil", "source": "TODO" },
-  "launch_date": { "value": "1998-11-20", "note": "最初のモジュールの打ち上げ", "source": "TODO" },
-  "mission": { "value": "微小重力を使った実験・研究", "source": "TODO" },
+  "operator": { "value": ["NASA", "Roscosmos", "JAXA", "ESA", "CSA"], "source": "https://oig.nasa.gov/wp-content/uploads/2024/02/IG-23-004.pdf", "as_of": "2026-09-30" },
+  "operator_type": { "value": "civil", "source": "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/International_Space_Station/International_Space_Station_legal_framework", "as_of": "2026-09-30", "note": "ISS の政府間協定で「平和目的の民生用宇宙基地」とされている" },
+  "launch_date": { "value": "1998-11-20", "source": "https://www.nasa.gov/missions/station/the-international-space-station-20-years-of-communications-excellence/", "as_of": "2026-09-30", "note": "最初のモジュール「ザーリャ」の打ち上げ" },
+  "mission": { "value": "宇宙で科学研究と技術の実証をする拠点", "source": "https://www.nasa.gov/news-release/nasa-names-new-station-manager-space-operations-deputy/", "as_of": "2026-09-30" },
+  "status": { "value": "operating", "source": "https://www.nasa.gov/international-space-station/space-station-overview/", "as_of": "2026-09-30", "note": "参加機関は2030年までの運用を約束している（NASA の FAQ）" },
   "stats": {
     "altitude_km": { "value": 400, "unit": "km", "note": "おおよその値", "source": "TODO" },
     "speed_km_s": { "value": 7.7, "unit": "km/s", "source": "TODO" },
@@ -22,5 +23,5 @@
     { "label": "JAXA きぼう", "url": "TODO" }
   ],
   "current_team": "sample-crew",
-  "updated_at": "2026-09-29"
+  "updated_at": "2026-09-30"
 }

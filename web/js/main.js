@@ -183,7 +183,14 @@ function startApp({ craft, land, prefectures }) {
   new ResizeObserver(() => $("#app").style.setProperty("--top-h", `${topBar.offsetHeight}px`)).observe(topBar);
 
   const first = craft[0] && positionAt(craft[0].satrec, clock.now());
-  globe.pointOfView({ lat: first?.lat ?? 25, lng: first?.lng ?? 135, altitude: isNarrow() ? 5 : 3.2 }, 0);
+  // スマホの縦長の画面では、静止軌道の環が横幅に収まるところまで引いて見る
+  const startAltitude = () => {
+    if (!isNarrow()) return 3.2;
+    const tanHalf = Math.tan(((globe.camera().fov * Math.PI) / 180) / 2) * (globe.width() / globe.height());
+    const geoRadius = 1 + RINGS.find((r) => r.id === "geo").alt; // 地球の半径を1としたとき
+    return Math.min(9, Math.max(5, (geoRadius * 1.1) / tanHalf - 1));
+  };
+  globe.pointOfView({ lat: first?.lat ?? 25, lng: first?.lng ?? 135, altitude: startAltitude() }, 0);
 
   // ---------- 注目の一覧と家族 ----------
   const present = FAMILIES.filter((f) => craft.some((c) => c.family.id === f.id));
@@ -451,6 +458,9 @@ function startApp({ craft, land, prefectures }) {
       for (const c of craft) {
         const n = listEl.querySelector(`[data-alt="${c.id}"]`);
         if (n) n.textContent = c.pos ? `約 ${Math.round(c.pos.altKm).toLocaleString("ja-JP")} km` : "--";
+        // 画面の右端で名前が切れるときは、名前を印の左に出す
+        const r = c.el.getBoundingClientRect();
+        if (r.width) c.el.classList.toggle("tag-left", r.left + 34 + (c.el.querySelector(".tag")?.offsetWidth ?? 0) > innerWidth - 8);
       }
       updateDetailLive();
       // 通過の予報は10分ごと、または次の通過が終わったら作り直す

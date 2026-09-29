@@ -529,6 +529,7 @@ body { overflow: hidden; }
   white-space: nowrap;
   text-shadow: 0 0 6px var(--navy-900);
 }
+.craft-marker.tag-left .tag { left: auto; right: 34px; }
 .craft-marker.selected .core { outline: 2px solid var(--c); outline-offset: 5px; }
 @keyframes ping {
   0% { transform: scale(0.6); opacity: 1; }
