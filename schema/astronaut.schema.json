@@ -13,6 +13,10 @@
       "$ref": "common.schema.json#/$defs/fact",
       "description": "所属機関"
     },
+    "nationality": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "国籍（公式プロフィールに書かれている場合だけ。value は日本語の国名。複数なら配列）"
+    },
     "official_profile_url": {
       "$ref": "common.schema.json#/$defs/source",
       "description": "所属機関の公式プロフィール。写真はここで見てもらう"
