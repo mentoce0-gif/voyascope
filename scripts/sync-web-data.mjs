@@ -2,52 +2,68 @@
 // web/ だけを配信する（npx serve web）ため、リポジトリ内の他のフォルダは直接読めない。
 // 元ファイルを変えたら npm run sync:web を実行する。--check で「書き出したものが古くないか」だけ確かめる。
 //
-// - 機体カード：そのままコピー
+// - 機体：config/orbits.json に並んだ順。カードは curation/（出典確認済み）を優先し、なければ examples/（見本）
 // - 乗員：その機体に向かったチーム（teams/ の destination）と、その飛行士（astronauts/）を1つのファイルにまとめる
 //   いま乗っているかどうか（打ち上げ済み・未帰還）はアプリ側で判断する
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-// Phase 0〜1 は見本（examples/）を使う（出典確認中）。curation/ に入ったら差し替える
-const SOURCE = "examples";
-const CRAFT = ["iss"];
-
 const readJson = (p) => JSON.parse(readFileSync(p, "utf8"));
 const readDir = (dir) =>
   existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => readJson(join(dir, f))) : [];
 
+// カードの置き場所：出典確認済み（curation）が先
+function cardSource(id) {
+  for (const root of ["curation", "examples"]) {
+    const path = join(root, "spacecraft", `${id}.json`);
+    if (existsSync(path)) return { root, path };
+  }
+  return null;
+}
+
 const outputs = [];
-const teams = readDir(join(SOURCE, "teams"));
-const astronauts = new Map(readDir(join(SOURCE, "astronauts")).map((a) => [a.id, a]));
+const { objects } = readJson("config/orbits.json");
+const craft = [];
 
-for (const id of CRAFT) {
-  const card = readFileSync(join(SOURCE, "spacecraft", `${id}.json`), "utf8");
-  outputs.push([`web/data/cards/${id}.json`, card]);
+for (const { id } of objects) {
+  const src = cardSource(id);
+  if (!src) {
+    console.log(`カードがないので表示しない: ${id}`);
+    continue;
+  }
+  const cardText = readFileSync(src.path, "utf8");
+  const card = JSON.parse(cardText);
+  outputs.push([`web/data/cards/${id}.json`, cardText]);
 
-  const crew = {
-    $comment: `scripts/sync-web-data.mjs が ${SOURCE}/teams と ${SOURCE}/astronauts から作る。手で編集しない。`,
-    teams: teams
-      .filter((t) => t.destination === id)
-      .map((t) => ({
-        ...t,
-        crew: t.crew.map((m) => ({ ...m, astronaut: astronauts.get(m.astronaut) ?? { id: m.astronaut } })),
-      })),
-  };
-  outputs.push([`web/data/cards/${id}-crew.json`, JSON.stringify(crew, null, 2) + "\n"]);
+  let crew = null;
+  if (card.class?.startsWith("crewed")) {
+    const teams = readDir(join(src.root, "teams"));
+    const astronauts = new Map(readDir(join(src.root, "astronauts")).map((a) => [a.id, a]));
+    const data = {
+      $comment: `scripts/sync-web-data.mjs が ${src.root}/teams と ${src.root}/astronauts から作る。手で編集しない。`,
+      teams: teams
+        .filter((t) => t.destination === id)
+        .map((t) => ({
+          ...t,
+          crew: t.crew.map((m) => ({ ...m, astronaut: astronauts.get(m.astronaut) ?? { id: m.astronaut } })),
+        })),
+    };
+    crew = `data/cards/${id}-crew.json`;
+    outputs.push([`web/${crew}`, JSON.stringify(data, null, 2) + "\n"]);
+  }
+
+  craft.push({
+    id,
+    card: `data/cards/${id}.json`,
+    orbit: `data/orbits/${id}.json`,
+    crew,
+    sample: src.root === "examples",
+  });
 }
 
 // アプリが最初に読む一覧。機体ごとのカード・軌道・乗員のファイルの場所
-const orbitIds = new Set(JSON.parse(readFileSync("config/orbits.json", "utf8")).objects.map((o) => o.id));
-const index = {
-  $comment: "scripts/sync-web-data.mjs が作る。手で編集しない。",
-  craft: CRAFT.map((id) => ({
-    id,
-    card: `data/cards/${id}.json`,
-    orbit: orbitIds.has(id) ? `data/orbits/${id}.json` : null,
-    crew: `data/cards/${id}-crew.json`,
-  })),
-};
+const index = { $comment: "scripts/sync-web-data.mjs が作る。手で編集しない。", craft };
 outputs.push(["web/data/craft-index.json", JSON.stringify(index, null, 2) + "\n"]);
 // 今夜の通過（県単位）に使う代表地点
 outputs.push(["web/data/prefectures.json", readFileSync("config/prefectures.json", "utf8")]);

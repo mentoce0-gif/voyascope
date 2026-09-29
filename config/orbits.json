@@ -1,6 +1,12 @@
 {
-  "$comment": "軌道データを自動で取り直す機体の一覧。CelesTrak の方針（必要なデータだけ取る）に合わせ、アプリで表示する機体だけを書く。id は web/data/orbits/<id>.json のファイル名になる。",
+  "$comment": "軌道データを自動で取り直す機体の一覧（この順に画面の「注目」一覧に並ぶ）。CelesTrak の方針（必要なデータだけ取る）に合わせ、アプリで表示する機体だけを書く。id は web/data/orbits/<id>.json と、カード（curation/spacecraft/<id>.json、なければ examples/）のファイル名になる。",
   "objects": [
-    { "id": "iss", "norad_id": 25544 }
+    { "id": "iss", "norad_id": 25544 },
+    { "id": "himawari-9", "norad_id": 41836 },
+    { "id": "qzs-6", "norad_id": 62876 },
+    { "id": "qzs-2", "norad_id": 42738 },
+    { "id": "daichi-4", "norad_id": 60182 },
+    { "id": "ibuki-gw", "norad_id": 64694 },
+    { "id": "hinode", "norad_id": 29479 }
   ]
 }

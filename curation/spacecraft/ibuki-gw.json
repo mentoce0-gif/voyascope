@@ -1,0 +1,61 @@
+{
+  "id": "ibuki-gw",
+  "norad_id": 64694,
+  "name": {
+    "ja": "いぶきGW",
+    "en": "GOSAT-GW"
+  },
+  "class": "earth_observation",
+  "operator": {
+    "value": [
+      "JAXA",
+      "環境省",
+      "国立環境研究所（NIES）"
+    ],
+    "source": "https://gosat-gw.nies.go.jp/gosat-gw01.html",
+    "as_of": "2026-09-30",
+    "note": "水の観測（AMSR3）は文部科学省と JAXA、温室効果ガスの観測（TANSO-3）は環境省と NIES が担当"
+  },
+  "operator_type": {
+    "value": "civil",
+    "source": "https://gosat-gw.nies.go.jp/gosat-gw01.html",
+    "as_of": "2026-09-30"
+  },
+  "launch_date": {
+    "value": "2025-06-29",
+    "source": "https://www.satnavi.jaxa.jp/ja/project/gosat-gw/",
+    "as_of": "2026-09-30"
+  },
+  "mission": {
+    "value": "宇宙から、地球の水と温室効果ガスを観測する",
+    "source": "https://www.satnavi.jaxa.jp/ja/project/gosat-gw/",
+    "as_of": "2026-09-30"
+  },
+  "stats": {
+    "altitude_km": {
+      "value": 666,
+      "unit": "km",
+      "source": "https://www.satnavi.jaxa.jp/ja/project/gosat-gw/",
+      "as_of": "2026-09-30",
+      "note": "軌道の高度（公称）"
+    },
+    "mass_kg": {
+      "value": 2600,
+      "unit": "kg",
+      "source": "https://www.satnavi.jaxa.jp/ja/project/gosat-gw/",
+      "as_of": "2026-09-30",
+      "note": "おおよその値（約2.6トン）"
+    }
+  },
+  "official_links": [
+    {
+      "label": "JAXA サテライトナビゲーター",
+      "url": "https://www.satnavi.jaxa.jp/ja/project/gosat-gw/"
+    },
+    {
+      "label": "国立環境研究所 GOSAT-GW",
+      "url": "https://gosat-gw.nies.go.jp/"
+    }
+  ],
+  "updated_at": "2026-09-30"
+}
