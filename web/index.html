@@ -29,37 +29,62 @@
 
   <!-- 観測画面 -->
   <main id="app" hidden>
-    <div id="globe" aria-label="地球と ISS の現在位置"></div>
+    <div id="globe" aria-label="地球と機体の現在位置"></div>
     <div class="crt-overlay" aria-hidden="true"></div>
 
-    <header class="hud hud-top">
-      <div class="brand mono">VOYASCOPE</div>
-      <div class="clock mono">
-        <div><span class="k">観測時刻</span> <span id="sim-time">--</span></div>
-        <div id="sim-offset" class="offset"></div>
+    <header class="top-bar">
+      <div class="brand-block">
+        <div class="brand mono">VOYASCOPE</div>
+        <div class="brand-sub">今、宇宙を旅する者たち。</div>
+      </div>
+      <div class="clock-block">
+        <span id="sim-time" class="mono">--</span>
+        <span id="live-badge" class="live-badge mono" data-live="true">LIVE</span>
       </div>
     </header>
 
-    <aside class="hud hud-telemetry mono" aria-label="ISS の計器表示">
-      <div class="tele-title">TARGET <span class="amber">ISS</span></div>
-      <dl>
-        <dt>緯度</dt><dd id="t-lat">--</dd>
-        <dt>経度</dt><dd id="t-lng">--</dd>
-        <dt>高度</dt><dd id="t-alt">--</dd>
-        <dt>速さ</dt><dd id="t-spd">--</dd>
-      </dl>
-      <p class="hint">ISS をタップするとカードが開きます</p>
-      <button type="button" id="card-open" class="btn mono card-open">カードを開く</button>
+    <!-- 左：注目の一覧 -->
+    <aside id="list-panel" class="side-panel list-panel" aria-label="注目の機体">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <nav class="fam-tabs" id="fam-tabs" aria-label="家族で絞り込む"></nav>
+      <h2 class="list-title">注目</h2>
+      <ul id="craft-list" class="craft-list"></ul>
+      <p class="list-note k small">名前で呼べる機体だけを、少しずつ置いていきます。</p>
     </aside>
 
-    <footer class="hud hud-bottom">
-      <div class="timectl" role="group" aria-label="時間の早送り">
-        <span class="k mono">時間</span>
-        <button type="button" class="btn speed mono" data-speed="1" aria-pressed="true">×1</button>
-        <button type="button" class="btn speed mono" data-speed="60" aria-pressed="false">×60</button>
-        <button type="button" class="btn speed mono" data-speed="600" aria-pressed="false">×600</button>
-        <button type="button" id="now" class="btn mono">現在時刻に戻る</button>
-        <button type="button" id="follow" class="btn mono" aria-pressed="false" title="カメラが ISS を追いかけます">追尾</button>
+    <!-- 右：選んだ機体の詳細 -->
+    <aside id="detail-panel" class="side-panel detail-panel" aria-label="機体の詳細" hidden>
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div id="detail-body"></div>
+    </aside>
+
+    <!-- 環のスケール注記 -->
+    <p class="scale-note k small">環の半径は比較用。実距離ではありません。</p>
+
+    <!-- 下：タイムラインと表示切り替え -->
+    <footer class="bottom-bar">
+      <div class="timeline">
+        <button type="button" id="play" class="round-btn" aria-label="一時停止" data-playing="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/><path class="i-play" d="M8 5l11 7-11 7z"/></svg>
+        </button>
+        <button type="button" id="now" class="btn mono live-btn">▶ LIVE</button>
+        <div class="slider-wrap">
+          <input id="timeline" type="range" min="-360" max="1440" step="1" value="0" aria-label="観測時刻（現在からのずれ）">
+          <div class="ticks mono" aria-hidden="true">
+            <span style="left:0%">−6h</span><span style="left:10%">−3h</span><span style="left:20%">現在</span><span style="left:40%">+6h</span><span style="left:60%">+12h</span><span style="left:100%">+24h</span>
+          </div>
+        </div>
+        <div class="speeds" role="group" aria-label="再生の速さ">
+          <button type="button" class="btn speed mono" data-speed="1" aria-pressed="true">×1</button>
+          <button type="button" class="btn speed mono" data-speed="60" aria-pressed="false">×60</button>
+          <button type="button" class="btn speed mono" data-speed="600" aria-pressed="false">×600</button>
+        </div>
+      </div>
+      <div class="controls-row">
+        <button type="button" id="list-open" class="btn mono list-open">注目</button>
+        <div id="fam-legend" class="fam-legend" role="group" aria-label="家族ごとの表示"></div>
+        <label class="toggle"><input type="checkbox" id="rings-toggle" checked> 環</label>
+        <button type="button" id="follow" class="btn mono" aria-pressed="false" title="カメラが選んだ機体を追いかけます">追尾</button>
       </div>
       <div class="footnote">
         <span id="tle-info" class="mono">軌道データ：--</span>
@@ -71,24 +96,18 @@
     </footer>
   </main>
 
-  <!-- ISS のキャラカード -->
-  <dialog id="card" class="card" aria-labelledby="card-name">
-    <div class="card-inner">
-      <button type="button" class="close mono" data-close aria-label="カードを閉じる">×</button>
-      <div id="card-body"></div>
-    </div>
-  </dialog>
-
   <!-- このアプリについて -->
   <dialog id="about" class="card" aria-labelledby="about-title">
     <div class="card-inner">
       <button type="button" class="close mono" data-close aria-label="閉じる">×</button>
       <h2 id="about-title">このアプリについて</h2>
       <p><strong>VOYASCOPE は非公式のファンメイド作品です。</strong>JAXA・NASA をはじめとする宇宙機関・運用者とは関係ありません。</p>
-      <h3>ISS の位置はどうやって出しているの？</h3>
-      <p>ISS の軌道の形を表す数字のセット（<b>TLE</b>）を公開データの CelesTrak から取得し、<b>SGP4</b>（人工衛星の位置を計算する方法）で、あなたのブラウザの中で計算しています。</p>
+      <h3>位置はどうやって出しているの？</h3>
+      <p>軌道の形を表す数字のセット（<b>軌道要素</b>）を公開データの CelesTrak から取得し、<b>SGP4</b>（人工衛星の位置を計算する方法）で、あなたのブラウザの中で計算しています。</p>
       <p>軌道データは時間がたつと少しずつずれていくので、6時間ごとに自動で取り直しています。それでも、実際の位置と少し差が出ることがあります。</p>
       <p id="about-tle" class="mono small"></p>
+      <h3>環（わ）について</h3>
+      <p>地球のまわりの3本の環は、低軌道・中軌道・静止軌道の目安です。違いが見えるように<b>半径を比較用に描いていて、実際の距離とは違います</b>。低軌道の機体は約90分で地球を一周して「流れ」、静止軌道の機体は地球と同じ速さで回るので「止まって」見えます。早送りで確かめてみてください。</p>
       <h3>使っているもの</h3>
       <ul class="small">
         <li>軌道データ：CelesTrak（公開データ）</li>
