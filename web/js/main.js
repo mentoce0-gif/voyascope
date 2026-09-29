@@ -1,7 +1,7 @@
 // VOYASCOPE Phase 0：地球＋ISS 1機＋キャラカード＋時間早送り
-import { satrecFromTle, positionAt, periodMinutes, SimClock } from "./orbit.js";
+import { satrecFromOrbit, positionAt, periodMinutes, SimClock } from "./orbit.js";
 import { renderCard, updateLive } from "./card.js";
-import { dateJa, dateTimeJa, durationJa, latStr, lngStr } from "./format.js";
+import { dateTimeShortJa, dateTimeJa, durationJa, latStr, lngStr } from "./format.js";
 
 const COLORS = {
   navy: "#07142b",
@@ -53,24 +53,24 @@ async function loadJson(path) {
 }
 
 async function loadAll() {
-  const [tle, card, thresholds, land] = await Promise.all([
-    loadJson("data/iss-tle.json"),
+  const [orbit, card, thresholds, land] = await Promise.all([
+    loadJson("data/orbits/iss.json"),
     loadJson("data/cards/iss.json"),
     loadJson("data/rank-thresholds.json"),
     loadJson("data/land-110m.geojson"),
   ]);
-  return { tle, card, thresholds, land };
+  return { orbit, card, thresholds, land };
 }
 
 // ---------- 観測画面 ----------
-function startApp({ tle, card, thresholds, land }) {
-  const satrec = satrecFromTle(tle);
+function startApp({ orbit, card, thresholds, land }) {
+  const satrec = satrecFromOrbit(orbit);
   const clock = new SimClock();
-  const epoch = new Date(tle.epoch);
+  const epoch = new Date(orbit.epoch);
 
-  $("#tle-info").textContent = `軌道データ取得：${dateJa(tle.fetched_at)}`;
+  $("#tle-info").textContent = `軌道データ取得：${dateTimeShortJa(new Date(orbit.fetched_at))}`;
   $("#about-tle").textContent =
-    `軌道データ取得：${dateTimeJa(new Date(tle.fetched_at))}／基準時刻（エポック）：${dateTimeJa(epoch)}／出典：${tle.source}`;
+    `軌道データ取得：${dateTimeJa(new Date(orbit.fetched_at))}／基準時刻（エポック）：${dateTimeJa(epoch)}／出典：${orbit.source}`;
 
   // ISS マーカー（HTML 要素を地球に重ねる）
   const marker = document.createElement("button");
@@ -231,8 +231,8 @@ async function boot() {
   } catch (e) {
     status.classList.add("error");
     status.textContent =
-      e.path === "data/iss-tle.json" && e.status === 404
-        ? "軌道データ（web/data/iss-tle.json）がありません。npm run fetch:tle で取得してください。"
+      e.path === "data/orbits/iss.json" && e.status === 404
+        ? "軌道データ（web/data/orbits/iss.json）がありません。npm run fetch:orbits で取得してください。"
         : `読み込みに失敗しました：${e.message}`;
     $("#start-label").textContent = "ERROR";
     return;
