@@ -41,6 +41,20 @@
       "$ref": "common.schema.json#/$defs/fact",
       "description": "公表されている任務。公表されていなければ { \"undisclosed\": true }"
     },
+    "status": {
+      "description": "運用の状態。公式の運用状況ページで確認できたときだけ書く（operating=運用中 / standby=待機中 / ended=運用終了）。終了した日は note に書く",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": {
+            "properties": {
+              "value": { "enum": ["operating", "standby", "ended"] }
+            }
+          }
+        }
+      ]
+    },
     "stats": {
       "type": "object",
       "description": "ゲージとランクはここから自動計算する（手で盛らない）",

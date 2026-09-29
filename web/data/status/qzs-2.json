@@ -1,0 +1,48 @@
+{
+  "$comment": "みちびき 衛星運用状況（内閣府）から scripts/fetch-status.mjs が作る。手で編集しない。",
+  "id": "qzs-2",
+  "source": "https://sys.qzss.go.jp/dod/constellation.html",
+  "source_label": "みちびきウェブサイト「衛星運用状況」",
+  "page_updated": "2026-09-29",
+  "fetched_at": "2026-09-29T22:54:36.646Z",
+  "name": "QZS02",
+  "svn": "002",
+  "services": [
+    {
+      "service": "PNT",
+      "signals": "L1C/A, L1C, L2C, L5",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    },
+    {
+      "service": "SLAS",
+      "signals": "L1S",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    },
+    {
+      "service": "PTV",
+      "signals": "L5S",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    },
+    {
+      "service": "CLAS",
+      "signals": "L6D",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    },
+    {
+      "service": "MADOCA-PPP",
+      "signals": "L6E",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    }
+  ],
+  "notices": []
+}
