@@ -37,6 +37,19 @@ for (const id of CRAFT) {
   outputs.push([`web/data/cards/${id}-crew.json`, JSON.stringify(crew, null, 2) + "\n"]);
 }
 
+// アプリが最初に読む一覧。機体ごとのカード・軌道・乗員のファイルの場所
+const orbitIds = new Set(JSON.parse(readFileSync("config/orbits.json", "utf8")).objects.map((o) => o.id));
+const index = {
+  $comment: "scripts/sync-web-data.mjs が作る。手で編集しない。",
+  craft: CRAFT.map((id) => ({
+    id,
+    card: `data/cards/${id}.json`,
+    orbit: orbitIds.has(id) ? `data/orbits/${id}.json` : null,
+    crew: `data/cards/${id}-crew.json`,
+  })),
+};
+outputs.push(["web/data/craft-index.json", JSON.stringify(index, null, 2) + "\n"]);
+
 const check = process.argv.includes("--check");
 let stale = 0;
 for (const [to, text] of outputs) {
