@@ -3,6 +3,7 @@
 // 元ファイルを変えたら npm run sync:web を実行する。--check で「書き出したものが古くないか」だけ確かめる。
 //
 // - 機体：config/orbits.json に並んだ順。カードは curation/（出典確認済み）を優先し、なければ examples/（見本）
+// - 運用状況：config/status.json にある機体だけ、自動取得したファイルの場所を載せる
 // - 乗員：その機体に向かったチーム（teams/ の destination）と、その飛行士（astronauts/）を1つのファイルにまとめる
 //   いま乗っているかどうか（打ち上げ済み・未帰還）はアプリ側で判断する
 
@@ -24,6 +25,8 @@ function cardSource(id) {
 
 const outputs = [];
 const { objects } = readJson("config/orbits.json");
+// 運用状況を自動で取りに行く機体（scripts/fetch-status.mjs が web/data/status/ に書く）
+const statusIds = new Set(readJson("config/status.json").qzss.map((c) => c.id));
 const craft = [];
 
 for (const { id } of objects) {
@@ -58,6 +61,7 @@ for (const { id } of objects) {
     card: `data/cards/${id}.json`,
     orbit: `data/orbits/${id}.json`,
     crew,
+    status: statusIds.has(id) ? `data/status/${id}.json` : null,
     sample: src.root === "examples",
   });
 }
