@@ -1,0 +1,29 @@
+{
+  "$comment": "CelesTrak の GP データ（OMM JSON）。scripts/fetch-orbits.mjs が自動で更新する。手で編集しない。",
+  "id": "qzs-2",
+  "norad_id": 42738,
+  "name": "QZS-2 (MICHIBIKI-2)",
+  "format": "omm",
+  "epoch": "2026-09-26T18:26:21.219Z",
+  "source": "https://celestrak.org/NORAD/elements/gp.php?CATNR=42738&FORMAT=JSON",
+  "fetched_at": "2026-09-29T22:32:22.966Z",
+  "omm": {
+    "OBJECT_NAME": "QZS-2 (MICHIBIKI-2)",
+    "OBJECT_ID": "2017-028A",
+    "EPOCH": "2026-09-26T18:26:21.219360",
+    "MEAN_MOTION": 1.0025761,
+    "ECCENTRICITY": 0.07485685,
+    "INCLINATION": 39.2816,
+    "RA_OF_ASC_NODE": 241.6589,
+    "ARG_OF_PERICENTER": 270.6116,
+    "MEAN_ANOMALY": 270.7346,
+    "EPHEMERIS_TYPE": 0,
+    "CLASSIFICATION_TYPE": "U",
+    "NORAD_CAT_ID": 42738,
+    "ELEMENT_SET_NO": 999,
+    "REV_AT_EPOCH": 864,
+    "BSTAR": 0,
+    "MEAN_MOTION_DOT": -0.00000163,
+    "MEAN_MOTION_DDOT": 0
+  }
+}

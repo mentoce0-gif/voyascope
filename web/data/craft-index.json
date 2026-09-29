@@ -5,7 +5,50 @@
       "id": "iss",
       "card": "data/cards/iss.json",
       "orbit": "data/orbits/iss.json",
-      "crew": "data/cards/iss-crew.json"
+      "crew": "data/cards/iss-crew.json",
+      "sample": true
+    },
+    {
+      "id": "himawari-9",
+      "card": "data/cards/himawari-9.json",
+      "orbit": "data/orbits/himawari-9.json",
+      "crew": null,
+      "sample": false
+    },
+    {
+      "id": "qzs-6",
+      "card": "data/cards/qzs-6.json",
+      "orbit": "data/orbits/qzs-6.json",
+      "crew": null,
+      "sample": false
+    },
+    {
+      "id": "qzs-2",
+      "card": "data/cards/qzs-2.json",
+      "orbit": "data/orbits/qzs-2.json",
+      "crew": null,
+      "sample": false
+    },
+    {
+      "id": "daichi-4",
+      "card": "data/cards/daichi-4.json",
+      "orbit": "data/orbits/daichi-4.json",
+      "crew": null,
+      "sample": false
+    },
+    {
+      "id": "ibuki-gw",
+      "card": "data/cards/ibuki-gw.json",
+      "orbit": "data/orbits/ibuki-gw.json",
+      "crew": null,
+      "sample": false
+    },
+    {
+      "id": "hinode",
+      "card": "data/cards/hinode.json",
+      "orbit": "data/orbits/hinode.json",
+      "crew": null,
+      "sample": false
     }
   ]
 }

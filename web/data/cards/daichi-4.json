@@ -1,0 +1,56 @@
+{
+  "id": "daichi-4",
+  "norad_id": 60182,
+  "name": {
+    "ja": "だいち4号",
+    "en": "ALOS-4"
+  },
+  "class": "earth_observation",
+  "operator": {
+    "value": "JAXA（宇宙航空研究開発機構）",
+    "source": "https://www.satnavi.jaxa.jp/ja/news/2025/04/01/10775/index.html",
+    "as_of": "2026-09-30"
+  },
+  "operator_type": {
+    "value": "civil",
+    "source": "https://www.jaxa.jp/about/jaxa/",
+    "as_of": "2026-09-30"
+  },
+  "launch_date": {
+    "value": "2024-07-01",
+    "source": "https://www.satnavi.jaxa.jp/ja/project/alos-4/",
+    "as_of": "2026-09-30"
+  },
+  "mission": {
+    "value": "レーダで地球を観測し、地面の動き・災害・森林や海の変化を調べる",
+    "source": "https://www.satnavi.jaxa.jp/ja/project/alos-4/",
+    "as_of": "2026-09-30"
+  },
+  "stats": {
+    "altitude_km": {
+      "value": 628,
+      "unit": "km",
+      "source": "https://www.satnavi.jaxa.jp/ja/project/alos-4/",
+      "as_of": "2026-09-30",
+      "note": "運用軌道の高度（公称）"
+    },
+    "mass_kg": {
+      "value": 3000,
+      "unit": "kg",
+      "source": "https://www.satnavi.jaxa.jp/ja/project/alos-4/",
+      "as_of": "2026-09-30",
+      "note": "おおよその値（約3トン）"
+    }
+  },
+  "official_links": [
+    {
+      "label": "JAXA だいち4号",
+      "url": "https://www.jaxa.jp/projects/sat/alos4/"
+    },
+    {
+      "label": "JAXA サテライトナビゲーター",
+      "url": "https://www.satnavi.jaxa.jp/ja/project/alos-4/"
+    }
+  ],
+  "updated_at": "2026-09-30"
+}

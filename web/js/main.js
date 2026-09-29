@@ -18,6 +18,9 @@ const COLORS = {
 const STALE_DAYS = 7;
 
 const $ = (sel) => document.querySelector(sel);
+// 地球の上と一覧に出す短い名前（日本語の愛称が長いときは英語の略称）
+const shortName = (c) => (c.card.name.ja.length <= 7 ? c.card.name.ja : c.card.name.en.length <= 8 ? c.card.name.en : c.id.toUpperCase());
+
 // 画面が狭いときは、一覧と詳細を下から出るシートにする（style.css と合わせる）
 const isNarrow = () => matchMedia("(max-width: 900px)").matches;
 
@@ -68,10 +71,11 @@ async function loadAll() {
     index.craft.map(async (c) => {
       const [card, orbit, crewData] = await Promise.all([
         loadJson(c.card),
-        c.orbit ? loadJson(c.orbit) : null,
+        // 軌道データがまだない機体（自動取得の前など）は、表示しないだけにする
+        c.orbit ? loadJson(c.orbit).catch((e) => (e.status === 404 ? null : Promise.reject(e))) : null,
         c.crew ? loadJson(c.crew).catch(() => null) : null,
       ]);
-      return { id: c.id, card, orbit, crewData };
+      return { id: c.id, card, orbit, crewData, sample: !!c.sample };
     }),
   );
   return { craft: craft.filter((c) => c.orbit), land, prefectures: prefs.prefectures };
@@ -95,7 +99,7 @@ function startApp({ craft, land, prefectures }) {
     el.className = "craft-marker";
     el.style.setProperty("--c", c.family.color);
     el.setAttribute("aria-label", `${c.card.name.ja} の詳細を開く`);
-    el.innerHTML = `<span class="ring"></span><span class="core"></span><span class="tag mono">${esc(c.id.toUpperCase())}</span>`;
+    el.innerHTML = `<span class="ring"></span><span class="core"></span><span class="tag">${esc(shortName(c))}</span>`;
     el.addEventListener("click", (e) => {
       e.stopPropagation();
       select(c);
@@ -118,18 +122,12 @@ function startApp({ craft, land, prefectures }) {
     ...r,
     points: Array.from({ length: 73 }, (_, i) => [0, -180 + i * 5, r.alt]),
   }));
-  const ringLabels = RINGS.map((r) => {
-    const el = document.createElement("div");
-    el.className = "ring-label";
-    el.innerHTML = `<span class="mono">${r.en}</span> ${r.label}<small>${r.range}</small>`;
-    return { el, lat: 0, lng: 0, alt: r.alt };
-  });
   let showRings = true;
 
   // ---------- 地球 ----------
   const globeEl = $("#globe");
   const hidden = new Set(); // 表示しない家族
-  const markerData = () => [...craft.filter((c) => c.pos && !hidden.has(c.family.id)), ...(showRings ? ringLabels : [])];
+  const markerData = () => craft.filter((c) => c.pos && !hidden.has(c.family.id));
   const globe = Globe({ animateIn: true })(globeEl)
     .backgroundColor(COLORS.navy)
     .showAtmosphere(true)
@@ -204,7 +202,7 @@ function startApp({ craft, land, prefectures }) {
       .map(
         (c) => `<li><button type="button" class="craft-item" data-id="${c.id}" aria-current="${c === selected}">
           <span class="craft-icon" style="--c:${c.family.color}" aria-hidden="true"></span>
-          <span class="craft-names"><span class="craft-id mono">${esc(c.id.toUpperCase())}</span><span class="craft-ja">${esc(c.card.name.ja)}</span></span>
+          <span class="craft-names"><span class="craft-id">${esc(shortName(c))}</span><span class="craft-ja">${esc(c.card.name.en)}</span></span>
           <span class="craft-alt mono" data-alt="${c.id}">--</span>
           <span class="chev" aria-hidden="true">›</span>
         </button></li>`,
@@ -271,7 +269,7 @@ function startApp({ craft, land, prefectures }) {
       card: c.card,
       crewData: c.crewData,
       now: clock.now(),
-      isSample: true,
+      isSample: c.sample,
       family: c.family,
       tab,
       orbitMeta: `取得 ${dateTimeShortJa(new Date(c.orbit.fetched_at))}・基準時刻 ${dateTimeShortJa(new Date(c.orbit.epoch))}（CelesTrak）`,
@@ -429,9 +427,7 @@ function startApp({ craft, land, prefectures }) {
       }
       c.el.classList.toggle("selected", c === selected);
     }
-    // 環のラベルは、いつも画面の左寄りに見えるように置く
     const pov = globe.pointOfView();
-    ringLabels.forEach((r, i) => (r.lng = pov.lng - 40 + i * 4));
     globe.htmlElementsData(markerData());
     if (follow && selected?.pos) globe.pointOfView({ lat: selected.pos.lat, lng: selected.pos.lng, altitude: pov.altitude }, 0);
 

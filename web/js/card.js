@@ -205,8 +205,8 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
   el.innerHTML = `
     <header class="panel-head">
       <div>
-        <div class="panel-title"><span class="mono amber">${esc(card.id.toUpperCase())}</span> <span class="panel-en">${esc(card.name.en)}</span></div>
-        <div class="panel-ja">${esc(card.name.ja)}</div>
+        <div class="panel-title"><span class="amber">${esc(card.name.ja)}</span></div>
+        <div class="panel-ja"><span class="panel-en">${esc(card.name.en)}</span>　<span class="k">NORAD ${card.norad_id}</span></div>
       </div>
       <button type="button" class="close mono" data-close aria-label="詳細を閉じる">×</button>
     </header>

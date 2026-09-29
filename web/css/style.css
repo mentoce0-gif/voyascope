@@ -253,7 +253,7 @@ body { overflow: hidden; }
   overflow: auto;
   overscroll-behavior: contain;
 }
-.list-panel { left: 16px; width: 300px; padding: 12px; }
+.list-panel { left: 16px; width: 330px; padding: 12px; }
 .detail-panel { right: 16px; width: 420px; padding: 14px 16px 12px; }
 .sheet-handle { display: none; }
 
@@ -306,7 +306,7 @@ body { overflow: hidden; }
   background: var(--c);
 }
 .craft-names { display: flex; flex-direction: column; min-width: 0; }
-.craft-id { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; }
+.craft-id { font-size: 0.92rem; font-weight: 700; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .craft-ja { font-size: 0.75rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .craft-alt { font-size: 0.75rem; color: var(--text-dim); white-space: nowrap; }
 .chev { color: var(--text-dim); font-size: 1.2rem; }
@@ -466,6 +466,7 @@ body { overflow: hidden; }
   background: rgba(5, 14, 31, 0.6);
   white-space: nowrap;
 }
+.scale-note b { color: var(--mint); font-weight: 400; }
 .ring-label {
   transform: translate(-50%, -120%);
   font-size: 11px;
@@ -694,7 +695,7 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   .round-btn { width: 36px; height: 36px; }
   .controls-row { gap: 8px; justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; }
   .fam-legend { flex-wrap: nowrap; gap: 10px; }
-  .scale-note { bottom: calc(var(--bottom-h) + 8px); font-size: 0.7rem; }
+  .scale-note { bottom: calc(var(--bottom-h) + 8px); font-size: 0.66rem; white-space: normal; text-align: center; width: calc(100vw - 32px); }
 }
 @media (max-width: 400px) {
   .orbit-stats { grid-template-columns: auto 1fr; }
