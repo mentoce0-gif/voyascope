@@ -1,0 +1,29 @@
+{
+  "$comment": "CelesTrak の GP データ（OMM JSON）。scripts/fetch-orbits.mjs が自動で更新する。手で編集しない。",
+  "id": "himawari-9",
+  "norad_id": 41836,
+  "name": "HIMAWARI-9",
+  "format": "omm",
+  "epoch": "2026-09-28T12:44:37.675Z",
+  "source": "https://celestrak.org/NORAD/elements/gp.php?CATNR=41836&FORMAT=JSON",
+  "fetched_at": "2026-09-29T22:32:22.681Z",
+  "omm": {
+    "OBJECT_NAME": "HIMAWARI-9",
+    "OBJECT_ID": "2016-064A",
+    "EPOCH": "2026-09-28T12:44:37.675968",
+    "MEAN_MOTION": 1.00269973,
+    "ECCENTRICITY": 0.0002066,
+    "INCLINATION": 0.0035,
+    "RA_OF_ASC_NODE": 209.1533,
+    "ARG_OF_PERICENTER": 31.3106,
+    "MEAN_ANOMALY": 98.7852,
+    "EPHEMERIS_TYPE": 0,
+    "CLASSIFICATION_TYPE": "U",
+    "NORAD_CAT_ID": 41836,
+    "ELEMENT_SET_NO": 999,
+    "REV_AT_EPOCH": 3624,
+    "BSTAR": 0,
+    "MEAN_MOTION_DOT": -0.0000027,
+    "MEAN_MOTION_DDOT": 0
+  }
+}

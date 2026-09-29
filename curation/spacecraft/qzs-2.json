@@ -1,0 +1,57 @@
+{
+  "id": "qzs-2",
+  "norad_id": 42738,
+  "name": {
+    "ja": "みちびき2号機",
+    "en": "QZS-2"
+  },
+  "class": "navigation",
+  "operator": {
+    "value": "内閣府",
+    "source": "https://www8.cao.go.jp/space/qzs/qzs.html",
+    "as_of": "2026-09-30",
+    "note": "運用は PFI 事業として準天頂衛星システムサービス株式会社が行う"
+  },
+  "operator_type": {
+    "value": "civil",
+    "source": "https://www8.cao.go.jp/space/qzs/qzs.html",
+    "as_of": "2026-09-30"
+  },
+  "launch_date": {
+    "value": "2017-06-01",
+    "source": "https://qzss.go.jp/technical/satellites/index.html",
+    "as_of": "2026-09-30"
+  },
+  "mission": {
+    "value": "GPS と一体で使える測位の信号を送り、位置を安定して測れるようにする",
+    "source": "https://qzss.go.jp/overview/services/sv04_pnt.html",
+    "as_of": "2026-09-30"
+  },
+  "stats": {
+    "mass_kg": {
+      "value": 1600,
+      "unit": "kg",
+      "source": "https://qzss.go.jp/min-michi/qzss2%2B4.html",
+      "as_of": "2026-09-30",
+      "note": "おおよその値。ドライ質量（打ち上げ時は約4,000 kg）"
+    },
+    "length_m": {
+      "value": 19,
+      "unit": "m",
+      "source": "https://qzss.go.jp/min-michi/qzss2%2B4.html",
+      "as_of": "2026-09-30",
+      "note": "おおよその値。軌道上で広げたときの全長"
+    }
+  },
+  "official_links": [
+    {
+      "label": "みちびき 衛星一覧",
+      "url": "https://qzss.go.jp/technical/satellites/index.html"
+    },
+    {
+      "label": "みちびき 衛星運用状況",
+      "url": "https://sys.qzss.go.jp/dod/constellation.html"
+    }
+  ],
+  "updated_at": "2026-09-30"
+}
