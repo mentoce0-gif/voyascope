@@ -1,0 +1,29 @@
+{
+  "$comment": "CelesTrak の GP データ（OMM JSON）。scripts/fetch-orbits.mjs が自動で更新する。手で編集しない。",
+  "id": "ibuki-gw",
+  "norad_id": 64694,
+  "name": "GOSAT-GW (IBUKI GW)",
+  "format": "omm",
+  "epoch": "2026-09-29T04:00:21.021Z",
+  "source": "https://celestrak.org/NORAD/elements/gp.php?CATNR=64694&FORMAT=JSON",
+  "fetched_at": "2026-09-29T22:32:23.245Z",
+  "omm": {
+    "OBJECT_NAME": "GOSAT-GW (IBUKI GW)",
+    "OBJECT_ID": "2025-141A",
+    "EPOCH": "2026-09-29T04:00:21.021408",
+    "MEAN_MOTION": 14.67550784,
+    "ECCENTRICITY": 0.000141,
+    "INCLINATION": 98.0619,
+    "RA_OF_ASC_NODE": 207.8071,
+    "ARG_OF_PERICENTER": 85.0114,
+    "MEAN_ANOMALY": 275.1252,
+    "EPHEMERIS_TYPE": 0,
+    "CLASSIFICATION_TYPE": "U",
+    "NORAD_CAT_ID": 64694,
+    "ELEMENT_SET_NO": 999,
+    "REV_AT_EPOCH": 6709,
+    "BSTAR": 0.000031058,
+    "MEAN_MOTION_DOT": 0.00000128,
+    "MEAN_MOTION_DDOT": 0
+  }
+}

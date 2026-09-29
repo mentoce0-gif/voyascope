@@ -1,0 +1,64 @@
+{
+  "id": "himawari-9",
+  "norad_id": 41836,
+  "name": {
+    "ja": "ひまわり9号",
+    "en": "Himawari-9"
+  },
+  "class": "weather",
+  "operator": {
+    "value": "気象庁",
+    "source": "https://www.data.jma.go.jp/mscweb/en/general/groundsystem.html",
+    "as_of": "2026-09-30",
+    "note": "衛星の管制は、気象庁の PFI 事業として気象衛星ひまわり運用事業株式会社（HOPE）が行う"
+  },
+  "operator_type": {
+    "value": "civil",
+    "source": "https://www.jma.go.jp/jma/en/Background/organization.html",
+    "as_of": "2026-09-30"
+  },
+  "launch_date": {
+    "value": "2016-11-02",
+    "source": "https://www.data.jma.go.jp/sat_info/himawari/enkaku.html",
+    "as_of": "2026-09-30"
+  },
+  "mission": {
+    "value": "日本と東アジア・西太平洋の気象を観測し、天気予報や台風・大雨の監視に使われる",
+    "source": "https://www.data.jma.go.jp/mscweb/ja/general/control.html",
+    "as_of": "2026-09-30"
+  },
+  "stats": {
+    "altitude_km": {
+      "value": 35800,
+      "unit": "km",
+      "source": "https://www.data.jma.go.jp/sat_info/himawari/satellite.html",
+      "as_of": "2026-09-30",
+      "note": "おおよその値。静止位置の高さ"
+    },
+    "mass_kg": {
+      "value": 1300,
+      "unit": "kg",
+      "source": "https://www.jma.go.jp/jma/kishou/books/himawari/201703_leaflet89.pdf",
+      "as_of": "2026-09-30",
+      "note": "おおよその値。ドライ質量（打ち上げ時は約3,500 kg）"
+    },
+    "length_m": {
+      "value": 8,
+      "unit": "m",
+      "source": "https://www.jma.go.jp/jma/kishou/books/himawari/201703_leaflet89.pdf",
+      "as_of": "2026-09-30",
+      "note": "おおよその値。運用中の全長"
+    }
+  },
+  "official_links": [
+    {
+      "label": "気象庁 気象衛星観測",
+      "url": "https://www.data.jma.go.jp/sat_info/himawari/satellite.html"
+    },
+    {
+      "label": "気象衛星センター",
+      "url": "https://www.data.jma.go.jp/mscweb/ja/general/jmasatellite.html"
+    }
+  ],
+  "updated_at": "2026-09-30"
+}
