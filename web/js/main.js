@@ -1,5 +1,5 @@
 // VOYASCOPE Phase 0：地球＋ISS 1機＋キャラカード＋時間早送り
-import { satrecFromOrbit, positionAt, periodMinutes, SimClock } from "./orbit.js";
+import { satrecFromOrbit, positionAt, SimClock } from "./orbit.js";
 import { renderCard, updateLive } from "./card.js";
 import { dateTimeShortJa, dateTimeJa, durationJa, latStr, lngStr } from "./format.js";
 
@@ -53,17 +53,17 @@ async function loadJson(path) {
 }
 
 async function loadAll() {
-  const [orbit, card, thresholds, land] = await Promise.all([
+  const [orbit, card, crewData, land] = await Promise.all([
     loadJson("data/orbits/iss.json"),
     loadJson("data/cards/iss.json"),
-    loadJson("data/rank-thresholds.json"),
+    loadJson("data/cards/iss-crew.json"),
     loadJson("data/land-110m.geojson"),
   ]);
-  return { orbit, card, thresholds, land };
+  return { orbit, card, crewData, land };
 }
 
 // ---------- 観測画面 ----------
-function startApp({ orbit, card, thresholds, land }) {
+function startApp({ orbit, card, crewData, land }) {
   const satrec = satrecFromOrbit(orbit);
   const clock = new SimClock();
   const epoch = new Date(orbit.epoch);
@@ -148,9 +148,12 @@ function startApp({ orbit, card, thresholds, land }) {
   // ---------- カード ----------
   const cardDialog = $("#card");
   const cardBody = $("#card-body");
-  renderCard(cardBody, { card, thresholds, isSample: true });
+  // 開くたびに作り直す（早送り中でも、その時刻に乗っている乗員を出す）
   function openCard() {
-    if (!cardDialog.open) cardDialog.showModal();
+    if (cardDialog.open) return;
+    renderCard(cardBody, { card, crewData, now: clock.now(), isSample: true });
+    updateLive(cardBody, positionAt(satrec, clock.now()));
+    cardDialog.showModal();
   }
   for (const d of [cardDialog, $("#about")]) {
     d.addEventListener("click", (e) => {
@@ -198,7 +201,7 @@ function startApp({ orbit, card, thresholds, land }) {
       els.lng.textContent = pos ? lngStr(pos.lng) : "--";
       els.alt.textContent = pos ? `${pos.altKm.toFixed(1)} km` : "--";
       els.spd.textContent = pos ? `${pos.speedKmS.toFixed(2)} km/s` : "--";
-      if (cardDialog.open) updateLive(cardBody, pos, periodMinutes(satrec));
+      if (cardDialog.open) updateLive(cardBody, pos);
 
       const ageDays = (now - epoch) / 86400000;
       let warning = "";

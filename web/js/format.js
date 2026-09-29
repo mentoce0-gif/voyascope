@@ -43,6 +43,8 @@ export function durationJa(ms) {
 
 export const latStr = (v) => `${Math.abs(v).toFixed(2)}° ${v >= 0 ? "N" : "S"}`;
 export const lngStr = (v) => `${Math.abs(v).toFixed(2)}° ${v >= 0 ? "E" : "W"}`;
+export const latJa = (v) => `${v >= 0 ? "北緯" : "南緯"} ${Math.abs(v).toFixed(1)}°`;
+export const lngJa = (v) => `${v >= 0 ? "東経" : "西経"} ${Math.abs(v).toFixed(1)}°`;
 
 export function numberJa(v) {
   return typeof v === "number" ? v.toLocaleString("ja-JP") : esc(v);
