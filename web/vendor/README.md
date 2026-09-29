@@ -19,7 +19,7 @@ cp node_modules/globe.gl/dist/globe.gl.min.js <repo>/web/vendor/
 cat > entry.mjs <<'JS'
 export { twoline2satrec, json2satrec } from "./node_modules/satellite.js/dist/io.js";
 export { propagate, gstime } from "./node_modules/satellite.js/dist/propagation.js";
-export { eciToGeodetic, degreesLat, degreesLong } from "./node_modules/satellite.js/dist/transforms.js";
+export { eciToGeodetic, eciToEcf, ecfToLookAngles, degreesLat, degreesLong, degreesToRadians } from "./node_modules/satellite.js/dist/transforms.js";
 JS
 npx esbuild entry.mjs --bundle --format=esm --minify --legal-comments=inline --outfile=<repo>/web/vendor/satellite.min.js
 ```

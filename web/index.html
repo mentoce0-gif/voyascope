@@ -37,6 +37,7 @@
         <div class="brand mono">VOYASCOPE</div>
         <div class="brand-sub">今、宇宙を旅する者たち。</div>
       </div>
+      <button type="button" id="tonight-chip" class="tonight-chip" hidden></button>
       <div class="clock-block">
         <span id="sim-time" class="mono">--</span>
         <span id="live-badge" class="live-badge mono" data-live="true">LIVE</span>
@@ -46,6 +47,13 @@
     <!-- 左：注目の一覧 -->
     <aside id="list-panel" class="side-panel list-panel" aria-label="注目の機体">
       <div class="sheet-handle" aria-hidden="true"></div>
+      <section class="tonight" aria-labelledby="tonight-title">
+        <div class="tonight-head">
+          <h2 id="tonight-title" class="tonight-title"><span id="tonight-label">今夜・頭の上</span></h2>
+          <select id="pref-select" class="pref-select" aria-label="都道府県"></select>
+        </div>
+        <div id="tonight-body" class="tonight-body"></div>
+      </section>
       <nav class="fam-tabs" id="fam-tabs" aria-label="家族で絞り込む"></nav>
       <h2 class="list-title">注目</h2>
       <ul id="craft-list" class="craft-list"></ul>
@@ -81,7 +89,7 @@
         </div>
       </div>
       <div class="controls-row">
-        <button type="button" id="list-open" class="btn mono list-open">注目</button>
+        <button type="button" id="list-open" class="btn list-open">今夜・注目</button>
         <div id="fam-legend" class="fam-legend" role="group" aria-label="家族ごとの表示"></div>
         <label class="toggle"><input type="checkbox" id="rings-toggle" checked> 環</label>
         <button type="button" id="follow" class="btn mono" aria-pressed="false" title="カメラが選んだ機体を追いかけます">追尾</button>
