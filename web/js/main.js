@@ -1,7 +1,10 @@
-// VOYASCOPE Phase 0：地球＋ISS 1機＋キャラカード＋時間早送り
-import { satrecFromOrbit, positionAt, SimClock } from "./orbit.js";
-import { renderCard, updateLive } from "./card.js";
-import { dateTimeShortJa, dateTimeJa, durationJa, latStr, lngStr } from "./format.js";
+// VOYASCOPE：地球＋環＋注目の機体＋詳細パネル＋タイムライン
+import { satrecFromOrbit, positionAt, periodMinutes, groundTrack, SimClock } from "./orbit.js";
+import { renderPanel, updatePanelLive } from "./card.js";
+import { landPath, renderMinimap } from "./minimap.js";
+import { displayAltitude, RINGS } from "./scale.js";
+import { FAMILIES, familyOf } from "./families.js";
+import { esc, dateTimeShortJa, dateTimeJa, durationJa } from "./format.js";
 
 const COLORS = {
   navy: "#07142b",
@@ -9,11 +12,12 @@ const COLORS = {
   mint: "#5ef2c2",
   land: "rgba(94, 242, 194, 0.78)",
 };
-const EARTH_RADIUS_KM = 6371;
 // 軌道データの基準時刻からこれ以上離れたら、位置がずれている可能性を知らせる
 const STALE_DAYS = 7;
 
 const $ = (sel) => document.querySelector(sel);
+// 画面が狭いときは、一覧と詳細を下から出るシートにする（style.css と合わせる）
+const isNarrow = () => matchMedia("(max-width: 900px)").matches;
 
 // ---------- 起動画面のノイズ ----------
 function startNoise(canvas) {
@@ -53,38 +57,73 @@ async function loadJson(path) {
 }
 
 async function loadAll() {
-  const [orbit, card, crewData, land] = await Promise.all([
-    loadJson("data/orbits/iss.json"),
-    loadJson("data/cards/iss.json"),
-    loadJson("data/cards/iss-crew.json"),
-    loadJson("data/land-110m.geojson"),
-  ]);
-  return { orbit, card, crewData, land };
+  const [index, land] = await Promise.all([loadJson("data/craft-index.json"), loadJson("data/land-110m.geojson")]);
+  const craft = await Promise.all(
+    index.craft.map(async (c) => {
+      const [card, orbit, crewData] = await Promise.all([
+        loadJson(c.card),
+        c.orbit ? loadJson(c.orbit) : null,
+        c.crew ? loadJson(c.crew).catch(() => null) : null,
+      ]);
+      return { id: c.id, card, orbit, crewData };
+    }),
+  );
+  return { craft: craft.filter((c) => c.orbit), land };
 }
 
 // ---------- 観測画面 ----------
-function startApp({ orbit, card, crewData, land }) {
-  const satrec = satrecFromOrbit(orbit);
+function startApp({ craft, land }) {
   const clock = new SimClock();
-  const epoch = new Date(orbit.epoch);
 
-  $("#tle-info").textContent = `軌道データ取得：${dateTimeShortJa(new Date(orbit.fetched_at))}`;
-  $("#about-tle").textContent =
-    `軌道データ取得：${dateTimeJa(new Date(orbit.fetched_at))}／基準時刻（エポック）：${dateTimeJa(epoch)}／出典：${orbit.source}`;
+  // 機体ごとの準備（軌道・家族・地球の上の印）
+  for (const c of craft) {
+    c.satrec = satrecFromOrbit(c.orbit);
+    c.period = periodMinutes(c.satrec);
+    c.family = familyOf(c.card.class);
+    c.lat = 0;
+    c.lng = 0;
+    c.alt = 0;
+    c.pos = null;
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "craft-marker";
+    el.style.setProperty("--c", c.family.color);
+    el.setAttribute("aria-label", `${c.card.name.ja} の詳細を開く`);
+    el.innerHTML = `<span class="ring"></span><span class="core"></span><span class="tag mono">${esc(c.id.toUpperCase())}</span>`;
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      select(c);
+    });
+    c.el = el;
+  }
 
-  // ISS マーカー（HTML 要素を地球に重ねる）
-  const marker = document.createElement("button");
-  marker.type = "button";
-  marker.className = "iss-marker";
-  marker.setAttribute("aria-label", "ISS のカードを開く");
-  marker.innerHTML = `<span class="ring"></span><span class="core"></span><span class="tag">ISS</span>`;
-  marker.addEventListener("click", (e) => {
-    e.stopPropagation();
-    openCard();
+  // 軌道データの取得日（いちばん古いもの）
+  const oldest = craft.reduce((a, c) => (!a || c.orbit.fetched_at < a.orbit.fetched_at ? c : a), null);
+  $("#tle-info").textContent = `軌道データ取得：${dateTimeShortJa(new Date(oldest.orbit.fetched_at))}`;
+  $("#about-tle").textContent = craft
+    .map(
+      (c) =>
+        `${c.card.name.ja}：取得 ${dateTimeJa(new Date(c.orbit.fetched_at))}／基準時刻（エポック） ${dateTimeJa(new Date(c.orbit.epoch))}／出典 ${c.orbit.source}`,
+    )
+    .join("\n");
+
+  // ---------- 環 ----------
+  const ringPaths = RINGS.map((r) => ({
+    ...r,
+    points: Array.from({ length: 73 }, (_, i) => [0, -180 + i * 5, r.alt]),
+  }));
+  const ringLabels = RINGS.map((r) => {
+    const el = document.createElement("div");
+    el.className = "ring-label";
+    el.innerHTML = `<span class="mono">${r.en}</span> ${r.label}<small>${r.range}</small>`;
+    return { el, lat: 0, lng: 0, alt: r.alt };
   });
+  let showRings = true;
 
-  const iss = { lat: 0, lng: 0, alt: 0 };
+  // ---------- 地球 ----------
   const globeEl = $("#globe");
+  const hidden = new Set(); // 表示しない家族
+  const markerData = () => [...craft.filter((c) => c.pos && !hidden.has(c.family.id)), ...(showRings ? ringLabels : [])];
   const globe = Globe({ animateIn: true })(globeEl)
     .backgroundColor(COLORS.navy)
     .showAtmosphere(true)
@@ -96,11 +135,20 @@ function startApp({ orbit, card, crewData, land }) {
     .hexPolygonMargin(0.35)
     .hexPolygonUseDots(true)
     .hexPolygonColor(() => COLORS.land)
-    .htmlElementsData([iss])
+    .pathsData(ringPaths)
+    .pathPoints("points")
+    .pathPointLat((p) => p[0])
+    .pathPointLng((p) => p[1])
+    .pathPointAlt((p) => p[2])
+    .pathColor(() => "rgba(94, 242, 194, 0.38)")
+    .pathDashLength(0.012)
+    .pathDashGap(0.008)
+    .pathTransitionDuration(0)
+    .htmlElementsData([])
     .htmlLat("lat")
     .htmlLng("lng")
     .htmlAltitude("alt")
-    .htmlElement(() => marker)
+    .htmlElement((d) => d.el)
     .htmlTransitionDuration(0);
 
   const mat = globe.globeMaterial();
@@ -110,105 +158,249 @@ function startApp({ orbit, card, crewData, land }) {
 
   const controls = globe.controls();
   controls.minDistance = 130;
-  controls.maxDistance = 900;
+  controls.maxDistance = 1100;
 
-  const resize = () => globe.width(globeEl.clientWidth).height(globeEl.clientHeight);
-  addEventListener("resize", resize);
-  resize();
+  // パネルで隠れない位置に地球を置く
+  const detailPanel = $("#detail-panel");
+  const layoutGlobe = () => {
+    globe.width(globeEl.clientWidth).height(globeEl.clientHeight);
+    if (isNarrow()) globe.globeOffset([0, -40]);
+    else globe.globeOffset([detailPanel.hidden ? 150 : -20, -30]);
+  };
+  addEventListener("resize", layoutGlobe);
+  layoutGlobe();
+  // 下のバーの実際の高さを、パネルや注記の位置に使う
+  const bottomBar = $(".bottom-bar");
+  new ResizeObserver(() => $("#app").style.setProperty("--bottom-h", `${bottomBar.offsetHeight}px`)).observe(bottomBar);
 
-  // 初期位置：ISS の真上から見る
-  const first = positionAt(satrec, clock.now());
-  globe.pointOfView({ lat: first?.lat ?? 20, lng: first?.lng ?? 135, altitude: innerWidth < 640 ? 3.1 : 2.4 }, 0);
+  const first = craft[0] && positionAt(craft[0].satrec, clock.now());
+  globe.pointOfView({ lat: first?.lat ?? 25, lng: first?.lng ?? 135, altitude: isNarrow() ? 5 : 3.2 }, 0);
 
-  // ---------- 時間の早送り ----------
+  // ---------- 注目の一覧と家族 ----------
+  const present = FAMILIES.filter((f) => craft.some((c) => c.family.id === f.id));
+  let listFilter = "all";
+  let selected = null;
+  const famTabs = $("#fam-tabs");
+  const listEl = $("#craft-list");
+  const renderFamTabs = () => {
+    famTabs.innerHTML = [{ id: "all", label: "すべて" }, ...present]
+      .map(
+        (f) =>
+          `<button type="button" class="fam-tab" data-fam="${f.id}" aria-pressed="${f.id === listFilter}">${esc(f.label)}</button>`,
+      )
+      .join("");
+  };
+  const renderList = () => {
+    listEl.innerHTML = craft
+      .filter((c) => listFilter === "all" || c.family.id === listFilter)
+      .map(
+        (c) => `<li><button type="button" class="craft-item" data-id="${c.id}" aria-current="${c === selected}">
+          <span class="craft-icon" style="--c:${c.family.color}" aria-hidden="true"></span>
+          <span class="craft-names"><span class="craft-id mono">${esc(c.id.toUpperCase())}</span><span class="craft-ja">${esc(c.card.name.ja)}</span></span>
+          <span class="craft-alt mono" data-alt="${c.id}">--</span>
+          <span class="chev" aria-hidden="true">›</span>
+        </button></li>`,
+      )
+      .join("");
+  };
+  famTabs.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-fam]");
+    if (!b) return;
+    listFilter = b.dataset.fam;
+    renderFamTabs();
+    renderList();
+  });
+  listEl.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-id]");
+    if (b) select(craft.find((c) => c.id === b.dataset.id));
+  });
+
+  const legend = $("#fam-legend");
+  legend.innerHTML = FAMILIES.filter((f) => f.id !== "other")
+    .map(
+      (f) =>
+        `<label class="toggle"><input type="checkbox" data-fam="${f.id}" checked><span class="fam-dot" style="--c:${f.color}"></span>${esc(f.label)}</label>`,
+    )
+    .join("");
+  legend.addEventListener("change", (e) => {
+    const id = e.target.dataset.fam;
+    if (!id) return;
+    if (e.target.checked) hidden.delete(id);
+    else hidden.add(id);
+  });
+  $("#rings-toggle").addEventListener("change", (e) => {
+    showRings = e.target.checked;
+    globe.pathsData(showRings ? ringPaths : []);
+    $(".scale-note").hidden = !showRings;
+  });
+
+  const listPanel = $("#list-panel");
+  $("#list-open").addEventListener("click", () => {
+    listPanel.classList.toggle("open");
+    if (isNarrow() && listPanel.classList.contains("open")) closeDetail();
+  });
+
+  // ---------- 詳細パネル ----------
+  const detailBody = $("#detail-body");
+  let tab = "overview";
+  let lastMapAt = 0;
+  let landD = null;
+  const updateDetailLive = (force = false) => {
+    if (!selected || detailPanel.hidden) return;
+    updatePanelLive(detailBody, { pos: selected.pos, periodMin: selected.period });
+    const svg = detailBody.querySelector('[data-live="map"]');
+    const t = clock.now().getTime();
+    if (svg && (force || Math.abs(t - lastMapAt) > 20000)) {
+      lastMapAt = t;
+      landD ??= landPath(land);
+      renderMinimap(svg, { land: landD, segments: groundTrack(selected.satrec, new Date(t)), pos: selected.pos });
+    }
+  };
+  const renderDetail = () => {
+    if (!selected) return;
+    const c = selected;
+    tab = renderPanel(detailBody, {
+      card: c.card,
+      crewData: c.crewData,
+      now: clock.now(),
+      isSample: true,
+      family: c.family,
+      tab,
+      orbitMeta: `取得 ${dateTimeShortJa(new Date(c.orbit.fetched_at))}・基準時刻 ${dateTimeShortJa(new Date(c.orbit.epoch))}（CelesTrak）`,
+    });
+    updateDetailLive(true);
+  };
+
+  function select(c) {
+    selected = c;
+    detailPanel.hidden = false;
+    if (isNarrow()) listPanel.classList.remove("open");
+    renderDetail();
+    renderList();
+    layoutGlobe();
+    if (c.pos) globe.pointOfView({ lat: c.pos.lat, lng: c.pos.lng }, 900);
+  }
+  function closeDetail() {
+    selected = null;
+    detailPanel.hidden = true;
+    setFollow(false);
+    renderList();
+    layoutGlobe();
+  }
+  detailBody.addEventListener("click", (e) => {
+    if (e.target.closest("[data-close]")) return closeDetail();
+    const t = e.target.closest("[data-tab]");
+    if (t) {
+      tab = t.dataset.tab;
+      renderDetail();
+    }
+  });
+  addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !detailPanel.hidden && !document.querySelector("dialog[open]")) closeDetail();
+  });
+
+  // ---------- タイムライン ----------
+  const slider = $("#timeline");
+  const playBtn = $("#play");
   const speedButtons = [...document.querySelectorAll(".speed")];
+  let dragging = false;
+  const syncControls = () => {
+    playBtn.dataset.playing = String(clock.playing);
+    playBtn.setAttribute("aria-label", clock.playing ? "一時停止" : "再生");
+    for (const b of speedButtons) b.setAttribute("aria-pressed", String(Number(b.dataset.speed) === clock.speed));
+  };
+  slider.addEventListener("input", () => {
+    dragging = true;
+    clock.jumpToOffset(Number(slider.value) * 60000);
+  });
+  slider.addEventListener("change", () => {
+    dragging = false;
+    if (selected) renderDetail(); // 滞在中のチームは時刻で変わる
+  });
+  playBtn.addEventListener("click", () => {
+    clock.setPlaying(!clock.playing);
+    syncControls();
+  });
+  $("#now").addEventListener("click", () => {
+    clock.live();
+    syncControls();
+    if (selected) renderDetail();
+  });
   for (const b of speedButtons) {
     b.addEventListener("click", () => {
       clock.setSpeed(Number(b.dataset.speed));
-      for (const o of speedButtons) o.setAttribute("aria-pressed", String(o === b));
+      if (!clock.playing) clock.setPlaying(true);
+      syncControls();
     });
   }
-  $("#now").addEventListener("click", () => {
-    clock.reset();
-    clock.setSpeed(1);
-    for (const o of speedButtons) o.setAttribute("aria-pressed", String(o.dataset.speed === "1"));
-  });
 
   // ---------- 追尾 ----------
   let follow = false;
   const followBtn = $("#follow");
-  const setFollow = (on) => {
-    follow = on;
-    followBtn.setAttribute("aria-pressed", String(on));
-  };
-  followBtn.addEventListener("click", () => setFollow(!follow));
-  // ドラッグで地球を回したら追尾をやめる
+  function setFollow(on) {
+    follow = on && !!selected;
+    followBtn.setAttribute("aria-pressed", String(follow));
+  }
+  followBtn.addEventListener("click", () => {
+    if (!selected && craft[0]) select(craft[0]);
+    setFollow(!follow);
+  });
   controls.addEventListener("start", () => follow && setFollow(false));
 
-  // ---------- カード ----------
-  const cardDialog = $("#card");
-  const cardBody = $("#card-body");
-  // 開くたびに作り直す（早送り中でも、その時刻に乗っている乗員を出す）
-  function openCard() {
-    if (cardDialog.open) return;
-    renderCard(cardBody, { card, crewData, now: clock.now(), isSample: true });
-    updateLive(cardBody, positionAt(satrec, clock.now()));
-    cardDialog.showModal();
-  }
-  for (const d of [cardDialog, $("#about")]) {
-    d.addEventListener("click", (e) => {
-      if (e.target === d || e.target.closest("[data-close]")) d.close();
-    });
-  }
-  $("#card-open").addEventListener("click", openCard);
-  $("#about-open").addEventListener("click", () => $("#about").showModal());
+  // ---------- このアプリについて ----------
+  const about = $("#about");
+  about.addEventListener("click", (e) => {
+    if (e.target === about || e.target.closest("[data-close]")) about.close();
+  });
+  $("#about-open").addEventListener("click", () => about.showModal());
 
   // ---------- 毎フレームの更新 ----------
-  const els = {
-    time: $("#sim-time"),
-    offset: $("#sim-offset"),
-    lat: $("#t-lat"),
-    lng: $("#t-lng"),
-    alt: $("#t-alt"),
-    spd: $("#t-spd"),
-    warning: $("#tle-warning"),
-  };
+  const els = { time: $("#sim-time"), badge: $("#live-badge"), warning: $("#tle-warning") };
   let lastText = 0;
   let lastWarning = "";
 
+  renderFamTabs();
+  renderList();
+  syncControls();
+
   const tick = (t) => {
+    if (clock.clampToTimeline()) syncControls();
     const now = clock.now();
-    const pos = positionAt(satrec, now);
-    marker.hidden = !pos;
-    if (pos) {
-      iss.lat = pos.lat;
-      iss.lng = pos.lng;
-      iss.alt = pos.altKm / EARTH_RADIUS_KM;
-      globe.htmlElementsData([iss]);
-      if (follow) {
-        const pov = globe.pointOfView();
-        globe.pointOfView({ lat: pos.lat, lng: pos.lng, altitude: pov.altitude }, 0);
+    for (const c of craft) {
+      c.pos = positionAt(c.satrec, now);
+      if (c.pos) {
+        c.lat = c.pos.lat;
+        c.lng = c.pos.lng;
+        c.alt = displayAltitude(c.pos.altKm);
       }
+      c.el.classList.toggle("selected", c === selected);
     }
+    // 環のラベルは、いつも画面の左寄りに見えるように置く
+    const pov = globe.pointOfView();
+    ringLabels.forEach((r, i) => (r.lng = pov.lng - 40 + i * 4));
+    globe.htmlElementsData(markerData());
+    if (follow && selected?.pos) globe.pointOfView({ lat: selected.pos.lat, lng: selected.pos.lng, altitude: pov.altitude }, 0);
 
     // 文字の更新は間引く
     if (t - lastText > 100) {
       lastText = t;
       els.time.textContent = dateTimeJa(now);
-      const off = clock.offset();
-      els.offset.textContent = Math.abs(off) > 2000 ? `現在から ${durationJa(off)}` : "";
-      els.lat.textContent = pos ? latStr(pos.lat) : "--";
-      els.lng.textContent = pos ? lngStr(pos.lng) : "--";
-      els.alt.textContent = pos ? `${pos.altKm.toFixed(1)} km` : "--";
-      els.spd.textContent = pos ? `${pos.speedKmS.toFixed(2)} km/s` : "--";
-      if (cardDialog.open) updateLive(cardBody, pos);
+      const live = clock.isLive();
+      els.badge.dataset.live = String(live);
+      els.badge.textContent = live ? "LIVE" : `${durationJa(clock.offset())}${clock.playing ? "" : " 停止中"}`;
+      if (!dragging) slider.value = String(Math.round(clock.offset() / 60000));
+      for (const c of craft) {
+        const n = listEl.querySelector(`[data-alt="${c.id}"]`);
+        if (n) n.textContent = c.pos ? `約 ${Math.round(c.pos.altKm).toLocaleString("ja-JP")} km` : "--";
+      }
+      updateDetailLive();
 
-      const ageDays = (now - epoch) / 86400000;
+      const ageDays = Math.max(...craft.map((c) => Math.abs(now - new Date(c.orbit.epoch)) / 86400000));
       let warning = "";
-      if (!pos) {
-        warning = "この時刻の ISS の位置は、いまの軌道データでは計算できません。";
-      } else if (Math.abs(ageDays) > STALE_DAYS) {
-        warning = `軌道データの基準時刻から ${Math.round(Math.abs(ageDays))} 日離れています。実際の位置とずれている可能性があります。`;
+      if (craft.some((c) => !c.pos)) {
+        warning = "この時刻の位置は、いまの軌道データでは計算できない機体があります。";
+      } else if (ageDays > STALE_DAYS) {
+        warning = `軌道データの基準時刻から ${Math.round(ageDays)} 日離れています。実際の位置とずれている可能性があります。`;
       }
       if (warning !== lastWarning) {
         lastWarning = warning;
@@ -234,8 +426,8 @@ async function boot() {
   } catch (e) {
     status.classList.add("error");
     status.textContent =
-      e.path === "data/orbits/iss.json" && e.status === 404
-        ? "軌道データ（web/data/orbits/iss.json）がありません。npm run fetch:orbits で取得してください。"
+      e.path?.startsWith("data/orbits/") && e.status === 404
+        ? `軌道データ（web/${e.path}）がありません。npm run fetch:orbits で取得してください。`
         : `読み込みに失敗しました：${e.message}`;
     $("#start-label").textContent = "ERROR";
     return;
