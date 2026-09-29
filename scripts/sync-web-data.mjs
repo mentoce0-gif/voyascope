@@ -1,35 +1,60 @@
-// web/ から読むデータを、元のファイルから web/data/ にコピーする。
+// web/ から読むデータを、元のファイルから web/data/ に書き出す。
 // web/ だけを配信する（npx serve web）ため、リポジトリ内の他のフォルダは直接読めない。
-// 元ファイルを変えたら npm run sync:web を実行する。--check で「コピーが古くないか」だけ確かめる。
+// 元ファイルを変えたら npm run sync:web を実行する。--check で「書き出したものが古くないか」だけ確かめる。
+//
+// - 機体カード：そのままコピー
+// - 乗員：その機体に向かったチーム（teams/ の destination）と、その飛行士（astronauts/）を1つのファイルにまとめる
+//   いま乗っているかどうか（打ち上げ済み・未帰還）はアプリ側で判断する
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { dirname } from "node:path";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
 
-const pairs = [
-  // Phase 0 は見本のカードを使う（出典確認中）。curation/ に入ったら差し替える
-  ["examples/spacecraft/iss.json", "web/data/cards/iss.json"],
-  ["config/rank-thresholds.json", "web/data/rank-thresholds.json"],
-];
+// Phase 0〜1 は見本（examples/）を使う（出典確認中）。curation/ に入ったら差し替える
+const SOURCE = "examples";
+const CRAFT = ["iss"];
+
+const readJson = (p) => JSON.parse(readFileSync(p, "utf8"));
+const readDir = (dir) =>
+  existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => readJson(join(dir, f))) : [];
+
+const outputs = [];
+const teams = readDir(join(SOURCE, "teams"));
+const astronauts = new Map(readDir(join(SOURCE, "astronauts")).map((a) => [a.id, a]));
+
+for (const id of CRAFT) {
+  const card = readFileSync(join(SOURCE, "spacecraft", `${id}.json`), "utf8");
+  outputs.push([`web/data/cards/${id}.json`, card]);
+
+  const crew = {
+    $comment: `scripts/sync-web-data.mjs が ${SOURCE}/teams と ${SOURCE}/astronauts から作る。手で編集しない。`,
+    teams: teams
+      .filter((t) => t.destination === id)
+      .map((t) => ({
+        ...t,
+        crew: t.crew.map((m) => ({ ...m, astronaut: astronauts.get(m.astronaut) ?? { id: m.astronaut } })),
+      })),
+  };
+  outputs.push([`web/data/cards/${id}-crew.json`, JSON.stringify(crew, null, 2) + "\n"]);
+}
 
 const check = process.argv.includes("--check");
 let stale = 0;
-for (const [from, to] of pairs) {
-  const src = readFileSync(from, "utf8");
+for (const [to, text] of outputs) {
   if (check) {
-    if (!existsSync(to) || readFileSync(to, "utf8") !== src) {
-      console.log(`古いコピー: ${to}（元: ${from}）`);
+    if (!existsSync(to) || readFileSync(to, "utf8") !== text) {
+      console.log(`古い: ${to}`);
       stale++;
     }
     continue;
   }
   mkdirSync(dirname(to), { recursive: true });
-  writeFileSync(to, src);
-  console.log(`コピー: ${from} → ${to}`);
+  writeFileSync(to, text);
+  console.log(`書き出し: ${to}`);
 }
 if (check) {
   if (stale) {
     console.log("npm run sync:web を実行してください");
     process.exit(1);
   }
-  console.log("web/data/ のコピーは最新です");
+  console.log("web/data/ は最新です");
 }

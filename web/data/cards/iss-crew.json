@@ -1,0 +1,80 @@
+{
+  "$comment": "scripts/sync-web-data.mjs が examples/teams と examples/astronauts から作る。手で編集しない。",
+  "teams": [
+    {
+      "id": "sample-crew",
+      "name": {
+        "value": "（見本）Crew-00",
+        "source": "TODO"
+      },
+      "vehicle": {
+        "value": "（見本）宇宙船の名前",
+        "source": "TODO"
+      },
+      "destination": "iss",
+      "launch_date": {
+        "value": "2026-01-01",
+        "source": "TODO"
+      },
+      "crew": [
+        {
+          "astronaut": {
+            "id": "sample-astronaut",
+            "name": {
+              "ja": "（見本）サンプル飛行士",
+              "en": "(Sample) Astronaut"
+            },
+            "agency": {
+              "value": "（見本）所属機関",
+              "source": "TODO"
+            },
+            "nationality": {
+              "value": "（見本）国名",
+              "source": "TODO"
+            },
+            "official_profile_url": "TODO",
+            "teams": [
+              "sample-crew"
+            ],
+            "records": {
+              "flights": {
+                "value": 2,
+                "source": "TODO",
+                "as_of": "2026-09-29"
+              },
+              "days_in_space": {
+                "value": 180,
+                "unit": "日",
+                "source": "TODO",
+                "as_of": "2026-09-29"
+              },
+              "eva_count": {
+                "value": 1,
+                "source": "TODO",
+                "as_of": "2026-09-29"
+              }
+            },
+            "specialties": [
+              {
+                "value": "（見本）専門分野",
+                "source": "TODO"
+              }
+            ],
+            "updated_at": "2026-09-29"
+          },
+          "role": {
+            "value": "コマンダー",
+            "source": "TODO"
+          }
+        }
+      ],
+      "official_links": [
+        {
+          "label": "ミッション公式ページ",
+          "url": "TODO"
+        }
+      ],
+      "updated_at": "2026-09-29"
+    }
+  ]
+}
