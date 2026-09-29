@@ -1,7 +1,8 @@
 name: update-orbits
 
-# 軌道データ（CelesTrak の GP データ）を6時間ごとに取り直す。
+# 軌道データ（CelesTrak の GP データ）と、みちびきの運用状況（内閣府）を6時間ごとに取り直す。
 # 利用方針：research/chappy/2026-09-29-c1-celestrak-usage.md
+# みちびき：みちびきウェブサイト利用規約（出典を書けば自由に利用可）https://qzss.go.jp/policy/rule.html
 # - 200 以外の応答を受けたらスクリプトが失敗で終わり、再試行はしない（GitHub がメールで知らせる）
 # - 変化があったときだけ main にコミットする
 
@@ -28,14 +29,24 @@ jobs:
           node-version: 20
       - name: 軌道データを取得
         run: node scripts/fetch-orbits.mjs
+      # 運用状況の取得に失敗しても、軌道データのコミットは続ける（失敗は最後のステップで知らせる）
+      - name: みちびきの運用状況を取得
+        id: status
+        continue-on-error: true
+        run: node scripts/fetch-status.mjs
       - name: 変化があればコミット
         run: |
-          if [ -z "$(git status --porcelain -- web/data/orbits)" ]; then
+          if [ -z "$(git status --porcelain -- web/data/orbits web/data/status)" ]; then
             echo "変化なし"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/data/orbits
-          git commit -m "軌道データを自動更新（CelesTrak）"
+          git add web/data/orbits web/data/status
+          git commit -m "軌道データ・運用状況を自動更新（CelesTrak・みちびき）"
           git push
+      - name: 運用状況の取得に失敗していたら知らせる
+        if: steps.status.outcome == 'failure'
+        run: |
+          echo "みちびきの運用状況を取得できませんでした。上の「みちびきの運用状況を取得」のログを見てください。"
+          exit 1

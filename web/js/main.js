@@ -1,6 +1,7 @@
 // VOYASCOPE：地球＋環＋注目の機体＋詳細パネル＋タイムライン
 import { satrecFromOrbit, positionAt, periodMinutes, groundTrack, SimClock } from "./orbit.js";
 import { renderPanel, updatePanelLive } from "./card.js";
+import { summarizeStatus } from "./status.js";
 import { landPath, renderMinimap } from "./minimap.js";
 import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
@@ -69,13 +70,15 @@ async function loadAll() {
   ]);
   const craft = await Promise.all(
     index.craft.map(async (c) => {
-      const [card, orbit, crewData] = await Promise.all([
+      const [card, orbit, crewData, status] = await Promise.all([
         loadJson(c.card),
         // 軌道データがまだない機体（自動取得の前など）は、表示しないだけにする
         c.orbit ? loadJson(c.orbit).catch((e) => (e.status === 404 ? null : Promise.reject(e))) : null,
         c.crew ? loadJson(c.crew).catch(() => null) : null,
+        // 運用状況（自動取得）は、なければカードの「状態」だけを出す
+        c.status ? loadJson(c.status).catch(() => null) : null,
       ]);
-      return { id: c.id, card, orbit, crewData, sample: !!c.sample };
+      return { id: c.id, card, orbit, crewData, status, sample: !!c.sample };
     }),
   );
   return { craft: craft.filter((c) => c.orbit), land, prefectures: prefs.prefectures };
@@ -196,13 +199,18 @@ function startApp({ craft, land, prefectures }) {
       )
       .join("");
   };
+  // 止まっている／止まる予定のお知らせがある機体に小さな札を付ける（実際の今で判断）
+  const statusBadge = (c) => {
+    const { badge } = summarizeStatus(c.card, c.status, new Date());
+    return badge ? ` <span class="st-badge${badge === "停止中" ? " down" : ""}">${badge}</span>` : "";
+  };
   const renderList = () => {
     listEl.innerHTML = craft
       .filter((c) => listFilter === "all" || c.family.id === listFilter)
       .map(
         (c) => `<li><button type="button" class="craft-item" data-id="${c.id}" aria-current="${c === selected}">
           <span class="craft-icon" style="--c:${c.family.color}" aria-hidden="true"></span>
-          <span class="craft-names"><span class="craft-id">${esc(shortName(c))}</span><span class="craft-ja">${esc(c.card.name.en)}</span></span>
+          <span class="craft-names"><span class="craft-id">${esc(shortName(c))}</span><span class="craft-ja">${esc(c.card.name.en)}${statusBadge(c)}</span></span>
           <span class="craft-alt mono" data-alt="${c.id}">--</span>
           <span class="chev" aria-hidden="true">›</span>
         </button></li>`,
@@ -272,6 +280,7 @@ function startApp({ craft, land, prefectures }) {
       isSample: c.sample,
       family: c.family,
       tab,
+      status: c.status,
       orbitMeta: `取得 ${dateTimeShortJa(new Date(c.orbit.fetched_at))}・基準時刻 ${dateTimeShortJa(new Date(c.orbit.epoch))}（CelesTrak）`,
     });
     updateDetailLive(true);

@@ -444,6 +444,19 @@ body { overflow: hidden; }
 }
 .plate-row .label { color: var(--amber); font-weight: 700; padding-top: 1px; }
 .plate-row .body { padding-top: 1px; min-width: 0; }
+
+/* 状態（運用状況） */
+.st-line { line-height: 1.6; }
+.st-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.st-dot.ok { background: var(--mint); box-shadow: 0 0 6px var(--mint-dim); }
+.st-dot.down { background: var(--amber); box-shadow: 0 0 6px var(--amber-dim); }
+.st-notice { margin: 6px 0 2px; padding: 5px 8px; border: 1px dashed var(--amber-dim); border-radius: 4px; font-size: 0.8rem; line-height: 1.5; }
+.st-notice.active { border-style: solid; background: rgba(255, 181, 71, 0.08); }
+.st-tag { display: inline-block; margin-right: 6px; padding: 0 5px; border: 1px solid var(--amber); border-radius: 3px; color: var(--amber); font-size: 0.7rem; }
+.st-src { margin-top: 4px; }
+.st-src a { color: var(--mint); }
+.st-badge { display: inline-block; margin-left: 4px; padding: 0 4px; border: 1px dashed var(--amber-dim); border-radius: 3px; color: var(--amber); font-size: 0.65rem; font-weight: 400; vertical-align: 1px; }
+.st-badge.down { border-style: solid; }
 .crew-summary { font-weight: 700; }
 .team { margin-top: 8px; }
 .team-name { font-size: 0.85rem; color: var(--mint); }

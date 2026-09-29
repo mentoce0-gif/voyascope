@@ -73,7 +73,7 @@ CelesTrak（https://celestrak.org）から軌道データ（GP / TLE）を取得
 
 **C2　ISS カード：基本情報**
 国際宇宙ステーション（NORAD 25544）について、次の項目を公式ソースで確認する。
-`operator`（参加・運用機関。value は配列）、`operator_type`（civil / commercial / military / mixed のどれか）、`launch_date`（最初のモジュールの打ち上げ日 YYYY-MM-DD）、`mission`（公表されている任務を1文で）
+`operator`（参加・運用機関。value は配列）、`operator_type`（civil / commercial / military / mixed のどれか）、`launch_date`（最初のモジュールの打ち上げ日 YYYY-MM-DD）、`mission`（公表されている任務を1文で）、`status`（運用の状態。operating / standby / ended のどれか。公式に運用終了の予定が出ていれば、その予定と出典を「食い違い・注意」に）
 見本の値：operator=["NASA","Roscosmos","JAXA","ESA","CSA"]、operator_type=civil、launch_date=1998-11-20、mission=微小重力を使った実験・研究
 
 **C3　ISS カード：ステータス**
@@ -128,7 +128,7 @@ ISS の窓や船外カメラの映像（ライブ配信）を、アプリの画�
 - `name`（ja は日本の公式の愛称を優先。en は公式の英語名）、`class`、`operator`、`operator_type`、`launch_date`、`mission`
 - `stats`：`altitude_km`（静止軌道なら約35,786 km のように公式の値）、`period_min`、`mass_kg`、`length_m`（公式に書かれているものだけ。なければ省略）
 - `official_links`（運用機関の公式ページ。最大3）
-- 運用中かどうか（公式の運用状況のページ）。運用を終えていたら、その日付と出典
+- `status`（運用の状態。`operating`＝運用中／`standby`＝待機中（予備機など）／`ended`＝運用終了のどれか）。公式の運用状況のページで確認する。運用を終えていたら、その日付を note に書く
 - `catchphrase`・`special_move`・`weakness` は書かない（Claude Code とオーナーが決める）
 
 ---

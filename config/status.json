@@ -1,0 +1,7 @@
+{
+  "$comment": "運用状況を自動で取りに行く機体。scripts/fetch-status.mjs が読む。name は公式ページ上の衛星名（https://sys.qzss.go.jp/dod/constellation.html の見出し）",
+  "qzss": [
+    { "id": "qzs-2", "name": "QZS02" },
+    { "id": "qzs-6", "name": "QZS06" }
+  ]
+}

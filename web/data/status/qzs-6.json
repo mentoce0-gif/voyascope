@@ -1,0 +1,65 @@
+{
+  "$comment": "みちびき 衛星運用状況（内閣府）から scripts/fetch-status.mjs が作る。手で編集しない。",
+  "id": "qzs-6",
+  "source": "https://sys.qzss.go.jp/dod/constellation.html",
+  "source_label": "みちびきウェブサイト「衛星運用状況」",
+  "page_updated": "2026-09-29",
+  "fetched_at": "2026-09-29T22:54:36.646Z",
+  "name": "QZS06",
+  "svn": "007",
+  "services": [
+    {
+      "service": "PNT",
+      "signals": "L1C, L5",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    },
+    {
+      "service": "PNT",
+      "signals": "L1C/B",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    },
+    {
+      "service": "PTV",
+      "signals": "L5S",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    },
+    {
+      "service": "PTV",
+      "signals": "L1Sb",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    },
+    {
+      "service": "MADOCA-PPP",
+      "signals": "L6D",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    },
+    {
+      "service": "MADOCA-PPP",
+      "signals": "L6E",
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
+    }
+  ],
+  "notices": [
+    {
+      "number": "2026252",
+      "type": "PNT_FCSTDV",
+      "kind": "forecast",
+      "svn": "007",
+      "subject": "SVN007 (PRN200) FORECAST OUTAGE JDAY 281/0959 - JDAY 285/0959",
+      "start": "2026-10-08T09:59:00.000Z",
+      "stop": "2026-10-12T09:59:00.000Z"
+    }
+  ]
+}

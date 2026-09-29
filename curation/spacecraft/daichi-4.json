@@ -26,6 +26,12 @@
     "source": "https://www.satnavi.jaxa.jp/ja/project/alos-4/",
     "as_of": "2026-09-30"
   },
+  "status": {
+    "value": "operating",
+    "source": "https://www.jaxa.jp/projects/sat/alos4/",
+    "as_of": "2026-09-30",
+    "note": "2025年3月31日から定常観測運用"
+  },
   "stats": {
     "altitude_km": {
       "value": 628,
