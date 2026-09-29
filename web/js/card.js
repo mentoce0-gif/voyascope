@@ -1,6 +1,7 @@
 // 機体の詳細パネル（タブ：概要／滞在／軌道／リンク）
-import { esc, numberJa, latJa, lngJa } from "./format.js";
+import { esc, numberJa, latJa, lngJa, dateTimeShortJa, plainDateJa } from "./format.js";
 import { RINGS, ringOf } from "./scale.js";
+import { summarizeStatus } from "./status.js";
 
 const CLASS_LABELS = {
   crewed_station: "有人宇宙基地",
@@ -119,7 +120,48 @@ const row = (icon, label, body) =>
     ? `<div class="plate-row"><span class="icon" aria-hidden="true">${icon}</span><span class="label">${label}</span><div class="body">${body}</div></div>`
     : "";
 
-function overviewHtml(card, aboard, family) {
+// 「状態」の行。カードの status（出典つき）と、自動取得の運用状況をまとめて出す
+function statusHtml(sum) {
+  const parts = [];
+  if (sum.live) {
+    const { services, down, notices } = sum.live;
+    const main = services.find((s) => s.code === "PNT");
+    const others = services.filter((s) => s !== main);
+    if (main) {
+      parts.push(
+        `<div class="st-line"><span class="st-dot ${main.ok ? "ok" : "down"}"></span>${esc(main.ja)}：<strong>${main.ok ? "運用中" : "停止中"}</strong></div>`,
+      );
+    }
+    if (others.length) {
+      const d = others.filter((s) => !s.ok);
+      parts.push(
+        `<div class="st-line k">ほかのサービス ${others.length}件：${
+          d.length ? `<span class="amber">${d.map((s) => esc(s.ja)).join("・")} が停止中</span>` : "すべて運用中"
+        }</div>`,
+      );
+    }
+    for (const n of notices) {
+      const range = [n.start && dateTimeShortJa(n.start), n.stop ? dateTimeShortJa(n.stop) : "再開の時刻は未定"]
+        .filter(Boolean)
+        .map((x) => `<span class="nw">${x}</span>`)
+        .join("〜");
+      parts.push(
+        `<div class="st-notice${n.active ? " active" : ""}"><span class="st-tag">${n.active ? "停止中" : "予定"}</span>${esc(n.service)}を止める期間（${esc(n.kindJa)}）<br><span class="mono">${range}</span></div>`,
+      );
+    }
+    if (!main && !down.length && !notices.length && sum.base) parts.unshift(`<strong>${esc(sum.base.label)}</strong>`);
+    parts.push(
+      `<div class="k small st-src"><a href="${esc(sum.live.source)}" target="_blank" rel="noopener noreferrer">${esc(sum.live.sourceLabel)}</a>をもとに作成（${plainDateJa(sum.live.pageUpdated)}更新・${dateTimeShortJa(sum.live.fetchedAt)} 取得）${
+        sum.live.stale ? `<br><span class="amber">しばらく取得できていません。最新の状況は公式ページで確認してください。</span>` : ""
+      }</div>`,
+    );
+    return parts.join("");
+  }
+  if (!sum.base) return null;
+  return `<strong>${esc(sum.base.label)}</strong>`;
+}
+
+function overviewHtml(card, aboard, family, statusSum) {
   const s = card.stats ?? {};
   const headline = [
     launchYear(card.launch_date) && `${launchYear(card.launch_date)}年〜`,
@@ -152,6 +194,7 @@ function overviewHtml(card, aboard, family) {
       <div class="plate-rows">
         ${row("◉", "運用", operator)}
         ${row("◎", "任務", factText(card.mission))}
+        ${row("◆", "状態", statusHtml(statusSum))}
         ${row("▣", "規模", scale.join("　"))}
         ${row("◈", "いま", `<span data-live="now" class="mono">--</span><span class="k">（計算値）</span>`)}
         ${isCrewed(card) ? row("◍", "滞在", crewSummary(aboard) ?? `<span class="k">調べています</span>`) : ""}
@@ -191,13 +234,14 @@ function linksHtml(card, orbitMeta) {
     ${orbitMeta ? `<p class="k small">軌道データ：${esc(orbitMeta)}</p>` : ""}`;
 }
 
-export function renderPanel(el, { card, crewData, now, isSample, family, tab = "overview", orbitMeta }) {
+export function renderPanel(el, { card, crewData, now, isSample, family, tab = "overview", orbitMeta, status, realNow = new Date() }) {
   const aboard = teamsAboard(crewData, now);
+  const statusSum = summarizeStatus(card, status, realNow);
   const showBanner = isSample || hasUnverified(card) || hasUnverified(aboard);
   const tabs = TABS.filter((t) => !t.crewedOnly || isCrewed(card));
   const current = tabs.some((t) => t.id === tab) ? tab : "overview";
   const bodies = {
-    overview: () => overviewHtml(card, aboard, family),
+    overview: () => overviewHtml(card, aboard, family, statusSum),
     crew: () => crewHtml(aboard),
     orbit: () => orbitHtml(),
     links: () => linksHtml(card, orbitMeta),

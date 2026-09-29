@@ -6,6 +6,7 @@
       "card": "data/cards/iss.json",
       "orbit": "data/orbits/iss.json",
       "crew": "data/cards/iss-crew.json",
+      "status": null,
       "sample": true
     },
     {
@@ -13,6 +14,7 @@
       "card": "data/cards/himawari-9.json",
       "orbit": "data/orbits/himawari-9.json",
       "crew": null,
+      "status": null,
       "sample": false
     },
     {
@@ -20,6 +22,7 @@
       "card": "data/cards/qzs-6.json",
       "orbit": "data/orbits/qzs-6.json",
       "crew": null,
+      "status": "data/status/qzs-6.json",
       "sample": false
     },
     {
@@ -27,6 +30,7 @@
       "card": "data/cards/qzs-2.json",
       "orbit": "data/orbits/qzs-2.json",
       "crew": null,
+      "status": "data/status/qzs-2.json",
       "sample": false
     },
     {
@@ -34,6 +38,7 @@
       "card": "data/cards/daichi-4.json",
       "orbit": "data/orbits/daichi-4.json",
       "crew": null,
+      "status": null,
       "sample": false
     },
     {
@@ -41,6 +46,7 @@
       "card": "data/cards/ibuki-gw.json",
       "orbit": "data/orbits/ibuki-gw.json",
       "crew": null,
+      "status": null,
       "sample": false
     },
     {
@@ -48,6 +54,7 @@
       "card": "data/cards/hinode.json",
       "orbit": "data/orbits/hinode.json",
       "crew": null,
+      "status": null,
       "sample": false
     }
   ]
