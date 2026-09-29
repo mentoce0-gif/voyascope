@@ -32,26 +32,81 @@ export function periodMinutes(satrec) {
   return (2 * Math.PI) / satrec.no;
 }
 
-// 画面の時間を早送りするための時計
-export class SimClock {
-  constructor() {
-    this.speed = 1;
-    this.reset();
+// 地上軌跡：center の前後 minutes 分を stepMin 分おきに。経度 ±180° をまたぐところで線を分ける
+export function groundTrack(satrec, center, { before = 90, after = 90, stepMin = 1 } = {}) {
+  const segments = [];
+  let seg = [];
+  let prevLng = null;
+  for (let m = -before; m <= after; m += stepMin) {
+    const p = positionAt(satrec, new Date(center.getTime() + m * 60000));
+    if (!p) continue;
+    if (prevLng !== null && Math.abs(p.lng - prevLng) > 180) {
+      if (seg.length > 1) segments.push(seg);
+      seg = [];
+    }
+    seg.push({ lat: p.lat, lng: p.lng, past: m < 0 });
+    prevLng = p.lng;
   }
-  reset() {
-    this.anchorReal = performance.now();
-    this.anchorSim = Date.now();
+  if (seg.length > 1) segments.push(seg);
+  return segments;
+}
+
+// 観測時刻の時計。タイムライン（現在の −6時間〜+24時間）の中だけを動く
+export const TIMELINE = { minMs: -6 * 3600e3, maxMs: 24 * 3600e3 };
+
+export class SimClock {
+  constructor(realNow = () => Date.now(), perfNow = () => performance.now()) {
+    this.realNow = realNow;
+    this.perfNow = perfNow;
+    this.speed = 1;
+    this.playing = true;
+    this.live();
+  }
+  // 現在時刻に戻して、等倍で再生する
+  live() {
+    this.anchorReal = this.perfNow();
+    this.anchorSim = this.realNow();
+    this.speed = 1;
+    this.playing = true;
   }
   now() {
-    return new Date(this.anchorSim + (performance.now() - this.anchorReal) * this.speed);
+    const elapsed = this.playing ? (this.perfNow() - this.anchorReal) * this.speed : 0;
+    return new Date(this.anchorSim + elapsed);
+  }
+  #rebase() {
+    this.anchorSim = this.now().getTime();
+    this.anchorReal = this.perfNow();
   }
   setSpeed(speed) {
-    this.anchorSim = this.now().getTime();
-    this.anchorReal = performance.now();
+    this.#rebase();
     this.speed = speed;
+  }
+  setPlaying(playing) {
+    this.#rebase();
+    this.playing = playing;
   }
   // 現実の時刻とのずれ（ミリ秒）
   offset() {
-    return this.now().getTime() - Date.now();
+    return this.now().getTime() - this.realNow();
+  }
+  // タイムラインの位置（現在からのずれ）へ移動する
+  jumpToOffset(ms) {
+    const clamped = Math.min(TIMELINE.maxMs, Math.max(TIMELINE.minMs, ms));
+    this.anchorSim = this.realNow() + clamped;
+    this.anchorReal = this.perfNow();
+  }
+  // タイムラインの端を越えたら止める。止めたら true
+  clampToTimeline() {
+    const off = this.offset();
+    if (off > TIMELINE.maxMs) {
+      this.jumpToOffset(TIMELINE.maxMs);
+      this.setPlaying(false);
+      return true;
+    }
+    if (off < TIMELINE.minMs) this.jumpToOffset(TIMELINE.minMs);
+    return false;
+  }
+  isLive() {
+    return this.playing && this.speed === 1 && Math.abs(this.offset()) < 2000;
   }
 }
