@@ -5,12 +5,12 @@
 ## 動かし方
 
 ```
-npm run fetch:tle          # 最初に1回だけ：ISS の軌道データを CelesTrak から取得
 npm run sync:web           # カード・閾値を web/data/ にコピー（元ファイルを変えたとき）
 npx serve web              # または python3 -m http.server -d web
 ```
 
-`web/data/iss-tle.json` がないと、起動画面に「軌道データがありません」と出て先に進めない。
+軌道データ（`web/data/orbits/iss.json`）は GitHub Actions（`update-orbits`）が6時間ごとに自動で取り直す。
+手元で取り直すときは `npm run fetch:orbits`（前回から2時間以内なら取りに行かない。`-- --force` で強制）。
 
 ## ファイル
 
@@ -23,7 +23,7 @@ npx serve web              # または python3 -m http.server -d web
 | `js/card.js` | キャラカードの表示（出典のない項目に「出典確認中」を付ける） |
 | `js/rank.js` | ゲージとランクの自動計算（`tests/rank.test.mjs` でテスト） |
 | `js/format.js` | 日付・数値の表示 |
-| `data/iss-tle.json` | 軌道データ（`npm run fetch:tle` で作る。取得日時と出典URLを含む） |
+| `data/orbits/iss.json` | 軌道データ（CelesTrak の OMM JSON。TLE でも動く。取得日時・エポック・出典URLを含む） |
 | `data/cards/iss.json` | `examples/spacecraft/iss.json` のコピー（見本） |
 | `data/rank-thresholds.json` | `config/rank-thresholds.json` のコピー |
 | `data/land-110m.geojson` | 陸地の形（Natural Earth） |
@@ -31,6 +31,6 @@ npx serve web              # または python3 -m http.server -d web
 
 ## メモ
 
-- 軌道データは Phase 0 ではスナップショット。基準時刻（エポック）から7日以上離れると、画面下に「ずれている可能性」を表示する
+- 軌道データの基準時刻（エポック）から7日以上離れると、画面下に「ずれている可能性」を表示する（自動更新が止まったときの目印にもなる）
 - カードは `examples/` の見本を読むので、常に「見本・出典確認中」を表示する（`main.js` の `isSample: true`）
 - lv3 リンク（CelesTrak）は `norad_id` から自動で作る。lv2 公式リンクは URL が `https://` で始まるまで無効

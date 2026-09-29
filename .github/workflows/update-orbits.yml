@@ -1,0 +1,41 @@
+name: update-orbits
+
+# 軌道データ（CelesTrak の GP データ）を6時間ごとに取り直す。
+# 利用方針：research/chappy/2026-09-29-c1-celestrak-usage.md
+# - 200 以外の応答を受けたらスクリプトが失敗で終わり、再試行はしない（GitHub がメールで知らせる）
+# - 変化があったときだけ main にコミットする
+
+on:
+  schedule:
+    - cron: "17 */6 * * *" # UTC 0:17 / 6:17 / 12:17 / 18:17（毎時0分は混み合うので避ける）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-orbits
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 軌道データを取得
+        run: node scripts/fetch-orbits.mjs
+      - name: 変化があればコミット
+        run: |
+          if [ -z "$(git status --porcelain -- web/data/orbits)" ]; then
+            echo "変化なし"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data/orbits
+          git commit -m "軌道データを自動更新（CelesTrak）"
+          git push

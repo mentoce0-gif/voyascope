@@ -1,9 +1,13 @@
 // 軌道計算（SGP4 をブラウザ内で実行）
-import { twoline2satrec, propagate, gstime, eciToGeodetic, degreesLat, degreesLong } from "../vendor/satellite.min.js";
+import { twoline2satrec, json2satrec, propagate, gstime, eciToGeodetic, degreesLat, degreesLong } from "../vendor/satellite.min.js";
 
-export function satrecFromTle(tle) {
-  const satrec = twoline2satrec(tle.line1, tle.line2);
-  if (satrec.error) throw new Error(`TLE を読み込めません（error ${satrec.error}）`);
+// web/data/orbits/<id>.json から SGP4 の計算に使う形を作る。OMM（JSON）と TLE のどちらでもよい
+export function satrecFromOrbit(orbit) {
+  let satrec;
+  if (orbit.format === "omm" && orbit.omm) satrec = json2satrec(orbit.omm);
+  else if (orbit.format === "tle" && orbit.tle) satrec = twoline2satrec(orbit.tle.line1, orbit.tle.line2);
+  else throw new Error(`軌道データの形式が分かりません（${orbit.format}）`);
+  if (satrec.error) throw new Error(`軌道データを読み込めません（error ${satrec.error}）`);
   return satrec;
 }
 
