@@ -4,7 +4,7 @@
 
 | ファイル | 相手 | タスク |
 |---|---|---|
-| `chappy-research.md` | チャッピー（ChatGPT） | C1〜C11：一次ソース調査（出典URL＋原文の引用つき） |
+| `chappy-research.md` | チャッピー（ChatGPT） | C1〜C12：一次ソース調査（出典URL＋原文の引用つき） |
 | `grok-news.md` | Grok | G1〜G3：速報（公式URLのあり・なしを区別） |
 
 ## 使い方
