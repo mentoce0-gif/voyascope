@@ -7,7 +7,8 @@
     "validate:examples": "node scripts/validate.mjs examples",
     "test": "node --test tests/*.test.mjs",
     "sync:web": "node scripts/sync-web-data.mjs",
-    "fetch:tle": "node scripts/fetch-iss-tle.mjs"
+    "fetch:tle": "node scripts/fetch-iss-tle.mjs",
+    "build:prompts": "node scripts/build-prompts.mjs"
   },
   "devDependencies": {
     "ajv": "^8.17.1"
