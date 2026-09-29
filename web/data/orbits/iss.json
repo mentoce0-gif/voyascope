@@ -1,0 +1,14 @@
+{
+  "$comment": "Phase 0 でオーナーが手動で取得した TLE。update-orbits ワークフローが初めて動いたときに OMM（JSON）形式に置き換わる。",
+  "id": "iss",
+  "norad_id": 25544,
+  "name": "ISS (ZARYA)",
+  "format": "tle",
+  "epoch": "2026-09-28T11:09:16.121Z",
+  "source": "https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=tle",
+  "fetched_at": "2026-09-29T00:23:55Z",
+  "tle": {
+    "line1": "1 25544U 98067A   26271.46476993  .00006013  00000+0  11848-3 0  9990",
+    "line2": "2 25544  51.6312 148.9632 0007159 198.2260 161.8473 15.48680135587767"
+  }
+}
