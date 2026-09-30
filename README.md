@@ -8,6 +8,10 @@
 > **非公式・ファンメイド作品です。** JAXA、NASA、その他の宇宙機関・運用者とは関係ありません。
 > Unofficial fan-made project. Not affiliated with any space agency or operator.
 
+## 公開ページ
+
+**https://mentoce0-gif.github.io/voyascope/**
+
 ## 公開停止について
 
 このアプリを使った軍事行為、または誰かに被害をもたらす行為が確認された場合は、公開を停止します。
