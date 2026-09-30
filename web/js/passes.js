@@ -93,3 +93,9 @@ export function heightWord(el) {
   if (el >= 30) return "中くらいの高さ";
   return "低い（地平線の近く）";
 }
+
+// 太陽が真上にある地点（緯度・経度、度）。地球の昼と夜の境目を描くのに使う
+export function subsolarPoint(date) {
+  const ecf = eciToEcf(sunEci(date), gstime(date));
+  return { lat: Math.atan2(ecf.z, Math.hypot(ecf.x, ecf.y)) * DEG, lng: Math.atan2(ecf.y, ecf.x) * DEG };
+}

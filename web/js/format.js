@@ -20,7 +20,8 @@ const pad = (n) => String(n).padStart(2, "0");
 export function dateTimeJa(d) {
   const tz = -d.getTimezoneOffset();
   const sign = tz >= 0 ? "+" : "-";
-  const tzLabel = `UTC${sign}${Math.floor(Math.abs(tz) / 60)}${tz % 60 ? ":" + pad(Math.abs(tz) % 60) : ""}`;
+  // 日本時間なら「JST」、それ以外は「UTC+x」
+  const tzLabel = tz === 540 ? "JST" : `UTC${sign}${Math.floor(Math.abs(tz) / 60)}${tz % 60 ? ":" + pad(Math.abs(tz) % 60) : ""}`;
   return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} (${tzLabel})`;
 }
 

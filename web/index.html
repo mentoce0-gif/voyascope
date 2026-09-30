@@ -13,18 +13,23 @@
 </head>
 <body>
   <!-- 起動画面 -->
-  <section id="boot" class="crt" aria-label="起動画面">
+  <section id="boot" class="hero crt" aria-label="起動画面">
+    <div class="hero-bg" aria-hidden="true"></div>
     <canvas id="noise" aria-hidden="true"></canvas>
-    <div class="boot-inner">
-      <p class="boot-sys mono" aria-hidden="true">OBSERVATION TERMINAL // BOOT</p>
+    <div class="hero-main">
       <h1 class="logo"><img src="assets/brand/logo-1200.webp" alt="VOYASCOPE" width="1200" height="207"></h1>
       <p class="subtitle">今、宇宙を旅する者たち。</p>
-      <button id="start" class="btn btn-primary mono" type="button" disabled>
-        <span id="start-label">LOADING…</span>
+      <button id="start" class="btn btn-primary hero-start" type="button" disabled>
+        <span id="start-label">読み込み中…</span><span class="chev" aria-hidden="true">›</span>
       </button>
-      <p id="boot-status" class="boot-status mono" role="status">データを読み込んでいます</p>
-      <p class="unofficial">※非公式ファンメイド作品です。<br>JAXA・NASA などの宇宙機関・運用者とは関係ありません。</p>
+      <p id="boot-status" class="boot-status mono" role="status">ORBITAL DATA LOADING…</p>
     </div>
+    <aside class="hero-side">
+      <p class="hero-copy">地球のまわりをめぐる<br>人工衛星たち。<br>今、どこにいて、<br>何をしているのか。</p>
+      <p class="hero-copy">リアルなデータで、<br>宇宙を見に行こう。</p>
+      <p class="unofficial">※非公式ファンメイド作品です。<br>JAXA・NASA などの宇宙機関・運用者とは関係ありません。</p>
+    </aside>
+    <p class="hero-credit">地球の画像：NASA Blue Marble・Black Marble をもとに作成</p>
   </section>
 
   <!-- 観測画面 -->
@@ -41,21 +46,36 @@
       <div class="clock-block">
         <span id="sim-time" class="mono">--</span>
         <span id="live-badge" class="live-badge mono" data-live="true">LIVE</span>
+        <button type="button" id="menu-open" class="menu-btn" aria-label="メニュー（このアプリについて）"><span></span><span></span><span></span></button>
       </div>
     </header>
+
+    <!-- 地球の左上：いま表示しているもの -->
+    <section class="earth-info" aria-label="現在の地球">
+      <h2 class="earth-info-title">現在の地球</h2>
+      <dl>
+        <dt>日時</dt><dd id="ei-time" class="mono">--</dd>
+        <dt>視点</dt><dd id="ei-view" class="mono">--</dd>
+        <dt>表示</dt><dd id="ei-count">--</dd>
+      </dl>
+    </section>
 
     <!-- 左：注目の一覧 -->
     <aside id="list-panel" class="side-panel list-panel" aria-label="注目の機体">
       <div class="sheet-handle" aria-hidden="true"></div>
-      <section class="tonight" aria-labelledby="tonight-title">
+      <label class="search">
+        <span class="visually-hidden">衛星を名前で探す</span>
+        <input id="craft-search" type="search" placeholder="衛星を検索…" autocomplete="off" enterkeyhint="search">
+      </label>
+      <nav class="fam-tabs" id="fam-tabs" aria-label="家族で絞り込む"></nav>
+      <section class="tonight" id="tonight-section" aria-labelledby="tonight-title" hidden>
         <div class="tonight-head">
           <h2 id="tonight-title" class="tonight-title"><span id="tonight-label">今夜・頭の上</span></h2>
           <select id="pref-select" class="pref-select" aria-label="都道府県"></select>
         </div>
         <div id="tonight-body" class="tonight-body"></div>
       </section>
-      <nav class="fam-tabs" id="fam-tabs" aria-label="家族で絞り込む"></nav>
-      <h2 class="list-title">注目</h2>
+      <h2 class="list-title" id="list-title">注目</h2>
       <ul id="craft-list" class="craft-list"></ul>
       <p class="list-note k small">名前で呼べる機体だけを、少しずつ置いていきます。</p>
     </aside>
@@ -89,7 +109,7 @@
         </div>
       </div>
       <div class="controls-row">
-        <button type="button" id="list-open" class="btn list-open">今夜・注目</button>
+        <button type="button" id="list-open" class="btn list-open">一覧・観測</button>
         <div id="fam-legend" class="fam-legend" role="group" aria-label="家族ごとの表示"></div>
         <label class="toggle"><input type="checkbox" id="rings-toggle" checked> 環</label>
         <button type="button" id="follow" class="btn mono" aria-pressed="false" title="カメラが選んだ機体を追いかけます">追尾</button>
@@ -124,6 +144,7 @@
         <li>みちびきの運用状況：みちびきウェブサイト「衛星運用状況」（内閣府）をもとに作成。6時間ごとに自動で取得</li>
         <li>位置計算：satellite.js（MIT License）</li>
         <li>3D表示：globe.gl／three.js（MIT License）</li>
+        <li>地球の画像：NASA Blue Marble（昼）・Black Marble（夜の明かり）。昼と夜の境目は、観測時刻の太陽の位置から計算しています</li>
         <li>陸地の形：Natural Earth（パブリックドメイン）／world-atlas（ISC License）</li>
       </ul>
       <p class="small">軌道データや画像などの権利は、それぞれの提供元にあります。</p>
