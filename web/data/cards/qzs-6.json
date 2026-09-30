@@ -55,6 +55,13 @@
       "note": "おおよその値。翼の端から端まで"
     }
   },
+  "image": {
+    "file": "assets/craft/qzs-6.jpg",
+    "source": "https://qzss.go.jp/7satellite-constellation/qzs-6/outline.html",
+    "credit": "提供：内閣府宇宙開発戦略推進事務局",
+    "caption": "みちびき6号機のイメージ",
+    "terms": "https://qzss.go.jp/policy/rule.html"
+  },
   "official_links": [
     {
       "label": "みちびき6号機",

@@ -7,7 +7,13 @@
   },
   "class": "crewed_station",
   "operator": {
-    "value": ["NASA", "Roscosmos", "JAXA", "ESA", "CSA"],
+    "value": [
+      "NASA",
+      "Roscosmos",
+      "JAXA",
+      "ESA",
+      "CSA"
+    ],
     "source": "https://oig.nasa.gov/wp-content/uploads/2024/02/IG-23-004.pdf",
     "as_of": "2026-09-30"
   },
@@ -71,10 +77,26 @@
     }
   },
   "catchphrase": "90分で地球を1周する、空飛ぶ研究所",
+  "image": {
+    "file": "assets/craft/iss.jpg",
+    "source": "https://images.nasa.gov/details/iss056e201248",
+    "credit": "NASA",
+    "caption": "ソユーズ宇宙船から撮影した国際宇宙ステーション（2018年10月4日）",
+    "terms": "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+  },
   "official_links": [
-    { "label": "NASA 国際宇宙ステーション", "url": "https://www.nasa.gov/international-space-station/" },
-    { "label": "JAXA「きぼう」日本実験棟", "url": "https://humans-in-space.jaxa.jp/kibo/" },
-    { "label": "ESA 国際宇宙ステーション", "url": "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/International_Space_Station" }
+    {
+      "label": "NASA 国際宇宙ステーション",
+      "url": "https://www.nasa.gov/international-space-station/"
+    },
+    {
+      "label": "JAXA「きぼう」日本実験棟",
+      "url": "https://humans-in-space.jaxa.jp/kibo/"
+    },
+    {
+      "label": "ESA 国際宇宙ステーション",
+      "url": "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/International_Space_Station"
+    }
   ],
   "updated_at": "2026-09-30"
 }

@@ -1,6 +1,6 @@
 // VOYASCOPE：地球＋環＋注目の機体＋詳細パネル＋タイムライン
 import { satrecFromOrbit, positionAt, periodMinutes, groundTrack, SimClock } from "./orbit.js";
-import { renderPanel, updatePanelLive } from "./card.js";
+import { renderPanel, updatePanelLive, imageCredit } from "./card.js";
 import { summarizeStatus } from "./status.js";
 import { landPath, renderMinimap } from "./minimap.js";
 import { setupEarth } from "./earth.js";
@@ -257,7 +257,11 @@ function startApp({ craft, land, prefectures }) {
     listEl.innerHTML = shown
       .map(
         (c) => `<li><button type="button" class="craft-item" data-id="${c.id}" aria-current="${c === selected}">
-          <span class="craft-icon" style="--c:${c.family.color}" aria-hidden="true"></span>
+          ${
+            c.card.image
+              ? `<span class="craft-thumb" style="--c:${c.family.color}" aria-hidden="true"><img src="${esc(c.card.image.file)}" alt="" loading="lazy"></span>`
+              : `<span class="craft-icon" style="--c:${c.family.color}" aria-hidden="true"></span>`
+          }
           <span class="craft-names"><span class="craft-id">${esc(shortName(c))}</span><span class="craft-ja">${esc(c.card.name.en)}${statusBadge(c)}</span></span>
           <span class="craft-alt mono"><span class="st-pip ${statusPip(c)}" aria-hidden="true"></span><span data-alt="${c.id}">--</span></span>
           <span class="chev" aria-hidden="true">›</span>
@@ -480,6 +484,11 @@ function startApp({ craft, land, prefectures }) {
   });
   $("#about-open").addEventListener("click", () => about.showModal());
   $("#menu-open").addEventListener("click", () => about.showModal());
+  // 機体の画像の出典（利用条件どおりのクレジット）
+  $("#about-images").innerHTML = craft
+    .filter((c) => c.card.image)
+    .map((c) => `<li>${esc(c.card.name.ja)}：${imageCredit(c.card.image)}</li>`)
+    .join("");
 
   // ---------- 毎フレームの更新 ----------
   const els = { time: $("#sim-time"), badge: $("#live-badge"), warning: $("#tle-warning") };
