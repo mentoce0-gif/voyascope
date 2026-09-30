@@ -10,7 +10,7 @@
 
 ## 公開ページ
 
-準備中です（Cloudflare Pages で公開する予定）。
+**https://mentoce0-gif.github.io/voyascope/**（仮の公開先。のちに Cloudflare Pages に移します）
 
 ## 公開停止について
 
