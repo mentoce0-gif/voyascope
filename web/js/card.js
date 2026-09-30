@@ -34,8 +34,9 @@ const OPERATOR_TYPE_LABELS = {
   mixed: "混合",
 };
 
-// 機体の線画（web/assets/craft/<id>.svg）。ないときは出さない
-const CRAFT_ART = { iss: "assets/craft/iss.svg" };
+// 機体の画像（カードの image。公式の画像を出典・クレジットつきで）
+export const imageCredit = (img) =>
+  `${esc(img.caption)}　<a href="${esc(img.source)}" target="_blank" rel="noopener noreferrer">${esc(img.credit)}</a>`;
 
 export const TABS = [
   { id: "overview", label: "概要" },
@@ -176,7 +177,11 @@ function overviewHtml(card, aboard, family, statusSum) {
   const st = statusRows(statusSum);
   return `
     <div class="ov">
-      ${CRAFT_ART[card.id] ? `<img class="ov-art" src="${CRAFT_ART[card.id]}" alt="">` : ""}
+      ${
+        card.image
+          ? `<figure class="ov-figure"><img class="ov-art" src="${esc(card.image.file)}" alt="${esc(card.image.caption)}"><figcaption class="k small">${imageCredit(card.image)}</figcaption></figure>`
+          : ""
+      }
       ${card.mission && !card.mission.undisclosed ? `<p class="ov-lead">${factText(card.mission)}</p>` : `<p class="ov-lead k">任務は公表されていません。</p>`}
       ${
         card.catchphrase

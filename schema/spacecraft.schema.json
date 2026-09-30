@@ -90,6 +90,19 @@
         "source": { "$ref": "common.schema.json#/$defs/source" }
       }
     },
+    "image": {
+      "type": "object",
+      "description": "機体の画像（公式のもの。出典と、利用条件どおりのクレジットが必須）。file は web/ からの相対パス",
+      "required": ["file", "source", "credit", "caption"],
+      "additionalProperties": false,
+      "properties": {
+        "file": { "type": "string", "pattern": "^assets/craft/[a-z0-9-]+\\.(jpg|png|webp)$" },
+        "source": { "$ref": "common.schema.json#/$defs/source" },
+        "credit": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "caption": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "terms": { "$ref": "common.schema.json#/$defs/source" }
+      }
+    },
     "official_links": {
       "type": "array",
       "minItems": 1,
