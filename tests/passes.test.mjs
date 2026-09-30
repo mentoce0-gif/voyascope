@@ -70,3 +70,13 @@ test("いつ・何時ごろのことば（日本時間）", () => {
   assert.equal(whenWord(new Date("2026-10-03T10:00:00Z"), now), "10月3日(土)の夜");
   assert.equal(clockWord(new Date("2026-09-30T10:10:19Z")), "19時10分ごろ");
 });
+
+test("太陽が真上にある地点：秋分のころの正午（UTC）は赤道・経度0°の近く", async () => {
+  const { subsolarPoint } = await import("../web/js/passes.js");
+  const p = subsolarPoint(new Date("2026-09-23T12:00:00Z"));
+  assert.ok(Math.abs(p.lat) < 1.5, `緯度 ${p.lat}`);
+  assert.ok(Math.abs(p.lng) < 5, `経度 ${p.lng}`);
+  // 6時間後は西へ約90°
+  const q = subsolarPoint(new Date("2026-09-23T18:00:00Z"));
+  assert.ok(Math.abs(q.lng + 90) < 5, `経度 ${q.lng}`);
+});
