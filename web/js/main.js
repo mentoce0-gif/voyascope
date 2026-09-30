@@ -3,17 +3,17 @@ import { satrecFromOrbit, positionAt, periodMinutes, groundTrack, SimClock } fro
 import { renderPanel, updatePanelLive } from "./card.js";
 import { summarizeStatus } from "./status.js";
 import { landPath, renderMinimap } from "./minimap.js";
+import { setupEarth } from "./earth.js";
 import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
-import { esc, dateTimeShortJa, dateTimeJa, durationJa } from "./format.js";
+import { esc, dateTimeShortJa, dateTimeJa, durationJa, latJa, lngJa } from "./format.js";
 import { findVisiblePasses, observerOf } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
 
 const COLORS = {
   navy: "#07142b",
-  globe: "#0c2140",
   mint: "#5ef2c2",
-  land: "rgba(94, 242, 194, 0.78)",
+  atmosphere: "#7fc4ff",
 };
 // 軌道データの基準時刻からこれ以上離れたら、位置がずれている可能性を知らせる
 const STALE_DAYS = 7;
@@ -126,6 +126,32 @@ function startApp({ craft, land, prefectures }) {
     points: Array.from({ length: 73 }, (_, i) => [0, -180 + i * 5, r.alt]),
   }));
   let showRings = true;
+  // 選んだ機体の軌道（前後に半周ずつ、1周分）。地球と一緒に回る座標なので、低軌道の線は1周で閉じない
+  let orbitPath = null;
+  let orbitFor = null;
+  let orbitAt = 0;
+  const refreshPaths = () => globe.pathsData([...(showRings ? ringPaths : []), ...(orbitPath ? [orbitPath] : [])]);
+  const updateOrbitPath = (now) => {
+    orbitFor = selected;
+    orbitAt = now.getTime();
+    // 静止軌道の機体はほとんど動かないので線を引かない（環で分かる）
+    if (!selected || !(selected.period < 600)) {
+      if (orbitPath) {
+        orbitPath = null;
+        refreshPaths();
+      }
+      return;
+    }
+    const half = selected.period / 2;
+    const step = Math.max(0.5, selected.period / 240);
+    const points = [];
+    for (let m = -half; m <= half; m += step) {
+      const p = positionAt(selected.satrec, new Date(orbitAt + m * 60000));
+      if (p) points.push([p.lat, p.lng, displayAltitude(p.altKm)]);
+    }
+    orbitPath = { solid: true, color: [`${selected.family.color}22`, `${selected.family.color}ee`, `${selected.family.color}22`], points };
+    refreshPaths();
+  };
 
   // ---------- 地球 ----------
   const globeEl = $("#globe");
@@ -134,22 +160,18 @@ function startApp({ craft, land, prefectures }) {
   const globe = Globe({ animateIn: true })(globeEl)
     .backgroundColor(COLORS.navy)
     .showAtmosphere(true)
-    .atmosphereColor(COLORS.mint)
-    .atmosphereAltitude(0.14)
-    .showGraticules(true)
-    .hexPolygonsData(land.features)
-    .hexPolygonResolution(3)
-    .hexPolygonMargin(0.35)
-    .hexPolygonUseDots(true)
-    .hexPolygonColor(() => COLORS.land)
+    .atmosphereColor(COLORS.atmosphere)
+    .atmosphereAltitude(0.16)
+    .showGraticules(false)
     .pathsData(ringPaths)
     .pathPoints("points")
     .pathPointLat((p) => p[0])
     .pathPointLng((p) => p[1])
     .pathPointAlt((p) => p[2])
-    .pathColor(() => "rgba(94, 242, 194, 0.38)")
-    .pathDashLength(0.012)
-    .pathDashGap(0.008)
+    .pathColor((d) => d.color ?? "rgba(94, 242, 194, 0.38)")
+    .pathDashLength((d) => (d.solid ? 1 : 0.012))
+    .pathDashGap((d) => (d.solid ? 0 : 0.008))
+    .pathStroke((d) => (d.solid ? 1.2 : null))
     .pathTransitionDuration(0)
     .htmlElementsData([])
     .htmlLat("lat")
@@ -158,10 +180,9 @@ function startApp({ craft, land, prefectures }) {
     .htmlElement((d) => d.el)
     .htmlTransitionDuration(0);
 
-  const mat = globe.globeMaterial();
-  mat.color.set(COLORS.globe);
-  if (mat.emissive) mat.emissive.set("#06152c");
-  if ("shininess" in mat) mat.shininess = 4;
+  // 写実的な地球（昼と夜の境目は観測時刻に合わせて動く）
+  const updateEarth = setupEarth(globe);
+  let lastEarthAt = 0;
 
   const controls = globe.controls();
   controls.minDistance = 130;
@@ -195,16 +216,30 @@ function startApp({ craft, land, prefectures }) {
   // ---------- 注目の一覧と家族 ----------
   const present = FAMILIES.filter((f) => craft.some((c) => c.family.id === f.id));
   let listFilter = "all";
+  let query = "";
   let selected = null;
   const famTabs = $("#fam-tabs");
   const listEl = $("#craft-list");
   const renderFamTabs = () => {
-    famTabs.innerHTML = [{ id: "all", label: "すべて" }, ...present]
+    // 最後の「観測」は、今夜の空（ISS の見える通過）
+    famTabs.innerHTML = [{ id: "all", label: "すべて" }, ...present, { id: "tonight", label: "観測" }]
       .map(
         (f) =>
           `<button type="button" class="fam-tab" data-fam="${f.id}" aria-pressed="${f.id === listFilter}">${esc(f.label)}</button>`,
       )
       .join("");
+  };
+  // 名前（日本語・英語・id）で探す。全角・半角や大文字・小文字の違いは無視する
+  const fold = (t) => String(t ?? "").normalize("NFKC").toLowerCase().replace(/\s+/g, "");
+  const matchesQuery = (c, q) => {
+    const f = fold(q);
+    return !f || [c.card.name.ja, c.card.name.en, c.id].some((t) => fold(t).includes(f));
+  };
+  // 状態の点：運用中は緑、止まっている／止まる予定は琥珀、分からなければ灰色
+  const statusPip = (c) => {
+    const s = summarizeStatus(c.card, c.status, new Date());
+    if (s.badge) return "warn";
+    return s.base?.value === "operating" ? "ok" : "unknown";
   };
   // 止まっている／止まる予定のお知らせがある機体に小さな札を付ける（実際の今で判断）
   const statusBadge = (c) => {
@@ -212,24 +247,44 @@ function startApp({ craft, land, prefectures }) {
     return badge ? ` <span class="st-badge${badge === "停止中" ? " down" : ""}">${badge}</span>` : "";
   };
   const renderList = () => {
-    listEl.innerHTML = craft
-      .filter((c) => listFilter === "all" || c.family.id === listFilter)
+    const shown = craft
+      .filter((c) => listFilter === "all" || listFilter === "tonight" || c.family.id === listFilter)
+      .filter((c) => matchesQuery(c, query));
+    if (!shown.length) {
+      listEl.innerHTML = `<li class="list-empty k">「${esc(query)}」に当たる機体はありません。</li>`;
+      return;
+    }
+    listEl.innerHTML = shown
       .map(
         (c) => `<li><button type="button" class="craft-item" data-id="${c.id}" aria-current="${c === selected}">
           <span class="craft-icon" style="--c:${c.family.color}" aria-hidden="true"></span>
           <span class="craft-names"><span class="craft-id">${esc(shortName(c))}</span><span class="craft-ja">${esc(c.card.name.en)}${statusBadge(c)}</span></span>
-          <span class="craft-alt mono" data-alt="${c.id}">--</span>
+          <span class="craft-alt mono"><span class="st-pip ${statusPip(c)}" aria-hidden="true"></span><span data-alt="${c.id}">--</span></span>
           <span class="chev" aria-hidden="true">›</span>
         </button></li>`,
       )
       .join("");
   };
-  famTabs.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-fam]");
-    if (!b) return;
-    listFilter = b.dataset.fam;
+  // 「観測」タブのときは一覧の代わりに今夜の空を出す
+  const tonightSection = $("#tonight-section");
+  const showListFilter = (id) => {
+    listFilter = id;
+    const tonight = id === "tonight";
+    tonightSection.hidden = !tonight;
+    listEl.hidden = tonight;
+    $("#list-title").hidden = tonight;
     renderFamTabs();
     renderList();
+  };
+  famTabs.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-fam]");
+    if (b) showListFilter(b.dataset.fam);
+  });
+  const searchEl = $("#craft-search");
+  searchEl.addEventListener("input", () => {
+    query = searchEl.value;
+    if (listFilter === "tonight") showListFilter("all");
+    else renderList();
   });
   listEl.addEventListener("click", (e) => {
     const b = e.target.closest("[data-id]");
@@ -251,7 +306,7 @@ function startApp({ craft, land, prefectures }) {
   });
   $("#rings-toggle").addEventListener("change", (e) => {
     showRings = e.target.checked;
-    globe.pathsData(showRings ? ringPaths : []);
+    refreshPaths();
     $(".scale-note").hidden = !showRings;
   });
 
@@ -386,12 +441,14 @@ function startApp({ craft, land, prefectures }) {
     passesAt = now.getTime();
     renderTonight(tonightBody, { pref, passes, now, jumpable });
     $("#tonight-label").textContent = pref ? `今夜・${pref.name}` : "今夜・頭の上";
-    tonightChip.hidden = !pref;
-    if (pref) {
-      tonightChip.textContent = passes.length
-        ? `${pref.name}　ISS ${whenWord(passes[0].start, now)} ${clockWord(passes[0].start)}`
-        : `${pref.name}　ISS 見える通過なし（5日間）`;
-    }
+    tonightChip.hidden = false;
+    tonightChip.innerHTML = !pref
+      ? `<span class="pin" aria-hidden="true">⌖</span>県を選ぶと、ISS が見える時刻が出ます`
+      : `<span class="pin" aria-hidden="true">⌖</span>${esc(pref.name)}<span class="sep" aria-hidden="true"></span>${
+          passes.length
+            ? `ISS ${whenWord(passes[0].start, now)} ${clockWord(passes[0].start)}`
+            : "ISS 見える通過なし（5日間）"
+        }`;
   };
   prefSelect.addEventListener("change", () => {
     pref = prefectures.find((p) => p.code === prefSelect.value) ?? null;
@@ -409,6 +466,7 @@ function startApp({ craft, land, prefectures }) {
     setFollow(true);
   });
   tonightChip.addEventListener("click", () => {
+    showListFilter("tonight");
     listPanel.classList.add("open");
     if (isNarrow()) closeDetail();
     listPanel.scrollTop = 0;
@@ -421,9 +479,13 @@ function startApp({ craft, land, prefectures }) {
     if (e.target === about || e.target.closest("[data-close]")) about.close();
   });
   $("#about-open").addEventListener("click", () => about.showModal());
+  $("#menu-open").addEventListener("click", () => about.showModal());
 
   // ---------- 毎フレームの更新 ----------
   const els = { time: $("#sim-time"), badge: $("#live-badge"), warning: $("#tle-warning") };
+  const eiTime = $("#ei-time");
+  const eiView = $("#ei-view");
+  const eiCount = $("#ei-count");
   let lastText = 0;
   let lastWarning = "";
 
@@ -434,6 +496,13 @@ function startApp({ craft, land, prefectures }) {
   const tick = (t) => {
     if (clock.clampToTimeline()) syncControls();
     const now = clock.now();
+    // 選んだ機体の軌道の線：選び直したとき、または観測時刻で20秒ごと
+    if (selected !== orbitFor || Math.abs(now - orbitAt) > 20000) updateOrbitPath(now);
+    // 昼と夜の境目：観測時刻で1分以上動いたら更新（早送りでも滑らかに）
+    if (Math.abs(now - lastEarthAt) > 60000) {
+      lastEarthAt = now.getTime();
+      updateEarth(now);
+    }
     for (const c of craft) {
       c.pos = positionAt(c.satrec, now);
       if (c.pos) {
@@ -451,6 +520,12 @@ function startApp({ craft, land, prefectures }) {
     if (t - lastText > 100) {
       lastText = t;
       els.time.textContent = dateTimeJa(now);
+      // 「現在の地球」：観測時刻・カメラが見ている地点・表示中の機体数
+      eiTime.textContent = dateTimeJa(now);
+      const pov = globe.pointOfView();
+      eiView.textContent = `${latJa(pov.lat)} ${lngJa(((pov.lng + 540) % 360) - 180)}`;
+      const n = markerData().length;
+      eiCount.textContent = `${n}機（${[...new Set(markerData().map((c) => c.family.label))].join("・")}）`;
       const live = clock.isLive();
       els.badge.dataset.live = String(live);
       els.badge.textContent = live ? "LIVE" : `${durationJa(clock.offset())}${clock.playing ? "" : " 停止中"}`;
@@ -493,14 +568,20 @@ async function boot() {
   try {
     if (typeof Globe !== "function") throw new Error("3D表示のライブラリを読み込めません");
     data = await loadAll();
-    status.textContent = "準備ができました";
+    // 読み込めた機体数と、軌道データのいちばん古い取得時刻（UTC）
+    const fetched = data.craft.map((c) => c.orbit.fetched_at).sort()[0];
+    status.textContent = [
+      "ORBITAL DATA LOADED",
+      `${data.craft.length} OBJECTS ONLINE`,
+      fetched ? `UPDATED ${fetched.slice(0, 16).replace("T", " ")} UTC` : "",
+    ].join("\n");
   } catch (e) {
     status.classList.add("error");
     status.textContent =
       e.path?.startsWith("data/orbits/") && e.status === 404
         ? `軌道データ（web/${e.path}）がありません。npm run fetch:orbits で取得してください。`
         : `読み込みに失敗しました：${e.message}`;
-    $("#start-label").textContent = "ERROR";
+    $("#start-label").textContent = "読み込めませんでした";
     return;
   }
   $("#start-label").textContent = "観測を開始";
