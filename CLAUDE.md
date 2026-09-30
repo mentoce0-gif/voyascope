@@ -9,7 +9,7 @@ VOYASCOPE は、地球のまわりを飛ぶ衛星・宇宙船・宇宙飛行士�
 
 - 作者（オーナー）：151Me。個人・本業あり・稼働は週数時間
 - 方針：サーバを持たない。GitHub Pages ＋ GitHub Actions ＋ ブラウザ内計算で完結させる
-- リポジトリは当面 private。public化はオーナーが判断する
+- リポジトリは public（2026-09-30 オーナーが公開）。公開ページ：https://mentoce0-gif.github.io/voyascope/
 
 ## 最優先ルール
 
