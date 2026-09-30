@@ -56,6 +56,13 @@
       "note": "おおよその値。運用中の全長"
     }
   },
+  "image": {
+    "file": "assets/craft/himawari-9.jpg",
+    "source": "https://www.data.jma.go.jp/sat_info/himawari/satellite.html",
+    "credit": "気象庁提供",
+    "caption": "ひまわり8号・9号のイラスト（2機は同じ形）",
+    "terms": "https://www.jma.go.jp/jma/kishou/info/coment.html"
+  },
   "official_links": [
     {
       "label": "気象庁 気象衛星観測",

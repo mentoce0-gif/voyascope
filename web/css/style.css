@@ -79,24 +79,35 @@ body { overflow: hidden; }
   cursor: pointer;
 }
 
-/* ---------- 起動画面（ブラウン管風） ---------- */
+/* ---------- 起動画面（横長のヒーロー） ---------- */
 #boot {
   position: fixed;
   inset: 0;
   z-index: 50;
   display: grid;
-  place-items: center;
-  padding: var(--gutter);
-  background: radial-gradient(ellipse at center, #0e2a4d 0%, var(--navy-800) 60%, var(--navy-900) 100%);
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2rem;
+  padding: clamp(24px, 6vw, 72px);
+  background: var(--navy-900);
+  overflow: hidden;
   transition: opacity 0.6s ease;
 }
 #boot.leaving { opacity: 0; pointer-events: none; }
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(4, 10, 22, 0.96) 0%, rgba(4, 10, 22, 0.78) 34%, rgba(4, 10, 22, 0.1) 62%, rgba(4, 10, 22, 0.35) 100%),
+    url("../assets/earth/hero-1600.webp") right center / cover no-repeat;
+  animation: hero-in 1.6s ease-out both;
+}
 #noise {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.07;
+  opacity: 0.05;
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -109,7 +120,7 @@ body { overflow: hidden; }
     to bottom,
     rgba(0, 0, 0, 0) 0px,
     rgba(0, 0, 0, 0) 2px,
-    rgba(0, 0, 0, 0.28) 3px,
+    rgba(0, 0, 0, 0.22) 3px,
     rgba(0, 0, 0, 0) 4px
   );
   z-index: 2;
@@ -119,50 +130,101 @@ body { overflow: hidden; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.85);
-  border-radius: 18px;
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.7);
   z-index: 3;
 }
-.boot-inner {
-  position: relative;
-  z-index: 4;
-  text-align: center;
-  max-width: 34rem;
-  animation: crt-on 0.9s ease-out both;
-}
-.boot-sys {
-  color: var(--mint-dim);
-  font-size: 0.72rem;
-  letter-spacing: 0.25em;
-  margin: 0 0 0.75rem;
-}
+.hero-main, .hero-side { position: relative; z-index: 4; }
+.hero-main { animation: crt-on 0.9s ease-out both; }
 .logo {
   margin: 0;
   line-height: 0;
   animation: flicker 5s infinite;
 }
-.logo img { width: min(86vw, 620px); height: auto; }
+.logo img { width: min(80vw, 560px); height: auto; }
 .subtitle {
-  margin: 0.4rem 0 2rem;
-  font-size: clamp(1rem, 4.2vw, 1.25rem);
-  color: var(--mint);
-  letter-spacing: 0.12em;
+  margin: 0.8rem 0 2.2rem;
+  font-size: clamp(1rem, 2.4vw, 1.3rem);
+  color: var(--text);
+  letter-spacing: 0.35em;
 }
+.hero-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 0.85rem 1.4rem;
+  font-size: 1.05rem;
+  letter-spacing: 0.2em;
+}
+.hero-start .chev { font-size: 1.3rem; line-height: 1; }
 .boot-status {
-  min-height: 1.5em;
-  margin: 1rem 0 0;
-  font-size: 0.78rem;
+  min-height: 4.5em;
+  margin: 1.6rem 0 0;
+  font-size: 0.74rem;
+  line-height: 1.6;
+  letter-spacing: 0.12em;
   color: var(--text-dim);
+  white-space: pre-line;
 }
-.boot-status.error { color: var(--danger); }
+.boot-status.error { color: var(--danger); letter-spacing: 0; }
+.hero-side {
+  justify-self: end;
+  align-self: start;
+  max-width: 23rem;
+  padding-top: 1rem;
+  animation: hero-copy-in 1.4s 0.4s ease-out both;
+}
+.hero-copy {
+  margin: 0 0 1.4rem;
+  font-size: 0.98rem;
+  line-height: 1.9;
+  letter-spacing: 0.12em;
+  color: var(--text);
+  text-shadow: 0 0 12px rgba(4, 10, 22, 0.9);
+}
 .unofficial {
   margin: 2rem 0 0;
-  font-size: 0.85rem;
-  color: var(--text);
-  border: 1px dashed var(--mint-dim);
-  padding: 0.6rem 0.9rem;
-  border-radius: 3px;
-  background: rgba(5, 14, 31, 0.55);
+  padding-top: 1rem;
+  border-top: 1px solid rgba(233, 244, 255, 0.25);
+  font-size: 0.74rem;
+  line-height: 1.7;
+  color: var(--text-dim);
+}
+.hero-credit {
+  position: absolute;
+  right: clamp(16px, 3vw, 32px);
+  bottom: 12px;
+  z-index: 4;
+  margin: 0;
+  font-size: 0.66rem;
+  color: var(--text-dim);
+  opacity: 0.8;
+}
+@media (max-width: 900px) {
+  #boot {
+    grid-template-columns: 1fr;
+    align-items: end;
+    align-content: end;
+    gap: 1.2rem;
+    padding-bottom: 48px;
+  }
+  .hero-bg {
+    background:
+      linear-gradient(180deg, rgba(4, 10, 22, 0.2) 0%, rgba(4, 10, 22, 0.55) 45%, rgba(4, 10, 22, 0.97) 72%),
+      url("../assets/earth/hero-1600.webp") 72% top / auto 62vh no-repeat,
+      var(--navy-900);
+  }
+  .hero-side { justify-self: start; padding-top: 0; order: 2; }
+  .hero-copy { font-size: 0.86rem; margin-bottom: 0.6rem; }
+  .hero-copy br { display: none; }
+  .subtitle { letter-spacing: 0.2em; margin-bottom: 1.4rem; }
+}
+@keyframes hero-in {
+  from { opacity: 0; transform: scale(1.06); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hero-copy-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes crt-on {
@@ -249,7 +311,9 @@ body { overflow: hidden; }
 .detail-panel { right: 16px; width: 420px; padding: 14px 16px 12px; }
 .sheet-handle { display: none; }
 
-.fam-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.fam-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.fam-tabs::-webkit-scrollbar { display: none; }
+.fam-tab[data-fam="tonight"] { margin-left: auto; }
 .fam-tab {
   appearance: none;
   border: 1px solid transparent;
@@ -257,11 +321,53 @@ body { overflow: hidden; }
   color: var(--text);
   font: inherit;
   font-size: 0.78rem;
-  padding: 4px 12px;
+  padding: 5px 10px;
   border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
 }
 .fam-tab[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); font-weight: 700; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.search { display: block; margin: 0 0 10px; position: relative; }
+.search::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--text-dim);
+  border-radius: 50%;
+  transform: translateY(-60%);
+}
+.search::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 58%;
+  width: 6px;
+  height: 1.5px;
+  background: var(--text-dim);
+  transform: rotate(45deg);
+}
+.search input {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: rgba(4, 12, 28, 0.7);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+}
+.search input::placeholder { color: var(--text-dim); }
+.search input:focus-visible { outline: 2px solid var(--mint); outline-offset: 1px; }
+.list-empty { list-style: none; padding: 12px 4px; }
+.st-pip { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; vertical-align: 1px; background: var(--text-dim); }
+.st-pip.ok { background: var(--mint); box-shadow: 0 0 5px var(--mint-dim); }
+.st-pip.warn { background: var(--amber); box-shadow: 0 0 5px var(--amber-dim); }
+.tonight-chip .pin { margin-right: 6px; }
+.tonight-chip .sep { display: inline-block; width: 1px; height: 0.9em; margin: 0 10px; vertical-align: -1px; background: var(--amber-dim); }
 .list-title { margin: 14px 2px 6px; font-size: 0.8rem; color: var(--text-dim); font-weight: 400; letter-spacing: 0.1em; }
 .craft-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .craft-item {
@@ -380,6 +486,36 @@ body { overflow: hidden; }
 }
 
 /* 銘板（概要タブ） */
+.ov { padding: 4px 2px 0; }
+.ov-figure { margin: 0 0 12px; }
+.ov-art { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 6px; border: 1px solid var(--panel-border); }
+.ov-figure figcaption { margin-top: 4px; line-height: 1.5; }
+.ov-figure figcaption a { color: var(--text-dim); }
+.craft-thumb {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid var(--c);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--c) 40%, transparent);
+}
+.craft-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ov-lead { margin: 0 0 10px !important; font-size: 0.95rem; line-height: 1.75; color: var(--text); }
+.ov-catch { margin: 0 0 10px !important; color: var(--mint); font-size: 0.9rem; font-weight: 700; }
+.ov-catch .k { font-weight: 400; font-size: 0.66rem; }
+.class-chip {
+  display: inline-block;
+  margin-right: 10px;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--c) 60%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 400;
+  vertical-align: 4px;
+  letter-spacing: 0.05em;
+}
 .plate {
   position: relative;
   text-align: center;
@@ -668,6 +804,39 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 .card-inner p { margin: 0.35rem 0; }
 #about-tle { white-space: pre-line; }
 
+/* 地球の左上：現在の地球 */
+.earth-info {
+  position: absolute;
+  z-index: 6;
+  top: calc(var(--top-h) + 4px);
+  left: 362px;
+  padding: 10px 14px;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: rgba(4, 12, 28, 0.62);
+  font-size: 0.74rem;
+  pointer-events: none;
+}
+.earth-info-title { margin: 0 0 6px; font-size: 0.82rem; font-weight: 700; color: var(--text); }
+.earth-info dl { display: grid; grid-template-columns: auto auto; gap: 2px 12px; margin: 0; }
+.earth-info dt { color: var(--text-dim); }
+.earth-info dd { margin: 0; color: var(--text); }
+@media (max-width: 1180px) { .earth-info { display: none; } }
+/* メニュー */
+.menu-btn {
+  display: inline-grid;
+  gap: 4px;
+  width: 34px;
+  height: 30px;
+  place-content: center;
+  margin-left: 6px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.menu-btn span { display: block; width: 20px; height: 1.5px; background: var(--text); }
+.menu-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
 /* ---------- 狭い画面：一覧と詳細は下から出るシート ---------- */
 @media (max-width: 900px) {
   :root { --top-h: 56px; }
@@ -676,7 +845,9 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   .brand-sub { display: none; }
   .tonight-chip { order: 3; flex-basis: 100%; margin: 4px 0 0; max-width: none; text-align: left; }
   .top-bar { flex-wrap: wrap; }
-  .clock-block { font-size: 0.72rem; gap: 6px; flex-direction: column; align-items: flex-end; }
+  .clock-block { font-size: 0.72rem; display: grid; grid-template-columns: auto auto; justify-items: end; align-items: center; gap: 4px 4px; }
+  .clock-block #sim-time { grid-column: 1 / -1; }
+  .menu-btn { margin-left: 0; }
   .side-panel {
     top: auto;
     left: 0;

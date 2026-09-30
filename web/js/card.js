@@ -34,8 +34,9 @@ const OPERATOR_TYPE_LABELS = {
   mixed: "混合",
 };
 
-// 機体の線画（web/assets/craft/<id>.svg）。ないときは出さない
-const CRAFT_ART = { iss: "assets/craft/iss.svg" };
+// 機体の画像（カードの image。公式の画像を出典・クレジットつきで）
+export const imageCredit = (img) =>
+  `${esc(img.caption)}　<a href="${esc(img.source)}" target="_blank" rel="noopener noreferrer">${esc(img.credit)}</a>`;
 
 export const TABS = [
   { id: "overview", label: "概要" },
@@ -120,50 +121,44 @@ const row = (icon, label, body) =>
     ? `<div class="plate-row"><span class="icon" aria-hidden="true">${icon}</span><span class="label">${label}</span><div class="body">${body}</div></div>`
     : "";
 
-// 「状態」の行。カードの status（出典つき）と、自動取得の運用状況をまとめて出す
-function statusHtml(sum) {
-  const parts = [];
-  if (sum.live) {
-    const { services, down, notices } = sum.live;
-    const main = services.find((s) => s.code === "PNT");
-    const others = services.filter((s) => s !== main);
-    if (main) {
-      parts.push(
-        `<div class="st-line"><span class="st-dot ${main.ok ? "ok" : "down"}"></span>${esc(main.ja)}：<strong>${main.ok ? "運用中" : "停止中"}</strong></div>`,
-      );
-    }
-    if (others.length) {
-      const d = others.filter((s) => !s.ok);
-      parts.push(
-        `<div class="st-line k">ほかのサービス ${others.length}件：${
-          d.length ? `<span class="amber">${d.map((s) => esc(s.ja)).join("・")} が停止中</span>` : "すべて運用中"
-        }</div>`,
-      );
-    }
-    for (const n of notices) {
-      const range = [n.start && dateTimeShortJa(n.start), n.stop ? dateTimeShortJa(n.stop) : "再開の時刻は未定"]
-        .filter(Boolean)
-        .map((x) => `<span class="nw">${x}</span>`)
-        .join("〜");
-      parts.push(
-        `<div class="st-notice${n.active ? " active" : ""}"><span class="st-tag">${n.active ? "停止中" : "予定"}</span>${esc(n.service)}を止める期間（${esc(n.kindJa)}）<br><span class="mono">${range}</span></div>`,
-      );
-    }
-    if (!main && !down.length && !notices.length && sum.base) parts.unshift(`<strong>${esc(sum.base.label)}</strong>`);
-    parts.push(
-      `<div class="k small st-src"><a href="${esc(sum.live.source)}" target="_blank" rel="noopener noreferrer">${esc(sum.live.sourceLabel)}</a>をもとに作成（${plainDateJa(sum.live.pageUpdated)}更新・${dateTimeShortJa(sum.live.fetchedAt)} 取得）${
-        sum.live.stale ? `<br><span class="amber">しばらく取得できていません。最新の状況は公式ページで確認してください。</span>` : ""
+// 「状態」と「予定」の行。カードの status（出典つき）と、自動取得の運用状況（みちびき）から作る
+function statusRows(sum) {
+  if (!sum.live) return { status: sum.base ? `<strong>${esc(sum.base.label)}</strong>` : null, plan: null };
+  const { services, down, notices } = sum.live;
+  const main = services.find((s) => s.code === "PNT");
+  const others = services.filter((s) => s !== main);
+  const lines = [];
+  if (main) {
+    lines.push(
+      `<div class="st-line"><span class="st-dot ${main.ok ? "ok" : "down"}"></span>${esc(main.ja)}：<strong>${main.ok ? "運用中" : "停止中"}</strong></div>`,
+    );
+  }
+  if (others.length) {
+    const d = others.filter((s) => !s.ok);
+    lines.push(
+      `<div class="st-line k">ほかのサービス ${others.length}件：${
+        d.length ? `<span class="amber">${d.map((s) => esc(s.ja)).join("・")} が停止中</span>` : "すべて運用中"
       }</div>`,
     );
-    return parts.join("");
   }
-  if (!sum.base) return null;
-  return `<strong>${esc(sum.base.label)}</strong>`;
+  if (!main && !down.length && sum.base) lines.unshift(`<strong>${esc(sum.base.label)}</strong>`);
+  const plan = notices.map((n) => {
+    const range = [n.start && dateTimeShortJa(n.start), n.stop ? dateTimeShortJa(n.stop) : "再開の時刻は未定"]
+      .filter(Boolean)
+      .map((x) => `<span class="nw">${x}</span>`)
+      .join("〜");
+    return `<div class="st-notice${n.active ? " active" : ""}"><span class="st-tag">${n.active ? "停止中" : "予定"}</span>${esc(n.service)}を止める期間（${esc(n.kindJa)}）<br><span class="mono">${range}</span></div>`;
+  });
+  // 出典は、表示した行のいちばん下に1回だけ
+  const src = `<div class="k small st-src"><a href="${esc(sum.live.source)}" target="_blank" rel="noopener noreferrer">${esc(sum.live.sourceLabel)}</a>をもとに作成（${plainDateJa(sum.live.pageUpdated)}更新・${dateTimeShortJa(sum.live.fetchedAt)} 取得）${
+    sum.live.stale ? `<br><span class="amber">しばらく取得できていません。最新の状況は公式ページで確認してください。</span>` : ""
+  }</div>`;
+  return plan.length ? { status: lines.join(""), plan: plan.join("") + src } : { status: lines.join("") + src, plan: null };
 }
 
 function overviewHtml(card, aboard, family, statusSum) {
   const s = card.stats ?? {};
-  const headline = [
+  const orbitLine = [
     launchYear(card.launch_date) && `${launchYear(card.launch_date)}年〜`,
     approxNumber(s.altitude_km) && `高度 ${approxNumber(s.altitude_km)}`,
     approxNumber(s.period_min) && `1周 ${approxNumber(s.period_min).replace(" min", "分")}`,
@@ -179,26 +174,28 @@ function overviewHtml(card, aboard, family, statusSum) {
   const operator = [factText(card.operator), factText(card.operator_type, (v) => esc(OPERATOR_TYPE_LABELS[v] ?? v))]
     .filter(Boolean)
     .join("　");
+  const st = statusRows(statusSum);
   return `
-    <div class="plate">
-      ${CRAFT_ART[card.id] ? `<img class="plate-art" src="${CRAFT_ART[card.id]}" alt="">` : ""}
-      <div class="plate-class"><span class="mono">${esc(CLASS_EN[card.class] ?? card.class)}</span><span class="k">${esc(CLASS_LABELS[card.class] ?? "")}</span></div>
-      <h3 class="plate-name">${esc(card.name.ja)}</h3>
-      <div class="plate-name-en">${esc(card.name.en)}</div>
-      ${headline.length ? `<p class="plate-headline">${headline.join('<span class="dot">・</span>')}</p>` : ""}
+    <div class="ov">
+      ${
+        card.image
+          ? `<figure class="ov-figure"><img class="ov-art" src="${esc(card.image.file)}" alt="${esc(card.image.caption)}"><figcaption class="k small">${imageCredit(card.image)}</figcaption></figure>`
+          : ""
+      }
+      ${card.mission && !card.mission.undisclosed ? `<p class="ov-lead">${factText(card.mission)}</p>` : `<p class="ov-lead k">任務は公表されていません。</p>`}
       ${
         card.catchphrase
-          ? `<p class="plate-catch">「${esc(card.catchphrase)}」</p><p class="k plate-catch-note">キャッチコピーは創作です</p>`
+          ? `<p class="ov-catch">「${esc(card.catchphrase)}」<span class="k">　キャッチコピーは創作です</span></p>`
           : ""
       }
       <div class="plate-rows">
         ${row("◉", "運用", operator)}
-        ${row("◎", "任務", factText(card.mission))}
-        ${row("◆", "状態", statusHtml(statusSum))}
+        ${row("◆", "状態", st.status)}
+        ${row("◎", "軌道", orbitLine.join("　"))}
         ${row("▣", "規模", scale.join("　"))}
         ${row("◈", "いま", `<span data-live="now" class="mono">--</span><span class="k">（計算値）</span>`)}
         ${isCrewed(card) ? row("◍", "滞在", crewSummary(aboard) ?? `<span class="k">調べています</span>`) : ""}
-        ${row("●", "家族", `<span class="fam-dot" style="--c:${family.color}"></span>${esc(family.label)}`)}
+        ${row("▷", "予定", st.plan)}
       </div>
     </div>`;
 }
@@ -249,7 +246,7 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
   el.innerHTML = `
     <header class="panel-head">
       <div>
-        <div class="panel-title"><span class="amber">${esc(card.name.ja)}</span></div>
+        <div class="panel-title"><span class="class-chip" style="--c:${family.color}">${esc(CLASS_LABELS[card.class] ?? "")}</span><span class="amber">${esc(card.name.ja)}</span></div>
         <div class="panel-ja"><span class="panel-en">${esc(card.name.en)}</span>　<span class="k">NORAD ${card.norad_id}</span></div>
       </div>
       <button type="button" class="close mono" data-close aria-label="詳細を閉じる">×</button>
