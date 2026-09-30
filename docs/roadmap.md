@@ -118,7 +118,8 @@ M3 は外部データなしで作れるので、M2 の調査待ちの間に先�
 **2週目：公開準備**
 - ✅ 公開の方法：**public**。メールアドレスは出さない（2026-09-30 オーナー決定）→ 手順は [`docs/publish-checklist.md`](publish-checklist.md)
 - ✅ リポジトリを public に（オーナー、2026-09-30）
-- 🔨 GitHub Pages で公開：`.github/workflows/pages.yml`（main の web/ 更新時と、軌道の自動更新のあとに公開し直す）→ https://mentoce0-gif.github.io/voyascope/
+- ⏸ 公開先：**微修正を重ねたあと Cloudflare Pages に移す**（2026-09-30 オーナー方針）。GitHub Pages 用のワークフロー（`.github/workflows/pages.yml`）は手動のときだけ動くようにしてある
+- ・ Cloudflare Pages への移行（アカウント作成・GitHub との接続はオーナー、設定と確認は Claude Code）
 - ⏳ ライセンス（C5）・CelesTrak の再配布（C9）・名前（C6）
 - ⏳ ISS の乗員（C10）。数値・リンク（C3・C4）は済み
 - ・ 機体の画像（公式画像なら C7、なければ線画）

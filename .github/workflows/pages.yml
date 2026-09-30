@@ -1,20 +1,16 @@
 name: pages
 
-# web/ を GitHub Pages に公開する。
-# - main に web/ の変更が入ったとき
-# - 軌道データ・運用状況の自動更新（update-orbits）が終わったとき
-#   （Actions がコミットしたプッシュでは、ほかのワークフローが動かないため）
-# - 手動（Actions の画面から）
+# web/ を GitHub Pages に公開する（手動のときだけ）。
 #
-# 最初に一度だけ、リポジトリの Settings → Pages → Source を「GitHub Actions」にする必要がある。
+# 2026-09-30 オーナー方針：微修正を重ねたあと Cloudflare Pages に移す。
+# それまでは GitHub Pages を有効にしていないので、自動では動かさない
+# （有効にしないまま自動で動くと、6時間ごとの自動更新のたびに失敗の通知が届くため）。
+# GitHub Pages で公開する場合は、Settings → Pages → Source を「GitHub Actions」にしてから、
+# 下の push と workflow_run を戻す：
+#   push: { branches: [main], paths: ["web/**", ".github/workflows/pages.yml"] }
+#   workflow_run: { workflows: [update-orbits], types: [completed] }
 
 on:
-  push:
-    branches: [main]
-    paths: ["web/**", ".github/workflows/pages.yml"]
-  workflow_run:
-    workflows: [update-orbits]
-    types: [completed]
   workflow_dispatch:
 
 permissions:
