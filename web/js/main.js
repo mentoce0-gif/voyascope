@@ -6,6 +6,7 @@ import { landPath, renderMinimap } from "./minimap.js";
 import { setupEarth } from "./earth.js";
 import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
+import { starfieldDataUrl } from "./stars.js";
 import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
 import { findVisiblePasses, observerOf } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
@@ -180,6 +181,9 @@ function startApp({ craft, land, prefectures }) {
     .htmlAltitude("alt")
     .htmlElement((d) => d.el)
     .htmlTransitionDuration(0);
+
+  // 地球のまわりの星空（飾り。地球を回すと一緒に動く）
+  globe.backgroundImageUrl(starfieldDataUrl());
 
   // 写実的な地球（昼と夜の境目は観測時刻に合わせて動く）
   const updateEarth = setupEarth(globe);
