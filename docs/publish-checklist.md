@@ -22,7 +22,7 @@
 
 ## そのほかの点検
 
-- ☐ ライセンス（C5）→ `LICENSE` を置く（ライセンスが確定するまで作らない）
+- ☑ ライセンス（C5）：コードは MIT（`LICENSE`）、文章は CC BY 4.0（`CONTENT_LICENSE.md`）。2026-10-01 オーナー決定
 - ☑ CelesTrak のデータを自分のサイトで配ってよいか（C9）：公開の GP データは、出典表示を条件に再配布が認められている（Space-Track の包括承認）。出典を「USSPACECOM／Space-Track.org（CelesTrak から取得）」に直した
 - ☐ 名前の確認（C6）
 - ☑ ISS の数値・公式リンク（C3・C4）
