@@ -282,6 +282,7 @@ body { overflow: hidden; }
   white-space: nowrap;
 }
 .live-badge[data-live="true"] { border-color: var(--mint); color: var(--mint); }
+.live-badge[data-paused="true"]::after { content: " 停止中"; }
 .live-badge[data-live="true"]::before {
   content: "";
   display: inline-block;
@@ -367,6 +368,7 @@ body { overflow: hidden; }
 .st-pip.ok { background: var(--mint); box-shadow: 0 0 5px var(--mint-dim); }
 .st-pip.warn { background: var(--amber); box-shadow: 0 0 5px var(--amber-dim); }
 .tonight-chip .pin { margin-right: 6px; }
+.tonight-chip .chip-short { display: none; }
 .tonight-chip .sep { display: inline-block; width: 1px; height: 0.9em; margin: 0 10px; vertical-align: -1px; background: var(--amber-dim); }
 .list-title { margin: 14px 2px 6px; font-size: 0.8rem; color: var(--text-dim); font-weight: 400; letter-spacing: 0.1em; }
 .craft-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -705,6 +707,8 @@ body { overflow: hidden; }
 .toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
 .toggle input { accent-color: var(--mint); margin: 0 2px 0 0; }
 .list-open { display: none; }
+/* スマホだけで出すもの */
+.narrow-only { display: none; }
 .footnote {
   font-size: 0.72rem;
   color: var(--text-dim);
@@ -840,42 +844,141 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 /* ---------- 狭い画面：一覧と詳細は下から出るシート ---------- */
 @media (max-width: 900px) {
   :root { --top-h: 56px; }
-  .top-bar { padding: calc(env(safe-area-inset-top) + 8px) 12px 6px; }
-  .brand img { height: 22px; }
+  /* 上のバーは1行：ロゴ（下に時刻）・今夜・LIVE・メニュー */
+  .top-bar {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    grid-template-areas: "brand chip badge menu" "time chip badge menu";
+    align-items: center;
+    gap: 2px 8px;
+    padding: calc(env(safe-area-inset-top) + 6px) 8px 4px 12px;
+  }
+  .brand-block { grid-area: brand; }
+  .brand img { height: 18px; }
   .brand-sub { display: none; }
-  .tonight-chip { order: 3; flex-basis: 100%; margin: 4px 0 0; max-width: none; text-align: left; }
-  .top-bar { flex-wrap: wrap; }
-  .clock-block { font-size: 0.72rem; display: grid; grid-template-columns: auto auto; justify-items: end; align-items: center; gap: 4px 4px; }
-  .clock-block #sim-time { grid-column: 1 / -1; }
-  .menu-btn { margin-left: 0; }
+  .clock-block { display: contents; }
+  #sim-time { grid-area: time; font-size: 0.66rem; color: var(--text-dim); white-space: nowrap; }
+  .live-badge { grid-area: badge; font-size: 0.72rem; padding: 2px 8px; }
+  .menu-btn { grid-area: menu; width: 44px; height: 44px; margin-left: 0; }
+  .tonight-chip {
+    grid-area: chip;
+    justify-self: end;
+    position: relative;
+    margin: 0;
+    max-width: none;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+  }
+  .tonight-chip::after { content: ""; position: absolute; inset: -8px -4px; } /* 押せる範囲を44pxに */
+  .tonight-chip .chip-full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tonight-chip .chip-short { display: inline; }
+  .live-badge[data-paused="true"]::after { content: none; }
   .side-panel {
+    --sheet-bg: rgb(7, 20, 43); /* 不透明：上に残る名前の裏に本文が透けないように */
     top: auto;
     left: 0;
     right: 0;
     bottom: var(--bottom-h);
     width: auto;
-    max-height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
+    /* 開いたときは半分（地球が見える）。つまみで全部に広げる */
+    max-height: calc((100dvh - var(--top-h) - var(--bottom-h)) * 0.6);
+    transition: max-height 0.2s ease, height 0.2s ease, transform 0.2s ease;
     border-radius: 14px 14px 0 0;
-    padding: 6px 14px 12px;
+    padding: 0 14px 12px;
     z-index: 20;
+    background: var(--sheet-bg);
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
   }
-  .sheet-handle { display: block; width: 40px; height: 4px; margin: 4px auto 10px; border-radius: 2px; background: var(--mint-dim); }
+  .side-panel.expanded {
+    max-height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
+    height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
+  }
+  /* つまみ：スクロールしても上に残る。押すと広げる／縮める、下へ引くと閉じる */
+  .sheet-handle {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    display: block;
+    width: calc(100% + 28px);
+    height: 28px;
+    margin: 0 -14px;
+    padding: 0;
+    border: 0;
+    border-radius: 14px 14px 0 0;
+    background: var(--sheet-bg);
+    cursor: grab;
+    touch-action: none;
+  }
+  .sheet-handle::before { content: ""; display: block; width: 40px; height: 4px; margin: 12px auto; border-radius: 2px; background: var(--mint-dim); }
+  .sheet-handle:focus-visible { outline: 2px solid var(--amber); outline-offset: -4px; }
+  /* 詳細の名前と × は、スクロールしても上に残す */
+  .detail-panel .panel-head {
+    position: sticky;
+    top: 28px;
+    z-index: 2;
+    margin: 0 -14px 8px;
+    padding: 0 14px 8px;
+    background: var(--sheet-bg);
+    border-bottom: 1px solid var(--panel-border);
+    align-items: center;
+  }
+  .detail-panel .panel-title { font-size: 1.15rem; }
+  .detail-panel .close { width: 44px; height: 44px; }
   .list-panel { display: none; }
   .list-panel.open { display: block; }
   .list-open { display: inline-block; flex: none; white-space: nowrap; }
-  .bottom-bar { padding: 8px 12px calc(env(safe-area-inset-bottom) + 6px); background: rgba(5, 14, 31, 0.94); }
-  .timeline { flex-wrap: wrap; gap: 8px; }
-  .slider-wrap { order: 3; flex-basis: 100%; }
-  .speeds { margin-left: auto; }
   .btn { padding: 0.35em 0.6em; font-size: 0.78rem; min-height: 32px; }
-  .round-btn { width: 36px; height: 36px; }
-  .controls-row { gap: 8px; justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; }
-  .fam-legend { flex-wrap: nowrap; gap: 10px; }
-  .scale-note { bottom: calc(var(--bottom-h) + 8px); font-size: 0.66rem; white-space: normal; text-align: center; width: calc(100vw - 32px); }
+  .wide-only { display: none; }
+  /* 下のバーは2段：再生・時間・速さ／一覧・表示・追尾・現在へ */
+  .bottom-bar {
+    padding: 8px 12px calc(env(safe-area-inset-bottom) + 6px);
+    background: rgba(5, 14, 31, 0.94);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "play slider speed" "ctl ctl now";
+    align-items: center;
+    gap: 6px 10px;
+  }
+  .timeline { display: contents; }
+  #play { grid-area: play; width: 44px; height: 44px; }
+  .slider-wrap { grid-area: slider; padding-top: 4px; }
+  .ticks span:nth-child(2) { display: none; } /* −3h は狭いと重なる */
+  .speeds { display: none; }
+  .speed-cycle { grid-area: speed; display: inline-block; min-width: 56px; min-height: 44px; font-size: 0.85rem; }
+  .bottom-bar .btn { min-height: 44px; padding: 0.35em 0.9em; font-size: 0.85rem; }
+  /* 「現在へ」：いまを見ているときは控えめ、時刻がずれたら目立たせる */
+  #now { grid-area: now; }
+  #now .narrow-only { display: inline; }
+  #app[data-live="true"] #now { opacity: 0.45; }
+  #app[data-live="false"] #now { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 10px var(--amber-dim); }
+  .controls-row { grid-area: ctl; gap: 8px; justify-content: flex-start; flex-wrap: nowrap; }
+  .controls-row .fam-legend, .controls-row .rings-toggle { display: none; } /* 一覧のタブと、一覧の下の「環」で切り替える */
+  #app:not(.has-selected) #follow { display: none; }
+  .footnote { display: none; } /* 軌道データの日時と「このアプリについて」はメニューの中にある */
+  .bottom-bar .warning { grid-column: 1 / -1; }
+  /* 一覧を詰めて、カードが多く見えるように */
+  .list-panel .list-title { display: none; }
+  .list-panel .fam-tabs { margin-bottom: 8px; }
+  .search { margin-bottom: 8px; }
+  .search input { padding-top: 7px; padding-bottom: 7px; }
+  .craft-item { padding: 6px 10px; }
+  .craft-thumb, .craft-icon { width: 30px; height: 30px; }
+  .list-rings.narrow-only { display: flex; min-height: 44px; margin-top: 8px; padding-top: 4px; border-top: 1px solid var(--panel-border); font-size: 0.85rem; gap: 8px; white-space: normal; }
+  .list-rings input { width: 20px; height: 20px; flex: none; }
+  /* 環の注記は1行（くわしい数字は「このアプリについて」にある） */
+  .scale-note { bottom: calc(var(--bottom-h) + 8px); font-size: 0.66rem; white-space: normal; text-align: center; width: max-content; max-width: calc(100vw - 16px); }
+  .scale-note .narrow-only { display: inline; }
 }
 @media (max-width: 400px) {
   .orbit-stats { grid-template-columns: auto 1fr; }
+}
+/* とても狭い画面（幅320〜374）：上のバーを1行に収める */
+@media (max-width: 374px) {
+  .top-bar { gap: 2px 6px; padding-left: 10px; }
+  #sim-time { font-size: 0.58rem; }
+  .tonight-chip { padding: 4px 8px; }
+  .tonight-chip .pin { display: none; }
+  .scale-note { font-size: 0.6rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

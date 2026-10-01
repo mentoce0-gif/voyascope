@@ -68,7 +68,7 @@
 
     <!-- 左：注目の一覧 -->
     <aside id="list-panel" class="side-panel list-panel" aria-label="注目の機体">
-      <div class="sheet-handle" aria-hidden="true"></div>
+      <button type="button" class="sheet-handle" aria-label="広げる" aria-expanded="false"></button>
       <label class="search">
         <span class="visually-hidden">衛星を名前で探す</span>
         <input id="craft-search" type="search" placeholder="衛星を検索…" autocomplete="off" enterkeyhint="search">
@@ -84,16 +84,17 @@
       <h2 class="list-title" id="list-title">注目</h2>
       <ul id="craft-list" class="craft-list"></ul>
       <p class="list-note k small">名前で呼べる機体だけを、少しずつ置いていきます。</p>
+      <label class="toggle list-rings narrow-only"><input type="checkbox" id="rings-toggle-list" checked> 環（低軌道・中軌道・静止軌道の目安）を表示</label>
     </aside>
 
     <!-- 右：選んだ機体の詳細 -->
     <aside id="detail-panel" class="side-panel detail-panel" aria-label="機体の詳細" hidden>
-      <div class="sheet-handle" aria-hidden="true"></div>
+      <button type="button" class="sheet-handle" aria-label="広げる" aria-expanded="false"></button>
       <div id="detail-body"></div>
     </aside>
 
     <!-- 環のスケール注記 -->
-    <p class="scale-note k small">環は内側から <b>低軌道</b>（約200〜2,000 km）・<b>中軌道</b>・<b>静止軌道</b>（約36,000 km）。半径は比較用で、実距離ではありません。</p>
+    <p class="scale-note k small"><span class="wide-only">環は内側から <b>低軌道</b>（約200〜2,000 km）・<b>中軌道</b>・<b>静止軌道</b>（約36,000 km）。半径は比較用で、実距離ではありません。</span><span class="narrow-only">環：内から<b>低・中・静止軌道</b>。半径は実距離ではありません</span></p>
 
     <!-- 下：タイムラインと表示切り替え -->
     <footer class="bottom-bar">
@@ -101,7 +102,7 @@
         <button type="button" id="play" class="round-btn" aria-label="一時停止" data-playing="true">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/><path class="i-play" d="M8 5l11 7-11 7z"/></svg>
         </button>
-        <button type="button" id="now" class="btn mono live-btn">▶ LIVE</button>
+        <button type="button" id="now" class="btn mono live-btn"><span class="wide-only">▶ LIVE</span><span class="narrow-only">現在へ</span></button>
         <div class="slider-wrap">
           <input id="timeline" type="range" min="-360" max="1440" step="1" value="0" aria-label="観測時刻（現在からのずれ）">
           <div class="ticks mono" aria-hidden="true">
@@ -113,11 +114,14 @@
           <button type="button" class="btn speed mono" data-speed="60" aria-pressed="false">×60</button>
           <button type="button" class="btn speed mono" data-speed="600" aria-pressed="false">×600</button>
         </div>
+        <!-- スマホ：速さは1つのボタン（押すたびに ×1 → ×60 → ×600） -->
+        <button type="button" id="speed-cycle" class="btn mono speed-cycle narrow-only" aria-label="再生の速さ ×1（押すと切り替わる）">×1</button>
       </div>
       <div class="controls-row">
         <button type="button" id="list-open" class="btn list-open">一覧・観測</button>
+        <!-- 家族ごとの表示と環（PC）。スマホでは一覧のタブが地球の表示も絞り、環は一覧の下に置く -->
         <div id="fam-legend" class="fam-legend" role="group" aria-label="家族ごとの表示"></div>
-        <label class="toggle"><input type="checkbox" id="rings-toggle" checked> 環</label>
+        <label class="toggle rings-toggle"><input type="checkbox" id="rings-toggle" checked> 環</label>
         <button type="button" id="follow" class="btn mono" aria-pressed="false" title="カメラが選んだ機体を追いかけます">追尾</button>
       </div>
       <div class="footnote">
