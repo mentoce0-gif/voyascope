@@ -6,7 +6,7 @@ import { landPath, renderMinimap } from "./minimap.js";
 import { setupEarth } from "./earth.js";
 import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
-import { esc, dateTimeShortJa, dateTimeJa, durationJa, latJa, lngJa } from "./format.js";
+import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
 import { findVisiblePasses, observerOf } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
 
@@ -154,6 +154,7 @@ function startApp({ craft, land, prefectures }) {
   };
 
   // ---------- 地球 ----------
+  const app = $("#app");
   const globeEl = $("#globe");
   const hidden = new Set(); // 表示しない家族
   const markerData = () => craft.filter((c) => c.pos && !hidden.has(c.family.id));
@@ -192,16 +193,37 @@ function startApp({ craft, land, prefectures }) {
   const detailPanel = $("#detail-panel");
   const layoutGlobe = () => {
     globe.width(globeEl.clientWidth).height(globeEl.clientHeight);
-    if (isNarrow()) globe.globeOffset([0, -40]);
-    else globe.globeOffset([detailPanel.hidden ? 150 : -20, -30]);
+    placeGlobe();
+  };
+  // 地球の位置だけを直す（大きさは変えないので軽い）
+  const placeGlobe = () => {
+    if (isNarrow()) {
+      // 下からシートが出ているときは、上のバーとシートの間の真ん中に地球を置く
+      const sheetTops = [...document.querySelectorAll(".side-panel")]
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.height > 0)
+        .map((r) => r.top);
+      const top = $(".top-bar").offsetHeight;
+      const dy = sheetTops.length ? Math.round((top + Math.min(...sheetTops)) / 2 - globeEl.clientHeight / 2) : -40;
+      setOffset(0, dy);
+    } else setOffset(detailPanel.hidden ? 150 : -20, -30);
+  };
+  let lastOffset = "";
+  const setOffset = (x, y) => {
+    if (`${x},${y}` === lastOffset) return;
+    lastOffset = `${x},${y}`;
+    globe.globeOffset([x, y]);
   };
   addEventListener("resize", layoutGlobe);
   layoutGlobe();
   // 下のバーの実際の高さを、パネルや注記の位置に使う
   const bottomBar = $(".bottom-bar");
-  new ResizeObserver(() => $("#app").style.setProperty("--bottom-h", `${bottomBar.offsetHeight}px`)).observe(bottomBar);
+  new ResizeObserver(() => app.style.setProperty("--bottom-h", `${bottomBar.offsetHeight}px`)).observe(bottomBar);
   const topBar = $(".top-bar");
-  new ResizeObserver(() => $("#app").style.setProperty("--top-h", `${topBar.offsetHeight}px`)).observe(topBar);
+  new ResizeObserver(() => app.style.setProperty("--top-h", `${topBar.offsetHeight}px`)).observe(topBar);
+  // シートの開け閉め・高さの変化に合わせて地球の位置を直す
+  const sheetObserver = new ResizeObserver(() => isNarrow() && placeGlobe());
+  for (const el of document.querySelectorAll(".side-panel")) sheetObserver.observe(el);
 
   const first = craft[0] && positionAt(craft[0].satrec, clock.now());
   // スマホの縦長の画面では、静止軌道の環が横幅に収まるところまで引いて見る
@@ -282,7 +304,9 @@ function startApp({ craft, land, prefectures }) {
   };
   famTabs.addEventListener("click", (e) => {
     const b = e.target.closest("[data-fam]");
-    if (b) showListFilter(b.dataset.fam);
+    if (!b) return;
+    showListFilter(b.dataset.fam);
+    if (isNarrow()) showOnlyFamily(b.dataset.fam);
   });
   const searchEl = $("#craft-search");
   searchEl.addEventListener("input", () => {
@@ -308,15 +332,28 @@ function startApp({ craft, land, prefectures }) {
     if (e.target.checked) hidden.delete(id);
     else hidden.add(id);
   });
-  $("#rings-toggle").addEventListener("change", (e) => {
-    showRings = e.target.checked;
-    refreshPaths();
-    $(".scale-note").hidden = !showRings;
-  });
+  // スマホ：一覧のタブで選んだ家族だけを地球にも出す（「すべて」「観測」は全部）
+  function showOnlyFamily(id) {
+    hidden.clear();
+    if (present.some((f) => f.id === id)) for (const f of FAMILIES) if (f.id !== id) hidden.add(f.id);
+    for (const input of legend.querySelectorAll("input")) input.checked = !hidden.has(input.dataset.fam);
+  }
+  // 環：PC は下のバー、スマホは一覧の下。どちらで切り替えても両方そろえる
+  const ringInputs = [$("#rings-toggle"), $("#rings-toggle-list")];
+  for (const input of ringInputs) {
+    input.addEventListener("change", () => {
+      showRings = input.checked;
+      for (const other of ringInputs) other.checked = showRings;
+      refreshPaths();
+      $(".scale-note").hidden = !showRings;
+    });
+  }
 
   const listPanel = $("#list-panel");
   $("#list-open").addEventListener("click", () => {
     listPanel.classList.toggle("open");
+    // 一覧は選ぶための画面なので、スマホでは全部の高さで開く（つまみで半分にできる）
+    setExpanded(listPanel, listPanel.classList.contains("open"));
     if (isNarrow() && listPanel.classList.contains("open")) closeDetail();
   });
 
@@ -355,6 +392,7 @@ function startApp({ craft, land, prefectures }) {
   function select(c) {
     selected = c;
     detailPanel.hidden = false;
+    app.classList.add("has-selected");
     if (isNarrow()) listPanel.classList.remove("open");
     renderDetail();
     renderList();
@@ -362,8 +400,10 @@ function startApp({ craft, land, prefectures }) {
     if (c.pos) globe.pointOfView({ lat: c.pos.lat, lng: c.pos.lng }, 900);
   }
   function closeDetail() {
+    setExpanded(detailPanel, false);
     selected = null;
     detailPanel.hidden = true;
+    app.classList.remove("has-selected");
     setFollow(false);
     renderList();
     layoutGlobe();
@@ -376,6 +416,64 @@ function startApp({ craft, land, prefectures }) {
       renderDetail();
     }
   });
+  // ---------- スマホのシート：つまみを押すと「半分 ⇄ 全部」、下へ引くと縮める→閉じる ----------
+  function setExpanded(panel, on) {
+    panel.classList.toggle("expanded", on);
+    const h = panel.querySelector(".sheet-handle");
+    h.setAttribute("aria-expanded", String(on));
+    h.setAttribute("aria-label", on ? "縮める" : "広げる");
+  }
+  function closeSheet(panel) {
+    if (panel === listPanel) {
+      setExpanded(listPanel, false);
+      listPanel.classList.remove("open");
+    } else closeDetail();
+  }
+  for (const h of document.querySelectorAll(".sheet-handle")) {
+    const panel = h.closest(".side-panel");
+    let startY = null;
+    let dy = 0;
+    let dragged = false;
+    h.addEventListener("pointerdown", (e) => {
+      startY = e.clientY;
+      dy = 0;
+      dragged = false;
+      h.setPointerCapture(e.pointerId);
+      panel.style.transition = "none";
+    });
+    h.addEventListener("pointermove", (e) => {
+      if (startY === null) return;
+      dy = e.clientY - startY;
+      if (Math.abs(dy) > 8) dragged = true;
+      if (dy > 0) panel.style.transform = `translateY(${dy}px)`; // 指について下がる
+    });
+    const end = () => {
+      if (startY === null) return;
+      startY = null;
+      panel.style.transform = "";
+      panel.style.transition = "";
+      if (!dragged) return;
+      const expanded = panel.classList.contains("expanded");
+      if (dy < -30) setExpanded(panel, true);
+      else if (dy > 70 && expanded && dy < 220) setExpanded(panel, false);
+      else if (dy > 70) closeSheet(panel);
+    };
+    h.addEventListener("pointerup", end);
+    h.addEventListener("pointercancel", () => {
+      dragged = false;
+      dy = 0;
+      end();
+    });
+    // 押しただけ（キーボードの Enter も）なら広げる／縮める。引いたあとのクリックは無視する
+    h.addEventListener("click", () => {
+      if (dragged) {
+        dragged = false;
+        return;
+      }
+      setExpanded(panel, !panel.classList.contains("expanded"));
+    });
+  }
+
   addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !detailPanel.hidden && !document.querySelector("dialog[open]")) closeDetail();
   });
@@ -384,11 +482,15 @@ function startApp({ craft, land, prefectures }) {
   const slider = $("#timeline");
   const playBtn = $("#play");
   const speedButtons = [...document.querySelectorAll(".speed")];
+  const speedCycle = $("#speed-cycle");
+  const SPEEDS = speedButtons.map((b) => Number(b.dataset.speed));
   let dragging = false;
   const syncControls = () => {
     playBtn.dataset.playing = String(clock.playing);
     playBtn.setAttribute("aria-label", clock.playing ? "一時停止" : "再生");
     for (const b of speedButtons) b.setAttribute("aria-pressed", String(Number(b.dataset.speed) === clock.speed));
+    speedCycle.textContent = `×${clock.speed}`;
+    speedCycle.setAttribute("aria-label", `再生の速さ ×${clock.speed}（押すと切り替わる）`);
   };
   slider.addEventListener("input", () => {
     dragging = true;
@@ -414,6 +516,13 @@ function startApp({ craft, land, prefectures }) {
       syncControls();
     });
   }
+
+  speedCycle.addEventListener("click", () => {
+    const i = SPEEDS.indexOf(clock.speed);
+    clock.setSpeed(SPEEDS[(i + 1) % SPEEDS.length]);
+    if (!clock.playing) clock.setPlaying(true);
+    syncControls();
+  });
 
   // ---------- 追尾 ----------
   let follow = false;
@@ -446,13 +555,13 @@ function startApp({ craft, land, prefectures }) {
     renderTonight(tonightBody, { pref, passes, now, jumpable });
     $("#tonight-label").textContent = pref ? `今夜・${pref.name}` : "今夜・頭の上";
     tonightChip.hidden = false;
-    tonightChip.innerHTML = !pref
-      ? `<span class="pin" aria-hidden="true">⌖</span>県を選ぶと、ISS が見える時刻が出ます`
-      : `<span class="pin" aria-hidden="true">⌖</span>${esc(pref.name)}<span class="sep" aria-hidden="true"></span>${
-          passes.length
-            ? `ISS ${whenWord(passes[0].start, now)} ${clockWord(passes[0].start)}`
-            : "ISS 見える通過なし（5日間）"
+    // PCは案内の文、スマホは短い「今夜」ボタン（文は読み上げ用に残す）
+    const chipText = !pref
+      ? "県を選ぶと、ISS が見える時刻が出ます"
+      : `${esc(pref.name)}<span class="sep" aria-hidden="true"></span>${
+          passes.length ? `ISS ${whenWord(passes[0].start, now)} ${clockWord(passes[0].start)}` : "ISS 見える通過なし（5日間）"
         }`;
+    tonightChip.innerHTML = `<span class="pin" aria-hidden="true">⌖</span><span class="chip-full">${chipText}</span><span class="chip-short" aria-hidden="true">今夜</span>`;
   };
   prefSelect.addEventListener("change", () => {
     pref = prefectures.find((p) => p.code === prefSelect.value) ?? null;
@@ -471,7 +580,9 @@ function startApp({ craft, land, prefectures }) {
   });
   tonightChip.addEventListener("click", () => {
     showListFilter("tonight");
+    if (isNarrow()) showOnlyFamily("tonight");
     listPanel.classList.add("open");
+    setExpanded(listPanel, true);
     if (isNarrow()) closeDetail();
     listPanel.scrollTop = 0;
   });
@@ -528,7 +639,7 @@ function startApp({ craft, land, prefectures }) {
     // 文字の更新は間引く
     if (t - lastText > 100) {
       lastText = t;
-      els.time.textContent = dateTimeJa(now);
+      els.time.textContent = isNarrow() ? dateTimeCompactJa(now) : dateTimeJa(now);
       // 「現在の地球」：観測時刻・カメラが見ている地点・表示中の機体数
       eiTime.textContent = dateTimeJa(now);
       const pov = globe.pointOfView();
@@ -537,7 +648,9 @@ function startApp({ craft, land, prefectures }) {
       eiCount.textContent = `${n}機（${[...new Set(markerData().map((c) => c.family.label))].join("・")}）`;
       const live = clock.isLive();
       els.badge.dataset.live = String(live);
-      els.badge.textContent = live ? "LIVE" : `${durationJa(clock.offset())}${clock.playing ? "" : " 停止中"}`;
+      app.dataset.live = String(live);
+      els.badge.textContent = live ? "LIVE" : durationJa(clock.offset());
+      els.badge.dataset.paused = String(!live && !clock.playing); // 「停止中」は CSS で足す（スマホでは再生ボタンの形で分かるので出さない）
       if (!dragging) slider.value = String(Math.round(clock.offset() / 60000));
       for (const c of craft) {
         const n = listEl.querySelector(`[data-alt="${c.id}"]`);
