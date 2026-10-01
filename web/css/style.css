@@ -882,12 +882,18 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
     right: 0;
     bottom: var(--bottom-h);
     width: auto;
-    max-height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
+    /* 開いたときは半分（地球が見える）。つまみで全部に広げる */
+    max-height: calc((100dvh - var(--top-h) - var(--bottom-h)) * 0.6);
+    transition: max-height 0.2s ease, height 0.2s ease, transform 0.2s ease;
     border-radius: 14px 14px 0 0;
     padding: 0 14px 12px;
     z-index: 20;
     background: var(--sheet-bg);
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  }
+  .side-panel.expanded {
+    max-height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
+    height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
   }
   /* つまみ：スクロールしても上に残る。押すと広げる／縮める、下へ引くと閉じる */
   .sheet-handle {
