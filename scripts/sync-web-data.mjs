@@ -6,6 +6,7 @@
 // - 運用状況：config/status.json にある機体だけ、自動取得したファイルの場所を載せる
 // - 乗員：その機体に向かったチーム（teams/ の destination）と、その飛行士（astronauts/）を1つのファイルにまとめる
 //   いま乗っているかどうか（打ち上げ済み・未帰還）はアプリ側で判断する
+// - 予定：curation/events を1つのファイルにまとめる。過ぎたかどうか・並べ替えはアプリ側でする
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -69,6 +70,16 @@ for (const { id } of objects) {
 // アプリが最初に読む一覧。機体ごとのカード・軌道・乗員のファイルの場所
 const index = { $comment: "scripts/sync-web-data.mjs が作る。手で編集しない。", craft };
 outputs.push(["web/data/craft-index.json", JSON.stringify(index, null, 2) + "\n"]);
+// 予定（次の出来事・これから行く）。出典を確認した curation/events だけを使う。並べ替えはアプリがする
+const eventsDir = "curation/events";
+const events = existsSync(eventsDir)
+  ? readdirSync(eventsDir)
+      .filter((f) => f.endsWith(".json"))
+      .sort()
+      .map((f) => readJson(join(eventsDir, f)))
+  : [];
+const eventsData = { $comment: "scripts/sync-web-data.mjs が curation/events から作る。手で編集しない。", events };
+outputs.push(["web/data/events.json", JSON.stringify(eventsData, null, 2) + "\n"]);
 // 今夜の通過（県単位）に使う代表地点
 outputs.push(["web/data/prefectures.json", readFileSync("config/prefectures.json", "utf8")]);
 

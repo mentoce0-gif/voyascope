@@ -2,6 +2,7 @@
 import { esc, numberJa, latJa, lngJa, dateTimeShortJa, plainDateJa } from "./format.js";
 import { RINGS, ringOf } from "./scale.js";
 import { summarizeStatus } from "./status.js";
+import { himawariImage, hmJstOf, HIMAWARI_PAGE } from "./himawari.js";
 
 const CLASS_LABELS = {
   crewed_station: "有人宇宙基地",
@@ -156,7 +157,15 @@ function statusRows(sum) {
   return plan.length ? { status: lines.join(""), plan: plan.join("") + src } : { status: lines.join("") + src, plan: null };
 }
 
-function overviewHtml(card, aboard, family, statusSum) {
+// いま見ている雲（ひまわり9号だけ。気象衛星センターの最新の赤外画像を、出典つき・加工なしで）
+function liveSatHtml(card, realNow) {
+  if (card.id !== "himawari-9") return "";
+  const { url, observed } = himawariImage(realNow);
+  return `<figure class="ov-figure live-sat"><img class="ov-live" src="${esc(url)}" alt="ひまわり9号の赤外画像（日本付近、日本時間 ${hmJstOf(observed)} ごろ）" loading="lazy" data-live-sat>
+    <figcaption class="k small">ひまわり9号がいま見ている日本付近の雲（赤外画像・日本時間 ${hmJstOf(observed)} ごろ。10分ごとに新しくなる）<br>出典：<a href="${HIMAWARI_PAGE}" target="_blank" rel="noopener noreferrer">気象衛星センターホームページ（ひまわりリアルタイム画像）</a>へのリンク</figcaption></figure>`;
+}
+
+function overviewHtml(card, aboard, family, statusSum, realNow) {
   const s = card.stats ?? {};
   const orbitLine = [
     launchYear(card.launch_date) && `${launchYear(card.launch_date)}年〜`,
@@ -177,6 +186,7 @@ function overviewHtml(card, aboard, family, statusSum) {
   const st = statusRows(statusSum);
   return `
     <div class="ov">
+      ${liveSatHtml(card, realNow)}
       ${
         card.image
           ? `<figure class="ov-figure"><img class="ov-art" src="${esc(card.image.file)}" alt="${esc(card.image.caption)}"><figcaption class="k small">${imageCredit(card.image)}</figcaption></figure>`
@@ -238,7 +248,7 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
   const tabs = TABS.filter((t) => !t.crewedOnly || isCrewed(card));
   const current = tabs.some((t) => t.id === tab) ? tab : "overview";
   const bodies = {
-    overview: () => overviewHtml(card, aboard, family, statusSum),
+    overview: () => overviewHtml(card, aboard, family, statusSum, realNow),
     crew: () => crewHtml(aboard),
     orbit: () => orbitHtml(),
     links: () => linksHtml(card, orbitMeta),
