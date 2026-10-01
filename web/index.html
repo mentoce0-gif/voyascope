@@ -68,7 +68,7 @@
 
     <!-- 左：注目の一覧 -->
     <aside id="list-panel" class="side-panel list-panel" aria-label="注目の機体">
-      <div class="sheet-handle" aria-hidden="true"></div>
+      <button type="button" class="sheet-handle" aria-label="広げる" aria-expanded="false"></button>
       <label class="search">
         <span class="visually-hidden">衛星を名前で探す</span>
         <input id="craft-search" type="search" placeholder="衛星を検索…" autocomplete="off" enterkeyhint="search">
@@ -88,7 +88,7 @@
 
     <!-- 右：選んだ機体の詳細 -->
     <aside id="detail-panel" class="side-panel detail-panel" aria-label="機体の詳細" hidden>
-      <div class="sheet-handle" aria-hidden="true"></div>
+      <button type="button" class="sheet-handle" aria-label="広げる" aria-expanded="false"></button>
       <div id="detail-body"></div>
     </aside>
 
