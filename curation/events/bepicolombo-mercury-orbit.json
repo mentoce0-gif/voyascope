@@ -1,0 +1,36 @@
+{
+  "id": "bepicolombo-mercury-orbit",
+  "kind": "arrival",
+  "regions": [
+    "world",
+    "japan"
+  ],
+  "title": {
+    "ja": "ベピコロンボが水星を回る軌道に入る",
+    "en": "BepiColombo enters orbit around Mercury"
+  },
+  "summary": {
+    "value": "ESA と JAXA の水星探査。ESA の MPO と JAXA の「みお」の2機で水星を回るのは、この計画が初めて",
+    "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+    "as_of": "2026-10-01"
+  },
+  "when": {
+    "value": {
+      "date": "2026-11-21"
+    },
+    "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+    "as_of": "2026-10-01",
+    "note": "ESA の発表は日付だけ（時刻なし）"
+  },
+  "links": [
+    {
+      "label": "ESA ベピコロンボ到着の最新情報（英語）",
+      "url": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+    },
+    {
+      "label": "JAXA 国際水星探査計画 BepiColombo／みお",
+      "url": "https://www.jaxa.jp/projects/sas/bepi/index_j.html"
+    }
+  ],
+  "updated_at": "2026-10-01"
+}
