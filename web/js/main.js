@@ -193,8 +193,26 @@ function startApp({ craft, land, prefectures }) {
   const detailPanel = $("#detail-panel");
   const layoutGlobe = () => {
     globe.width(globeEl.clientWidth).height(globeEl.clientHeight);
-    if (isNarrow()) globe.globeOffset([0, -40]);
-    else globe.globeOffset([detailPanel.hidden ? 150 : -20, -30]);
+    placeGlobe();
+  };
+  // 地球の位置だけを直す（大きさは変えないので軽い）
+  const placeGlobe = () => {
+    if (isNarrow()) {
+      // 下からシートが出ているときは、上のバーとシートの間の真ん中に地球を置く
+      const sheetTops = [...document.querySelectorAll(".side-panel")]
+        .map((el) => el.getBoundingClientRect())
+        .filter((r) => r.height > 0)
+        .map((r) => r.top);
+      const top = $(".top-bar").offsetHeight;
+      const dy = sheetTops.length ? Math.round((top + Math.min(...sheetTops)) / 2 - globeEl.clientHeight / 2) : -40;
+      setOffset(0, dy);
+    } else setOffset(detailPanel.hidden ? 150 : -20, -30);
+  };
+  let lastOffset = "";
+  const setOffset = (x, y) => {
+    if (`${x},${y}` === lastOffset) return;
+    lastOffset = `${x},${y}`;
+    globe.globeOffset([x, y]);
   };
   addEventListener("resize", layoutGlobe);
   layoutGlobe();
@@ -203,6 +221,9 @@ function startApp({ craft, land, prefectures }) {
   new ResizeObserver(() => app.style.setProperty("--bottom-h", `${bottomBar.offsetHeight}px`)).observe(bottomBar);
   const topBar = $(".top-bar");
   new ResizeObserver(() => app.style.setProperty("--top-h", `${topBar.offsetHeight}px`)).observe(topBar);
+  // シートの開け閉め・高さの変化に合わせて地球の位置を直す
+  const sheetObserver = new ResizeObserver(() => isNarrow() && placeGlobe());
+  for (const el of document.querySelectorAll(".side-panel")) sheetObserver.observe(el);
 
   const first = craft[0] && positionAt(craft[0].satrec, clock.now());
   // スマホの縦長の画面では、静止軌道の環が横幅に収まるところまで引いて見る
@@ -318,6 +339,7 @@ function startApp({ craft, land, prefectures }) {
   const listPanel = $("#list-panel");
   $("#list-open").addEventListener("click", () => {
     listPanel.classList.toggle("open");
+    setExpanded(listPanel, false);
     setViewPanel(false);
     if (isNarrow() && listPanel.classList.contains("open")) closeDetail();
   });
@@ -377,6 +399,7 @@ function startApp({ craft, land, prefectures }) {
     if (c.pos) globe.pointOfView({ lat: c.pos.lat, lng: c.pos.lng }, 900);
   }
   function closeDetail() {
+    setExpanded(detailPanel, false);
     selected = null;
     detailPanel.hidden = true;
     app.classList.remove("has-selected");
@@ -392,6 +415,64 @@ function startApp({ craft, land, prefectures }) {
       renderDetail();
     }
   });
+  // ---------- スマホのシート：つまみを押すと「半分 ⇄ 全部」、下へ引くと縮める→閉じる ----------
+  function setExpanded(panel, on) {
+    panel.classList.toggle("expanded", on);
+    const h = panel.querySelector(".sheet-handle");
+    h.setAttribute("aria-expanded", String(on));
+    h.setAttribute("aria-label", on ? "縮める" : "広げる");
+  }
+  function closeSheet(panel) {
+    if (panel === listPanel) {
+      setExpanded(listPanel, false);
+      listPanel.classList.remove("open");
+    } else closeDetail();
+  }
+  for (const h of document.querySelectorAll(".sheet-handle")) {
+    const panel = h.closest(".side-panel");
+    let startY = null;
+    let dy = 0;
+    let dragged = false;
+    h.addEventListener("pointerdown", (e) => {
+      startY = e.clientY;
+      dy = 0;
+      dragged = false;
+      h.setPointerCapture(e.pointerId);
+      panel.style.transition = "none";
+    });
+    h.addEventListener("pointermove", (e) => {
+      if (startY === null) return;
+      dy = e.clientY - startY;
+      if (Math.abs(dy) > 8) dragged = true;
+      if (dy > 0) panel.style.transform = `translateY(${dy}px)`; // 指について下がる
+    });
+    const end = () => {
+      if (startY === null) return;
+      startY = null;
+      panel.style.transform = "";
+      panel.style.transition = "";
+      if (!dragged) return;
+      const expanded = panel.classList.contains("expanded");
+      if (dy < -30) setExpanded(panel, true);
+      else if (dy > 70 && expanded && dy < 220) setExpanded(panel, false);
+      else if (dy > 70) closeSheet(panel);
+    };
+    h.addEventListener("pointerup", end);
+    h.addEventListener("pointercancel", () => {
+      dragged = false;
+      dy = 0;
+      end();
+    });
+    // 押しただけ（キーボードの Enter も）なら広げる／縮める。引いたあとのクリックは無視する
+    h.addEventListener("click", () => {
+      if (dragged) {
+        dragged = false;
+        return;
+      }
+      setExpanded(panel, !panel.classList.contains("expanded"));
+    });
+  }
+
   addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !detailPanel.hidden && !document.querySelector("dialog[open]")) closeDetail();
   });
