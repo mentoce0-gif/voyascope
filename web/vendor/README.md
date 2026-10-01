@@ -8,6 +8,8 @@ CDN を使わないのは、ローカルプレビューだけで動かすため�
 | `globe.gl.min.js` | npm `globe.gl` の `dist/globe.gl.min.js`（three.js を内蔵） | 2.46.2（three 0.186.1） | MIT（`globe.gl.LICENSE`、`three.LICENSE`） |
 | `satellite.min.js` | npm `satellite.js` から必要な関数だけを esbuild でまとめたもの | 7.1.0 | MIT（`satellite.js.LICENSE.md`） |
 
+`THIRD_PARTY_NOTICES.txt` は、上の2つに入っているライブラリ（globe.gl の依存を含む46パッケージ：MIT・ISC・Apache-2.0・Unlicense・0BSD）のライセンス全文。下の「作り直し方」で npm install したあと `node scripts/build-notices.mjs /tmp/vendor/node_modules` で作り直す。
+
 `web/data/land-110m.geojson` は npm `world-atlas`（Natural Earth 1:110m、パブリックドメイン）から `scripts/build-land.cjs` で作った（world-atlas は ISC：`world-atlas.LICENSE`）。
 
 ## 作り直し方
