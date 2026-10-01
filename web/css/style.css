@@ -314,9 +314,10 @@ body { overflow: hidden; }
 .detail-panel { right: 16px; width: 420px; padding: 14px 16px 12px; }
 .sheet-handle { display: none; }
 
-.fam-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.fam-tabs { display: flex; flex-wrap: wrap; gap: 4px 6px; overflow-x: auto; scrollbar-width: none; }
 .fam-tabs::-webkit-scrollbar { display: none; }
-.fam-tab[data-fam="tonight"] { margin-left: auto; }
+.fam-group { display: flex; gap: 3px; }
+.fam-views { margin-left: auto; } /* 「予定」「観測」は右にまとめる（入らなければ2つ一緒に次の行へ） */
 .fam-tab {
   appearance: none;
   border: 1px solid transparent;
@@ -324,7 +325,7 @@ body { overflow: hidden; }
   color: var(--text);
   font: inherit;
   font-size: 0.78rem;
-  padding: 5px 10px;
+  padding: 5px 6px;
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
@@ -507,6 +508,9 @@ body { overflow: hidden; }
 .ov-art { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 6px; border: 1px solid var(--panel-border); }
 .ov-figure figcaption { margin-top: 4px; line-height: 1.5; }
 .ov-figure figcaption a { color: var(--text-dim); }
+/* ひまわりの最新画像（801×641。切り取らない） */
+.ov-live { display: block; width: 100%; aspect-ratio: 801 / 641; object-fit: contain; background: #000; border-radius: 6px; border: 1px solid var(--panel-border); }
+.live-sat.failed { display: none; }
 .craft-thumb {
   width: 34px;
   height: 34px;
@@ -803,6 +807,122 @@ body { overflow: hidden; }
   max-width: 46vw;
 }
 
+/* 上のバー：次の出来事（狭い画面では一覧の「予定」タブだけ） */
+.next-chip {
+  appearance: none;
+  margin-right: 12px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--mint-dim);
+  background: rgba(94, 242, 194, 0.08);
+  color: var(--mint);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 30vw;
+}
+.next-chip .next-k { margin-right: 8px; color: var(--text-dim); font-size: 0.72rem; }
+.next-chip .next-left { margin-left: 8px; }
+.tonight-chip:focus-visible, .next-chip:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+@media (max-width: 1100px) { .next-chip { display: none; } }
+
+/* 予定（次の出来事）：一覧の「予定」タブ */
+.events {
+  margin: -2px -2px 12px;
+  padding: 10px 10px 8px;
+  border: 1px solid var(--mint-dim);
+  border-radius: 8px;
+  background: rgba(94, 242, 194, 0.04);
+}
+.events-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+.events-title { margin: 0; font-size: 0.95rem; color: var(--mint); letter-spacing: 0.08em; }
+.events-body { margin-top: 8px; }
+.events-note { margin-top: 8px !important; line-height: 1.5; }
+.event-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.event-item {
+  appearance: none;
+  width: 100%;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 62px 1fr 12px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: rgba(12, 33, 64, 0.6);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.event-item:hover { border-color: var(--mint-dim); }
+.event-item:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.event-tonight { border-color: rgba(255, 181, 71, 0.5); background: rgba(255, 181, 71, 0.07); }
+.event-when { display: flex; flex-direction: column; font-size: 0.78rem; line-height: 1.35; color: var(--mint); }
+.event-tonight .event-when { color: var(--amber); }
+.event-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.event-title { font-size: 0.9rem; font-weight: 700; }
+.event-sub { font-size: 0.74rem; color: var(--text-dim); }
+.event-left { margin-left: 8px; color: var(--mint); white-space: nowrap; }
+.event-src { font-size: 0.68rem; color: var(--text-dim); }
+/* 予定の詳細：残り時間 */
+.event-countdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: rgba(94, 242, 194, 0.07);
+}
+.event-countdown .mono { font-size: 1.35rem; font-weight: 700; color: var(--mint); letter-spacing: 0.02em; }
+.event-h { margin: 14px 0 6px; font-size: 0.85rem; color: var(--mint); }
+.event-rows .plate-row { grid-template-columns: 24px 4.3em 1fr; } /* 「予備期間」「ロケット」を1行に */
+
+/* 地球の上の射場のピン（ひし形。打ち上がるまで軌道は描かない） */
+.site-marker {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.site-marker .diamond {
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--c);
+  background: var(--navy-900);
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--c) 60%, transparent);
+}
+/* 名前はひし形の真下に（機体の名前は右上に出るので、重なりにくい） */
+.site-marker .tag {
+  position: absolute;
+  left: 50%;
+  top: 33px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--c);
+  white-space: nowrap;
+  text-shadow: 0 0 6px var(--navy-900);
+}
+.site-marker.selected .diamond { outline: 2px solid var(--c); outline-offset: 4px; }
+.site-marker:focus-visible { outline: 2px solid var(--amber); outline-offset: -8px; border-radius: 50%; }
+/* 凡例：予定はひし形 */
+.fam-dot.fam-planned { width: 8px; height: 8px; border-radius: 1px; background: none; border: 1.5px solid var(--c); transform: rotate(45deg); }
+
 /* ---------- このアプリについて（ダイアログ） ---------- */
 dialog.card {
   width: min(560px, calc(100vw - 2 * var(--gutter)));
@@ -981,7 +1101,9 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   .bottom-bar .warning { grid-column: 1 / -1; }
   /* 一覧を詰めて、カードが多く見えるように */
   .list-panel .list-title { display: none; }
-  .list-panel .fam-tabs { margin-bottom: 8px; }
+  .list-panel .fam-tabs { margin-bottom: 8px; flex-wrap: nowrap; gap: 4px; }
+  .fam-group { gap: 4px; }
+  .fam-tab { padding: 5px 10px; }
   .search { margin-bottom: 8px; }
   .search input { padding-top: 7px; padding-bottom: 7px; }
   .craft-item { padding: 6px 10px; }

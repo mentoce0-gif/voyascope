@@ -1,0 +1,67 @@
+{
+  "id": "mmx-launch",
+  "kind": "launch",
+  "regions": [
+    "japan"
+  ],
+  "title": {
+    "ja": "MMX の打ち上げ",
+    "en": "MMX launch"
+  },
+  "summary": {
+    "value": "火星の衛星フォボスからサンプルを持ち帰る計画の探査機。2031年度に、人類初の火星圏からのサンプルリターンをめざす",
+    "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+    "as_of": "2026-10-01",
+    "note": "打上げ計画書「2.5 火星衛星探査機(MMX)の概要」"
+  },
+  "when": {
+    "value": {
+      "at": "2026-10-19T19:41:03Z"
+    },
+    "source": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html",
+    "as_of": "2026-10-01"
+  },
+  "window_end": {
+    "value": "2026-11-07",
+    "source": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html",
+    "as_of": "2026-10-01",
+    "note": "予備期間は10月21日〜11月7日。予備期間中の時刻は日ごとに決まる"
+  },
+  "vehicle": {
+    "value": "H3ロケット10号機（H3-24L）",
+    "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+    "as_of": "2026-10-01"
+  },
+  "site": {
+    "label": "種子島",
+    "name": {
+      "value": "種子島宇宙センター 大型ロケット第2射点（鹿児島県）",
+      "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+      "as_of": "2026-10-01"
+    },
+    "position": {
+      "value": {
+        "lat": 30.401,
+        "lng": 130.9776
+      },
+      "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+      "as_of": "2026-10-01",
+      "note": "計画書にある第1射点の座標（30°24′03.47″N、130°58′39.20″E）。第2射点はすぐ隣"
+    }
+  },
+  "links": [
+    {
+      "label": "JAXA プレスリリース（MMX の打上げ）",
+      "url": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html"
+    },
+    {
+      "label": "JAXA 打上げ計画書（PDF）",
+      "url": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf"
+    },
+    {
+      "label": "MMX プロジェクトサイト",
+      "url": "https://www.mmx.jaxa.jp/"
+    }
+  ],
+  "updated_at": "2026-10-01"
+}

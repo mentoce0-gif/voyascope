@@ -22,14 +22,16 @@ npx serve web              # または python3 -m http.server -d web
 | `js/orbit.js` | SGP4 による位置計算、早送りできる時計 |
 | `js/card.js` | 詳細パネル（タブ：概要／滞在／軌道／リンク）。出典未確認なら「見本・出典確認中」を出す |
 | `js/scale.js` | 高さの縮尺（比較用）と環3本（低軌道・中軌道・静止軌道） |
-| `js/families.js` | 空の家族分け（有人・気象科学・測位・通信の帯）と色 |
+| `js/families.js` | 空の家族分け（有人・気象科学・測位・通信の帯）と色。「予定」は射場のピンの表示切り替え用 |
 | `js/minimap.js` | 地上軌跡のミニ地図（SVG） |
 | `js/passes.js` | 今夜の通過の計算（太陽の位置・地球の影・見上げる高さと方角） |
 | `js/tonight.js` | 「今夜・頭の上」の表示（県の選択、時刻と方角のことば、空の図） |
 | `js/format.js` | 日付・数値の表示 |
+| `js/events.js` | 予定（次の出来事・これから行く）：日本時間の日付・残り時間・一覧と詳細の表示 |
 | `data/orbits/iss.json` | 軌道データ（CelesTrak の OMM JSON。TLE でも動く。取得日時・エポック・出典URLを含む） |
 | `data/prefectures.json` | 都道府県の代表地点（`config/prefectures.json` のコピー） |
 | `data/craft-index.json` | 表示する機体の一覧（`npm run sync:web` で作る） |
+| `data/events.json` | 予定（`curation/events/` から `npm run sync:web` で作る） |
 | `data/cards/iss.json` | `examples/spacecraft/iss.json` のコピー（見本） |
 | `data/cards/iss-crew.json` | ISS に向かったチームと飛行士（`examples/teams`・`examples/astronauts` から `npm run sync:web` で作る） |
 | `data/land-110m.geojson` | 陸地の形（Natural Earth） |
@@ -41,6 +43,7 @@ npx serve web              # または python3 -m http.server -d web
 - カードは `examples/` の見本を読むので、常に「見本・出典確認中」を表示する（`main.js` の `isSample: true`）
 - 「滞在」には、打ち上げ済みで帰還日が来ていないチームを出す（観測時刻で判断するので、早送りすると変わる）
 - タイムラインは現在の −6時間〜+24時間。端に着いたら止まる。「LIVE」で現在・等倍に戻る
+- 予定：日付は公式の発表どおり（日本時間で表示）。時刻まで決まっている予定は、その時刻から6時間で一覧から消える。延期は「延期」として残す。射場のピンは打ち上げの予定だけ
 - 今夜の通過：高さ10°以上・空が暗い（太陽が−6°より下）・ISS に日が当たっている、の3つを満たすときだけ「見える」とする。選んだ県はブラウザ（localStorage）にだけ保存
 - 環の半径と機体の高さは比較用の縮尺（`js/scale.js`）。画面に「実距離ではない」と必ず出す
 - 生データリンク（CelesTrak）は `norad_id` から自動で作る。公式リンクは URL が `https://` で始まるまで無効
