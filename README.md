@@ -34,7 +34,7 @@
 
 ## 仕組み（予定）
 
-- 軌道データ：CelesTrak の公開データ（GitHub Actions で6時間ごとに取得）
+- 軌道データ：USSPACECOM／Space-Track.org の公開の軌道要素（GP データ）。CelesTrak から GitHub Actions で6時間ごとに取得し、このサイトから配っている（再配布の条件は `research/verification/2026-10-01-c9.md`）
 - 位置計算：ブラウザ内で SGP4（satellite.js）
 - 3D表示：globe.gl
 - サーバなし：GitHub Pages ＋ GitHub Actions
