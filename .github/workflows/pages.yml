@@ -2,7 +2,7 @@ name: pages
 
 # web/ を GitHub Pages に公開する。
 # - main に web/ の変更が入ったとき
-# - 軌道データ・運用状況の自動更新（update-orbits）が終わったとき
+# - 軌道データ・運用状況・打ち上げ予定の自動更新（update-orbits）が終わったとき
 #   （Actions がコミットしたプッシュでは、ほかのワークフローが動かないため）
 # - 手動（Actions の画面から）
 #
@@ -28,8 +28,10 @@ concurrency:
 
 jobs:
   deploy:
-    # 自動更新が失敗したときは公開し直さない
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    # 自動更新が「失敗」で終わっても公開し直す。失敗は、軌道データをコミットしたあとで
+    # 運用状況・打ち上げ予定の取得の失敗を知らせるためのことがあり、公開を止めると軌道データまで古くなるため
+    # （何もコミットされていなければ、同じ中身を公開し直すだけ）
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
