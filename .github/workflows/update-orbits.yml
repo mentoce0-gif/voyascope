@@ -1,8 +1,9 @@
 name: update-orbits
 
-# 軌道データ（CelesTrak の GP データ）と、みちびきの運用状況（内閣府）を6時間ごとに取り直す。
+# 軌道データ（CelesTrak の GP データ）と、みちびきの運用状況（内閣府）と、世界の打ち上げ予定（参考）を6時間ごとに取り直す。
 # 利用方針：research/chappy/2026-09-29-c1-celestrak-usage.md
 # みちびき：みちびきウェブサイト利用規約（出典を書けば自由に利用可）https://qzss.go.jp/policy/rule.html
+# 打ち上げ予定：Launch Library 2（The Space Devs。公式機関ではない）。無料は1時間15回まで・キャッシュ推奨 research/verification/2026-10-02-c8.md
 # - 200 以外の応答を受けたらスクリプトが失敗で終わり、再試行はしない（GitHub がメールで知らせる）
 # - 変化があったときだけ main にコミットする
 
@@ -34,19 +35,28 @@ jobs:
         id: status
         continue-on-error: true
         run: node scripts/fetch-status.mjs
+      # 打ち上げ予定も同じ。1〜2回の失敗（混み合いなど）では知らせず、前回のデータを使い続ける
+      - name: 世界の打ち上げ予定を取得（Launch Library 2）
+        id: launches
+        continue-on-error: true
+        run: node scripts/fetch-launches.mjs
       - name: 変化があればコミット
         run: |
-          if [ -z "$(git status --porcelain -- web/data/orbits web/data/status)" ]; then
+          if [ -z "$(git status --porcelain -- web/data/orbits web/data/status web/data/launches.json)" ]; then
             echo "変化なし"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/data/orbits web/data/status
-          git commit -m "軌道データ・運用状況を自動更新（CelesTrak・みちびき）"
+          git add web/data/orbits web/data/status web/data/launches.json
+          git commit -m "軌道データ・運用状況・打ち上げ予定を自動更新（CelesTrak・みちびき・Launch Library 2）"
           git push
       - name: 運用状況の取得に失敗していたら知らせる
         if: steps.status.outcome == 'failure'
         run: |
           echo "みちびきの運用状況を取得できませんでした。上の「みちびきの運用状況を取得」のログを見てください。"
           exit 1
+      # 前回の取得から36時間（6回分）以上たっていたら失敗にして知らせる。それより短ければ注意だけ
+      - name: 打ち上げ予定の取得の失敗が続いていたら知らせる
+        if: ${{ !cancelled() && steps.launches.outcome == 'failure' }}
+        run: node scripts/fetch-launches.mjs --check-age
