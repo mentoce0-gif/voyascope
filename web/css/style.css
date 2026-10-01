@@ -941,7 +941,9 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   .view-panel .toggle { min-height: 44px; font-size: 0.9rem; gap: 8px; }
   .view-panel .toggle input { width: 20px; height: 20px; }
   .view-panel > .toggle { border-top: 1px solid var(--panel-border); width: 100%; }
-  .scale-note { bottom: calc(var(--bottom-h) + 8px); font-size: 0.66rem; white-space: normal; text-align: center; width: calc(100vw - 32px); }
+  /* 環の注記は1行（くわしい数字は「このアプリについて」にある） */
+  .scale-note { bottom: calc(var(--bottom-h) + 8px); font-size: 0.66rem; white-space: normal; text-align: center; width: max-content; max-width: calc(100vw - 16px); }
+  .scale-note .narrow-only { display: inline; }
 }
 @media (max-width: 400px) {
   .orbit-stats { grid-template-columns: auto 1fr; }
@@ -952,6 +954,7 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   #sim-time { font-size: 0.58rem; }
   .tonight-chip { padding: 4px 8px; }
   .tonight-chip .pin { display: none; }
+  .scale-note { font-size: 0.6rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
