@@ -154,6 +154,7 @@ function startApp({ craft, land, prefectures }) {
   };
 
   // ---------- 地球 ----------
+  const app = $("#app");
   const globeEl = $("#globe");
   const hidden = new Set(); // 表示しない家族
   const markerData = () => craft.filter((c) => c.pos && !hidden.has(c.family.id));
@@ -199,9 +200,9 @@ function startApp({ craft, land, prefectures }) {
   layoutGlobe();
   // 下のバーの実際の高さを、パネルや注記の位置に使う
   const bottomBar = $(".bottom-bar");
-  new ResizeObserver(() => $("#app").style.setProperty("--bottom-h", `${bottomBar.offsetHeight}px`)).observe(bottomBar);
+  new ResizeObserver(() => app.style.setProperty("--bottom-h", `${bottomBar.offsetHeight}px`)).observe(bottomBar);
   const topBar = $(".top-bar");
-  new ResizeObserver(() => $("#app").style.setProperty("--top-h", `${topBar.offsetHeight}px`)).observe(topBar);
+  new ResizeObserver(() => app.style.setProperty("--top-h", `${topBar.offsetHeight}px`)).observe(topBar);
 
   const first = craft[0] && positionAt(craft[0].satrec, clock.now());
   // スマホの縦長の画面では、静止軌道の環が横幅に収まるところまで引いて見る
@@ -317,7 +318,20 @@ function startApp({ craft, land, prefectures }) {
   const listPanel = $("#list-panel");
   $("#list-open").addEventListener("click", () => {
     listPanel.classList.toggle("open");
+    setViewPanel(false);
     if (isNarrow() && listPanel.classList.contains("open")) closeDetail();
+  });
+
+  // スマホ：家族ごとの表示と環は「表示」で開く小さなパネル。外を触ると閉じる
+  const viewPanel = $("#view-panel");
+  const viewOpen = $("#view-open");
+  function setViewPanel(on) {
+    viewPanel.classList.toggle("open", on);
+    viewOpen.setAttribute("aria-expanded", String(on));
+  }
+  viewOpen.addEventListener("click", () => setViewPanel(!viewPanel.classList.contains("open")));
+  document.addEventListener("pointerdown", (e) => {
+    if (viewPanel.classList.contains("open") && !e.target.closest("#view-panel, #view-open")) setViewPanel(false);
   });
 
   // ---------- 詳細パネル ----------
@@ -355,6 +369,7 @@ function startApp({ craft, land, prefectures }) {
   function select(c) {
     selected = c;
     detailPanel.hidden = false;
+    app.classList.add("has-selected");
     if (isNarrow()) listPanel.classList.remove("open");
     renderDetail();
     renderList();
@@ -364,6 +379,7 @@ function startApp({ craft, land, prefectures }) {
   function closeDetail() {
     selected = null;
     detailPanel.hidden = true;
+    app.classList.remove("has-selected");
     setFollow(false);
     renderList();
     layoutGlobe();
@@ -384,11 +400,15 @@ function startApp({ craft, land, prefectures }) {
   const slider = $("#timeline");
   const playBtn = $("#play");
   const speedButtons = [...document.querySelectorAll(".speed")];
+  const speedCycle = $("#speed-cycle");
+  const SPEEDS = speedButtons.map((b) => Number(b.dataset.speed));
   let dragging = false;
   const syncControls = () => {
     playBtn.dataset.playing = String(clock.playing);
     playBtn.setAttribute("aria-label", clock.playing ? "一時停止" : "再生");
     for (const b of speedButtons) b.setAttribute("aria-pressed", String(Number(b.dataset.speed) === clock.speed));
+    speedCycle.textContent = `×${clock.speed}`;
+    speedCycle.setAttribute("aria-label", `再生の速さ ×${clock.speed}（押すと切り替わる）`);
   };
   slider.addEventListener("input", () => {
     dragging = true;
@@ -414,6 +434,13 @@ function startApp({ craft, land, prefectures }) {
       syncControls();
     });
   }
+
+  speedCycle.addEventListener("click", () => {
+    const i = SPEEDS.indexOf(clock.speed);
+    clock.setSpeed(SPEEDS[(i + 1) % SPEEDS.length]);
+    if (!clock.playing) clock.setPlaying(true);
+    syncControls();
+  });
 
   // ---------- 追尾 ----------
   let follow = false;
@@ -537,6 +564,7 @@ function startApp({ craft, land, prefectures }) {
       eiCount.textContent = `${n}機（${[...new Set(markerData().map((c) => c.family.label))].join("・")}）`;
       const live = clock.isLive();
       els.badge.dataset.live = String(live);
+      app.dataset.live = String(live);
       els.badge.textContent = live ? "LIVE" : `${durationJa(clock.offset())}${clock.playing ? "" : " 停止中"}`;
       if (!dragging) slider.value = String(Math.round(clock.offset() / 60000));
       for (const c of craft) {
