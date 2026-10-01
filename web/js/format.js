@@ -17,12 +17,20 @@ export function plainDateJa(s) {
 
 const pad = (n) => String(n).padStart(2, "0");
 
-export function dateTimeJa(d) {
+// 日本時間なら「JST」、それ以外は「UTC+x」
+function tzLabel(d) {
   const tz = -d.getTimezoneOffset();
   const sign = tz >= 0 ? "+" : "-";
-  // 日本時間なら「JST」、それ以外は「UTC+x」
-  const tzLabel = tz === 540 ? "JST" : `UTC${sign}${Math.floor(Math.abs(tz) / 60)}${tz % 60 ? ":" + pad(Math.abs(tz) % 60) : ""}`;
-  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} (${tzLabel})`;
+  return tz === 540 ? "JST" : `UTC${sign}${Math.floor(Math.abs(tz) / 60)}${tz % 60 ? ":" + pad(Math.abs(tz) % 60) : ""}`;
+}
+
+export function dateTimeJa(d) {
+  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} (${tzLabel(d)})`;
+}
+
+// スマホの上のバー用：「10/01 12:07:36 JST」（年を省く）
+export function dateTimeCompactJa(d) {
+  return `${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${tzLabel(d)}`;
 }
 
 // 「9月29日 15:17」のような短い表示（閲覧者の時刻で）
