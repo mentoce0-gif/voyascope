@@ -591,6 +591,7 @@ body { overflow: hidden; }
 
 /* 状態（運用状況） */
 .st-line { line-height: 1.6; }
+.place { color: var(--amber); font-weight: 700; }
 .st-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
 .st-dot.ok { background: var(--mint); box-shadow: 0 0 6px var(--mint-dim); }
 .st-dot.down { background: var(--amber); box-shadow: 0 0 6px var(--amber-dim); }

@@ -273,7 +273,7 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
   return current;
 }
 
-export function updatePanelLive(el, { pos, periodMin }) {
+export function updatePanelLive(el, { pos, periodMin, place }) {
   const set = (k, html) => {
     const n = el.querySelector(`[data-live="${k}"]`);
     if (n) n.innerHTML = html;
@@ -282,7 +282,9 @@ export function updatePanelLive(el, { pos, periodMin }) {
     for (const k of ["now", "alt", "spd", "lat", "lng", "ring"]) set(k, "計算できません");
     return;
   }
-  set("now", [latJa(pos.lat), lngJa(pos.lng), `高度 ${pos.altKm.toFixed(0)} km`].map(nw).join("　"));
+  // どこの上か（分からないときは座標だけ）
+  const where = place ? `<strong class="place">${esc(place.name)}</strong>の上　` : "";
+  set("now", where + [latJa(pos.lat), lngJa(pos.lng), `高度 ${pos.altKm.toFixed(0)} km`].map(nw).join("　"));
   set("alt", `${pos.altKm.toFixed(1)} km`);
   set("spd", `${pos.speedKmS.toFixed(2)} km/s`);
   set("period", Number.isFinite(periodMin) ? `約 ${periodMin.toFixed(1)} 分` : "--");
