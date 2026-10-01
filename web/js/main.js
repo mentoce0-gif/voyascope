@@ -7,6 +7,7 @@ import { setupEarth } from "./earth.js";
 import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
 import { starfieldDataUrl } from "./stars.js";
+import { placeAt } from "./places.js";
 import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
 import { findVisiblePasses, observerOf } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
@@ -181,6 +182,12 @@ function startApp({ craft, land, prefectures }) {
     .htmlAltitude("alt")
     .htmlElement((d) => d.el)
     .htmlTransitionDuration(0);
+
+  // 「いま、どこの上？」の地名（重いので、観測を始めてから読む。読めなくても座標は出る）
+  let places = null;
+  loadJson("data/places.json")
+    .then((d) => (places = d))
+    .catch(() => {});
 
   // 地球のまわりの星空（飾り。地球を回すと一緒に動く）
   globe.backgroundImageUrl(starfieldDataUrl());
@@ -368,7 +375,7 @@ function startApp({ craft, land, prefectures }) {
   let landD = null;
   const updateDetailLive = (force = false) => {
     if (!selected || detailPanel.hidden) return;
-    updatePanelLive(detailBody, { pos: selected.pos, periodMin: selected.period });
+    updatePanelLive(detailBody, { pos: selected.pos, periodMin: selected.period, place: selected.pos && placeAt(places, selected.pos.lat, selected.pos.lng) });
     const svg = detailBody.querySelector('[data-live="map"]');
     const t = clock.now().getTime();
     if (svg && (force || Math.abs(t - lastMapAt) > 20000)) {
