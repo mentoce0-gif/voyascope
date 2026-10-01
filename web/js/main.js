@@ -6,7 +6,7 @@ import { landPath, renderMinimap } from "./minimap.js";
 import { setupEarth } from "./earth.js";
 import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
-import { esc, dateTimeShortJa, dateTimeJa, durationJa, latJa, lngJa } from "./format.js";
+import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
 import { findVisiblePasses, observerOf } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
 
@@ -473,13 +473,13 @@ function startApp({ craft, land, prefectures }) {
     renderTonight(tonightBody, { pref, passes, now, jumpable });
     $("#tonight-label").textContent = pref ? `今夜・${pref.name}` : "今夜・頭の上";
     tonightChip.hidden = false;
-    tonightChip.innerHTML = !pref
-      ? `<span class="pin" aria-hidden="true">⌖</span>県を選ぶと、ISS が見える時刻が出ます`
-      : `<span class="pin" aria-hidden="true">⌖</span>${esc(pref.name)}<span class="sep" aria-hidden="true"></span>${
-          passes.length
-            ? `ISS ${whenWord(passes[0].start, now)} ${clockWord(passes[0].start)}`
-            : "ISS 見える通過なし（5日間）"
+    // PCは案内の文、スマホは短い「今夜」ボタン（文は読み上げ用に残す）
+    const chipText = !pref
+      ? "県を選ぶと、ISS が見える時刻が出ます"
+      : `${esc(pref.name)}<span class="sep" aria-hidden="true"></span>${
+          passes.length ? `ISS ${whenWord(passes[0].start, now)} ${clockWord(passes[0].start)}` : "ISS 見える通過なし（5日間）"
         }`;
+    tonightChip.innerHTML = `<span class="pin" aria-hidden="true">⌖</span><span class="chip-full">${chipText}</span><span class="chip-short" aria-hidden="true">今夜</span>`;
   };
   prefSelect.addEventListener("change", () => {
     pref = prefectures.find((p) => p.code === prefSelect.value) ?? null;
@@ -555,7 +555,7 @@ function startApp({ craft, land, prefectures }) {
     // 文字の更新は間引く
     if (t - lastText > 100) {
       lastText = t;
-      els.time.textContent = dateTimeJa(now);
+      els.time.textContent = isNarrow() ? dateTimeCompactJa(now) : dateTimeJa(now);
       // 「現在の地球」：観測時刻・カメラが見ている地点・表示中の機体数
       eiTime.textContent = dateTimeJa(now);
       const pov = globe.pointOfView();
@@ -565,7 +565,8 @@ function startApp({ craft, land, prefectures }) {
       const live = clock.isLive();
       els.badge.dataset.live = String(live);
       app.dataset.live = String(live);
-      els.badge.textContent = live ? "LIVE" : `${durationJa(clock.offset())}${clock.playing ? "" : " 停止中"}`;
+      els.badge.textContent = live ? "LIVE" : durationJa(clock.offset());
+      els.badge.dataset.paused = String(!live && !clock.playing); // 「停止中」は CSS で足す（スマホでは再生ボタンの形で分かるので出さない）
       if (!dragging) slider.value = String(Math.round(clock.offset() / 60000));
       for (const c of craft) {
         const n = listEl.querySelector(`[data-alt="${c.id}"]`);

@@ -282,6 +282,7 @@ body { overflow: hidden; }
   white-space: nowrap;
 }
 .live-badge[data-live="true"] { border-color: var(--mint); color: var(--mint); }
+.live-badge[data-paused="true"]::after { content: " 停止中"; }
 .live-badge[data-live="true"]::before {
   content: "";
   display: inline-block;
@@ -367,6 +368,7 @@ body { overflow: hidden; }
 .st-pip.ok { background: var(--mint); box-shadow: 0 0 5px var(--mint-dim); }
 .st-pip.warn { background: var(--amber); box-shadow: 0 0 5px var(--amber-dim); }
 .tonight-chip .pin { margin-right: 6px; }
+.tonight-chip .chip-short { display: none; }
 .tonight-chip .sep { display: inline-block; width: 1px; height: 0.9em; margin: 0 10px; vertical-align: -1px; background: var(--amber-dim); }
 .list-title { margin: 14px 2px 6px; font-size: 0.8rem; color: var(--text-dim); font-weight: 400; letter-spacing: 0.1em; }
 .craft-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
@@ -844,14 +846,35 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 /* ---------- 狭い画面：一覧と詳細は下から出るシート ---------- */
 @media (max-width: 900px) {
   :root { --top-h: 56px; }
-  .top-bar { padding: calc(env(safe-area-inset-top) + 8px) 12px 6px; }
-  .brand img { height: 22px; }
+  /* 上のバーは1行：ロゴ（下に時刻）・今夜・LIVE・メニュー */
+  .top-bar {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    grid-template-areas: "brand chip badge menu" "time chip badge menu";
+    align-items: center;
+    gap: 2px 8px;
+    padding: calc(env(safe-area-inset-top) + 6px) 8px 4px 12px;
+  }
+  .brand-block { grid-area: brand; }
+  .brand img { height: 18px; }
   .brand-sub { display: none; }
-  .tonight-chip { order: 3; flex-basis: 100%; margin: 4px 0 0; max-width: none; text-align: left; }
-  .top-bar { flex-wrap: wrap; }
-  .clock-block { font-size: 0.72rem; display: grid; grid-template-columns: auto auto; justify-items: end; align-items: center; gap: 4px 4px; }
-  .clock-block #sim-time { grid-column: 1 / -1; }
-  .menu-btn { margin-left: 0; }
+  .clock-block { display: contents; }
+  #sim-time { grid-area: time; font-size: 0.66rem; color: var(--text-dim); white-space: nowrap; }
+  .live-badge { grid-area: badge; font-size: 0.72rem; padding: 2px 8px; }
+  .menu-btn { grid-area: menu; width: 44px; height: 44px; margin-left: 0; }
+  .tonight-chip {
+    grid-area: chip;
+    justify-self: end;
+    position: relative;
+    margin: 0;
+    max-width: none;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+  }
+  .tonight-chip::after { content: ""; position: absolute; inset: -8px -4px; } /* 押せる範囲を44pxに */
+  .tonight-chip .chip-full { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tonight-chip .chip-short { display: inline; }
+  .live-badge[data-paused="true"]::after { content: none; }
   .side-panel {
     top: auto;
     left: 0;
@@ -922,6 +945,13 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 }
 @media (max-width: 400px) {
   .orbit-stats { grid-template-columns: auto 1fr; }
+}
+/* とても狭い画面（幅320〜374）：上のバーを1行に収める */
+@media (max-width: 374px) {
+  .top-bar { gap: 2px 6px; padding-left: 10px; }
+  #sim-time { font-size: 0.58rem; }
+  .tonight-chip { padding: 4px 8px; }
+  .tonight-chip .pin { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
