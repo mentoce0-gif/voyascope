@@ -1,0 +1,374 @@
+{
+ "_comment": "テスト用：Launch Library 2 の /2.3.0/launches/upcoming/（status 1,8）の応答から、変換で読む項目だけを残したもの（2026-10-01 23:00 UTC に取得）",
+ "count": 8,
+ "results": [
+  {
+   "id": "4651fd8a-43de-4166-bf8f-c168b3bd1d2c",
+   "name": "Falcon Heavy | NROL-97",
+   "status": {
+    "id": 1,
+    "abbrev": "Go"
+   },
+   "last_updated": "2026-10-01T22:24:01Z",
+   "net": "2026-10-02T03:53:00Z",
+   "net_precision": {
+    "id": 1,
+    "abbrev": "MIN"
+   },
+   "window_start": "2026-10-02T03:53:00Z",
+   "window_end": "2026-10-02T04:42:00Z",
+   "launch_service_provider": {
+    "id": 121,
+    "name": "SpaceX"
+   },
+   "rocket": {
+    "configuration": {
+     "name": "Falcon Heavy",
+     "full_name": "Falcon Heavy"
+    }
+   },
+   "mission": {
+    "name": "NROL-97",
+    "type": "Government/Top Secret",
+    "orbit": {
+     "name": "Unknown",
+     "abbrev": "N/A"
+    }
+   },
+   "pad": {
+    "name": "Launch Complex 39A",
+    "latitude": 28.60822681,
+    "longitude": -80.60428186,
+    "country": {
+     "alpha_3_code": "USA"
+    },
+    "location": {
+     "id": 27,
+     "name": "Kennedy Space Center, FL, USA"
+    }
+   }
+  },
+  {
+   "id": "da43dc2c-00af-4cc1-8ef1-90a60b2eb9e5",
+   "name": "Falcon 9 Block 5 | SDA Tranche 1 Transport Layer A",
+   "status": {
+    "id": 1,
+    "abbrev": "Go"
+   },
+   "last_updated": "2026-10-01T22:25:38Z",
+   "net": "2026-10-05T08:17:00Z",
+   "net_precision": {
+    "id": 1,
+    "abbrev": "MIN"
+   },
+   "window_start": "2026-10-05T08:17:00Z",
+   "window_end": "2026-10-05T08:17:00Z",
+   "launch_service_provider": {
+    "id": 121,
+    "name": "SpaceX"
+   },
+   "rocket": {
+    "configuration": {
+     "name": "Falcon 9",
+     "full_name": "Falcon 9 Block 5"
+    }
+   },
+   "mission": {
+    "name": "SDA Tranche 1 Transport Layer A",
+    "type": "Government/Top Secret",
+    "orbit": {
+     "name": "Polar Orbit",
+     "abbrev": "PO"
+    }
+   },
+   "pad": {
+    "name": "Space Launch Complex 4E",
+    "latitude": 34.632,
+    "longitude": -120.611,
+    "country": {
+     "alpha_3_code": "USA"
+    },
+    "location": {
+     "id": 11,
+     "name": "Vandenberg SFB, CA, USA"
+    }
+   }
+  },
+  {
+   "id": "e0741415-6c63-4236-9736-24a6c04485bc",
+   "name": "Nuri | NeonSat-2 to 6",
+   "status": {
+    "id": 1,
+    "abbrev": "Go"
+   },
+   "last_updated": "2026-08-27T02:42:27Z",
+   "net": "2026-10-07T03:23:00Z",
+   "net_precision": {
+    "id": 1,
+    "abbrev": "MIN"
+   },
+   "window_start": "2026-10-07T03:23:00Z",
+   "window_end": "2026-10-07T04:23:00Z",
+   "launch_service_provider": {
+    "id": 41,
+    "name": "Korea Aerospace Research Institute"
+   },
+   "rocket": {
+    "configuration": {
+     "name": "Nuri",
+     "full_name": "KSLV-2 Nuri"
+    }
+   },
+   "mission": {
+    "name": "NeonSat-2 to 6",
+    "type": "Earth Science",
+    "orbit": {
+     "name": "Sun-Synchronous Orbit",
+     "abbrev": "SSO"
+    }
+   },
+   "pad": {
+    "name": "LC-2",
+    "latitude": 34.431867,
+    "longitude": 127.535069,
+    "country": {
+     "alpha_3_code": "KOR"
+    },
+    "location": {
+     "id": 9,
+     "name": "Naro Space Center, South Korea"
+    }
+   }
+  },
+  {
+   "id": "a1bb0984-19d4-4b47-9bba-706d225573e2",
+   "name": "Long March 12 | Unknown Payload",
+   "status": {
+    "id": 1,
+    "abbrev": "Go"
+   },
+   "last_updated": "2026-09-30T02:25:58Z",
+   "net": "2026-10-09T19:25:00Z",
+   "net_precision": {
+    "id": 2,
+    "abbrev": "HR"
+   },
+   "window_start": "2026-10-09T19:20:00Z",
+   "window_end": "2026-10-09T19:49:00Z",
+   "launch_service_provider": {
+    "id": 88,
+    "name": "China Aerospace Science and Technology Corporation"
+   },
+   "rocket": {
+    "configuration": {
+     "name": "Long March 12",
+     "full_name": "Long March 12"
+    }
+   },
+   "mission": {
+    "name": "Unknown Payload",
+    "type": "Unknown",
+    "orbit": {
+     "name": "Unknown",
+     "abbrev": "N/A"
+    }
+   },
+   "pad": {
+    "name": "Commercial LC-2",
+    "latitude": 19.59755,
+    "longitude": 110.936481,
+    "country": {
+     "alpha_3_code": "CHN"
+    },
+    "location": {
+     "id": 8,
+     "name": "Wenchang Space Launch Site, People's Republic of China"
+    }
+   }
+  },
+  {
+   "id": "97c6f5e1-299e-4652-b72d-9618ac047076",
+   "name": "Falcon 9 Block 5 | Starlink Group 15-25",
+   "status": {
+    "id": 1,
+    "abbrev": "Go"
+   },
+   "last_updated": "2026-09-30T23:22:54Z",
+   "net": "2026-10-10T23:00:00Z",
+   "net_precision": {
+    "id": 1,
+    "abbrev": "MIN"
+   },
+   "window_start": "2026-10-10T23:00:00Z",
+   "window_end": "2026-10-11T03:00:00Z",
+   "launch_service_provider": {
+    "id": 121,
+    "name": "SpaceX"
+   },
+   "rocket": {
+    "configuration": {
+     "name": "Falcon 9",
+     "full_name": "Falcon 9 Block 5"
+    }
+   },
+   "mission": {
+    "name": "Starlink Group 15-25",
+    "type": "Communications",
+    "orbit": {
+     "name": "Low Earth Orbit",
+     "abbrev": "LEO"
+    }
+   },
+   "pad": {
+    "name": "Space Launch Complex 4E",
+    "latitude": 34.632,
+    "longitude": -120.611,
+    "country": {
+     "alpha_3_code": "USA"
+    },
+    "location": {
+     "id": 11,
+     "name": "Vandenberg SFB, CA, USA"
+    }
+   }
+  },
+  {
+   "id": "bf2c3027-a314-403e-a416-2bfd5d165ad1",
+   "name": "Falcon 9 Block 5 | Dragon CRS-2 SpX-35",
+   "status": {
+    "id": 8,
+    "abbrev": "TBC"
+   },
+   "last_updated": "2026-10-01T22:00:43Z",
+   "net": "2026-10-13T10:33:00Z",
+   "net_precision": {
+    "id": 1,
+    "abbrev": "MIN"
+   },
+   "window_start": "2026-10-13T10:33:00Z",
+   "window_end": "2026-10-13T10:33:00Z",
+   "launch_service_provider": {
+    "id": 121,
+    "name": "SpaceX"
+   },
+   "rocket": {
+    "configuration": {
+     "name": "Falcon 9",
+     "full_name": "Falcon 9 Block 5"
+    }
+   },
+   "mission": {
+    "name": "Dragon CRS-2 SpX-35",
+    "type": "Resupply",
+    "orbit": {
+     "name": "Low Earth Orbit",
+     "abbrev": "LEO"
+    }
+   },
+   "pad": {
+    "name": "Space Launch Complex 40",
+    "latitude": 28.56194122,
+    "longitude": -80.57735736,
+    "country": {
+     "alpha_3_code": "USA"
+    },
+    "location": {
+     "id": 12,
+     "name": "Cape Canaveral SFS, FL, USA"
+    }
+   }
+  },
+  {
+   "id": "69ebbcd2-b257-4070-9ef9-21e7d1f8a883",
+   "name": "H3-24 | Martian Moon eXplorer (MMX)",
+   "status": {
+    "id": 1,
+    "abbrev": "Go"
+   },
+   "last_updated": "2026-08-20T21:04:48Z",
+   "net": "2026-10-19T19:41:03Z",
+   "net_precision": {
+    "id": 0,
+    "abbrev": "SEC"
+   },
+   "window_start": "2026-10-19T19:41:03Z",
+   "window_end": "2026-10-19T19:41:03Z",
+   "launch_service_provider": {
+    "id": 98,
+    "name": "Mitsubishi Heavy Industries"
+   },
+   "rocket": {
+    "configuration": {
+     "name": "H3-24",
+     "full_name": "H3-24"
+    }
+   },
+   "mission": {
+    "name": "Martian Moon eXplorer (MMX)",
+    "type": "Planetary Science",
+    "orbit": {
+     "name": "Mars Orbit",
+     "abbrev": "Mars"
+    }
+   },
+   "pad": {
+    "name": "Yoshinobu Launch Complex LP-2",
+    "latitude": 30.400938,
+    "longitude": 130.97564,
+    "country": {
+     "alpha_3_code": "JPN"
+    },
+    "location": {
+     "id": 26,
+     "name": "Tanegashima Space Center, Japan"
+    }
+   }
+  },
+  {
+   "id": "8dd5de11-831b-445f-86f0-bffefe0550d9",
+   "name": "Soyuz 2.1b | Progress MS-36 (97P)",
+   "status": {
+    "id": 8,
+    "abbrev": "TBC"
+   },
+   "last_updated": "2026-06-08T21:46:36Z",
+   "net": "2026-11-24T05:03:00Z",
+   "net_precision": {
+    "id": 1,
+    "abbrev": "MIN"
+   },
+   "window_start": "2026-11-24T05:03:00Z",
+   "window_end": "2026-11-24T05:03:00Z",
+   "launch_service_provider": {
+    "id": 63,
+    "name": "Russian Federal Space Agency (ROSCOSMOS)"
+   },
+   "rocket": {
+    "configuration": {
+     "name": "Soyuz 2.1b",
+     "full_name": "Soyuz 2.1b"
+    }
+   },
+   "mission": {
+    "name": "Progress MS-36 (97P)",
+    "type": "Resupply",
+    "orbit": {
+     "name": "Low Earth Orbit",
+     "abbrev": "LEO"
+    }
+   },
+   "pad": {
+    "name": "31/6",
+    "latitude": 45.996034,
+    "longitude": 63.564003,
+    "country": {
+     "alpha_3_code": "KAZ"
+    },
+    "location": {
+     "id": 15,
+     "name": "Baikonur Cosmodrome, Republic of Kazakhstan"
+    }
+   }
+  }
+ ]
+}

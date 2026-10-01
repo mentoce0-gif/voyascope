@@ -90,6 +90,18 @@
         <div id="events-body" class="events-body"></div>
         <p class="events-note k small">日付は運用している機関（JAXA・NASA・ESA など）の公式発表どおりで、日本時間で書いています。遅れたら「延期」とだけ書きます。</p>
       </section>
+      <!-- 世界の打ち上げ（参考）：The Space Devs のデータ。公式の予定とは箱を分け、点線の「参考」の印を付ける -->
+      <section class="events world" id="world-section" aria-labelledby="world-title" hidden>
+        <div class="events-head ref-anchor">
+          <h2 id="world-title" class="events-title world-title">世界の打ち上げ</h2>
+          <span class="ref-mark">参考<span class="ref-tip" aria-hidden="true">The Space Devs 参照（正確な情報は公式サイトを確認ください）</span></span>
+          <span class="k">The Space Devs のデータ・6時間ごとに更新</span>
+        </div>
+        <div id="world-body" class="events-body"></div>
+        <p class="events-note k small">「参考」の印は、宇宙機関の公式の発表ではない情報です。世界の打ち上げ予定をまとめている有志の団体 The Space Devs のデータ（Launch Library 2）を、日本時間にして載せています。遅れや変更がまだ入っていないことがあります。正確な情報は、各社・各機関の公式サイトで確かめてください。<span id="world-fetched"></span></p>
+        <!-- 「参考」の印の説明（一覧の行と地球のピンの aria-describedby が指す） -->
+        <span id="ref-note" hidden>The Space Devs 参照（正確な情報は公式サイトを確認ください）</span>
+      </section>
       <h2 class="list-title" id="list-title">注目</h2>
       <ul id="craft-list" class="craft-list"></ul>
       <p class="list-note k small">名前で呼べる機体だけを、少しずつ置いていきます。</p>
@@ -160,12 +172,14 @@
       <h3>「予定」について</h3>
       <p>一覧の「予定」と上の「次の出来事」には、打ち上げや探査機の到着など、運用している機関（JAXA・NASA・ESA など）が公式に発表した日付だけを載せています。日本時間で書き、遅れたら「延期」とだけ書きます。出典は予定ごとに出しています。</p>
       <p>地球の上のひし形（◇）は射場の場所です。位置は打上げ計画書の座標で、打ち上がるまで軌道は描きません。</p>
+      <p>「予定」の下の段の<b>世界の打ち上げ</b>には、点線の<b>「参考」の印</b>を付けています。世界の打ち上げ予定をまとめている有志の非営利団体 The Space Devs（宇宙機関・ロケット会社とは関係ありません）のデータで、公式の発表ではありません。6時間ごとに取り直していますが、遅れや変更がまだ入っていないことがあります。正確な情報は、各社・各機関の公式サイトで確かめてください。公式の予定と同じ打ち上げは、公式の方だけを出します。</p>
       <h3>使っているもの</h3>
       <ul class="small">
         <li>軌道データ：USSPACECOM／Space-Track.org（公開の軌道要素。CelesTrak から取得）</li>
         <li>みちびきの運用状況：みちびきウェブサイト「衛星運用状況」（内閣府）をもとに作成。6時間ごとに自動で取得</li>
         <li>ひまわり9号の最新の画像：気象衛星センターホームページ「ひまわりリアルタイム画像」（日本付近・赤外）。加工せずに表示しています</li>
         <li>予定の日付と射場の位置：JAXA・NASA・ESA など、運用している機関の公式発表（予定ごとに出典を表示）</li>
+        <li>世界の打ち上げ（参考）：<a href="https://thespacedevs.com/llapi" target="_blank" rel="noopener noreferrer">Launch Library 2（The Space Devs）</a>。6時間ごとに自動で取得し、日本時間と日本語の名前にして表示しています</li>
         <li>位置計算：satellite.js（MIT License）</li>
         <li>3D表示：globe.gl／three.js（MIT License）。中に入っているライブラリも含めた全文は <a href="vendor/THIRD_PARTY_NOTICES.txt" target="_blank" rel="noopener">ライセンス一覧</a></li>
         <li>地球の画像：NASA Blue Marble（昼）・Black Marble（夜の明かり）。昼と夜の境目は、観測時刻の太陽の位置から計算しています</li>
