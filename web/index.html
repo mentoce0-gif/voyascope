@@ -49,6 +49,7 @@
         <div class="brand-sub">今、宇宙を旅する者たち。</div>
       </div>
       <button type="button" id="tonight-chip" class="tonight-chip" hidden></button>
+      <button type="button" id="next-chip" class="next-chip" hidden></button>
       <div class="clock-block">
         <span id="sim-time" class="mono">--</span>
         <button type="button" id="live-badge" class="live-badge mono" data-live="true" aria-label="いまの時刻を表示中">LIVE</button>
@@ -80,6 +81,14 @@
           <select id="pref-select" class="pref-select" aria-label="都道府県"></select>
         </div>
         <div id="tonight-body" class="tonight-body"></div>
+      </section>
+      <section class="events" id="events-section" aria-labelledby="events-title" hidden>
+        <div class="events-head">
+          <h2 id="events-title" class="events-title">次の出来事</h2>
+          <span class="k">日本と世界・公式の日付だけ</span>
+        </div>
+        <div id="events-body" class="events-body"></div>
+        <p class="events-note k small">日付は運用している機関（JAXA・NASA・ESA など）の公式発表どおりで、日本時間で書いています。遅れたら「延期」とだけ書きます。</p>
       </section>
       <h2 class="list-title" id="list-title">注目</h2>
       <ul id="craft-list" class="craft-list"></ul>
@@ -148,10 +157,14 @@
       <p>地球のまわりの3本の環は、低軌道・中軌道・静止軌道の目安です。違いが見えるように<b>半径を比較用に描いていて、実際の距離とは違います</b>。低軌道の機体は約90分で地球を一周して「流れ」、静止軌道の機体は地球と同じ速さで回るので「止まって」見えます。早送りで確かめてみてください。</p>
       <h3>「状態」について</h3>
       <p>カードの「状態」は、運用している機関の公式ページで確かめた内容です。みちびきは、サービスを止める予定や、止まっているというお知らせ（公式の運用状況ページ）を自動で読み取って表示します。</p>
+      <h3>「予定」について</h3>
+      <p>一覧の「予定」と上の「次の出来事」には、打ち上げや探査機の到着など、運用している機関（JAXA・NASA・ESA など）が公式に発表した日付だけを載せています。日本時間で書き、遅れたら「延期」とだけ書きます。出典は予定ごとに出しています。</p>
+      <p>地球の上のひし形（◇）は射場の場所です。位置は打上げ計画書の座標で、打ち上がるまで軌道は描きません。</p>
       <h3>使っているもの</h3>
       <ul class="small">
         <li>軌道データ：USSPACECOM／Space-Track.org（公開の軌道要素。CelesTrak から取得）</li>
         <li>みちびきの運用状況：みちびきウェブサイト「衛星運用状況」（内閣府）をもとに作成。6時間ごとに自動で取得</li>
+        <li>予定の日付と射場の位置：JAXA・NASA・ESA など、運用している機関の公式発表（予定ごとに出典を表示）</li>
         <li>位置計算：satellite.js（MIT License）</li>
         <li>3D表示：globe.gl／three.js（MIT License）。中に入っているライブラリも含めた全文は <a href="vendor/THIRD_PARTY_NOTICES.txt" target="_blank" rel="noopener">ライセンス一覧</a></li>
         <li>地球の画像：NASA Blue Marble（昼）・Black Marble（夜の明かり）。昼と夜の境目は、観測時刻の太陽の位置から計算しています</li>

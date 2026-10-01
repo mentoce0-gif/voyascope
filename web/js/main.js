@@ -9,8 +9,9 @@ import { FAMILIES, familyOf } from "./families.js";
 import { starfieldDataUrl } from "./stars.js";
 import { placeAt } from "./places.js";
 import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
-import { findVisiblePasses, observerOf } from "./passes.js";
+import { findVisiblePasses, observerOf, dir8 } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
+import { upcomingEvents, eventsListHtml, eventPanelHtml, nextChipHtml, bigCountdown, whenShort, hmJst } from "./events.js";
 
 const COLORS = {
   navy: "#07142b",
@@ -65,10 +66,12 @@ async function loadJson(path) {
 }
 
 async function loadAll() {
-  const [index, land, prefs] = await Promise.all([
+  const [index, land, prefs, eventsData] = await Promise.all([
     loadJson("data/craft-index.json"),
     loadJson("data/land-110m.geojson"),
     loadJson("data/prefectures.json"),
+    // 予定は、読めなくても地球と機体は出す
+    loadJson("data/events.json").catch(() => ({ events: [] })),
   ]);
   const craft = await Promise.all(
     index.craft.map(async (c) => {
@@ -83,11 +86,11 @@ async function loadAll() {
       return { id: c.id, card, orbit, crewData, status, sample: !!c.sample };
     }),
   );
-  return { craft: craft.filter((c) => c.orbit), land, prefectures: prefs.prefectures };
+  return { craft: craft.filter((c) => c.orbit), land, prefectures: prefs.prefectures, events: eventsData.events ?? [] };
 }
 
 // ---------- 観測画面 ----------
-function startApp({ craft, land, prefectures }) {
+function startApp({ craft, land, prefectures, events }) {
   const clock = new SimClock();
 
   // 機体ごとの準備（軌道・家族・地球の上の印）
@@ -111,6 +114,25 @@ function startApp({ craft, land, prefectures }) {
     });
     c.el = el;
   }
+
+  // ---------- 予定：射場のピン（打ち上げの予定。打ち上がるまで軌道は描かない） ----------
+  const plannedFamily = FAMILIES.find((f) => f.id === "planned");
+  const sites = events
+    .filter((ev) => ev.kind === "launch" && ev.site?.position?.value)
+    .map((ev) => {
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = "site-marker";
+      el.style.setProperty("--c", plannedFamily.color);
+      el.setAttribute("aria-label", `${ev.title.ja}（${ev.site.label}）の予定を開く`);
+      el.innerHTML = `<span class="diamond"></span><span class="tag"></span>`;
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectEvent(ev);
+      });
+      const { lat, lng } = ev.site.position.value;
+      return { ev, el, lat, lng, alt: 0.012, shown: false };
+    });
 
   // 軌道データの取得日（いちばん古いもの）
   const oldest = craft.reduce((a, c) => (!a || c.orbit.fetched_at < a.orbit.fetched_at ? c : a), null);
@@ -160,6 +182,7 @@ function startApp({ craft, land, prefectures }) {
   const globeEl = $("#globe");
   const hidden = new Set(); // 表示しない家族
   const markerData = () => craft.filter((c) => c.pos && !hidden.has(c.family.id));
+  const siteData = () => (hidden.has("planned") ? [] : sites.filter((s) => s.shown));
   const globe = Globe({ animateIn: true })(globeEl)
     .backgroundColor(COLORS.navy)
     .showAtmosphere(true)
@@ -251,16 +274,16 @@ function startApp({ craft, land, prefectures }) {
   let listFilter = "all";
   let query = "";
   let selected = null;
+  let selectedEvent = null; // 詳細に出している予定（機体を選んでいるときは null）
   const famTabs = $("#fam-tabs");
   const listEl = $("#craft-list");
   const renderFamTabs = () => {
-    // 最後の「観測」は、今夜の空（ISS の見える通過）
-    famTabs.innerHTML = [{ id: "all", label: "すべて" }, ...present, { id: "tonight", label: "観測" }]
-      .map(
-        (f) =>
-          `<button type="button" class="fam-tab" data-fam="${f.id}" aria-pressed="${f.id === listFilter}">${esc(f.label)}</button>`,
-      )
-      .join("");
+    const tab = (f) =>
+      `<button type="button" class="fam-tab" data-fam="${f.id}" aria-pressed="${f.id === listFilter}">${esc(f.label)}</button>`;
+    // 左は家族で絞るタブ。右の2つは見る画面の切り替え：「予定」は次の出来事（公式の日付）、「観測」は今夜の空（ISS の見える通過）
+    famTabs.innerHTML =
+      `<span class="fam-group">${[{ id: "all", label: "すべて" }, ...present].map(tab).join("")}</span>` +
+      `<span class="fam-group fam-views">${[{ id: "planned", label: "予定" }, { id: "tonight", label: "観測" }].map(tab).join("")}</span>`;
   };
   // 名前（日本語・英語・id）で探す。全角・半角や大文字・小文字の違いは無視する
   const fold = (t) => String(t ?? "").normalize("NFKC").toLowerCase().replace(/\s+/g, "");
@@ -302,16 +325,20 @@ function startApp({ craft, land, prefectures }) {
       )
       .join("");
   };
-  // 「観測」タブのときは一覧の代わりに今夜の空を出す
+  // 「観測」タブは今夜の空、「予定」タブは次の出来事を、機体の一覧の代わりに出す
   const tonightSection = $("#tonight-section");
+  const eventsSection = $("#events-section");
   const showListFilter = (id) => {
     listFilter = id;
     const tonight = id === "tonight";
+    const planned = id === "planned";
     tonightSection.hidden = !tonight;
-    listEl.hidden = tonight;
-    $("#list-title").hidden = tonight;
+    eventsSection.hidden = !planned;
+    listEl.hidden = tonight || planned;
+    $("#list-title").hidden = tonight || planned;
     renderFamTabs();
     renderList();
+    if (planned) renderEvents();
   };
   famTabs.addEventListener("click", (e) => {
     const b = e.target.closest("[data-fam]");
@@ -322,7 +349,7 @@ function startApp({ craft, land, prefectures }) {
   const searchEl = $("#craft-search");
   searchEl.addEventListener("input", () => {
     query = searchEl.value;
-    if (listFilter === "tonight") showListFilter("all");
+    if (listFilter === "tonight" || listFilter === "planned") showListFilter("all");
     else renderList();
   });
   listEl.addEventListener("click", (e) => {
@@ -334,7 +361,7 @@ function startApp({ craft, land, prefectures }) {
   legend.innerHTML = FAMILIES.filter((f) => f.id !== "other")
     .map(
       (f) =>
-        `<label class="toggle"><input type="checkbox" data-fam="${f.id}" checked><span class="fam-dot" style="--c:${f.color}"></span>${esc(f.label)}</label>`,
+        `<label class="toggle"><input type="checkbox" data-fam="${f.id}" checked><span class="fam-dot fam-${f.id}" style="--c:${f.color}"></span>${esc(f.label)}</label>`,
     )
     .join("");
   legend.addEventListener("change", (e) => {
@@ -343,10 +370,10 @@ function startApp({ craft, land, prefectures }) {
     if (e.target.checked) hidden.delete(id);
     else hidden.add(id);
   });
-  // スマホ：一覧のタブで選んだ家族だけを地球にも出す（「すべて」「観測」は全部）
+  // スマホ：一覧のタブで選んだ家族だけを地球にも出す（「予定」は射場のピンだけ。「すべて」「観測」は全部）
   function showOnlyFamily(id) {
     hidden.clear();
-    if (present.some((f) => f.id === id)) for (const f of FAMILIES) if (f.id !== id) hidden.add(f.id);
+    if (id === "planned" || present.some((f) => f.id === id)) for (const f of FAMILIES) if (f.id !== id) hidden.add(f.id);
     for (const input of legend.querySelectorAll("input")) input.checked = !hidden.has(input.dataset.fam);
   }
   // 環：PC は下のバー、スマホは一覧の下。どちらで切り替えても両方そろえる
@@ -374,6 +401,15 @@ function startApp({ craft, land, prefectures }) {
   let lastMapAt = 0;
   let landD = null;
   const updateDetailLive = (force = false) => {
+    if (selectedEvent && !detailPanel.hidden) {
+      // 予定：打ち上げまでの残り時間を毎秒書き換える。時刻を過ぎたら描き直して残り時間を消す
+      const n = detailBody.querySelector('[data-live="countdown"]');
+      if (!n) return;
+      const text = bigCountdown(selectedEvent, clock.now());
+      if (!text) renderDetail();
+      else if (n.textContent !== text) n.textContent = text;
+      return;
+    }
     if (!selected || detailPanel.hidden) return;
     updatePanelLive(detailBody, { pos: selected.pos, periodMin: selected.period, place: selected.pos && placeAt(places, selected.pos.lat, selected.pos.lng) });
     const svg = detailBody.querySelector('[data-live="map"]');
@@ -385,6 +421,10 @@ function startApp({ craft, land, prefectures }) {
     }
   };
   const renderDetail = () => {
+    if (selectedEvent) {
+      detailBody.innerHTML = eventPanelHtml(selectedEvent, clock.now());
+      return;
+    }
     if (!selected) return;
     const c = selected;
     tab = renderPanel(detailBody, {
@@ -403,6 +443,7 @@ function startApp({ craft, land, prefectures }) {
 
   function select(c) {
     selected = c;
+    selectedEvent = null;
     detailPanel.hidden = false;
     app.classList.add("has-selected");
     if (isNarrow()) listPanel.classList.remove("open");
@@ -411,9 +452,25 @@ function startApp({ craft, land, prefectures }) {
     layoutGlobe();
     if (c.pos) globe.pointOfView({ lat: c.pos.lat, lng: c.pos.lng }, 900);
   }
+  // 予定を詳細に出す。射場があれば地球をそこへ向ける
+  function selectEvent(ev) {
+    if (!ev) return;
+    selected = null;
+    selectedEvent = ev;
+    setFollow(false);
+    detailPanel.hidden = false;
+    app.classList.add("has-selected");
+    if (isNarrow()) listPanel.classList.remove("open");
+    renderDetail();
+    renderList();
+    layoutGlobe();
+    const p = ev.site?.position?.value;
+    if (p) globe.pointOfView({ lat: p.lat, lng: p.lng }, 900);
+  }
   function closeDetail() {
     setExpanded(detailPanel, false);
     selected = null;
+    selectedEvent = null;
     detailPanel.hidden = true;
     app.classList.remove("has-selected");
     setFollow(false);
@@ -579,6 +636,7 @@ function startApp({ craft, land, prefectures }) {
           passes.length ? `ISS ${whenWord(passes[0].start, now)} ${clockWord(passes[0].start)}` : "ISS 見える通過なし（5日間）"
         }`;
     tonightChip.innerHTML = `<span class="pin" aria-hidden="true">⌖</span><span class="chip-full">${chipText}</span><span class="chip-short" aria-hidden="true">今夜</span>`;
+    renderEvents(); // 「予定」の先頭に出す今夜の通過も作り直す
   };
   prefSelect.addEventListener("change", () => {
     pref = prefectures.find((p) => p.code === prefSelect.value) ?? null;
@@ -595,13 +653,65 @@ function startApp({ craft, land, prefectures }) {
     select(iss);
     setFollow(true);
   });
-  tonightChip.addEventListener("click", () => {
-    showListFilter("tonight");
-    if (isNarrow()) showOnlyFamily("tonight");
+  // 上のバーのボタンから、一覧のタブを開く（スマホでは全部の高さで）
+  const openListTab = (id) => {
+    showListFilter(id);
+    if (isNarrow()) showOnlyFamily(id);
     listPanel.classList.add("open");
     setExpanded(listPanel, true);
     if (isNarrow()) closeDetail();
     listPanel.scrollTop = 0;
+  };
+  tonightChip.addEventListener("click", () => openListTab("tonight"));
+
+  // ---------- 予定：次の出来事（公式の日付）と、上のバーの「次の出来事」 ----------
+  const eventsBody = $("#events-body");
+  const nextChip = $("#next-chip");
+  let upcoming = [];
+  let eventsAt = -Infinity;
+  let eventsHtml = "";
+  let nextHtml = "";
+  // 今夜〜明日の ISS の見える通過（計算）を、予定の先頭に出す
+  const tonightRow = () => {
+    const p = passes[0];
+    const now = new Date();
+    if (!pref || !p || p.start - now > 24 * 3600e3) return null;
+    return {
+      day: whenWord(p.start, now),
+      time: hmJst(p.start),
+      title: `ISS が${pref.name}の空を通る`,
+      sub: `${dir8(p.startAz)}から${dir8(p.endAz)}へ・計算：公開の軌道データから`,
+    };
+  };
+  function renderEvents() {
+    const now = clock.now();
+    eventsAt = now.getTime();
+    upcoming = upcomingEvents(events, now);
+    if (!eventsSection.hidden) {
+      const html = eventsListHtml(upcoming, now, { tonight: tonightRow() });
+      // 書き換えると押しかけのボタンが消えるので、変わったときだけ
+      if (html !== eventsHtml) eventsBody.innerHTML = eventsHtml = html;
+    }
+    // 上のバー：いちばん近い予定（延期なら「延期」と出る）
+    const next = upcoming[0];
+    const chip = next ? nextChipHtml(next, now) : "";
+    if (chip !== nextHtml) {
+      nextChip.innerHTML = nextHtml = chip;
+      nextChip.setAttribute("aria-label", next ? `次の出来事：${next.title.ja}。予定の一覧を開く` : "");
+    }
+    nextChip.hidden = !next;
+    // 射場のピン：これからの打ち上げだけ。名前は「種子島 10/20」
+    const ids = new Set(upcoming.map((ev) => ev.id));
+    for (const s of sites) {
+      s.shown = ids.has(s.ev.id);
+      s.el.querySelector(".tag").textContent = `${s.ev.site.label} ${whenShort(s.ev, now)[0]}`;
+    }
+  }
+  nextChip.addEventListener("click", () => openListTab("planned"));
+  eventsBody.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-event]");
+    if (b) return selectEvent(events.find((ev) => ev.id === b.dataset.event));
+    if (e.target.closest('[data-go="tonight"]')) showListFilter("tonight");
   });
   updateTonight();
 
@@ -649,8 +759,9 @@ function startApp({ craft, land, prefectures }) {
       }
       c.el.classList.toggle("selected", c === selected);
     }
+    for (const s of sites) s.el.classList.toggle("selected", s.ev === selectedEvent);
     const pov = globe.pointOfView();
-    globe.htmlElementsData(markerData());
+    globe.htmlElementsData([...markerData(), ...siteData()]);
     if (follow && selected?.pos) globe.pointOfView({ lat: selected.pos.lat, lng: selected.pos.lng, altitude: pov.altitude }, 0);
 
     // 文字の更新は間引く
@@ -678,6 +789,8 @@ function startApp({ craft, land, prefectures }) {
         if (r.width) c.el.classList.toggle("tag-left", r.left + 34 + (c.el.querySelector(".tag")?.offsetWidth ?? 0) > innerWidth - 8);
       }
       updateDetailLive();
+      // 予定と「次の出来事」：観測時刻で30秒ごと（早送りや時刻の移動にもついていく）
+      if (Math.abs(now - eventsAt) > 30000) renderEvents();
       // 通過の予報は10分ごと、または次の通過が終わったら作り直す
       if (pref && (Date.now() - passesAt > 600e3 || (passes[0] && passes[0].end.getTime() < Date.now()))) updateTonight();
 

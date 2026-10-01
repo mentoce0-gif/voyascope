@@ -1,0 +1,211 @@
+{
+  "$comment": "scripts/sync-web-data.mjs が curation/events から作る。手で編集しない。",
+  "events": [
+    {
+      "id": "bepicolombo-mercury-orbit",
+      "kind": "arrival",
+      "regions": [
+        "world",
+        "japan"
+      ],
+      "title": {
+        "ja": "ベピコロンボが水星を回る軌道に入る",
+        "en": "BepiColombo enters orbit around Mercury"
+      },
+      "summary": {
+        "value": "ESA と JAXA の水星探査。ESA の MPO と JAXA の「みお」の2機で水星を回るのは、この計画が初めて",
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-01"
+      },
+      "when": {
+        "value": {
+          "date": "2026-11-21"
+        },
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-01",
+        "note": "ESA の発表は日付だけ（時刻なし）"
+      },
+      "links": [
+        {
+          "label": "ESA ベピコロンボ到着の最新情報（英語）",
+          "url": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+        },
+        {
+          "label": "JAXA 国際水星探査計画 BepiColombo／みお",
+          "url": "https://www.jaxa.jp/projects/sas/bepi/index_j.html"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    },
+    {
+      "id": "bepicolombo-mio-separation",
+      "kind": "separation",
+      "regions": [
+        "world",
+        "japan"
+      ],
+      "title": {
+        "ja": "「みお」と MPO が分かれる",
+        "en": "MPO and Mio separate"
+      },
+      "summary": {
+        "value": "水星を回る軌道に入ったあと、2機が分かれる。観測の本番は2027年4月から",
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-01"
+      },
+      "when": {
+        "value": {
+          "from": "2026-12-09",
+          "to": "2026-12-10"
+        },
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-01",
+        "note": "ESA の発表は「9–10 December 2026」"
+      },
+      "links": [
+        {
+          "label": "ESA ベピコロンボ到着の最新情報（英語）",
+          "url": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+        },
+        {
+          "label": "JAXA 国際水星探査計画 BepiColombo／みお",
+          "url": "https://www.jaxa.jp/projects/sas/bepi/index_j.html"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    },
+    {
+      "id": "hayabusa2-earth-swingby",
+      "kind": "flyby",
+      "regions": [
+        "japan"
+      ],
+      "title": {
+        "ja": "はやぶさ2 の地球スイングバイ",
+        "en": "Hayabusa2 Earth swing-by"
+      },
+      "summary": {
+        "value": "拡張ミッション（はやぶさ2♯）の次の目標。探査の対象は、小惑星トリフネ（2026年7月5日にフライバイ成功）と 1998 KY26",
+        "source": "https://www.hayabusa2.jaxa.jp/enjoy/material/press/Hayabusa2_Press_20260730.pdf",
+        "as_of": "2026-10-01"
+      },
+      "when": {
+        "value": {
+          "month": "2027-12"
+        },
+        "source": "https://www.hayabusa2.jaxa.jp/enjoy/material/press/Hayabusa2_Press_20260730.pdf",
+        "as_of": "2026-10-01",
+        "note": "記者説明会資料（2026-07-30）の「次の目標（2027年12月の地球スイングバイ）」"
+      },
+      "links": [
+        {
+          "label": "JAXA はやぶさ2 プロジェクト",
+          "url": "https://www.hayabusa2.jaxa.jp/"
+        },
+        {
+          "label": "記者説明会資料（2026-07-30、PDF）",
+          "url": "https://www.hayabusa2.jaxa.jp/enjoy/material/press/Hayabusa2_Press_20260730.pdf"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    },
+    {
+      "id": "mmx-launch",
+      "kind": "launch",
+      "regions": [
+        "japan"
+      ],
+      "title": {
+        "ja": "MMX の打ち上げ",
+        "en": "MMX launch"
+      },
+      "summary": {
+        "value": "火星の衛星フォボスからサンプルを持ち帰る計画の探査機。2031年度に、人類初の火星圏からのサンプルリターンをめざす",
+        "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+        "as_of": "2026-10-01",
+        "note": "打上げ計画書「2.5 火星衛星探査機(MMX)の概要」"
+      },
+      "when": {
+        "value": {
+          "at": "2026-10-19T19:41:03Z"
+        },
+        "source": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html",
+        "as_of": "2026-10-01"
+      },
+      "window_end": {
+        "value": "2026-11-07",
+        "source": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html",
+        "as_of": "2026-10-01",
+        "note": "予備期間は10月21日〜11月7日。予備期間中の時刻は日ごとに決まる"
+      },
+      "vehicle": {
+        "value": "H3ロケット10号機（H3-24L）",
+        "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+        "as_of": "2026-10-01"
+      },
+      "site": {
+        "label": "種子島",
+        "name": {
+          "value": "種子島宇宙センター 大型ロケット第2射点（鹿児島県）",
+          "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+          "as_of": "2026-10-01"
+        },
+        "position": {
+          "value": {
+            "lat": 30.401,
+            "lng": 130.9776
+          },
+          "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+          "as_of": "2026-10-01",
+          "note": "計画書にある第1射点の座標（30°24′03.47″N、130°58′39.20″E）。第2射点はすぐ隣"
+        }
+      },
+      "links": [
+        {
+          "label": "JAXA プレスリリース（MMX の打上げ）",
+          "url": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html"
+        },
+        {
+          "label": "JAXA 打上げ計画書（PDF）",
+          "url": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf"
+        },
+        {
+          "label": "MMX プロジェクトサイト",
+          "url": "https://www.mmx.jaxa.jp/"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    },
+    {
+      "id": "voyager-1-one-light-day",
+      "kind": "milestone",
+      "regions": [
+        "world"
+      ],
+      "title": {
+        "ja": "ボイジャー1号が地球から1光日に",
+        "en": "Voyager 1 reaches one light-day from Earth"
+      },
+      "summary": {
+        "value": "光で24時間かかる距離（約259億 km）。人がつくったもので、ここまで届くのはボイジャー1号が初めて",
+        "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+        "as_of": "2026-10-01"
+      },
+      "when": {
+        "value": {
+          "at": "2026-11-18T10:16:07Z"
+        },
+        "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+        "as_of": "2026-10-01",
+        "note": "NASA の発表は 2026年11月18日 2時16分07秒（米国太平洋標準時）"
+      },
+      "links": [
+        {
+          "label": "NASA「Where Are Voyager 1 and Voyager 2 Now?」",
+          "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    }
+  ]
+}

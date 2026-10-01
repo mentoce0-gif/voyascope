@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyascope.local/schema/event.schema.json",
+  "title": "予定（打ち上げ・到着などの出来事）",
+  "$comment": "日付は運用機関の公式発表どおりに書く。遅れたら status を postponed にし、新しい日付が公式に出たら when を直す。推測で日付を書かない。",
+  "type": "object",
+  "required": ["id", "kind", "regions", "title", "when", "links", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "kind": {
+      "enum": ["launch", "arrival", "separation", "flyby", "milestone"],
+      "description": "launch=打ち上げ / arrival=到着 / separation=分離 / flyby=接近（スイングバイ・フライバイ） / milestone=節目"
+    },
+    "regions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["japan", "world"] },
+      "description": "日本の機関が関わる出来事は japan。世界の出来事は world（両方でもよい）"
+    },
+    "title": { "$ref": "common.schema.json#/$defs/bilingualName" },
+    "summary": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "一言の説明。出典に書かれていることだけ"
+    },
+    "when": {
+      "type": "object",
+      "required": ["value", "source", "as_of"],
+      "additionalProperties": false,
+      "description": "公式に発表された日時。as_of は出典を確かめた日",
+      "properties": {
+        "value": { "$ref": "#/$defs/when" },
+        "source": { "$ref": "common.schema.json#/$defs/source" },
+        "as_of": { "$ref": "common.schema.json#/$defs/date" },
+        "note": { "type": "string", "maxLength": 80 }
+      }
+    },
+    "status": {
+      "description": "なければ予定どおり（scheduled）。延期・終わった・中止は、公式の発表を出典にして書く",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": { "properties": { "value": { "enum": ["scheduled", "postponed", "done", "cancelled"] } } }
+        }
+      ]
+    },
+    "window_end": {
+      "description": "打ち上げの予備期間の終わり（日本時間の日付）",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": { "properties": { "value": { "$ref": "common.schema.json#/$defs/date" } } }
+        }
+      ]
+    },
+    "vehicle": { "$ref": "common.schema.json#/$defs/fact" },
+    "site": {
+      "type": "object",
+      "required": ["label", "name", "position"],
+      "additionalProperties": false,
+      "description": "射場。地球の上にピンを立てる",
+      "properties": {
+        "label": { "type": "string", "minLength": 1, "maxLength": 8, "description": "ピンに添える短い名前" },
+        "name": { "$ref": "common.schema.json#/$defs/fact" },
+        "position": {
+          "allOf": [
+            { "$ref": "common.schema.json#/$defs/fact" },
+            {
+              "if": { "required": ["value"] },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "object",
+                    "required": ["lat", "lng"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "lat": { "type": "number", "minimum": -90, "maximum": 90 },
+                      "lng": { "type": "number", "minimum": -180, "maximum": 180 }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": { "$ref": "common.schema.json#/$defs/link" }
+    },
+    "updated_at": { "$ref": "common.schema.json#/$defs/date" }
+  },
+  "$defs": {
+    "when": {
+      "description": "発表の細かさに合わせて1つだけ：at=時刻まで（UTC）／date=日付だけ／from・to=日付の幅／month=月だけ",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["at"],
+          "additionalProperties": false,
+          "properties": { "at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2})?Z$" } }
+        },
+        {
+          "type": "object",
+          "required": ["date"],
+          "additionalProperties": false,
+          "properties": { "date": { "$ref": "common.schema.json#/$defs/date" } }
+        },
+        {
+          "type": "object",
+          "required": ["from", "to"],
+          "additionalProperties": false,
+          "properties": {
+            "from": { "$ref": "common.schema.json#/$defs/date" },
+            "to": { "$ref": "common.schema.json#/$defs/date" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["month"],
+          "additionalProperties": false,
+          "properties": { "month": { "type": "string", "pattern": "^\\d{4}-(0[1-9]|1[0-2])$" } }
+        }
+      ]
+    }
+  }
+}
