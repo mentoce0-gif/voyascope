@@ -28,10 +28,12 @@ npx serve web              # または python3 -m http.server -d web
 | `js/tonight.js` | 「今夜・頭の上」の表示（県の選択、時刻と方角のことば、空の図） |
 | `js/format.js` | 日付・数値の表示 |
 | `js/events.js` | 予定（次の出来事・これから行く）：日本時間の日付・残り時間・一覧と詳細の表示 |
+| `js/launches.js` | 世界の打ち上げ（参考）：日本時間の日時・残り時間・公式の予定との重なりの除外・射場のピンのまとめ・「参考」の印・一覧と詳細の表示 |
 | `data/orbits/iss.json` | 軌道データ（CelesTrak の OMM JSON。TLE でも動く。取得日時・エポック・出典URLを含む） |
 | `data/prefectures.json` | 都道府県の代表地点（`config/prefectures.json` のコピー） |
 | `data/craft-index.json` | 表示する機体の一覧（`npm run sync:web` で作る） |
 | `data/events.json` | 予定（`curation/events/` から `npm run sync:web` で作る） |
+| `data/launches.json` | 世界の打ち上げ（参考）。Launch Library 2（The Space Devs）から GitHub Actions が6時間ごとに作る（手元では `npm run fetch:launches`）。公式の発表ではないので、画面では「参考」の印を付ける |
 | `data/cards/iss.json` | `examples/spacecraft/iss.json` のコピー（見本） |
 | `data/cards/iss-crew.json` | ISS に向かったチームと飛行士（`examples/teams`・`examples/astronauts` から `npm run sync:web` で作る） |
 | `data/land-110m.geojson` | 陸地の形（Natural Earth） |
