@@ -705,6 +705,10 @@ body { overflow: hidden; }
 .toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
 .toggle input { accent-color: var(--mint); margin: 0 2px 0 0; }
 .list-open { display: none; }
+/* PC：「表示」パネルは枠を持たず、家族と環がこの行にそのまま並ぶ */
+.view-panel { display: contents; }
+/* スマホだけで出すもの */
+.narrow-only { display: none; }
 .footnote {
   font-size: 0.72rem;
   color: var(--text-dim);
@@ -864,14 +868,56 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   .list-panel { display: none; }
   .list-panel.open { display: block; }
   .list-open { display: inline-block; flex: none; white-space: nowrap; }
-  .bottom-bar { padding: 8px 12px calc(env(safe-area-inset-bottom) + 6px); background: rgba(5, 14, 31, 0.94); }
-  .timeline { flex-wrap: wrap; gap: 8px; }
-  .slider-wrap { order: 3; flex-basis: 100%; }
-  .speeds { margin-left: auto; }
   .btn { padding: 0.35em 0.6em; font-size: 0.78rem; min-height: 32px; }
-  .round-btn { width: 36px; height: 36px; }
-  .controls-row { gap: 8px; justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; }
-  .fam-legend { flex-wrap: nowrap; gap: 10px; }
+  .wide-only { display: none; }
+  /* 下のバーは2段：再生・時間・速さ／一覧・表示・追尾・現在へ */
+  .bottom-bar {
+    padding: 8px 12px calc(env(safe-area-inset-bottom) + 6px);
+    background: rgba(5, 14, 31, 0.94);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "play slider speed" "ctl ctl now";
+    align-items: center;
+    gap: 6px 10px;
+  }
+  .timeline { display: contents; }
+  #play { grid-area: play; width: 44px; height: 44px; }
+  .slider-wrap { grid-area: slider; padding-top: 4px; }
+  .ticks span:nth-child(2) { display: none; } /* −3h は狭いと重なる */
+  .speeds { display: none; }
+  .speed-cycle { grid-area: speed; display: inline-block; min-width: 56px; min-height: 44px; font-size: 0.85rem; }
+  .bottom-bar .btn { min-height: 44px; padding: 0.35em 0.9em; font-size: 0.85rem; }
+  /* 「現在へ」：いまを見ているときは控えめ、時刻がずれたら目立たせる */
+  #now { grid-area: now; }
+  #now .narrow-only { display: inline; }
+  #app[data-live="true"] #now { opacity: 0.45; }
+  #app[data-live="false"] #now { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 10px var(--amber-dim); }
+  .controls-row { grid-area: ctl; gap: 8px; justify-content: flex-start; flex-wrap: nowrap; }
+  .view-open { display: inline-block; }
+  .view-open[aria-expanded="true"] { border-color: var(--mint); color: var(--mint); }
+  #app:not(.has-selected) #follow { display: none; }
+  .footnote { display: none; } /* 軌道データの日時と「このアプリについて」はメニューの中にある */
+  .bottom-bar .warning { grid-column: 1 / -1; }
+  /* 「表示」パネル：下のバーの上に出る */
+  .view-panel {
+    display: none;
+    position: absolute;
+    left: 12px;
+    bottom: calc(100% + 8px);
+    z-index: 25;
+    min-width: 220px;
+    padding: 8px 14px 10px;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    background: rgba(7, 20, 43, 0.97);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  }
+  .view-panel.open { display: block; }
+  .view-title.narrow-only { display: block; margin: 2px 0 4px; }
+  .view-panel .fam-legend { display: grid; gap: 0; }
+  .view-panel .toggle { min-height: 44px; font-size: 0.9rem; gap: 8px; }
+  .view-panel .toggle input { width: 20px; height: 20px; }
+  .view-panel > .toggle { border-top: 1px solid var(--panel-border); width: 100%; }
   .scale-note { bottom: calc(var(--bottom-h) + 8px); font-size: 0.66rem; white-space: normal; text-align: center; width: calc(100vw - 32px); }
 }
 @media (max-width: 400px) {

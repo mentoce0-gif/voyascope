@@ -101,7 +101,7 @@
         <button type="button" id="play" class="round-btn" aria-label="一時停止" data-playing="true">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-pause" d="M7 5h4v14H7zM13 5h4v14h-4z"/><path class="i-play" d="M8 5l11 7-11 7z"/></svg>
         </button>
-        <button type="button" id="now" class="btn mono live-btn">▶ LIVE</button>
+        <button type="button" id="now" class="btn mono live-btn"><span class="wide-only">▶ LIVE</span><span class="narrow-only">現在へ</span></button>
         <div class="slider-wrap">
           <input id="timeline" type="range" min="-360" max="1440" step="1" value="0" aria-label="観測時刻（現在からのずれ）">
           <div class="ticks mono" aria-hidden="true">
@@ -113,11 +113,18 @@
           <button type="button" class="btn speed mono" data-speed="60" aria-pressed="false">×60</button>
           <button type="button" class="btn speed mono" data-speed="600" aria-pressed="false">×600</button>
         </div>
+        <!-- スマホ：速さは1つのボタン（押すたびに ×1 → ×60 → ×600） -->
+        <button type="button" id="speed-cycle" class="btn mono speed-cycle narrow-only" aria-label="再生の速さ ×1（押すと切り替わる）">×1</button>
       </div>
       <div class="controls-row">
         <button type="button" id="list-open" class="btn list-open">一覧・観測</button>
-        <div id="fam-legend" class="fam-legend" role="group" aria-label="家族ごとの表示"></div>
-        <label class="toggle"><input type="checkbox" id="rings-toggle" checked> 環</label>
+        <button type="button" id="view-open" class="btn view-open narrow-only" aria-expanded="false" aria-controls="view-panel">表示</button>
+        <!-- 家族ごとの表示と環。PCではこの行にそのまま並び、スマホでは「表示」で開く小さなパネルになる -->
+        <div id="view-panel" class="view-panel">
+          <p class="view-title k narrow-only">表示するもの</p>
+          <div id="fam-legend" class="fam-legend" role="group" aria-label="家族ごとの表示"></div>
+          <label class="toggle"><input type="checkbox" id="rings-toggle" checked> 環</label>
+        </div>
         <button type="button" id="follow" class="btn mono" aria-pressed="false" title="カメラが選んだ機体を追いかけます">追尾</button>
       </div>
       <div class="footnote">
