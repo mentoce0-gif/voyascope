@@ -304,7 +304,9 @@ function startApp({ craft, land, prefectures }) {
   };
   famTabs.addEventListener("click", (e) => {
     const b = e.target.closest("[data-fam]");
-    if (b) showListFilter(b.dataset.fam);
+    if (!b) return;
+    showListFilter(b.dataset.fam);
+    if (isNarrow()) showOnlyFamily(b.dataset.fam);
   });
   const searchEl = $("#craft-search");
   searchEl.addEventListener("input", () => {
@@ -330,30 +332,28 @@ function startApp({ craft, land, prefectures }) {
     if (e.target.checked) hidden.delete(id);
     else hidden.add(id);
   });
-  $("#rings-toggle").addEventListener("change", (e) => {
-    showRings = e.target.checked;
-    refreshPaths();
-    $(".scale-note").hidden = !showRings;
-  });
+  // スマホ：一覧のタブで選んだ家族だけを地球にも出す（「すべて」「観測」は全部）
+  function showOnlyFamily(id) {
+    hidden.clear();
+    if (present.some((f) => f.id === id)) for (const f of FAMILIES) if (f.id !== id) hidden.add(f.id);
+    for (const input of legend.querySelectorAll("input")) input.checked = !hidden.has(input.dataset.fam);
+  }
+  // 環：PC は下のバー、スマホは一覧の下。どちらで切り替えても両方そろえる
+  const ringInputs = [$("#rings-toggle"), $("#rings-toggle-list")];
+  for (const input of ringInputs) {
+    input.addEventListener("change", () => {
+      showRings = input.checked;
+      for (const other of ringInputs) other.checked = showRings;
+      refreshPaths();
+      $(".scale-note").hidden = !showRings;
+    });
+  }
 
   const listPanel = $("#list-panel");
   $("#list-open").addEventListener("click", () => {
     listPanel.classList.toggle("open");
     setExpanded(listPanel, false);
-    setViewPanel(false);
     if (isNarrow() && listPanel.classList.contains("open")) closeDetail();
-  });
-
-  // スマホ：家族ごとの表示と環は「表示」で開く小さなパネル。外を触ると閉じる
-  const viewPanel = $("#view-panel");
-  const viewOpen = $("#view-open");
-  function setViewPanel(on) {
-    viewPanel.classList.toggle("open", on);
-    viewOpen.setAttribute("aria-expanded", String(on));
-  }
-  viewOpen.addEventListener("click", () => setViewPanel(!viewPanel.classList.contains("open")));
-  document.addEventListener("pointerdown", (e) => {
-    if (viewPanel.classList.contains("open") && !e.target.closest("#view-panel, #view-open")) setViewPanel(false);
   });
 
   // ---------- 詳細パネル ----------
@@ -579,6 +579,7 @@ function startApp({ craft, land, prefectures }) {
   });
   tonightChip.addEventListener("click", () => {
     showListFilter("tonight");
+    if (isNarrow()) showOnlyFamily("tonight");
     listPanel.classList.add("open");
     if (isNarrow()) closeDetail();
     listPanel.scrollTop = 0;
