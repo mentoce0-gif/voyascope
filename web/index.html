@@ -51,7 +51,7 @@
       <button type="button" id="tonight-chip" class="tonight-chip" hidden></button>
       <div class="clock-block">
         <span id="sim-time" class="mono">--</span>
-        <span id="live-badge" class="live-badge mono" data-live="true">LIVE</span>
+        <button type="button" id="live-badge" class="live-badge mono" data-live="true" aria-label="いまの時刻を表示中">LIVE</button>
         <button type="button" id="menu-open" class="menu-btn" aria-label="メニュー（このアプリについて）"><span></span><span></span><span></span></button>
       </div>
     </header>
@@ -118,7 +118,7 @@
         <button type="button" id="speed-cycle" class="btn mono speed-cycle narrow-only" aria-label="再生の速さ ×1（押すと切り替わる）">×1</button>
       </div>
       <div class="controls-row">
-        <button type="button" id="list-open" class="btn list-open">一覧・観測</button>
+        <button type="button" id="list-open" class="btn list-open">一覧</button>
         <!-- 家族ごとの表示と環（PC）。スマホでは一覧のタブが地球の表示も絞り、環は一覧の下に置く -->
         <div id="fam-legend" class="fam-legend" role="group" aria-label="家族ごとの表示"></div>
         <label class="toggle rings-toggle"><input type="checkbox" id="rings-toggle" checked> 環</label>
