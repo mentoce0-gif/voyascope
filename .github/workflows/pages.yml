@@ -6,7 +6,8 @@ name: pages
 #   （Actions がコミットしたプッシュでは、ほかのワークフローが動かないため）
 # - 手動（Actions の画面から）
 #
-# 最初に一度だけ、リポジトリの Settings → Pages → Source を「GitHub Actions」にする必要がある。
+# 2026-09-30 オーナー方針：微修正を重ねたあと Cloudflare Pages に移す。それまでの仮の公開先。
+# 移したら、このワークフローは消すか手動だけにする。
 
 on:
   push:
