@@ -10,6 +10,9 @@
   --amber-dim: rgba(255, 181, 71, 0.6);
   --text: #d9f4ea;
   --text-dim: #8fb3a8;
+  /* 参考（公式の発表ではない情報）：点線と、この青灰色で見分ける */
+  --ref: #a8bce0;
+  --ref-dim: rgba(168, 188, 224, 0.5);
   --danger: #ff7a6b;
   --font-body: "Zen Kaku Gothic New", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -919,9 +922,101 @@ body { overflow: hidden; }
   text-shadow: 0 0 6px var(--navy-900);
 }
 .site-marker.selected .diamond { outline: 2px solid var(--c); outline-offset: 4px; }
+/* 一覧の行にマウスを乗せているあいだ：同じ射場のピンを光らせる */
+.site-marker.peek .diamond { outline: 2px dashed var(--c); outline-offset: 5px; }
+.site-marker.peek .tag { color: var(--text); }
 .site-marker:focus-visible { outline: 2px solid var(--amber); outline-offset: -8px; border-radius: 50%; }
 /* 凡例：予定はひし形 */
 .fam-dot.fam-planned { width: 8px; height: 8px; border-radius: 1px; background: none; border: 1.5px solid var(--c); transform: rotate(45deg); }
+
+/* ---------- 参考（公式の発表ではない情報）：点線の「参考」の印と、ホバー・フォーカスで出る説明 ---------- */
+.ref-mark {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  border: 1px dashed var(--ref);
+  border-radius: 3px;
+  color: var(--ref);
+  font-size: 0.66rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+/* 説明の吹き出し：行（または見出し）の幅いっぱいに、すぐ下へ出す。少し待ってから出す（一覧の上をなぞったときにちらつかない） */
+.ref-tip {
+  position: absolute;
+  z-index: 5;
+  left: 8px;
+  right: 8px;
+  top: calc(100% + 4px);
+  padding: 6px 9px;
+  border: 1px dashed var(--ref);
+  border-radius: 6px;
+  background: rgba(5, 14, 31, 0.96);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  white-space: normal;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0s linear 0.15s;
+}
+.event-item.is-ref, .ref-anchor { position: relative; }
+.event-list li:last-child .event-item.is-ref .ref-tip { top: auto; bottom: calc(100% + 4px); } /* 最後の行は上に */
+@media (hover: hover) {
+  .event-item.is-ref:hover .ref-tip,
+  .ref-anchor .ref-mark:hover .ref-tip,
+  .site-marker.is-ref:hover .ref-tip { opacity: 1; visibility: visible; transition-delay: 0.25s, 0.25s; }
+}
+.event-item.is-ref:focus-visible .ref-tip,
+.site-marker.is-ref:focus-visible .ref-tip { opacity: 1; visibility: visible; transition-delay: 0s, 0s; }
+@media (prefers-reduced-motion: reduce) { .ref-tip { transition: none; } }
+
+/* 予定タブの下の段：世界の打ち上げ（公式の予定の箱とは、点線と色で分ける） */
+.events.world { border-style: dashed; border-color: var(--ref-dim); background: rgba(168, 188, 224, 0.04); }
+.world-title { color: var(--ref); }
+.event-item.is-ref { border-style: dashed; }
+.event-item.is-ref:hover { border-color: var(--ref); }
+.event-item.is-ref .event-when,
+.event-item.is-ref .event-left { color: var(--ref); }
+/* 1行ずつに収める（名前が長ければ末尾を省く。全部の名前は詳細と読み上げに出る） */
+.ref-line { display: flex; align-items: baseline; min-width: 0; }
+.ref-line .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ref-line .event-left { flex: none; margin-left: 6px; }
+/* 一覧の行では、印は日時の下にそろえて置く */
+.event-when .ref-mark { align-self: flex-start; margin: 3px 0 0; font-family: var(--font-body); }
+
+/* 詳細：説明の文は常に出す */
+.ref-note {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px !important;
+  padding: 8px 10px;
+  border: 1px dashed var(--ref-dim);
+  border-radius: 8px;
+  background: rgba(168, 188, 224, 0.06);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.ref-note .ref-mark { margin-left: 0; flex: none; }
+.class-chip.ref-chip { --c: var(--ref); border-style: dashed; }
+.event-countdown.ref-box { border-style: dashed; background: rgba(168, 188, 224, 0.07); }
+.event-countdown.ref-box .mono { color: var(--ref); }
+
+/* 地球の上の世界の打ち上げのピン：点線のひし形。説明は名前の下に */
+.site-marker.is-ref { --c: var(--ref); }
+.site-marker.is-ref .diamond { border-style: dashed; box-shadow: none; }
+.site-marker.is-ref .tag .ref-mark { margin-left: 2px; padding: 0 3px; font-size: 9px; vertical-align: 1px; }
+.site-marker.is-ref .ref-tip { left: 50%; right: auto; top: 54px; width: 230px; transform: translateX(-50%); }
 
 /* ---------- このアプリについて（ダイアログ） ---------- */
 dialog.card {
@@ -1032,6 +1127,8 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
     max-height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
     height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
   }
+  /* シートを全部の高さに広げたときは、上に少しだけ見える地球の名前を消す（上のバーの文字と重なるため） */
+  #app:has(.side-panel.expanded) #globe .tag { visibility: hidden; }
   /* つまみ：スクロールしても上に残る。押すと広げる／縮める、下へ引くと閉じる */
   .sheet-handle {
     position: sticky;

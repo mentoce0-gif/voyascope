@@ -27,8 +27,8 @@ const nextMonth = (ym) => {
   const [y, m] = ym.split("-").map(Number);
   return m === 12 ? `${y + 1}-01` : `${y}-${pad(m + 1)}`;
 };
-const weekday = (ymd) => WEEKDAYS[new Date(`${ymd}T00:00:00Z`).getUTCDay()];
-const md = (ymd) => `${Number(ymd.slice(5, 7))}月${Number(ymd.slice(8, 10))}日`;
+export const weekday = (ymd) => WEEKDAYS[new Date(`${ymd}T00:00:00Z`).getUTCDay()];
+export const md = (ymd) => `${Number(ymd.slice(5, 7))}月${Number(ymd.slice(8, 10))}日`;
 
 // 予定の始まりと、一覧から消す時刻。
 // 日付だけの発表は、発表した国との時差があるので、日本時間の翌日いっぱいまで残す
