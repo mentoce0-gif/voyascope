@@ -707,8 +707,6 @@ body { overflow: hidden; }
 .toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
 .toggle input { accent-color: var(--mint); margin: 0 2px 0 0; }
 .list-open { display: none; }
-/* PC：「表示」パネルは枠を持たず、家族と環がこの行にそのまま並ぶ */
-.view-panel { display: contents; }
 /* スマホだけで出すもの */
 .narrow-only { display: none; }
 .footnote {
@@ -954,31 +952,12 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   #app[data-live="true"] #now { opacity: 0.45; }
   #app[data-live="false"] #now { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 10px var(--amber-dim); }
   .controls-row { grid-area: ctl; gap: 8px; justify-content: flex-start; flex-wrap: nowrap; }
-  .view-open { display: inline-block; }
-  .view-open[aria-expanded="true"] { border-color: var(--mint); color: var(--mint); }
+  .controls-row .fam-legend, .controls-row .rings-toggle { display: none; } /* 一覧のタブと、一覧の下の「環」で切り替える */
   #app:not(.has-selected) #follow { display: none; }
   .footnote { display: none; } /* 軌道データの日時と「このアプリについて」はメニューの中にある */
   .bottom-bar .warning { grid-column: 1 / -1; }
-  /* 「表示」パネル：下のバーの上に出る */
-  .view-panel {
-    display: none;
-    position: absolute;
-    left: 12px;
-    bottom: calc(100% + 8px);
-    z-index: 25;
-    min-width: 220px;
-    padding: 8px 14px 10px;
-    border: 1px solid var(--panel-border);
-    border-radius: 12px;
-    background: rgba(7, 20, 43, 0.97);
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
-  }
-  .view-panel.open { display: block; }
-  .view-title.narrow-only { display: block; margin: 2px 0 4px; }
-  .view-panel .fam-legend { display: grid; gap: 0; }
-  .view-panel .toggle { min-height: 44px; font-size: 0.9rem; gap: 8px; }
-  .view-panel .toggle input { width: 20px; height: 20px; }
-  .view-panel > .toggle { border-top: 1px solid var(--panel-border); width: 100%; }
+  .list-rings.narrow-only { display: flex; min-height: 44px; margin-top: 8px; padding-top: 4px; border-top: 1px solid var(--panel-border); font-size: 0.85rem; gap: 8px; white-space: normal; }
+  .list-rings input { width: 20px; height: 20px; flex: none; }
   /* 環の注記は1行（くわしい数字は「このアプリについて」にある） */
   .scale-note { bottom: calc(var(--bottom-h) + 8px); font-size: 0.66rem; white-space: normal; text-align: center; width: max-content; max-width: calc(100vw - 16px); }
   .scale-note .narrow-only { display: inline; }
