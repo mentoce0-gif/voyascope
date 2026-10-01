@@ -386,6 +386,7 @@ function startApp({ craft, land, prefectures }) {
       status: c.status,
       orbitMeta: `取得 ${dateTimeShortJa(new Date(c.orbit.fetched_at))}・基準時刻 ${dateTimeShortJa(new Date(c.orbit.epoch))}（CelesTrak）`,
     });
+    detailBody.querySelector("[data-follow]")?.setAttribute("aria-pressed", String(follow));
     updateDetailLive(true);
   };
 
@@ -410,6 +411,7 @@ function startApp({ craft, land, prefectures }) {
   }
   detailBody.addEventListener("click", (e) => {
     if (e.target.closest("[data-close]")) return closeDetail();
+    if (e.target.closest("[data-follow]")) return setFollow(!follow);
     const t = e.target.closest("[data-tab]");
     if (t) {
       tab = t.dataset.tab;
@@ -504,11 +506,14 @@ function startApp({ craft, land, prefectures }) {
     clock.setPlaying(!clock.playing);
     syncControls();
   });
-  $("#now").addEventListener("click", () => {
+  const backToNow = () => {
     clock.live();
     syncControls();
     if (selected) renderDetail();
-  });
+  };
+  $("#now").addEventListener("click", backToNow);
+  // 上の LIVE 表示も、時刻をずらしているときは押すと現在に戻る（スマホではこれが「現在へ」）
+  $("#live-badge").addEventListener("click", () => !clock.isLive() && backToNow());
   for (const b of speedButtons) {
     b.addEventListener("click", () => {
       clock.setSpeed(Number(b.dataset.speed));
@@ -530,6 +535,7 @@ function startApp({ craft, land, prefectures }) {
   function setFollow(on) {
     follow = on && !!selected;
     followBtn.setAttribute("aria-pressed", String(follow));
+    detailBody.querySelector("[data-follow]")?.setAttribute("aria-pressed", String(follow));
   }
   followBtn.addEventListener("click", () => {
     if (!selected && craft[0]) select(craft[0]);
@@ -650,7 +656,8 @@ function startApp({ craft, land, prefectures }) {
       els.badge.dataset.live = String(live);
       app.dataset.live = String(live);
       els.badge.textContent = live ? "LIVE" : durationJa(clock.offset());
-      els.badge.dataset.paused = String(!live && !clock.playing); // 「停止中」は CSS で足す（スマホでは再生ボタンの形で分かるので出さない）
+      els.badge.dataset.paused = String(!live && !clock.playing);
+      els.badge.setAttribute("aria-label", live ? "いまの時刻を表示中" : `現在に戻る（いまは ${els.badge.textContent}）`); // 「停止中」は CSS で足す（スマホでは再生ボタンの形で分かるので出さない）
       if (!dragging) slider.value = String(Math.round(clock.offset() / 60000));
       for (const c of craft) {
         const n = listEl.querySelector(`[data-alt="${c.id}"]`);
