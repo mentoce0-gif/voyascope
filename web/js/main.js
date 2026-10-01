@@ -438,6 +438,9 @@ function startApp({ craft, land, prefectures, events }) {
       orbitMeta: `取得 ${dateTimeShortJa(new Date(c.orbit.fetched_at))}・基準時刻 ${dateTimeShortJa(new Date(c.orbit.epoch))}（CelesTrak）`,
     });
     detailBody.querySelector("[data-follow]")?.setAttribute("aria-pressed", String(follow));
+    // ひまわりの最新画像が読めないときは、画像の枠ごと隠す（イラストは残る）
+    const sat = detailBody.querySelector("[data-live-sat]");
+    sat?.addEventListener("error", () => sat.closest("figure").classList.add("failed"), { once: true });
     updateDetailLive(true);
   };
 

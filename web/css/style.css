@@ -508,6 +508,9 @@ body { overflow: hidden; }
 .ov-art { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 6px; border: 1px solid var(--panel-border); }
 .ov-figure figcaption { margin-top: 4px; line-height: 1.5; }
 .ov-figure figcaption a { color: var(--text-dim); }
+/* ひまわりの最新画像（801×641。切り取らない） */
+.ov-live { display: block; width: 100%; aspect-ratio: 801 / 641; object-fit: contain; background: #000; border-radius: 6px; border: 1px solid var(--panel-border); }
+.live-sat.failed { display: none; }
 .craft-thumb {
   width: 34px;
   height: 34px;

@@ -98,7 +98,12 @@ LICENSE_DRAFT.md のチェックリストを埋める。
 NASA と JAXA について、画像・ロゴ・ミッションパッチを非公式ファンサイトで使うときの条件（使ってよいもの、クレジットの書き方、ロゴの禁止事項）。
 
 **C8　打ち上げ予定データの利用条件**
-Launch Library 2（The Space Devs）の無料枠の制限（リクエスト数など）と利用条件、出典表示の方法。
+Launch Library 2（The Space Devs、https://thespacedevs.com/llapi）の世界の打ち上げ予定を、GitHub Actions で数時間ごとに取得し、自分のサイト（GitHub Pages）から配って表示したい。
+- 無料枠の制限（1時間あたりのリクエスト数など）と、有料枠との違い
+- データの利用条件・ライセンス（再配布してよいか、非商用・商用の扱い）。利用規約・FAQ・ドキュメントの原文
+- 出典表示の決まった書き方があるか
+- データの元（各機関の公式発表か、有志の入力か）。公式の日付とずれることがあるか
+- 確認できなければ、問い合わせ先（公式に書かれている連絡方法）
 
 **C9　CelesTrak のデータを自分のサイトで配ってよいか（C1 の続き）**
 CelesTrak から取得した GP データ（TLE / OMM）を、GitHub Pages の自分のサイトに置いてブラウザに配ること（再配布）について。
@@ -137,6 +142,18 @@ ISS の窓や船外カメラの映像（ライブ配信）を、アプリの画�
 - `official_links`（運用機関の公式ページ。最大3）
 - `status`（運用の状態。`operating`＝運用中／`standby`＝待機中（予備機など）／`ended`＝運用終了のどれか）。公式の運用状況のページで確認する。運用を終えていたら、その日付を note に書く
 - `catchphrase`・`special_move`・`weakness` は書かない（Claude Code とオーナーが決める）
+
+**C14　探査機の位置データ（JPL Horizons）の利用条件**
+NASA JPL の Horizons（https://ssd-api.jpl.nasa.gov/doc/horizons.html）で、探査機（ボイジャー1号・2号、ジェイムズ・ウェッブ宇宙望遠鏡、はやぶさ2、ベピコロンボなど）の地球からの距離を1日1回取得し、自分のサイトから配って表示したい。
+- Horizons の API と出力の利用条件（再配布・自分のサイトでの表示）。JPL・NASA の利用規約やドキュメントの原文
+- 出典表示の書き方（推奨される引用の文があるか）
+- 探査機の軌道データの出どころ（JAXA・ESA などの航法データ）に、別の利用条件がかかるか。Horizons の出力に書かれている注記も
+- 1日1回程度の自動取得で、アクセスの頻度について守ることがあるか
+
+**C15　今日の地球の画像（NASA GIBS）と宇宙天気（NOAA SWPC）の利用条件**
+- NASA GIBS（https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api）の毎日の地球の画像（VIIRS・MODIS のトゥルーカラーなど）を、ブラウザから直接読み込んで表示すること。利用条件、出典（謝辞）の決まった文、ほかのサイトから読み込む頻度の注意
+- NOAA SWPC（https://www.swpc.noaa.gov/）の Kp 指数（例：https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json）を表示すること。利用条件、出典表示、取得の頻度の注意
+- どちらも、非公式ファンサイトで使うときに禁止されていること（公認と誤解される表現・ロゴなど）
 
 ---
 
