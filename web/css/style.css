@@ -956,6 +956,13 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   #app:not(.has-selected) #follow { display: none; }
   .footnote { display: none; } /* 軌道データの日時と「このアプリについて」はメニューの中にある */
   .bottom-bar .warning { grid-column: 1 / -1; }
+  /* 一覧を詰めて、カードが多く見えるように */
+  .list-panel .list-title { display: none; }
+  .list-panel .fam-tabs { margin-bottom: 8px; }
+  .search { margin-bottom: 8px; }
+  .search input { padding-top: 7px; padding-bottom: 7px; }
+  .craft-item { padding: 6px 10px; }
+  .craft-thumb, .craft-icon { width: 30px; height: 30px; }
   .list-rings.narrow-only { display: flex; min-height: 44px; margin-top: 8px; padding-top: 4px; border-top: 1px solid var(--panel-border); font-size: 0.85rem; gap: 8px; white-space: normal; }
   .list-rings input { width: 20px; height: 20px; flex: none; }
   /* 環の注記は1行（くわしい数字は「このアプリについて」にある） */

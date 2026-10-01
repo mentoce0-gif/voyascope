@@ -352,7 +352,8 @@ function startApp({ craft, land, prefectures }) {
   const listPanel = $("#list-panel");
   $("#list-open").addEventListener("click", () => {
     listPanel.classList.toggle("open");
-    setExpanded(listPanel, false);
+    // 一覧は選ぶための画面なので、スマホでは全部の高さで開く（つまみで半分にできる）
+    setExpanded(listPanel, listPanel.classList.contains("open"));
     if (isNarrow() && listPanel.classList.contains("open")) closeDetail();
   });
 
@@ -581,6 +582,7 @@ function startApp({ craft, land, prefectures }) {
     showListFilter("tonight");
     if (isNarrow()) showOnlyFamily("tonight");
     listPanel.classList.add("open");
+    setExpanded(listPanel, true);
     if (isNarrow()) closeDetail();
     listPanel.scrollTop = 0;
   });
