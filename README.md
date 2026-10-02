@@ -60,6 +60,8 @@
 npm install
 npm run validate            # curation/ を検証
 npm run validate:examples   # 見本を検証（出典未確認なのでエラーが出るのが正常）
+npm test                    # テスト
+npm run check:size          # 読み込み量が上限の中か（スマホで重くしない。上限は config/size-budget.json）
 ```
 
 ## ライセンス
