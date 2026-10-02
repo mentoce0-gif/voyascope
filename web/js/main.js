@@ -2,7 +2,7 @@
 import { satrecFromOrbit, positionAt, periodMinutes, groundTrack, SimClock } from "./orbit.js";
 import { renderPanel, updatePanelLive, imageCredit } from "./card.js";
 import { summarizeStatus } from "./status.js";
-import { landPath, renderMinimap } from "./minimap.js";
+import { renderMinimap } from "./minimap.js";
 import { setupEarth } from "./earth.js";
 import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
@@ -71,8 +71,9 @@ function startNoise(canvas) {
   return () => (running = false);
 }
 
-async function loadJson(path) {
-  const res = await fetch(path, { cache: "no-cache" });
+// options：fetch に足す指定（あとから読む重いデータは priority: "low"。対応していないブラウザは無視する）
+async function loadJson(path, options = {}) {
+  const res = await fetch(path, { cache: "no-cache", ...options });
   if (!res.ok) {
     const err = new Error(`${path} を読み込めません（HTTP ${res.status}）`);
     err.status = res.status;
@@ -82,34 +83,62 @@ async function loadJson(path) {
   return res.json();
 }
 
+// 3D 表示のライブラリ（globe.gl、約500KB）を実行する。index.html の <link rel="preload"> で最初に読み始めているので、
+// ここでは届いたものを実行するだけ。<script> をページに直接書くと、届くまでほかの部品とデータの読み込みが止まる
+function loadGlobeLib() {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "vendor/globe.gl.min.js";
+    s.onload = () => (typeof Globe === "function" ? resolve() : reject(new Error("3D表示のライブラリを読み込めません")));
+    s.onerror = () => reject(new Error("3D表示のライブラリを読み込めません"));
+    document.head.append(s);
+  });
+}
+
+// 「観測を開始」を押せるまでに要るデータ
 async function loadAll() {
-  const [index, land, prefs, eventsData, launchesData] = await Promise.all([
-    loadJson("data/craft-index.json"),
-    loadJson("data/land-110m.geojson"),
+  // 機体の一覧が届いたら、すぐに各機体のカードと軌道を読み始める（ほかのデータを待たない）
+  const craftLoading = loadJson("data/craft-index.json").then((index) =>
+    Promise.all(
+      index.craft.map(async (c) => {
+        const [card, orbit, crewData, status] = await Promise.all([
+          loadJson(c.card),
+          // 軌道データがまだない機体（自動取得の前など）は、表示しないだけにする
+          c.orbit ? loadJson(c.orbit).catch((e) => (e.status === 404 ? null : Promise.reject(e))) : null,
+          c.crew ? loadJson(c.crew).catch(() => null) : null,
+          // 運用状況（自動取得）は、なければカードの「状態」だけを出す
+          c.status ? loadJson(c.status).catch(() => null) : null,
+        ]);
+        return { id: c.id, card, orbit, crewData, status, sample: !!c.sample };
+      }),
+    ),
+  );
+  const [craft, prefs, eventsData, launchesData] = await Promise.all([
+    craftLoading,
     loadJson("data/prefectures.json"),
     // 予定は、読めなくても地球と機体は出す
     loadJson("data/events.json").catch(() => ({ events: [] })),
     // 世界の打ち上げ（参考）も同じ。読めなければ「読み込めませんでした」と出す
     loadJson("data/launches.json").catch(() => null),
   ]);
-  const craft = await Promise.all(
-    index.craft.map(async (c) => {
-      const [card, orbit, crewData, status] = await Promise.all([
-        loadJson(c.card),
-        // 軌道データがまだない機体（自動取得の前など）は、表示しないだけにする
-        c.orbit ? loadJson(c.orbit).catch((e) => (e.status === 404 ? null : Promise.reject(e))) : null,
-        c.crew ? loadJson(c.crew).catch(() => null) : null,
-        // 運用状況（自動取得）は、なければカードの「状態」だけを出す
-        c.status ? loadJson(c.status).catch(() => null) : null,
-      ]);
-      return { id: c.id, card, orbit, crewData, status, sample: !!c.sample };
-    }),
-  );
-  return { craft: craft.filter((c) => c.orbit), land, prefectures: prefs.prefectures, events: eventsData.events ?? [], launchesData };
+  return { craft: craft.filter((c) => c.orbit), prefectures: prefs.prefectures, events: eventsData.events ?? [], launchesData };
+}
+
+// あとから読む重いデータ。「観測を開始」を押せるようになってから、裏で読み始める（起動を遅らせない）
+// 読めなくても動く：地名がなければ座標だけ、陸地がなければ海と軌跡だけを出す
+function loadLater() {
+  return {
+    // 「いま、どこの上？」の地名
+    places: loadJson("data/places.json", { priority: "low" }).catch(() => null),
+    // ミニ地図の陸地（計算済みの path）
+    land: loadJson("data/land-minimap.json", { priority: "low" })
+      .then((d) => d.d)
+      .catch(() => null),
+  };
 }
 
 // ---------- 観測画面 ----------
-function startApp({ craft, land, prefectures, events, launchesData }) {
+function startApp({ craft, prefectures, events, launchesData, later }) {
   const clock = new SimClock();
 
   // 機体ごとの準備（軌道・家族・地球の上の印）
@@ -249,11 +278,9 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
     .htmlElement((d) => d.el)
     .htmlTransitionDuration(0);
 
-  // 「いま、どこの上？」の地名（重いので、観測を始めてから読む。読めなくても座標は出る）
+  // 「いま、どこの上？」の地名（重いので、起動のあとに裏で読んでいる。届くまでは座標だけを出す）
   let places = null;
-  loadJson("data/places.json")
-    .then((d) => (places = d))
-    .catch(() => {});
+  later.places.then((d) => (places = d));
 
   // 地球のまわりの星空（飾り。地球を回すと一緒に動く）
   globe.backgroundImageUrl(starfieldDataUrl());
@@ -496,7 +523,13 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
   const detailBody = $("#detail-body");
   let tab = "overview";
   let lastMapAt = 0;
-  let landD = null;
+  // ミニ地図の陸地（起動のあとに裏で読んでいる。届いたら、開いている詳細のミニ地図を描き直す）
+  let landD = "";
+  later.land.then((d) => {
+    if (!d) return;
+    landD = d;
+    updateDetailLive(true);
+  });
   const updateDetailLive = (force = false) => {
     if (selectedLaunch && !detailPanel.hidden) {
       // 世界の打ち上げ（参考）：予定の時刻までの残り時間。時刻を過ぎたら描き直す
@@ -522,7 +555,6 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
     const t = clock.now().getTime();
     if (svg && (force || Math.abs(t - lastMapAt) > 20000)) {
       lastMapAt = t;
-      landD ??= landPath(land);
       renderMinimap(svg, { land: landD, segments: groundTrack(selected.satrec, new Date(t)), pos: selected.pos });
     }
   };
@@ -1030,8 +1062,8 @@ async function boot() {
   const startBtn = $("#start");
   let data;
   try {
-    if (typeof Globe !== "function") throw new Error("3D表示のライブラリを読み込めません");
-    data = await loadAll();
+    // データと 3D 表示のライブラリを並べて読む（どちらかを待ってからもう一方、にしない）
+    [data] = await Promise.all([loadAll(), loadGlobeLib()]);
     // 読み込めた機体数と、軌道データのいちばん古い取得時刻（UTC）
     const fetched = data.craft.map((c) => c.orbit.fetched_at).sort()[0];
     status.textContent = [
@@ -1048,6 +1080,8 @@ async function boot() {
     $("#start-label").textContent = "読み込めませんでした";
     return;
   }
+  // 重いデータ（地名・ミニ地図の陸地）は、ここから裏で読む。ボタンを押すまでの時間を使う
+  data.later = loadLater();
   $("#start-label").textContent = "観測を開始";
   startBtn.disabled = false;
   startBtn.focus();

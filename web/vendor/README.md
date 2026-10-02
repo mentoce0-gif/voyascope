@@ -10,7 +10,9 @@ CDN を使わないのは、ローカルプレビューだけで動かすため�
 
 `THIRD_PARTY_NOTICES.txt` は、上の2つに入っているライブラリ（globe.gl の依存を含む46パッケージ：MIT・ISC・Apache-2.0・Unlicense・0BSD）のライセンス全文。下の「作り直し方」で npm install したあと `node scripts/build-notices.mjs /tmp/vendor/node_modules` で作り直す。
 
-`web/data/land-110m.geojson` は npm `world-atlas`（Natural Earth 1:110m、パブリックドメイン）から `scripts/build-land.cjs` で作った（world-atlas は ISC：`world-atlas.LICENSE`）。
+`web/data/land-110m.geojson` は npm `world-atlas`（Natural Earth 1:110m、パブリックドメイン）から `scripts/build-land.cjs` で作った（world-atlas は ISC：`world-atlas.LICENSE`）。画面ではこれを読まず、ここから前もって計算したミニ地図の陸地（`web/data/land-minimap.json`、`scripts/build-minimap-land.mjs`）を読む。
+
+`globe.gl.min.js` は大きい（gzip 後 約510KB）ので、`index.html` の `<link rel="preload">` で最初に読み始め、実行は `js/main.js` がする（ページに `<script>` で書くと、届くまでほかの読み込みが止まる。タスク012）。
 
 ## 作り直し方
 
