@@ -2,7 +2,7 @@
 <title>遠くを見る部屋 体感の試作</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <style>
-/* Layout: three tabs (A ladder / B light trip / C real-scale scroll) inside one observation-terminal panel. Single dark look, same tokens as web/css. */
+/* Layout: four tabs (D fly as light / A ladder / B light trip / C real-scale scroll) inside one observation-terminal panel. Single dark look, same tokens as web/css. */
 :root {
   --navy-900: #050e1f;
   --navy-800: #07142b;
@@ -73,19 +73,49 @@ p { margin: 0; }
 .mark.big { border-color: var(--amber); color: var(--amber); }
 .km { position: absolute; left: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--navy-600); }
 .end { position: absolute; left: 0; right: 0; padding: 16px 12px; display: grid; gap: 6px; border-top: 2px dashed var(--amber); }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+/* D fly */
+.fly { position: relative; height: 72vh; max-height: 600px; min-height: 420px; border-radius: 6px; overflow: hidden; background: var(--navy-900); touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.fly:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.fly canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hud { position: absolute; top: 12px; right: 12px; display: grid; gap: 2px; justify-items: end; text-align: right; pointer-events: none; text-shadow: 0 0 8px var(--navy-900); }
+.hud .km { position: static; font-family: var(--font-mono); font-size: clamp(20px, 6vw, 34px); color: var(--amber); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.hud .sub { font-family: var(--font-mono); font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.hud .warp { font-family: var(--font-mono); font-size: 12px; color: var(--mint); }
+.fly-card { position: absolute; left: 12px; bottom: 12px; max-width: min(300px, calc(100% - 24px)); background: rgba(12, 33, 64, .92); border: 1px solid var(--mint); border-radius: 6px; padding: 10px 12px; display: grid; gap: 2px; pointer-events: none; transition: opacity .3s, transform .3s; }
+.fly-card[data-off="true"] { opacity: 0; transform: translateY(8px); }
+.fly-card .name { font-weight: 700; color: var(--mint); }
+.hint { position: absolute; left: 0; right: 0; top: 46%; text-align: center; font-size: 14px; color: var(--ink); pointer-events: none; transition: opacity .4s; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } .fly-card { transition: none; } }
 </style>
 
 <div class="wrap">
   <div class="eyebrow">VOYASCOPE · M7 v0 遠くを見る部屋 · 体感の試作</div>
   <h1>地球の輪の外は、桁が違う</h1>
-  <p class="note">3つの案を触って比べるための試作です。距離はすべて<span class="kari">仮</span>の目安で、本番は JPL Horizons（利用条件の確認後）から毎日取ります。</p>
+  <p class="note">4つの案を触って比べるための試作です。距離はすべて<span class="kari">仮</span>の目安で、本番は JPL Horizons（利用条件の確認後）から毎日取ります。</p>
 
   <div class="tabs" role="tablist" aria-label="案">
+    <button class="tab" role="tab" id="tab-d" aria-controls="pane-d" aria-selected="true">D 光になって飛ぶ（オーナー案）</button>
     <button class="tab" role="tab" id="tab-a" aria-controls="pane-a" aria-selected="false">A 距離のはしご</button>
-    <button class="tab" role="tab" id="tab-b" aria-controls="pane-b" aria-selected="true">B 光の旅（おすすめの見どころ）</button>
+    <button class="tab" role="tab" id="tab-b" aria-controls="pane-b" aria-selected="false">B 光の旅</button>
     <button class="tab" role="tab" id="tab-c" aria-controls="pane-c" aria-selected="false">C 実寸のスクロール</button>
   </div>
+
+  <section class="panel" id="pane-d" role="tabpanel" aria-labelledby="tab-d">
+    <h2>D 光になって飛ぶ</h2>
+    <p class="note">地表の近くから、上へスワイプすると奥へ飛んでいきます。強くはじくほど速く、下へスワイプで戻る。PC はホイールか ↑↓ キー。</p>
+    <div class="fly" id="fly" tabindex="0" aria-label="上へスワイプで遠くへ飛ぶ。↑↓キーでも動く">
+      <canvas id="fly-canvas"></canvas>
+      <div class="hud" aria-live="off">
+        <span class="km" id="d-km">100 km</span>
+        <span class="sub" id="d-ly">0.000000 光年</span>
+        <span class="sub" id="d-lt">光で 0.0003 秒</span>
+        <span class="warp" id="d-warp">停止中</span>
+      </div>
+      <div class="hint" id="d-hint">↑ 上へスワイプ</div>
+      <div class="fly-card" id="d-card" data-off="true" aria-live="polite"></div>
+    </div>
+    <div class="row"><button class="btn" id="d-reset">地表へ戻る</button><span class="note">数字は地球からの距離（<span class="kari">仮</span>）。光より速く進むのはワープ（作り話）で、「光で◯秒」が本当の光の速さ。本番では、通り過ぎた探査機の出典つきカードが出ます。</span></div>
+  </section>
 
   <section class="panel" id="pane-a" role="tabpanel" aria-labelledby="tab-a" hidden>
     <h2>A 距離のはしご</h2>
@@ -94,7 +124,7 @@ p { margin: 0; }
     <div class="detail" id="a-detail" aria-live="polite"><span class="note">名前を押してください</span></div>
   </section>
 
-  <section class="panel" id="pane-b" role="tabpanel" aria-labelledby="tab-b">
+  <section class="panel" id="pane-b" role="tabpanel" aria-labelledby="tab-b" hidden>
     <h2>B 光の旅</h2>
     <p class="note">地球から光を出します。月までは本当の速さ。その先は早送りで。</p>
     <div class="row">
@@ -141,6 +171,94 @@ tabs.forEach((t) => t.addEventListener("click", () => {
   tabs.forEach((x) => { const on = x === t; x.setAttribute("aria-selected", on); document.getElementById(x.getAttribute("aria-controls")).hidden = !on; });
   if (t.id === "tab-c") layoutC();
 }));
+
+// D: fly as light. Position is kept as log10(km from Earth) so each swipe moves you a fraction of a decade.
+(() => {
+  const fly = document.getElementById("fly"), cv = document.getElementById("fly-canvas"), ctx = cv.getContext("2d");
+  const LY = 9.4607e12, P0 = 2, PMAX = Math.log10(C * 86400) + 0.08;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const stops = [{ id: "earth", name: "地表の近く", km: 100 }, ...OBJS].map((o) => ({ ...o, p: Math.log10(o.km) }));
+  let p = P0, v = 0, W = 0, H = 0, dpr = 1, lastT = performance.now(), shown = null;
+  const stars = Array.from({ length: 260 }, () => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random() }));
+  function size() { dpr = Math.min(devicePixelRatio || 1, 2); W = fly.clientWidth; H = fly.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  addEventListener("resize", size);
+  const push = (dv) => { v = Math.max(-3, Math.min(3, v + dv)); document.getElementById("d-hint").style.opacity = 0; };
+  let drag = null;
+  fly.addEventListener("pointerdown", (e) => { drag = { y: e.clientY, t: performance.now() }; fly.setPointerCapture(e.pointerId); });
+  fly.addEventListener("pointermove", (e) => { if (!drag) return; const dy = drag.y - e.clientY; push(dy * 0.004); drag.y = e.clientY; });
+  fly.addEventListener("pointerup", () => (drag = null));
+  fly.addEventListener("pointercancel", () => (drag = null));
+  fly.addEventListener("wheel", (e) => { e.preventDefault(); push(-e.deltaY * 0.0015); }, { passive: false });
+  fly.addEventListener("keydown", (e) => { if (e.key === "ArrowUp") { push(0.35); e.preventDefault(); } if (e.key === "ArrowDown") { push(-0.35); e.preventDefault(); } });
+  document.getElementById("d-reset").addEventListener("click", () => { p = P0; v = 0; shown = null; card(null); });
+  const SUP = { "-": "⁻", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
+  const fmtLy = (ly) => {
+    if (ly >= 1e-4) return ly.toFixed(5) + " 光年";
+    const [m, e] = ly.toExponential(1).split("e");
+    return m + "×10" + String(+e).replace(/./g, (c) => SUP[c]) + " 光年";
+  };
+  function card(o) {
+    const el = document.getElementById("d-card");
+    if (!o) { el.dataset.off = "true"; return; }
+    el.innerHTML = `<span class="name">${o.name}</span><span class="mono">${fmtKm(o.km)} <span class="kari">仮</span></span><span>光で <span class="mono">${fmtTime(o.km / C)}</span></span><span class="note">本番：出典つきの探査機カードがここに</span>`;
+    el.dataset.off = "false";
+  }
+  function draw(dt) {
+    const km = 10 ** p, cx = W / 2, cy = H * 0.42;
+    ctx.fillStyle = "#050e1f"; ctx.fillRect(0, 0, W, H);
+    // stars streak outward from the center; speed follows how fast you are climbing the decades
+    const sp = reduce ? 0 : Math.min(Math.abs(v), 3) * Math.sign(v);
+    for (const s of stars) {
+      const z0 = s.z; s.z -= sp * dt * 0.45;
+      if (s.z <= 0.02) { s.z = 1; s.x = Math.random() * 2 - 1; s.y = Math.random() * 2 - 1; }
+      if (s.z > 1) { s.z = 0.03; s.x = Math.random() * 2 - 1; s.y = Math.random() * 2 - 1; }
+      const k = W * 0.5, x = cx + (s.x / s.z) * k * 0.3, y = cy + (s.y / s.z) * k * 0.3;
+      const px = cx + (s.x / z0) * k * 0.3, py = cy + (s.y / z0) * k * 0.3;
+      const a = Math.min(1, (1 - s.z) * 1.2);
+      ctx.strokeStyle = `rgba(228,236,247,${a})`; ctx.lineWidth = Math.max(0.6, (1 - s.z) * 2);
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x + 0.1, y + 0.1); ctx.stroke();
+    }
+    // Earth falls away below you
+    const r = Math.min(H * 40, (6371 / km) * H * 0.9);
+    if (r > 0.6) {
+      const ey = H * 0.92 + r * (r > H ? 1 : 0.2);
+      const g = ctx.createRadialGradient(cx, ey, r * 0.2, cx, ey, r);
+      g.addColorStop(0, "#1d5fa8"); g.addColorStop(0.97, "#2f86c9"); g.addColorStop(1, "#9fd8ff");
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, ey, r, 0, Math.PI * 2); ctx.fill();
+    }
+    // waypoints grow as you approach and slide past
+    stops.slice(1).forEach((o, i) => {
+      const d = o.p - p;
+      if (d > 0.9 || d < -0.25) return;
+      const t = (0.9 - d) / 1.15, ang = -Math.PI / 2 + (i % 2 ? 0.9 : -0.9);
+      const x = cx + Math.cos(ang) * t * t * W * 0.55, y = cy + Math.sin(ang) * t * t * H * 0.5 + t * H * 0.3;
+      const rad = 2 + t * t * 26;
+      ctx.fillStyle = o.id === "sun" ? "#ffd27a" : o.id === "moon" ? "#c9d3e0" : "#5ef2c2";
+      ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#e4ecf7"; ctx.font = "13px 'Zen Kaku Gothic New', sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(o.name, x, y - rad - 6);
+    });
+  }
+  function hud() {
+    const km = 10 ** p, t = km / C;
+    document.getElementById("d-km").textContent = fmtKm(km);
+    document.getElementById("d-ly").textContent = fmtLy(km / LY);
+    document.getElementById("d-lt").textContent = "光で " + (t < 1 ? t.toFixed(4) + " 秒" : fmtTime(t));
+    const ratio = Math.abs(km * Math.LN10 * v) / C;
+    document.getElementById("d-warp").textContent = Math.abs(v) < 0.01 ? "停止中" : (ratio < 1 ? "秒速 " + Math.round(ratio * C).toLocaleString("ja-JP") + " km" : "ワープ中：光の " + Math.round(ratio).toLocaleString("ja-JP") + " 倍");
+  }
+  function tick(now) {
+    const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+    p = Math.max(P0, Math.min(PMAX, p + v * dt));
+    if (p === P0 || p === PMAX) v = 0;
+    v *= Math.pow(0.2, dt); // friction: the push fades in about a second
+    const passed = [...stops].reverse().find((o) => p >= o.p - 0.02);
+    if (passed && passed !== shown) { shown = passed; card(passed.id === "earth" ? null : passed); }
+    if (!fly.closest("[hidden]")) { if (W !== fly.clientWidth || H !== fly.clientHeight) size(); draw(dt); hud(); }
+    requestAnimationFrame(tick);
+  }
+  size(); requestAnimationFrame(tick);
+})();
 
 // A
 const ladder = document.getElementById("ladder");
