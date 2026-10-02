@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-02T12:33:41.504Z",
+  "fetched_at": "2026-10-02T22:13:58.319Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -163,13 +163,13 @@
     },
     {
       "id": "bf2c3027-a314-403e-a416-2bfd5d165ad1",
-      "net": "2026-10-13T10:33:00.000Z",
-      "precision": "min",
+      "net": "2026-10-13T10:33:44.000Z",
+      "precision": "sec",
       "window_end": null,
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-10-01T22:00:43Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-02T17:25:21Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
