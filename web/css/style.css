@@ -922,6 +922,9 @@ body { overflow: hidden; }
   text-shadow: 0 0 6px var(--navy-900);
 }
 .site-marker.selected .diamond { outline: 2px solid var(--c); outline-offset: 4px; }
+/* 名前が重なったピン：名前を隠す（ひし形は残る。マウスを乗せる・キーボードで選ぶと出る） */
+.site-marker.tag-hidden .tag { visibility: hidden; }
+.site-marker.tag-hidden:hover .tag, .site-marker.tag-hidden:focus-visible .tag { visibility: visible; }
 /* 一覧の行にマウスを乗せているあいだ：同じ射場のピンを光らせる */
 .site-marker.peek .diamond { outline: 2px dashed var(--c); outline-offset: 5px; }
 .site-marker.peek .tag { color: var(--text); }
@@ -1039,10 +1042,45 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 #about-tle { white-space: pre-line; }
 
 /* 地球の左上：現在の地球 */
-.earth-info {
+/* 地球の上の表示切替（すべて／日本のみ／衛星のみ／打ち上げ予定のみ）。押しているものはミント色 */
+.view-switch {
   position: absolute;
   z-index: 6;
   top: calc(var(--top-h) + 4px);
+  left: 362px;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--mint-dim);
+  border-radius: 999px;
+  background: rgba(4, 12, 28, 0.72);
+  backdrop-filter: blur(4px);
+}
+.view-switch button {
+  appearance: none;
+  position: relative;
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.view-switch button:hover { background: var(--mint-faint); }
+.view-switch button[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); font-weight: 700; }
+.view-switch button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.view-switch .vs-short { display: none; }
+/* 幅の狭い PC で詳細を開いているあいだは隠す（詳細のパネルと重なるため。閉じると戻る） */
+@media (min-width: 901px) and (max-width: 1180px) { #app.has-selected .view-switch { display: none; } }
+
+.earth-info {
+  position: absolute;
+  z-index: 6;
+  top: calc(var(--top-h) + 48px); /* 表示切替の下 */
   left: 362px;
   padding: 10px 14px;
   border: 1px solid var(--panel-border);
@@ -1073,7 +1111,7 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 
 /* ---------- 狭い画面：一覧と詳細は下から出るシート ---------- */
 @media (max-width: 900px) {
-  :root { --top-h: 56px; }
+  :root { --top-h: 56px; --switch-h: 44px; }
   /* 上のバーは1行：ロゴ（下に時刻）・今夜・LIVE・メニュー */
   .top-bar {
     display: grid;
@@ -1124,11 +1162,16 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
   }
   .side-panel.expanded {
-    max-height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
-    height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
+    max-height: calc(100dvh - var(--top-h) - var(--switch-h) - var(--bottom-h) - 8px);
+    height: calc(100dvh - var(--top-h) - var(--switch-h) - var(--bottom-h) - 8px);
   }
   /* シートを全部の高さに広げたときは、上に少しだけ見える地球の名前を消す（上のバーの文字と重なるため） */
   #app:has(.side-panel.expanded) #globe .tag { visibility: hidden; }
+  /* 表示切替：上のバーのすぐ下に左寄せ。押せる範囲を44pxに */
+  /* シートを全部に広げても隠れないように、シートより上に置き、シートはその下から */
+  .view-switch { z-index: 21; left: 12px; top: calc(var(--top-h) + 2px); max-width: calc(100vw - 24px); }
+  .view-switch button { padding: 6px 10px; font-size: 0.8rem; }
+  .view-switch button::after { content: ""; position: absolute; inset: -7px -1px; }
   /* つまみ：スクロールしても上に残る。押すと広げる／縮める、下へ引くと閉じる */
   .sheet-handle {
     position: sticky;
@@ -1226,4 +1269,10 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* とても狭い画面（幅380px未満）では、表示切替を短い名前に（読み上げは長い名前のまま） */
+@media (max-width: 379px) {
+  .view-switch .vs-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .view-switch .vs-short { display: inline; }
 }

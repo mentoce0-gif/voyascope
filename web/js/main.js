@@ -11,7 +11,7 @@ import { placeAt } from "./places.js";
 import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
 import { findVisiblePasses, observerOf, dir8 } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
-import { upcomingEvents, eventsListHtml, eventPanelHtml, nextChipHtml, bigCountdown, whenShort, hmJst } from "./events.js";
+import { upcomingEvents, eventsListHtml, eventPanelHtml, nextChipHtml, bigCountdown, whenShort, hmJst, eventSpan } from "./events.js";
 import {
   worldLaunches,
   dataState,
@@ -26,6 +26,7 @@ import {
   jstShort,
   REF_NOTE,
 } from "./launches.js";
+import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
 
 const COLORS = {
   navy: "#07142b",
@@ -41,6 +42,8 @@ const shortName = (c) => (c.card.name.ja.length <= 7 ? c.card.name.ja : c.card.n
 
 // 画面が狭いときは、一覧と詳細を下から出るシートにする（style.css と合わせる）
 const isNarrow = () => matchMedia("(max-width: 900px)").matches;
+// 予定の始まりの時刻（射場のピンを日付の順に並べるため）
+const eventSpanStart = (ev) => eventSpan(ev)?.start ?? NaN;
 
 // ---------- 起動画面のノイズ ----------
 function startNoise(canvas) {
@@ -212,15 +215,16 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
   // ---------- 地球 ----------
   const app = $("#app");
   const globeEl = $("#globe");
-  const hidden = new Set(); // 表示しない家族
-  const markerData = () => craft.filter((c) => c.pos && !hidden.has(c.family.id));
-  // 世界の打ち上げのピンは「予定」タブを開いているとき（または選んでいるとき）だけ。ホームの地球に光る名前を増やさない
+  const hidden = new Set(); // 表示しない家族（凡例・スマホの一覧のタブ）
+  let viewMode = loadView(); // 表示切替：すべて／日本のみ／衛星のみ／打ち上げ予定のみ（view.js）
+  const markerData = () => craft.filter((c) => c.pos && !hidden.has(c.family.id) && showsCraft(viewMode, c.card));
+  // 射場のピン：公式の予定と、世界の打ち上げ（参考）。表示切替で絞る。選んでいる打ち上げのピンはいつも出す
   const siteData = () =>
     hidden.has("planned")
       ? []
       : [
-          ...sites.filter((s) => s.shown),
-          ...(listFilter === "planned" || selectedLaunch ? worldPins.filter((p) => p.shown && (listFilter === "planned" || p.launches.includes(selectedLaunch))) : []),
+          ...sites.filter((s) => s.shown && showsEvent(viewMode, s.ev)),
+          ...worldPins.filter((p) => p.shown && (showsLaunch(viewMode, p.first) || p.launches.includes(selectedLaunch))),
         ];
   const globe = Globe({ animateIn: true })(globeEl)
     .backgroundColor(COLORS.navy)
@@ -276,7 +280,7 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
         .map((el) => el.getBoundingClientRect())
         .filter((r) => r.height > 0)
         .map((r) => r.top);
-      const top = $(".top-bar").offsetHeight;
+      const top = $(".top-bar").offsetHeight + ($("#view-switch")?.offsetHeight ?? 0);
       const dy = sheetTops.length ? Math.round((top + Math.min(...sheetTops)) / 2 - globeEl.clientHeight / 2) : -40;
       setOffset(0, dy);
     } else setOffset(detailPanel.hidden ? 150 : -20, -30);
@@ -345,9 +349,12 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
   const renderList = () => {
     const shown = craft
       .filter((c) => listFilter === "all" || listFilter === "tonight" || c.family.id === listFilter)
+      .filter((c) => showsCraft(viewMode, c.card))
       .filter((c) => matchesQuery(c, query));
     if (!shown.length) {
-      listEl.innerHTML = `<li class="list-empty k">「${esc(query)}」に当たる機体はありません。</li>`;
+      listEl.innerHTML = query
+        ? `<li class="list-empty k">「${esc(query)}」に当たる機体はありません。</li>`
+        : `<li class="list-empty k">この表示に当たる機体はありません。</li>`;
       return;
     }
     listEl.innerHTML = shown
@@ -369,7 +376,8 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
   const tonightSection = $("#tonight-section");
   const eventsSection = $("#events-section");
   const worldSection = $("#world-section");
-  const showListFilter = (id) => {
+  // fromView：表示切替から呼ばれたとき（表示切替を呼び返さない）
+  const showListFilter = (id, { fromView = false } = {}) => {
     listFilter = id;
     const tonight = id === "tonight";
     const planned = id === "planned";
@@ -378,6 +386,11 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
     worldSection.hidden = !planned;
     listEl.hidden = tonight || planned;
     $("#list-title").hidden = tonight || planned;
+    // 一覧と地球をそろえる：「予定」タブは「打ち上げ予定のみ」。予定から離れたら「すべて」に戻す
+    if (!fromView) {
+      if (planned && viewMode !== "launches") setView("launches", { fromList: true });
+      else if (!planned && viewMode === "launches") setView("all", { fromList: true });
+    }
     renderFamTabs();
     renderList();
     if (planned) renderEvents();
@@ -418,6 +431,48 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
     if (id === "planned" || present.some((f) => f.id === id)) for (const f of FAMILIES) if (f.id !== id) hidden.add(f.id);
     for (const input of legend.querySelectorAll("input")) input.checked = !hidden.has(input.dataset.fam);
   }
+  // ---------- 表示切替（地球の上）：すべて／日本のみ／衛星のみ／打ち上げ予定のみ。一覧も合わせる ----------
+  const viewSwitch = $("#view-switch");
+  // fromList：一覧のタブから呼ばれたとき（家族ごとの表示と一覧のタブはそのまま）
+  function setView(mode, { fromList = false } = {}) {
+    if (!isViewMode(mode)) return;
+    viewMode = mode;
+    saveView(mode);
+    for (const b of viewSwitch.querySelectorAll("[data-view]")) b.setAttribute("aria-pressed", String(b.dataset.view === mode));
+    if (!fromList) {
+      // 表示切替は表示の組み合わせのひな形なので、凡例（スマホは一覧のタブ）で消したものも全部に戻す。
+      // 一覧も合わせる：打ち上げ予定のみ → 予定タブ。ほかは家族のタブ・予定タブから「すべて」へ（観測タブはそのまま）
+      hidden.clear();
+      for (const input of legend.querySelectorAll("input")) input.checked = true;
+      if (mode === "launches") {
+        if (listFilter !== "planned") showListFilter("planned", { fromView: true });
+      } else if (listFilter !== "all" && listFilter !== "tonight") showListFilter("all", { fromView: true });
+    }
+    $("#list-title").textContent = mode === "japan" ? "注目・日本のみ" : "注目";
+    $("#events-sub").textContent = mode === "japan" ? "日本のものだけ・公式の日付だけ" : "日本と世界・公式の日付だけ";
+    renderList();
+    renderEvents();
+  }
+  // 押したときは、見どころへ地球を向ける：日本のみ → 日本、打ち上げ予定のみ → 次の打ち上げの射場
+  // （一覧の先頭と同じく、公式の予定を先に。なければ世界の打ち上げ（参考）のいちばん近いもの）
+  const JAPAN_VIEW = { lat: 36, lng: 138 };
+  function lookForView(mode) {
+    if (follow) return;
+    if (mode === "japan") return globe.pointOfView(JAPAN_VIEW, 900);
+    if (mode !== "launches") return;
+    const next = siteData()
+      .map((p) => ({ p, official: !!p.ev, t: p.ev ? eventSpanStart(p.ev) : Date.parse(p.first?.net ?? "") }))
+      .filter((x) => Number.isFinite(x.t))
+      .sort((a, b) => b.official - a.official || a.t - b.t)[0];
+    if (next) globe.pointOfView({ lat: next.p.lat, lng: next.p.lng }, 900);
+  }
+  viewSwitch.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-view]");
+    if (!b) return;
+    setView(b.dataset.view);
+    lookForView(b.dataset.view);
+  });
+
   // 環：PC は下のバー、スマホは一覧の下。どちらで切り替えても両方そろえる
   const ringInputs = [$("#rings-toggle"), $("#rings-toggle-list")];
   for (const input of ringInputs) {
@@ -768,13 +823,15 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
     const now = clock.now();
     eventsAt = now.getTime();
     upcoming = upcomingEvents(events, now);
+    // 一覧と「次の出来事」：日本のみの表示なら日本の予定だけ
+    const listed = viewMode === "japan" ? upcoming.filter((ev) => showsEvent("japan", ev)) : upcoming;
     if (!eventsSection.hidden) {
-      const html = eventsListHtml(upcoming, now, { tonight: tonightRow() });
+      const html = eventsListHtml(listed, now, { tonight: tonightRow() });
       // 書き換えると押しかけのボタンが消えるので、変わったときだけ
       if (html !== eventsHtml) eventsBody.innerHTML = eventsHtml = html;
     }
     // 上のバー：いちばん近い予定（延期なら「延期」と出る）
-    const next = upcoming[0];
+    const next = listed[0];
     const chip = next ? nextChipHtml(next, now) : "";
     if (chip !== nextHtml) {
       nextChip.innerHTML = nextHtml = chip;
@@ -792,7 +849,13 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
     const state = dataState(launchesData, new Date());
     world = worldLaunches(launchesData, events, now, new Date());
     if (!worldSection.hidden) {
-      const html = launchesListHtml(world, now, { state, fetchedAt: launchesData?.fetched_at, noteId: "ref-note" });
+      const japan = viewMode === "japan";
+      const html = launchesListHtml(japan ? world.filter((l) => showsLaunch("japan", l)) : world, now, {
+        state,
+        fetchedAt: launchesData?.fetched_at,
+        noteId: "ref-note",
+        empty: japan ? "いま載せている、日本の射場からの打ち上げはありません。" : undefined,
+      });
       if (html !== worldHtml) worldBody.innerHTML = worldHtml = html;
     }
     // ピン：まとめた射場のうち、いちばん近い打ち上げ。公式の射場のピンと重なるところには立てない
@@ -845,6 +908,33 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
     .map((c) => `<li>${esc(c.card.name.ja)}：${imageCredit(c.card.image)}</li>`)
     .join("");
 
+  // 射場の名前が重なったら、日付の遅いほうの名前を隠す（ひし形は残り、マウスを乗せると名前が出る）。
+  // 機体の名前と、選んでいる・一覧で指しているピンの名前を優先する
+  const overlaps = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+  function declutterPins() {
+    const kept = [];
+    for (const c of craft) {
+      const r = c.el.isConnected && c.el.querySelector(".tag")?.getBoundingClientRect();
+      if (r?.width) kept.push(r);
+    }
+    // 先に全部の位置を読み、あとでまとめて書き換える（読み書きを交互にすると、そのたびに配置の計算が走る）
+    const pins = siteData()
+      .filter((p) => p.el.isConnected)
+      .map((p) => ({
+        p,
+        r: p.el.querySelector(".tag").getBoundingClientRect(),
+        first: p.el.classList.contains("selected") || p.el.classList.contains("peek"),
+        t: p.ev ? eventSpanStart(p.ev) : Date.parse(p.first?.net ?? ""),
+      }))
+      .sort((a, b) => b.first - a.first || a.t - b.t);
+    const hides = pins.map(({ r, first }) => {
+      const hide = !first && kept.some((k) => overlaps(k, r));
+      if (!hide) kept.push(r);
+      return hide;
+    });
+    pins.forEach(({ p }, i) => p.el.classList.toggle("tag-hidden", hides[i]));
+  }
+
   // ---------- 毎フレームの更新 ----------
   const els = { time: $("#sim-time"), badge: $("#live-badge"), warning: $("#tle-warning") };
   const eiTime = $("#ei-time");
@@ -854,7 +944,7 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
   let lastWarning = "";
 
   renderFamTabs();
-  renderList();
+  setView(viewMode); // 覚えている表示（なければ「すべて」）。一覧も描く
   syncControls();
 
   const tick = (t) => {
@@ -890,8 +980,10 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
       eiTime.textContent = dateTimeJa(now);
       const pov = globe.pointOfView();
       eiView.textContent = `${latJa(pov.lat)} ${lngJa(((pov.lng + 540) % 360) - 180)}`;
-      const n = markerData().length;
-      eiCount.textContent = `${n}機（${[...new Set(markerData().map((c) => c.family.label))].join("・")}）`;
+      const shownCraft = markerData();
+      const pins = siteData().length;
+      const fams = [...new Set(shownCraft.map((c) => c.family.label))].join("・");
+      eiCount.textContent = [shownCraft.length ? `${shownCraft.length}機（${fams}）` : "", pins ? `射場 ${pins}か所` : ""].filter(Boolean).join("・") || "なし";
       const live = clock.isLive();
       els.badge.dataset.live = String(live);
       app.dataset.live = String(live);
@@ -907,6 +999,7 @@ function startApp({ craft, land, prefectures, events, launchesData }) {
         if (r.width) c.el.classList.toggle("tag-left", r.left + 34 + (c.el.querySelector(".tag")?.offsetWidth ?? 0) > innerWidth - 8);
       }
       updateDetailLive();
+      declutterPins();
       // 予定と「次の出来事」：観測時刻で30秒ごと（早送りや時刻の移動にもついていく）
       if (Math.abs(now - eventsAt) > 30000) renderEvents();
       // 通過の予報は10分ごと、または次の通過が終わったら作り直す

@@ -57,6 +57,14 @@
       </div>
     </header>
 
+    <!-- 地球の上：表示切替（地球と一覧に出すもの）。押したものが光る -->
+    <div class="view-switch" id="view-switch" role="group" aria-label="地球と一覧に出すもの">
+      <button type="button" data-view="all" aria-pressed="true"><span class="vs-long">すべて</span><span class="vs-short" aria-hidden="true">すべて</span></button>
+      <button type="button" data-view="japan" aria-pressed="false"><span class="vs-long">日本のみ</span><span class="vs-short" aria-hidden="true">日本</span></button>
+      <button type="button" data-view="craft" aria-pressed="false"><span class="vs-long">衛星のみ</span><span class="vs-short" aria-hidden="true">衛星</span></button>
+      <button type="button" data-view="launches" aria-pressed="false"><span class="vs-long">打ち上げ予定のみ</span><span class="vs-short" aria-hidden="true">打ち上げ</span></button>
+    </div>
+
     <!-- 地球の左上：いま表示しているもの -->
     <section class="earth-info" aria-label="現在の地球">
       <h2 class="earth-info-title">現在の地球</h2>
@@ -85,7 +93,7 @@
       <section class="events" id="events-section" aria-labelledby="events-title" hidden>
         <div class="events-head">
           <h2 id="events-title" class="events-title">次の出来事</h2>
-          <span class="k">日本と世界・公式の日付だけ</span>
+          <span class="k" id="events-sub">日本と世界・公式の日付だけ</span>
         </div>
         <div id="events-body" class="events-body"></div>
         <p class="events-note k small">日付は運用している機関（JAXA・NASA・ESA など）の公式発表どおりで、日本時間で書いています。遅れたら「延期」とだけ書きます。</p>
@@ -165,6 +173,8 @@
       <p>軌道の形を表す数字のセット（<b>軌道要素</b>）は、米国宇宙軍（USSPACECOM）が Space-Track.org で公開しているものです。これを CelesTrak から取得し、<b>SGP4</b>（人工衛星の位置を計算する方法）で、あなたのブラウザの中で計算しています。</p>
       <p>軌道データは時間がたつと少しずつずれていくので、6時間ごとに自動で取り直しています。それでも、実際の位置と少し差が出ることがあります。</p>
       <p id="about-tle" class="mono small"></p>
+      <h3>表示の切り替え</h3>
+      <p>地球の上のボタンで、地球と一覧に出すものを切り替えられます（すべて・日本のみ・衛星のみ・打ち上げ予定のみ）。<b>日本のみ</b>は、運用している機関に日本の機関（JAXA・気象庁・内閣府など）が入っている機体（ISS も入ります）と、日本の予定・日本の射場からの打ち上げです。選んだ表示は、このブラウザにだけ覚えておきます。</p>
       <h3>環（わ）について</h3>
       <p>地球のまわりの3本の環は、低軌道・中軌道・静止軌道の目安です。違いが見えるように<b>半径を比較用に描いていて、実際の距離とは違います</b>。低軌道の機体は約90分で地球を一周して「流れ」、静止軌道の機体は地球と同じ速さで回るので「止まって」見えます。早送りで確かめてみてください。</p>
       <h3>「状態」について</h3>
