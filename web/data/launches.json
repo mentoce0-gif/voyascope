@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-01T23:00:30.000Z",
+  "fetched_at": "2026-10-02T05:36:29.171Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "4651fd8a-43de-4166-bf8f-c168b3bd1d2c",
-      "net": "2026-10-02T03:53:00.000Z",
-      "precision": "min",
-      "window_end": "2026-10-02T04:42:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-01T22:24:01Z",
-      "rocket": {
-        "name": "Falcon Heavy",
-        "full_name": "Falcon Heavy"
-      },
-      "provider": {
-        "name": "SpaceX",
-        "ja": "スペースX"
-      },
-      "mission": {
-        "name": "NROL-97",
-        "placeholder": false,
-        "type": "Government/Top Secret",
-        "type_ja": "政府（内容は非公開）",
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 27,
-        "name": "Kennedy Space Center, FL, USA",
-        "ja": "ケネディ宇宙センター",
-        "short": "ケネディ",
-        "pad": "Launch Complex 39A",
-        "country": "USA",
-        "country_ja": "アメリカ",
-        "position": {
-          "lat": 28.60822681,
-          "lng": -80.60428186
-        }
-      }
-    },
     {
       "id": "da43dc2c-00af-4cc1-8ef1-90a60b2eb9e5",
       "net": "2026-10-05T08:17:00.000Z",
