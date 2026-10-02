@@ -189,11 +189,11 @@ export const refMarkHtml = ({ tip = true } = {}) =>
 
 // ---------- 一覧（「予定」タブの下の段） ----------
 // noteId：説明の文を持つ要素の id（各行の aria-describedby に使う）
-export function launchesListHtml(list, now, { state = "ok", fetchedAt = null, noteId = "ref-note" } = {}) {
+export function launchesListHtml(list, now, { state = "ok", fetchedAt = null, noteId = "ref-note", empty = "いま載せている世界の打ち上げはありません。" } = {}) {
   if (state === "missing") return `<p class="k small">世界の打ち上げ予定を読み込めませんでした。</p>`;
   if (state === "stale")
     return `<p class="k small">世界の打ち上げ予定のデータが古くなっているので、いまは出していません${fetchedAt ? `（最後の取得：${esc(jstShort(fetchedAt))}）` : ""}。</p>`;
-  if (!list.length) return `<p class="k small">いま載せている世界の打ち上げはありません。</p>`;
+  if (!list.length) return `<p class="k small">${esc(empty)}</p>`;
   const rows = list.map((l) => {
     const [d1, d2] = launchWhenShort(l, now);
     const left = launchCountdownText(l, now, { approx: false });
