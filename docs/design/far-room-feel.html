@@ -1,0 +1,228 @@
+<meta charset="utf-8">
+<title>遠くを見る部屋 体感の試作</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: three tabs (A ladder / B light trip / C real-scale scroll) inside one observation-terminal panel. Single dark look, same tokens as web/css. */
+:root {
+  --navy-900: #050e1f;
+  --navy-800: #07142b;
+  --navy-700: #0c2140;
+  --navy-600: #143057;
+  --ink: #e4ecf7;
+  --dim: #8ea3c2;
+  --mint: #5ef2c2;
+  --mint-faint: rgba(94, 242, 194, 0.16);
+  --amber: #ffb547;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--navy-800); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; margin: 0; padding-inline: 16px; padding-block: 24px 40px; }
+.wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 18px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; color: var(--mint); }
+h1 { margin: 0; font-size: 24px; text-wrap: balance; }
+p { margin: 0; }
+.note { color: var(--dim); font-size: 13px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab { font: inherit; font-size: 14px; color: var(--mint); background: transparent; border: 1px solid rgba(94,242,194,.45); border-radius: 4px; padding: 8px 14px; min-height: 44px; cursor: pointer; }
+.tab[aria-selected="true"] { background: var(--mint); color: var(--navy-900); font-weight: 700; }
+.tab:focus-visible, .btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.panel { background: var(--navy-700); border: 1px solid var(--navy-600); border-radius: 8px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel h2 { margin: 0; font-size: 17px; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.btn { font: inherit; font-size: 14px; border-radius: 4px; padding: 8px 14px; min-height: 44px; cursor: pointer; border: 1px solid rgba(94,242,194,.45); background: transparent; color: var(--mint); }
+.btn.primary { background: var(--amber); border-color: var(--amber); color: var(--navy-900); font-weight: 700; }
+.btn[aria-pressed="true"] { background: var(--mint-faint); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.kari { font-family: var(--font-mono); font-size: 11px; color: var(--navy-900); background: var(--dim); border-radius: 3px; padding: 0 6px; }
+
+/* A ladder */
+.ladder { display: grid; gap: 0; }
+.rung { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: center; min-height: 46px; border-top: 1px dashed var(--navy-600); }
+.rung .scale { font-family: var(--font-mono); font-size: 12px; color: var(--dim); }
+.rung .objs { display: flex; gap: 8px; flex-wrap: wrap; }
+.obj { font: inherit; font-size: 14px; background: var(--navy-800); color: var(--ink); border: 1px solid var(--navy-600); border-radius: 999px; padding: 4px 12px; min-height: 36px; cursor: pointer; }
+.obj:hover, .obj[aria-pressed="true"] { border-color: var(--mint); color: var(--mint); }
+.detail { background: var(--navy-800); border-radius: 6px; padding: 12px 14px; display: grid; gap: 4px; }
+
+/* B light */
+.track { position: relative; height: 150px; margin-inline: 40px; }
+.track .axis { position: absolute; left: 0; right: 0; top: 74px; height: 2px; background: var(--navy-600); }
+.track .beam { position: absolute; left: 0; top: 73px; height: 4px; width: 0; background: linear-gradient(90deg, rgba(255,181,71,.15), var(--amber)); border-radius: 2px; }
+.track .pin { position: absolute; top: 0; transform: translateX(-50%); display: grid; justify-items: center; gap: 2px; font-size: 12px; width: 80px; text-align: center; }
+.track .pin.low { top: 62px; }
+.track .pin.low .tick { margin-top: 0; order: 0; }
+.track .pin.low .lbl { order: 2; }
+.track .pin .tick { width: 2px; height: 26px; background: var(--dim); margin-top: 28px; order: 2; }
+.track .pin:not(.low) .lbl { position: absolute; top: 0; }
+.track .pin .lbl { order: 1; line-height: 1.3; }
+.track .pin .t { order: 3; font-family: var(--font-mono); font-size: 11px; color: var(--dim); }
+.track .pin.hit .tick { background: var(--amber); box-shadow: 0 0 10px var(--amber); }
+.track .pin.hit .lbl { color: var(--amber); font-weight: 700; }
+.clock { font-family: var(--font-mono); font-size: 28px; color: var(--amber); font-variant-numeric: tabular-nums; }
+.log { display: grid; gap: 4px; font-size: 14px; min-height: 2em; }
+.track-wrap { overflow-x: auto; }
+.track-inner { min-width: 0; }
+
+/* C scroll */
+.scroller { height: 60vh; max-height: 520px; overflow-y: auto; background: var(--navy-900); border-radius: 6px; position: relative; }
+.ruler { position: relative; }
+.mark { position: absolute; left: 0; right: 0; border-top: 1px solid var(--dim); padding: 4px 12px; font-size: 14px; }
+.mark.big { border-color: var(--amber); color: var(--amber); }
+.km { position: absolute; left: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--navy-600); }
+.end { position: absolute; left: 0; right: 0; padding: 16px 12px; display: grid; gap: 6px; border-top: 2px dashed var(--amber); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">VOYASCOPE · M7 v0 遠くを見る部屋 · 体感の試作</div>
+  <h1>地球の輪の外は、桁が違う</h1>
+  <p class="note">3つの案を触って比べるための試作です。距離はすべて<span class="kari">仮</span>の目安で、本番は JPL Horizons（利用条件の確認後）から毎日取ります。</p>
+
+  <div class="tabs" role="tablist" aria-label="案">
+    <button class="tab" role="tab" id="tab-a" aria-controls="pane-a" aria-selected="false">A 距離のはしご</button>
+    <button class="tab" role="tab" id="tab-b" aria-controls="pane-b" aria-selected="true">B 光の旅（おすすめの見どころ）</button>
+    <button class="tab" role="tab" id="tab-c" aria-controls="pane-c" aria-selected="false">C 実寸のスクロール</button>
+  </div>
+
+  <section class="panel" id="pane-a" role="tabpanel" aria-labelledby="tab-a" hidden>
+    <h2>A 距離のはしご</h2>
+    <p class="note">目盛りが1段下がるごとに10倍遠い。名前を押すと詳細。</p>
+    <div class="ladder" id="ladder"></div>
+    <div class="detail" id="a-detail" aria-live="polite"><span class="note">名前を押してください</span></div>
+  </section>
+
+  <section class="panel" id="pane-b" role="tabpanel" aria-labelledby="tab-b">
+    <h2>B 光の旅</h2>
+    <p class="note">地球から光を出します。月までは本当の速さ。その先は早送りで。</p>
+    <div class="row">
+      <button class="btn primary" id="b-go">光を出す</button>
+      <span class="note">速さ</span>
+      <button class="btn" data-speed="1" aria-pressed="true">×1（実時間）</button>
+      <button class="btn" data-speed="60" aria-pressed="false">×60</button>
+      <button class="btn" data-speed="3600" aria-pressed="false">×3600</button>
+    </div>
+    <div class="row"><span class="clock" id="b-clock">0.0 秒</span><span class="note" id="b-speed">×1（実時間）</span></div>
+    <div class="track-wrap"><div class="track-inner"><div class="track" id="track"><div class="axis"></div><div class="beam" id="beam"></div></div></div></div>
+    <div class="log" id="b-log" aria-live="polite"></div>
+    <p class="note" id="b-voyager"></p>
+  </section>
+
+  <section class="panel" id="pane-c" role="tabpanel" aria-labelledby="tab-c" hidden>
+    <h2>C 実寸のスクロール</h2>
+    <p class="note">1px＝1,000km。下へスクロールしてください。</p>
+    <div class="scroller" id="scroller" tabindex="0" aria-label="実寸の距離"><div class="ruler" id="ruler"></div></div>
+  </section>
+
+  <p class="note">設計メモ：docs/design/far-room-feel.md。数値は仮：月 384,400km、L2（ジェイムズ・ウェッブ）約150万km、太陽 約1億4960万km、ボイジャー1号 約1光日（11/18 に到達）。</p>
+</div>
+
+<script>
+const C = 299792.458; // km/s
+const OBJS = [
+  { id: "moon", name: "月", km: 384400 },
+  { id: "jwst", name: "ジェイムズ・ウェッブ（L2）", km: 1.5e6 },
+  { id: "sun", name: "太陽", km: 1.496e8 },
+  { id: "v1", name: "ボイジャー1号", km: C * 86400 },
+];
+const fmtKm = (km) => Math.round(km).toLocaleString("ja-JP") + " km";
+function fmtTime(s) {
+  if (s < 60) return s.toFixed(1) + " 秒";
+  if (s < 3600) return Math.floor(s / 60) + " 分 " + Math.floor(s % 60) + " 秒";
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h + " 時間 " + m + " 分";
+}
+
+// tabs
+const tabs = [...document.querySelectorAll(".tab")];
+tabs.forEach((t) => t.addEventListener("click", () => {
+  tabs.forEach((x) => { const on = x === t; x.setAttribute("aria-selected", on); document.getElementById(x.getAttribute("aria-controls")).hidden = !on; });
+  if (t.id === "tab-c") layoutC();
+}));
+
+// A
+const ladder = document.getElementById("ladder");
+for (let e = 4; e <= 11; e++) {
+  const r = document.createElement("div"); r.className = "rung";
+  const label = e < 8 ? (10 ** (e - 4)).toLocaleString("ja-JP") + " 万km" : (10 ** (e - 8)).toLocaleString("ja-JP") + " 億km";
+  r.innerHTML = `<span class="scale">${label}〜</span><span class="objs"></span>`;
+  OBJS.filter((o) => Math.floor(Math.log10(o.km)) === e).forEach((o) => {
+    const b = document.createElement("button"); b.className = "obj"; b.textContent = o.name; b.setAttribute("aria-pressed", "false");
+    b.addEventListener("click", () => {
+      ladder.querySelectorAll(".obj").forEach((x) => x.setAttribute("aria-pressed", x === b));
+      document.getElementById("a-detail").innerHTML =
+        `<strong>${o.name}</strong><span class="mono">${fmtKm(o.km)} <span class="kari">仮</span></span>` +
+        `<span>光で <span class="mono">${fmtTime(o.km / C)}</span></span><span class="note">月の約 ${Math.round(o.km / 384400).toLocaleString("ja-JP")} 倍</span>`;
+    });
+    r.querySelector(".objs").append(b);
+  });
+  ladder.append(r);
+}
+
+// B
+const LMIN = 4, LMAX = Math.log10(C * 86400) + 0.15;
+const xOf = (km) => Math.max(0, Math.min(1, (Math.log10(Math.max(km, 1e4)) - LMIN) / (LMAX - LMIN))) * 100;
+const track = document.getElementById("track");
+const earth = document.createElement("div"); earth.className = "pin hit"; earth.style.left = "0%";
+earth.innerHTML = `<span class="lbl">地球</span><span class="tick"></span><span class="t">0 秒</span>`; track.append(earth);
+OBJS.forEach((o, i) => {
+  const p = document.createElement("div"); p.className = "pin" + (i % 2 === 0 ? " low" : ""); p.id = "pin-" + o.id; p.style.left = xOf(o.km) + "%";
+  p.innerHTML = `<span class="lbl">${o.name}</span><span class="tick"></span><span class="t">${fmtTime(o.km / C)}</span>`; track.append(p);
+});
+let speed = 1, t = 0, running = false, last = 0;
+const beam = document.getElementById("beam"), clock = document.getElementById("b-clock"), log = document.getElementById("b-log");
+const speedLabel = { 1: "×1（実時間）", 60: "×60（1秒で1分）", 3600: "×3600（1秒で1時間）" };
+document.querySelectorAll("[data-speed]").forEach((b) => b.addEventListener("click", () => {
+  speed = +b.dataset.speed;
+  document.querySelectorAll("[data-speed]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  document.getElementById("b-speed").textContent = speedLabel[speed];
+}));
+const hit = new Set();
+function frame(now) {
+  if (!running) return;
+  t += ((now - last) / 1000) * speed; last = now;
+  const d = C * t;
+  beam.style.width = xOf(d) + "%";
+  clock.textContent = fmtTime(t);
+  OBJS.forEach((o) => {
+    if (d >= o.km && !hit.has(o.id)) {
+      hit.add(o.id); document.getElementById("pin-" + o.id).classList.add("hit");
+      const line = document.createElement("div"); line.innerHTML = `<span class="mono">${fmtTime(o.km / C)}</span> ${o.name}に届いた`; log.append(line);
+    }
+  });
+  const left = 86400 - t;
+  if (left > 0 && t > 5) document.getElementById("b-voyager").textContent = `ボイジャー1号まで、あと ${fmtTime(left)}。`;
+  if (left <= 0) { running = false; document.getElementById("b-go").textContent = "もう一度"; return; }
+  requestAnimationFrame(frame);
+}
+document.getElementById("b-go").addEventListener("click", (e) => {
+  t = 0; hit.clear(); log.innerHTML = ""; OBJS.forEach((o) => document.getElementById("pin-" + o.id).classList.remove("hit"));
+  e.target.textContent = "最初から"; last = performance.now();
+  if (!running) { running = true; requestAnimationFrame(frame); }
+});
+// 1 light-day: the light reaching Voyager 1 now left Earth exactly one day ago
+const ago = new Date(Date.now() - 86400e3);
+const jst = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(ago);
+document.getElementById("b-voyager").textContent = `11/18 からは：いまボイジャー1号に届いている光は、${jst}（日本時間）に地球を出た光。`;
+
+// C
+const PX_PER_KM = 1 / 1000;
+const ruler = document.getElementById("ruler"), scroller = document.getElementById("scroller");
+function layoutC() {
+  const H = scroller.clientHeight || 400;
+  const l2 = 1.5e6 * PX_PER_KM;
+  ruler.style.height = (l2 + 260) + "px";
+  ruler.innerHTML = "";
+  const marks = [["地球", 0, true], ["月 384,400km", 384400 * PX_PER_KM, true], ["ジェイムズ・ウェッブ（L2） 約150万km", l2, true]];
+  for (let k = 1e5; k < 1.5e6; k += 1e5) ruler.insertAdjacentHTML("beforeend", `<span class="km" style="top:${k * PX_PER_KM}px">${(k / 1e4).toLocaleString("ja-JP")}万km</span>`);
+  marks.forEach(([n, y, big]) => ruler.insertAdjacentHTML("beforeend", `<div class="mark${big ? " big" : ""}" style="top:${y}px">${n}</div>`));
+  const screens = (km) => Math.round((km * PX_PER_KM) / H).toLocaleString("ja-JP");
+  ruler.insertAdjacentHTML("beforeend", `<div class="end" style="top:${l2 + 40}px">
+    <strong>ここまでで ${screens(1.5e6)} 画面ぶん。</strong>
+    <span>このまま太陽まで行くと、約 <span class="mono">${screens(1.496e8)}</span> 画面。</span>
+    <span>ボイジャー1号までなら、約 <span class="mono">${screens(C * 86400)}</span> 画面。</span>
+    <span class="note">画面の数は、いま見ている枠の高さ（${H}px）で計算しています。</span></div>`);
+}
+</script>
