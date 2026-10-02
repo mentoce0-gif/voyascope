@@ -28,6 +28,7 @@ npx serve web              # または python3 -m http.server -d web
 | `js/tonight.js` | 「今夜・頭の上」の表示（県の選択、時刻と方角のことば、空の図） |
 | `js/format.js` | 日付・数値の表示 |
 | `js/events.js` | 予定（次の出来事・これから行く）：日本時間の日付・残り時間・一覧と詳細の表示 |
+| `js/view.js` | 表示切替（すべて／日本のみ／衛星のみ／打ち上げ予定のみ）：日本の決め方と、それぞれの表示で出すもの。選んだ表示はブラウザに覚える |
 | `js/launches.js` | 世界の打ち上げ（参考）：日本時間の日時・残り時間・公式の予定との重なりの除外・射場のピンのまとめ・「参考」の印・一覧と詳細の表示 |
 | `data/orbits/iss.json` | 軌道データ（CelesTrak の OMM JSON。TLE でも動く。取得日時・エポック・出典URLを含む） |
 | `data/prefectures.json` | 都道府県の代表地点（`config/prefectures.json` のコピー） |
