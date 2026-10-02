@@ -81,7 +81,7 @@ p { margin: 0; }
 .hud .km { position: static; font-family: var(--font-mono); font-size: clamp(20px, 6vw, 34px); color: var(--amber); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .hud .sub { font-family: var(--font-mono); font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; }
 .hud .warp { font-family: var(--font-mono); font-size: 12px; color: var(--mint); }
-.fly-card { position: absolute; left: 12px; bottom: 12px; max-width: min(300px, calc(100% - 24px)); background: rgba(12, 33, 64, .92); border: 1px solid var(--mint); border-radius: 6px; padding: 10px 12px; display: grid; gap: 2px; pointer-events: none; transition: opacity .3s, transform .3s; }
+.fly-card { position: absolute; left: 12px; bottom: 76px; max-width: min(300px, calc(100% - 24px)); background: rgba(12, 33, 64, .92); border: 1px solid var(--mint); border-radius: 6px; padding: 10px 12px; display: grid; gap: 2px; pointer-events: none; transition: opacity .3s, transform .3s; }
 .fly-card[data-off="true"] { opacity: 0; transform: translateY(8px); }
 .fly-card .name { font-weight: 700; color: var(--mint); }
 .hint { position: absolute; left: 0; right: 0; top: 46%; text-align: center; font-size: 14px; color: var(--ink); pointer-events: none; transition: opacity .4s; }
@@ -114,7 +114,7 @@ p { margin: 0; }
       <div class="hint" id="d-hint">↑ 上へスワイプ</div>
       <div class="fly-card" id="d-card" data-off="true" aria-live="polite"></div>
     </div>
-    <div class="row"><button class="btn" id="d-reset">地表へ戻る</button><span class="note">数字は地球からの距離（<span class="kari">仮</span>）。光より速く進むのはワープ（作り話）で、「光で◯秒」が本当の光の速さ。本番では、通り過ぎた探査機の出典つきカードが出ます。</span></div>
+    <div class="row"><button class="btn" id="d-reset">地表へ戻る</button><span class="note">数字は地球からの距離（<span class="kari">仮</span>）。光より速く進むのはワープ（作り話）で、「光で◯秒」が本当の光の速さ。下の物差しは「0〜いまの距離」で、遠くへ行くほど縮尺が変わり、通り過ぎた場所（▼）は左へ押しつぶされていく。本番では、通り過ぎた探査機の出典つきカードが出ます。</span></div>
   </section>
 
   <section class="panel" id="pane-a" role="tabpanel" aria-labelledby="tab-a" hidden>
@@ -221,7 +221,7 @@ tabs.forEach((t) => t.addEventListener("click", () => {
     // Earth falls away below you
     const r = Math.min(H * 40, (6371 / km) * H * 0.9);
     if (r > 0.6) {
-      const ey = H * 0.92 + r * (r > H ? 1 : 0.2);
+      const ey = H - 70 + r * (r > H ? 1 : 0.2);
       const g = ctx.createRadialGradient(cx, ey, r * 0.2, cx, ey, r);
       g.addColorStop(0, "#1d5fa8"); g.addColorStop(0.97, "#2f86c9"); g.addColorStop(1, "#9fd8ff");
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, ey, r, 0, Math.PI * 2); ctx.fill();
@@ -239,6 +239,36 @@ tabs.forEach((t) => t.addEventListener("click", () => {
       ctx.fillText(o.name, x, y - rad - 6);
     });
   }
+  // tape measure along the bottom: 0 → where you are now. Steps are 1/2/5×10^n so labels stay round;
+  // places you have passed slide toward 0 as the scale grows (the Moon ends up crushed against Earth).
+  const jaKm = (n) => n >= 1e12 ? +(n / 1e12).toPrecision(3) + "兆km" : n >= 1e8 ? +(n / 1e8).toPrecision(3) + "億km" : n >= 1e4 ? +(n / 1e4).toPrecision(3) + "万km" : Math.round(n) + "km";
+  function niceStep(span) {
+    const raw = span / 4, e = 10 ** Math.floor(Math.log10(raw)), m = raw / e;
+    return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * e;
+  }
+  function tape() {
+    const km = 10 ** p, x0 = 16, x1 = W - 16, y = H - 30, len = x1 - x0;
+    ctx.fillStyle = "rgba(5,14,31,.82)"; ctx.fillRect(0, H - 58, W, 58);
+    ctx.strokeStyle = "#8ea3c2"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x0, y); ctx.lineTo(x1, y); ctx.stroke();
+    const step = niceStep(km);
+    ctx.font = "10px 'JetBrains Mono', monospace"; ctx.textAlign = "center"; ctx.fillStyle = "#8ea3c2";
+    for (let v = 0, i = 0; v <= km * 1.0001; v += step, i++) {
+      const x = x0 + (v / km) * len; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - 8); ctx.stroke();
+      for (let k = 1; k < 5; k++) { const xs = x0 + ((v + (step * k) / 5) / km) * len; if (xs <= x1) { ctx.beginPath(); ctx.moveTo(xs, y); ctx.lineTo(xs, y - 4); ctx.stroke(); } }
+      if (i > 0 && x < x1 - 56) ctx.fillText(jaKm(v), x, y + 14);
+    }
+    ctx.textAlign = "left"; ctx.fillText("0", x0 - 2, y + 14);
+    ctx.textAlign = "right"; ctx.fillStyle = "#ffb547"; ctx.fillText("いまここ", x1, y + 14);
+    ctx.textAlign = "left"; ctx.fillStyle = "#5ef2c2"; ctx.font = "11px 'Zen Kaku Gothic New', sans-serif";
+    ctx.fillText("物差し：1目盛り＝" + jaKm(step / 5), x0, H - 44);
+    stops.slice(1).forEach((o) => {
+      if (o.km > km) return;
+      const x = x0 + (o.km / km) * len;
+      ctx.fillStyle = o.id === "sun" ? "#ffd27a" : o.id === "moon" ? "#c9d3e0" : "#5ef2c2";
+      ctx.beginPath(); ctx.moveTo(x, y - 2); ctx.lineTo(x - 4, y - 10); ctx.lineTo(x + 4, y - 10); ctx.closePath(); ctx.fill();
+    });
+  }
   function hud() {
     const km = 10 ** p, t = km / C;
     document.getElementById("d-km").textContent = fmtKm(km);
@@ -254,7 +284,7 @@ tabs.forEach((t) => t.addEventListener("click", () => {
     v *= Math.pow(0.2, dt); // friction: the push fades in about a second
     const passed = [...stops].reverse().find((o) => p >= o.p - 0.02);
     if (passed && passed !== shown) { shown = passed; card(passed.id === "earth" ? null : passed); }
-    if (!fly.closest("[hidden]")) { if (W !== fly.clientWidth || H !== fly.clientHeight) size(); draw(dt); hud(); }
+    if (!fly.closest("[hidden]")) { if (W !== fly.clientWidth || H !== fly.clientHeight) size(); draw(dt); tape(); hud(); }
     requestAnimationFrame(tick);
   }
   size(); requestAnimationFrame(tick);
