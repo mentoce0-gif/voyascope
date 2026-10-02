@@ -81,7 +81,7 @@ CelesTrak（https://celestrak.org）から軌道データ（GP / TLE）を取得
 **C4　ISS カード：公式リンク**
 - 公式リンク（最大3つ）：NASA の ISS 公式ページ、JAXA「きぼう」の公式ページ など。`{ "label": "NASA", "url": "https://…" }` の形で
 
-**C5　ライセンス**
+**C5　ライセンス**（2026-10-01 完了。コードは MIT、文章は CC BY 4.0 に決定。もう依頼しない）
 LICENSE_DRAFT.md のチェックリストを埋める。
 - Hippocratic License 3.0 の最新版の条文と、軍事活動を禁止するモジュールの正式名・内容
 - 公式のライセンス生成ツールの URL と、そこで作れる LICENSE 本文の入手方法（本文は貼らなくてよい。URL だけ）

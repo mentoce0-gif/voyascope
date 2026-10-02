@@ -12,7 +12,10 @@
 
 **https://mentoce0-gif.github.io/voyascope/**
 
-## 公開停止について
+## お願いと公開停止について
+
+**軍事目的や、誰かを傷つけたり虐げたりすることには使わないでください。**
+これは法的な禁止ではなく、作者からのお願いです。
 
 このアプリを使った軍事行為、または誰かに被害をもたらす行為が確認された場合は、公開を停止します。
 詳しくは [RULES.md](RULES.md) を参照してください。
@@ -64,5 +67,11 @@ npm run validate:examples   # 見本を検証（出典未確認なのでエラ�
 
 ## ライセンス
 
-確定待ちです（[LICENSE_DRAFT.md](LICENSE_DRAFT.md)）。
-軌道データ・画像などの権利は、それぞれの提供元に帰属します。
+| 対象 | ライセンス |
+|---|---|
+| プログラム（`web/` の HTML・CSS・JavaScript、`scripts/`、`schema/`、`tests/`、`config/`） | [MIT License](LICENSE) |
+| VOYASCOPE が書いた文章（カードの説明文、`docs/` など） | [CC BY 4.0](CONTENT_LICENSE.md) |
+| ロゴ・ブランド画像（`web/assets/brand/`、`docs/design/`） | 作者が権利を持つ（自由に使ってよいものとしては配らない） |
+| 軌道データ・地名・画像・ライブラリなど | それぞれの提供元の条件（[CONTENT_LICENSE.md](CONTENT_LICENSE.md)、[web/vendor/THIRD_PARTY_NOTICES.txt](web/vendor/THIRD_PARTY_NOTICES.txt)） |
+
+上の「お願い」はライセンスの条件ではありません。
