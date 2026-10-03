@@ -1,0 +1,72 @@
+{
+  "id": "crew-13",
+  "name": {
+    "value": "Crew-13",
+    "source": "https://www.nasa.gov/mission/nasas-spacex-crew-13/",
+    "as_of": "2026-10-03"
+  },
+  "vehicle": {
+    "value": "クルードラゴン宇宙船「Grace」",
+    "source": "https://www.nasa.gov/missions/station/commercial-crew/what-you-need-to-know-about-nasas-spacex-crew-13-mission/",
+    "as_of": "2026-10-03",
+    "note": "宇宙船の名前は NASA、種類の書き方は JAXA"
+  },
+  "destination": "iss",
+  "launch_date": {
+    "value": "2026-10-01",
+    "source": "https://www.nasa.gov/mission/nasas-spacex-crew-13/",
+    "as_of": "2026-10-03",
+    "note": "打ち上げ済み。米国東部時間 11:10（日本時間 10月2日 0:10）"
+  },
+  "return_date": {
+    "value": "2027",
+    "source": "https://www.nasa.gov/mission/nasas-spacex-crew-13/",
+    "as_of": "2026-10-03",
+    "note": "予定：2027年（NASA）。月日はまだ発表されていない"
+  },
+  "crew": [
+    {
+      "astronaut": "jessica-watkins",
+      "role": {
+        "value": "コマンダー",
+        "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+        "as_of": "2026-10-03"
+      }
+    },
+    {
+      "astronaut": "luke-delaney",
+      "role": {
+        "value": "パイロット",
+        "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+        "as_of": "2026-10-03"
+      }
+    },
+    {
+      "astronaut": "joshua-kutryk",
+      "role": {
+        "value": "ミッションスペシャリスト",
+        "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+        "as_of": "2026-10-03"
+      }
+    },
+    {
+      "astronaut": "sergey-teteryatnikov",
+      "role": {
+        "value": "ミッションスペシャリスト",
+        "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+        "as_of": "2026-10-03"
+      }
+    }
+  ],
+  "official_links": [
+    {
+      "label": "NASA Crew-13",
+      "url": "https://www.nasa.gov/mission/nasas-spacex-crew-13/"
+    },
+    {
+      "label": "JAXA ISS滞在クルー",
+      "url": "https://humans-in-space.jaxa.jp/iss/crew/"
+    }
+  ],
+  "updated_at": "2026-10-03"
+}
