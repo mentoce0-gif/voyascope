@@ -6,6 +6,7 @@
 |---|---|---|
 | `chappy-research.md` | チャッピー（ChatGPT） | C1〜C17：一次ソース調査（出典URL＋原文の引用つき） |
 | `grok-news.md` | Grok | G1〜G4：速報（公式URLのあり・なしを区別）。G4 は「次の出来事」の延期・日付の変更 |
+| `codex-far-room-visual.md` | Codex（ほかの AI でも可） | 遠くを見る部屋の見た目の試作（1回だけ。Claude Code の試作と同じ条件で比べる。事実は依頼文の固定データだけを使わせる） |
 
 ## 使い方
 
@@ -16,4 +17,4 @@
 
 ## 編集するとき
 
-`chappy-research.md` と `grok-news.md` は生成物。`prompts/src/` を直して `npm run build:prompts` を実行する（RULES.md を変えたときも同じ）。
+`chappy-research.md`・`grok-news.md`・`codex-far-room-visual.md` は生成物。`prompts/src/` を直して `npm run build:prompts` を実行する（RULES.md を変えたときも同じ）。
