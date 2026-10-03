@@ -1,0 +1,17 @@
+{
+  "id": "anna-kikina",
+  "name": {
+    "ja": "アンナ・キキナ",
+    "en": "Anna Kikina"
+  },
+  "agency": {
+    "value": "Roscosmos",
+    "source": "https://www.gctc.ru/main.php?id=1710",
+    "as_of": "2026-10-03"
+  },
+  "official_profile_url": "https://www.gctc.ru/main.php?id=1710",
+  "teams": [
+    "soyuz-ms-29"
+  ],
+  "updated_at": "2026-10-03"
+}

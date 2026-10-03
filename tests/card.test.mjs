@@ -24,6 +24,16 @@ test("打ち上げ済みで、帰還日が来ていないチームだけ", () =>
   assert.deepEqual(ids("2026-10-10T00:00:00Z"), ["aboard", "future"]);
 });
 
+test("帰還の予定が月まで・年までのときは、その月・年が終わるまで滞在中", () => {
+  const partial = { teams: [team("month", "2026-02-13", "2026-10"), team("year", "2026-10-01", "2027")] };
+  const at = (now) => teamsAboard(partial, new Date(now)).map((t) => t.id);
+  assert.deepEqual(at("2026-10-03T00:00:00Z"), ["month", "year"]);
+  assert.deepEqual(at("2026-10-31T23:59:59Z"), ["month", "year"]);
+  assert.deepEqual(at("2026-11-01T00:00:00Z"), ["year"]);
+  assert.deepEqual(at("2027-12-31T00:00:00Z"), ["year"]);
+  assert.deepEqual(at("2028-01-01T00:00:00Z"), []);
+});
+
 test("データがなくても落ちない", () => {
   assert.deepEqual(teamsAboard(undefined, new Date()), []);
 });

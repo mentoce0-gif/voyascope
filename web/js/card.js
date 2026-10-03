@@ -75,13 +75,18 @@ function approxNumber(fact) {
 const launchYear = (fact) => /^(\d{4})/.exec(fact?.value ?? "")?.[1];
 const nw = (t) => `<span class="nw">${t}</span>`;
 
+// 帰還日が来たか。予定が「2026-10」（月まで）や「2027」（年まで）のときは、その月・年が終わるまで滞在中とみなす
+function hasReturned(value, day) {
+  if (!value) return false;
+  return value.length === 10 ? value <= day : day.slice(0, value.length) > value;
+}
+
 // いま乗っているチーム（打ち上げ済みで、帰還日がないか、まだ来ていない）
 export function teamsAboard(crewData, now) {
   const day = now.toISOString().slice(0, 10);
   return (crewData?.teams ?? []).filter((t) => {
     const launched = t.launch_date?.value && t.launch_date.value <= day;
-    const returned = t.return_date?.value && t.return_date.value <= day;
-    return launched && !returned;
+    return launched && !hasReturned(t.return_date?.value, day);
   });
 }
 
