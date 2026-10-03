@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://voyascope.local/schema/probe.schema.json",
+  "title": "探査機カード（遠くを見る部屋）",
+  "$comment": "地球の輪の外にいる探査機。創作の項目（キャッチコピーなど）は持たない。距離は推測で書かない：惑星の位置からブラウザで計算するもの・公式の目安の値・日付つきの公式の値のどれか。どれもなければ pending（準備中）。",
+  "type": "object",
+  "required": ["id", "name", "operator", "launch_date", "status", "location", "mission", "distance", "official_links", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "name": {
+      "$ref": "common.schema.json#/$defs/bilingualName",
+      "description": "ja は日本の公的機関（JAXA・国立天文台など）が使う呼び方"
+    },
+    "operator": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "運用している機関（value は配列）"
+    },
+    "launch_date": {
+      "description": "打ち上げ日（YYYY-MM-DD）。打ち上げ前なら公式の予定日を書き、note に「予定」",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": { "properties": { "value": { "$ref": "common.schema.json#/$defs/date" } } }
+        }
+      ]
+    },
+    "status": {
+      "description": "運用の状態（operating=運用中 / ended=運用終了 / not_launched=打ち上げ前）。公式の記述で確かめたときだけ。運用を終えた日は note に",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": { "properties": { "value": { "enum": ["operating", "ended", "not_launched"] } } }
+        }
+      ]
+    },
+    "location": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "いまどこで何をしているかを1文で（出典に書かれていることだけ）"
+    },
+    "mission": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "任務を中高生に分かる1文で"
+    },
+    "distance": {
+      "type": "object",
+      "description": "地球からの距離の出し方。planet=いる惑星までの距離をブラウザで計算 / typical=公式の目安の値（その日の距離ではない） / dated=日付つきの公式の値 / pending=準備中 / on_earth=打ち上げ前で地上にいる",
+      "required": ["method"],
+      "properties": {
+        "method": { "enum": ["planet", "typical", "dated", "pending", "on_earth"] }
+      },
+      "allOf": [
+        { "if": { "properties": { "method": { "const": "planet" } } }, "then": { "$ref": "#/$defs/planetDistance" } },
+        { "if": { "properties": { "method": { "const": "typical" } } }, "then": { "$ref": "#/$defs/typicalDistance" } },
+        { "if": { "properties": { "method": { "const": "dated" } } }, "then": { "$ref": "#/$defs/datedDistance" } },
+        { "if": { "properties": { "method": { "enum": ["pending", "on_earth"] } } }, "then": { "$ref": "#/$defs/noDistance" } }
+      ]
+    },
+    "events": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "この探査機の予定（curation/events の id）。部屋のカードに日付を出す",
+      "items": { "$ref": "common.schema.json#/$defs/id" }
+    },
+    "official_links": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": { "$ref": "common.schema.json#/$defs/link" }
+    },
+    "updated_at": { "$ref": "common.schema.json#/$defs/date" }
+  },
+  "$defs": {
+    "planetDistance": {
+      "type": "object",
+      "required": ["method", "body", "source", "as_of"],
+      "additionalProperties": false,
+      "description": "その惑星にいる・惑星のすぐ近くにいることを、source の公式ページで確かめたもの。距離は惑星までの距離（ブラウザで計算）",
+      "properties": {
+        "method": { "const": "planet" },
+        "body": { "enum": ["Mercury", "Venus", "Mars", "Jupiter", "Saturn"] },
+        "source": { "$ref": "common.schema.json#/$defs/source" },
+        "as_of": { "$ref": "common.schema.json#/$defs/date" },
+        "note": { "type": "string", "maxLength": 80 }
+      }
+    },
+    "typicalDistance": {
+      "type": "object",
+      "required": ["method", "value", "unit", "source", "as_of"],
+      "additionalProperties": false,
+      "properties": {
+        "method": { "const": "typical" },
+        "value": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "const": "km" },
+        "source": { "$ref": "common.schema.json#/$defs/source" },
+        "as_of": { "$ref": "common.schema.json#/$defs/date" },
+        "note": { "type": "string", "maxLength": 80 }
+      }
+    },
+    "datedDistance": {
+      "type": "object",
+      "required": ["method", "value", "unit", "at", "source", "as_of"],
+      "additionalProperties": false,
+      "description": "at はその値の日付（公式ページに書かれた日）。as_of は出典を確かめた日",
+      "properties": {
+        "method": { "const": "dated" },
+        "value": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "const": "km" },
+        "at": { "$ref": "common.schema.json#/$defs/date" },
+        "source": { "$ref": "common.schema.json#/$defs/source" },
+        "as_of": { "$ref": "common.schema.json#/$defs/date" },
+        "note": { "type": "string", "maxLength": 80 }
+      }
+    },
+    "noDistance": {
+      "type": "object",
+      "required": ["method"],
+      "additionalProperties": false,
+      "properties": {
+        "method": { "enum": ["pending", "on_earth"] },
+        "note": { "type": "string", "maxLength": 80 }
+      }
+    }
+  }
+}

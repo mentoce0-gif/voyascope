@@ -12,6 +12,7 @@ const kinds = [
   { dir: "teams", schema: "team.schema.json" },
   { dir: "astronauts", schema: "astronaut.schema.json" },
   { dir: "events", schema: "event.schema.json" },
+  { dir: "probes", schema: "probe.schema.json" },
 ];
 
 const loadJson = (path) => JSON.parse(readFileSync(path, "utf8"));
@@ -19,7 +20,7 @@ const ajv = new Ajv2020({ allErrors: true, strict: false });
 ajv.addSchema(loadJson("schema/common.schema.json"), "common.schema.json");
 
 const errors = [];
-const ids = { spacecraft: new Set(), teams: new Set(), astronauts: new Set(), events: new Set() };
+const ids = { spacecraft: new Set(), teams: new Set(), astronauts: new Set(), events: new Set(), probes: new Set() };
 const cards = [];
 
 for (const kind of kinds) {
@@ -101,6 +102,19 @@ for (const { kind, path, card } of cards) {
     if (v.at && Number.isNaN(Date.parse(v.at))) errors.push(`${path}: when "${v.at}" は日時として読めません`);
     if (v.from && v.to && v.from > v.to) errors.push(`${path}: when の from が to より後になっています`);
     if (card.kind === "launch" && !card.site) errors.push(`${path}: 打ち上げ（launch）には射場（site）が要ります`);
+  }
+  if (kind === "probes") {
+    for (const ev of card.events ?? []) {
+      if (!ids.events.has(ev)) errors.push(`${path}: events "${ev}" が events/ にありません`);
+    }
+    const realDay = (s) => !Number.isNaN(Date.parse(`${s}T00:00:00Z`)) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s;
+    for (const d of [card.launch_date?.value, card.distance?.at].filter(Boolean)) {
+      if (!realDay(d)) errors.push(`${path}: "${d}" は日付として読めません`);
+    }
+    // 打ち上げ前（not_launched）なのに、地上にいる以外の距離を出していないか
+    if (card.status?.value === "not_launched" && card.distance?.method !== "on_earth") {
+      errors.push(`${path}: 打ち上げ前（not_launched）の距離は on_earth にします`);
+    }
   }
 }
 

@@ -1,0 +1,50 @@
+{
+  "id": "bepicolombo",
+  "name": {
+    "ja": "ベピコロンボ（みお）",
+    "en": "BepiColombo"
+  },
+  "operator": {
+    "value": ["ESA", "JAXA"],
+    "source": "https://mio.isas.jaxa.jp/mission/",
+    "as_of": "2026-10-03",
+    "note": "「みお」は JAXA、MPO は ESA が担当"
+  },
+  "launch_date": {
+    "value": "2018-10-20",
+    "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet",
+    "as_of": "2026-10-03"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+    "as_of": "2026-10-03",
+    "note": "ESA の最新情報（2026年9月28日の更新）"
+  },
+  "location": {
+    "value": "8年かけて太陽系の内側を旅し、いま水星に着こうとしている（最後の接近の途中）",
+    "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+    "as_of": "2026-10-03"
+  },
+  "mission": {
+    "value": "JAXA の「みお」と ESA の MPO、2機の探査機を水星のまわりに送り、水星を同時に観測する",
+    "source": "https://mio.isas.jaxa.jp/mission/",
+    "as_of": "2026-10-03"
+  },
+  "distance": {
+    "method": "planet",
+    "body": "Mercury",
+    "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+    "as_of": "2026-10-03",
+    "note": "水星に着く途中なので、水星までの距離を目安として出す"
+  },
+  "events": ["bepicolombo-mercury-orbit", "bepicolombo-mio-separation"],
+  "official_links": [
+    {
+      "label": "ESA「BepiColombo の水星到着」最新情報",
+      "url": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+    },
+    { "label": "JAXA 水星磁気圏探査機「みお」", "url": "https://mio.isas.jaxa.jp/mission/" }
+  ],
+  "updated_at": "2026-10-03"
+}
