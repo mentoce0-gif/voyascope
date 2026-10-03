@@ -1,0 +1,17 @@
+{
+  "id": "andrey-fedyaev",
+  "name": {
+    "ja": "アンドレイ・フェジャーエフ",
+    "en": "Andrey Fedyaev"
+  },
+  "agency": {
+    "value": "Roscosmos",
+    "source": "https://www.nasa.gov/missions/station/what-you-need-to-know-about-nasas-spacex-crew-12-mission/",
+    "as_of": "2026-10-03"
+  },
+  "official_profile_url": "https://humans-in-space.jaxa.jp/iss/crew/",
+  "teams": [
+    "crew-12"
+  ],
+  "updated_at": "2026-10-03"
+}
