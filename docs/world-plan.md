@@ -86,7 +86,7 @@
 | データ | 提供元 | 取り方 | キー | ブラウザから直接 | 条件 | 置き場所 |
 |---|---|---|---|---|---|---|
 | 地球のまわりの軌道 | USSPACECOM／Space-Track.org（CelesTrak から） | Actions で6時間ごと（いまと同じ） | 不要 | — | 出典表示で再配布可（C9 で確認済み） | いまの地球 |
-| 探査機の位置・距離 | [NASA JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html) | Actions で1日1回 | 不要 | ×（サイトに API を埋め込まない決まり） | 取得は Fair Use Policy に沿えば可（1件ずつ・キャッシュ・連絡先入りの User-Agent）。**数値を自分のサイトに出すには JPL SSD の許可が要る**（C14 で確認済み）→ オーナーが問い合わせ | M7 |
+| 探査機の位置・距離 | [NASA JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html) | Actions で1日1回 | 不要 | ×（サイトに API を埋め込まない決まり） | 取得は Fair Use Policy に沿えば可（1件ずつ・キャッシュ・連絡先入りの User-Agent）。**数値を自分のサイトに出すには JPL SSD の許可が要る**（C14 で確認済み）→ オーナーが問い合わせ済み（2026-10-03）、返事待ち | M7 |
 | 毎日の地球の画像 | [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api) | ブラウザから直接（地図タイル） | 不要 | ○（`Access-Control-Allow-Origin: *` を確認） | 「full and open」。決まった謝辞の文がある → **C15** で書き方を確認 | M10 |
 | 宇宙天気（Kp 指数） | [NOAA SWPC](https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json) | ブラウザか Actions | 不要 | ○（同上） | 未確認 → **C15** | M11 |
 | 世界の打ち上げ予定 | [The Space Devs「Launch Library 2」](https://thespacedevs.com/llapi)（公式機関ではない。日付は各機関の公式で確かめる） | Actions で6時間ごと | 不要（1時間 15 回まで） | — | 自由に使ってよい・付加価値なしの転送は控える・キャッシュ推奨・出典表示は推奨（C8 で確認済み）。画面では「参考」の印を付ける（2026-10-02 オーナー決定） | M4 v1 ✅ |
