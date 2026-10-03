@@ -37,11 +37,15 @@ npx serve web              # または python3 -m http.server -d web
 | `data/launches.json` | 世界の打ち上げ（参考）。Launch Library 2（The Space Devs）から GitHub Actions が6時間ごとに作る（手元では `npm run fetch:launches`）。公式の発表ではないので、画面では「参考」の印を付ける |
 | `data/cards/iss.json` | `examples/spacecraft/iss.json` のコピー（見本） |
 | `data/cards/iss-crew.json` | ISS に向かったチームと飛行士（`examples/teams`・`examples/astronauts` から `npm run sync:web` で作る） |
-| `data/land-110m.geojson` | 陸地の形（Natural Earth） |
+| `data/land-110m.geojson` | 陸地の形（Natural Earth）。画面では読まない（ミニ地図の陸地の元） |
+| `data/land-minimap.json` | ミニ地図の陸地（計算済みの SVG の線）。`land-110m.geojson` から `npm run build:minimap-land` で作る。起動のあとに裏で読む |
+| `data/places.json` | 「いま、どこの上？」の地名（Natural Earth から `scripts/build-places.mjs` で作る）。起動のあとに裏で読む |
 | `vendor/` | ライブラリ（`vendor/README.md`） |
 
 ## メモ
 
+- 読み込みの順番（タスク012、スマホで軽くするため）：3D 表示のライブラリ（`vendor/globe.gl.min.js`）は `index.html` の preload で最初に読み始め、`js/main.js` が実行する。データと並べて読み、地名とミニ地図の陸地は「観測を開始」を押せるようになってから裏で読む。フォントは画面の表示を止めずに読む
+- 読み込み量の上限は `config/size-budget.json`（CI で確かめる。手元では `npm run check:size`）。超えたら、まず小さくできないか（画像を縮める・あとから読む）を考える
 - 軌道データの基準時刻（エポック）から7日以上離れると、画面下に「ずれている可能性」を表示する（自動更新が止まったときの目印にもなる）
 - カードは `examples/` の見本を読むので、常に「見本・出典確認中」を表示する（`main.js` の `isSample: true`）
 - 「滞在」には、打ち上げ済みで帰還日が来ていないチームを出す（観測時刻で判断するので、早送りすると変わる）
