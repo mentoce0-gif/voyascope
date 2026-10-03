@@ -1,4 +1,389 @@
 {
   "$comment": "scripts/sync-web-data.mjs が curation/teams と curation/astronauts から作る。手で編集しない。",
-  "teams": []
+  "teams": [
+    {
+      "id": "crew-12",
+      "name": {
+        "value": "Crew-12",
+        "source": "https://www.nasa.gov/missions/station/what-you-need-to-know-about-nasas-spacex-crew-12-mission/",
+        "as_of": "2026-10-03"
+      },
+      "vehicle": {
+        "value": "クルードラゴン宇宙船「Freedom」",
+        "source": "https://www.nasa.gov/missions/station/what-you-need-to-know-about-nasas-spacex-crew-12-mission/",
+        "as_of": "2026-10-03",
+        "note": "宇宙船の名前は NASA、種類の書き方は JAXA"
+      },
+      "destination": "iss",
+      "launch_date": {
+        "value": "2026-02-13",
+        "source": "https://www.nasa.gov/blogs/spacestation/2026/02/13/nasas-spacex-crew-12-launches/",
+        "as_of": "2026-10-03",
+        "note": "打ち上げ済み。米国東部時間 5:15"
+      },
+      "return_date": {
+        "value": "2026-10",
+        "source": "https://www.nasa.gov/missions/station/iss-research/heading-home-nasas-spacex-crew-12-concludes-station-science-mission/",
+        "as_of": "2026-10-03",
+        "note": "予定：10月上旬（NASA）。日付はまだ発表されていない"
+      },
+      "crew": [
+        {
+          "astronaut": {
+            "id": "jessica-meir",
+            "name": {
+              "ja": "ジェシカ・メイヤー",
+              "en": "Jessica Meir"
+            },
+            "agency": {
+              "value": "NASA",
+              "source": "https://www.nasa.gov/people/jessica-u-meir/",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.nasa.gov/people/jessica-u-meir/",
+            "teams": [
+              "crew-12"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "コマンダー",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        },
+        {
+          "astronaut": {
+            "id": "jack-hathaway",
+            "name": {
+              "ja": "ジャック・ハサウェイ",
+              "en": "Jack Hathaway"
+            },
+            "agency": {
+              "value": "NASA",
+              "source": "https://www.nasa.gov/people/nasa-astronaut-jack-hathaway/",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.nasa.gov/people/nasa-astronaut-jack-hathaway/",
+            "teams": [
+              "crew-12"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "パイロット",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        },
+        {
+          "astronaut": {
+            "id": "sophie-adenot",
+            "name": {
+              "ja": "ソフィー・アデノ",
+              "en": "Sophie Adenot"
+            },
+            "agency": {
+              "value": "ESA",
+              "source": "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Astronauts/Sophie_Adenot",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Astronauts/Sophie_Adenot",
+            "teams": [
+              "crew-12"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "ミッションスペシャリスト",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        },
+        {
+          "astronaut": {
+            "id": "andrey-fedyaev",
+            "name": {
+              "ja": "アンドレイ・フェジャーエフ",
+              "en": "Andrey Fedyaev"
+            },
+            "agency": {
+              "value": "Roscosmos",
+              "source": "https://www.nasa.gov/missions/station/what-you-need-to-know-about-nasas-spacex-crew-12-mission/",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "teams": [
+              "crew-12"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "ミッションスペシャリスト",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        }
+      ],
+      "official_links": [
+        {
+          "label": "NASA Crew-12 の紹介",
+          "url": "https://www.nasa.gov/missions/station/what-you-need-to-know-about-nasas-spacex-crew-12-mission/"
+        },
+        {
+          "label": "JAXA ISS滞在クルー",
+          "url": "https://humans-in-space.jaxa.jp/iss/crew/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "crew-13",
+      "name": {
+        "value": "Crew-13",
+        "source": "https://www.nasa.gov/mission/nasas-spacex-crew-13/",
+        "as_of": "2026-10-03"
+      },
+      "vehicle": {
+        "value": "クルードラゴン宇宙船「Grace」",
+        "source": "https://www.nasa.gov/missions/station/commercial-crew/what-you-need-to-know-about-nasas-spacex-crew-13-mission/",
+        "as_of": "2026-10-03",
+        "note": "宇宙船の名前は NASA、種類の書き方は JAXA"
+      },
+      "destination": "iss",
+      "launch_date": {
+        "value": "2026-10-01",
+        "source": "https://www.nasa.gov/mission/nasas-spacex-crew-13/",
+        "as_of": "2026-10-03",
+        "note": "打ち上げ済み。米国東部時間 11:10（日本時間 10月2日 0:10）"
+      },
+      "return_date": {
+        "value": "2027",
+        "source": "https://www.nasa.gov/mission/nasas-spacex-crew-13/",
+        "as_of": "2026-10-03",
+        "note": "予定：2027年（NASA）。月日はまだ発表されていない"
+      },
+      "crew": [
+        {
+          "astronaut": {
+            "id": "jessica-watkins",
+            "name": {
+              "ja": "ジェシカ・ワトキンス",
+              "en": "Jessica Watkins"
+            },
+            "agency": {
+              "value": "NASA",
+              "source": "https://www.nasa.gov/people/jessica-watkins/",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.nasa.gov/people/jessica-watkins/",
+            "teams": [
+              "crew-13"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "コマンダー",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        },
+        {
+          "astronaut": {
+            "id": "luke-delaney",
+            "name": {
+              "ja": "ルーク・デラニー",
+              "en": "Luke Delaney"
+            },
+            "agency": {
+              "value": "NASA",
+              "source": "https://www.nasa.gov/people/nasa-astronaut-luke-delaney/",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.nasa.gov/people/nasa-astronaut-luke-delaney/",
+            "teams": [
+              "crew-13"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "パイロット",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        },
+        {
+          "astronaut": {
+            "id": "joshua-kutryk",
+            "name": {
+              "ja": "ジョシュア・クトリク",
+              "en": "Joshua Kutryk"
+            },
+            "agency": {
+              "value": "CSA",
+              "source": "https://www.asc-csa.gc.ca/eng/astronauts/canadian/active/bio-joshua-kutryk.asp",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.asc-csa.gc.ca/eng/astronauts/canadian/active/bio-joshua-kutryk.asp",
+            "teams": [
+              "crew-13"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "ミッションスペシャリスト",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        },
+        {
+          "astronaut": {
+            "id": "sergey-teteryatnikov",
+            "name": {
+              "ja": "セルゲイ・テテリャトニコフ",
+              "en": "Sergey Teteryatnikov"
+            },
+            "agency": {
+              "value": "Roscosmos",
+              "source": "https://www.gctc.ru/main.php?id=6331",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.gctc.ru/main.php?id=6331",
+            "teams": [
+              "crew-13"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "ミッションスペシャリスト",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        }
+      ],
+      "official_links": [
+        {
+          "label": "NASA Crew-13",
+          "url": "https://www.nasa.gov/mission/nasas-spacex-crew-13/"
+        },
+        {
+          "label": "JAXA ISS滞在クルー",
+          "url": "https://humans-in-space.jaxa.jp/iss/crew/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "soyuz-ms-29",
+      "name": {
+        "value": "ソユーズMS-29",
+        "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+        "as_of": "2026-10-03",
+        "note": "JAXA の飛行名は 75S"
+      },
+      "vehicle": {
+        "value": "ソユーズMS-29宇宙船",
+        "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+        "as_of": "2026-10-03"
+      },
+      "destination": "iss",
+      "launch_date": {
+        "value": "2026-07-14",
+        "source": "https://www.nasa.gov/blogs/spacestation/2026/07/14/soyuz-spacecraft-launches-new-crew-for-station-arrival-today/",
+        "as_of": "2026-10-03",
+        "note": "打ち上げ済み"
+      },
+      "return_date": {
+        "value": "2027-04",
+        "source": "https://www.nasa.gov/blogs/spacestation/2026/07/14/soyuz-spacecraft-launches-new-crew-for-station-arrival-today/",
+        "as_of": "2026-10-03",
+        "note": "予定：2027年4月（NASA）。日付はまだ発表されていない"
+      },
+      "crew": [
+        {
+          "astronaut": {
+            "id": "pyotr-dubrov",
+            "name": {
+              "ja": "ピョートル・ドゥブロフ",
+              "en": "Pyotr Dubrov"
+            },
+            "agency": {
+              "value": "Roscosmos",
+              "source": "https://www.gctc.ru/main.php?id=1704",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.gctc.ru/main.php?id=1704",
+            "teams": [
+              "soyuz-ms-29"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "コマンダー",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        },
+        {
+          "astronaut": {
+            "id": "anna-kikina",
+            "name": {
+              "ja": "アンナ・キキナ",
+              "en": "Anna Kikina"
+            },
+            "agency": {
+              "value": "Roscosmos",
+              "source": "https://www.gctc.ru/main.php?id=1710",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.gctc.ru/main.php?id=1710",
+            "teams": [
+              "soyuz-ms-29"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "フライトエンジニア",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        },
+        {
+          "astronaut": {
+            "id": "anil-menon",
+            "name": {
+              "ja": "アニル・メノン",
+              "en": "Anil Menon"
+            },
+            "agency": {
+              "value": "NASA",
+              "source": "https://www.nasa.gov/humans-in-space/astronauts/nasa-astronaut-anil-menon/",
+              "as_of": "2026-10-03"
+            },
+            "official_profile_url": "https://www.nasa.gov/humans-in-space/astronauts/nasa-astronaut-anil-menon/",
+            "teams": [
+              "soyuz-ms-29"
+            ],
+            "updated_at": "2026-10-03"
+          },
+          "role": {
+            "value": "フライトエンジニア",
+            "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+            "as_of": "2026-10-03"
+          }
+        }
+      ],
+      "official_links": [
+        {
+          "label": "NASA ソユーズMS-29 の打ち上げ",
+          "url": "https://www.nasa.gov/blogs/spacestation/2026/07/14/soyuz-spacecraft-launches-new-crew-for-station-arrival-today/"
+        },
+        {
+          "label": "JAXA ISS滞在クルー",
+          "url": "https://humans-in-space.jaxa.jp/iss/crew/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    }
+  ]
 }
