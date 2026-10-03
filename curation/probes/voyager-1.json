@@ -1,0 +1,45 @@
+{
+  "id": "voyager-1",
+  "name": {
+    "ja": "ボイジャー1号",
+    "en": "Voyager 1"
+  },
+  "operator": {
+    "value": ["NASA", "JPL"],
+    "source": "https://science.nasa.gov/mission/voyager/voyager-1/",
+    "as_of": "2026-10-03"
+  },
+  "launch_date": {
+    "value": "1977-09-05",
+    "source": "https://science.nasa.gov/mission/voyager/voyager-1/",
+    "as_of": "2026-10-03"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+    "as_of": "2026-10-03",
+    "note": "電力を節約するため、観測装置を少しずつ止めながら運用している（2026年4月17日に1台止めた）"
+  },
+  "location": {
+    "value": "太陽圏の外の「恒星間空間」を飛んでいる。人がつくったもので、いちばん遠くにある",
+    "source": "https://science.nasa.gov/mission/voyager/voyager-1/",
+    "as_of": "2026-10-03"
+  },
+  "mission": {
+    "value": "木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った。いまもデータを送っている",
+    "source": "https://science.nasa.gov/mission/voyager/voyager-1/",
+    "as_of": "2026-10-03"
+  },
+  "distance": {
+    "method": "pending"
+  },
+  "events": ["voyager-1-one-light-day"],
+  "official_links": [
+    { "label": "NASA「Voyager 1」", "url": "https://science.nasa.gov/mission/voyager/voyager-1/" },
+    {
+      "label": "NASA「Where Are Voyager 1 and Voyager 2 Now?」",
+      "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
+    }
+  ],
+  "updated_at": "2026-10-03"
+}

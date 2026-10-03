@@ -1,0 +1,44 @@
+{
+  "id": "voyager-2",
+  "name": {
+    "ja": "ボイジャー2号",
+    "en": "Voyager 2"
+  },
+  "operator": {
+    "value": ["NASA", "JPL"],
+    "source": "https://science.nasa.gov/mission/voyager/voyager-2/",
+    "as_of": "2026-10-03"
+  },
+  "launch_date": {
+    "value": "1977-08-20",
+    "source": "https://science.nasa.gov/mission/voyager/voyager-2/",
+    "as_of": "2026-10-03"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+    "as_of": "2026-10-03",
+    "note": "電力を節約するため、観測装置を少しずつ止めながら運用している"
+  },
+  "location": {
+    "value": "太陽圏の外の「恒星間空間」を飛んでいる（2018年12月に入った）",
+    "source": "https://science.nasa.gov/mission/voyager/voyager-2/",
+    "as_of": "2026-10-03"
+  },
+  "mission": {
+    "value": "天王星と海王星を訪れた、ただ1つの探査機。いまは恒星間空間を飛んでいる",
+    "source": "https://science.nasa.gov/mission/voyager/voyager-2/",
+    "as_of": "2026-10-03"
+  },
+  "distance": {
+    "method": "pending"
+  },
+  "official_links": [
+    { "label": "NASA「Voyager 2」", "url": "https://science.nasa.gov/mission/voyager/voyager-2/" },
+    {
+      "label": "NASA「Where Are Voyager 1 and Voyager 2 Now?」",
+      "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
+    }
+  ],
+  "updated_at": "2026-10-03"
+}
