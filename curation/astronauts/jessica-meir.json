@@ -1,0 +1,17 @@
+{
+  "id": "jessica-meir",
+  "name": {
+    "ja": "ジェシカ・メイヤー",
+    "en": "Jessica Meir"
+  },
+  "agency": {
+    "value": "NASA",
+    "source": "https://www.nasa.gov/people/jessica-u-meir/",
+    "as_of": "2026-10-03"
+  },
+  "official_profile_url": "https://www.nasa.gov/people/jessica-u-meir/",
+  "teams": [
+    "crew-12"
+  ],
+  "updated_at": "2026-10-03"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "jack-hathaway",
+  "name": {
+    "ja": "ジャック・ハサウェイ",
+    "en": "Jack Hathaway"
+  },
+  "agency": {
+    "value": "NASA",
+    "source": "https://www.nasa.gov/people/nasa-astronaut-jack-hathaway/",
+    "as_of": "2026-10-03"
+  },
+  "official_profile_url": "https://www.nasa.gov/people/nasa-astronaut-jack-hathaway/",
+  "teams": [
+    "crew-12"
+  ],
+  "updated_at": "2026-10-03"
+}

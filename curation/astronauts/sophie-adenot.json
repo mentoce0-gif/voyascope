@@ -1,0 +1,17 @@
+{
+  "id": "sophie-adenot",
+  "name": {
+    "ja": "ソフィー・アデノ",
+    "en": "Sophie Adenot"
+  },
+  "agency": {
+    "value": "ESA",
+    "source": "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Astronauts/Sophie_Adenot",
+    "as_of": "2026-10-03"
+  },
+  "official_profile_url": "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/Astronauts/Sophie_Adenot",
+  "teams": [
+    "crew-12"
+  ],
+  "updated_at": "2026-10-03"
+}
