@@ -86,9 +86,9 @@
 | データ | 提供元 | 取り方 | キー | ブラウザから直接 | 条件 | 置き場所 |
 |---|---|---|---|---|---|---|
 | 地球のまわりの軌道 | USSPACECOM／Space-Track.org（CelesTrak から） | Actions で6時間ごと（いまと同じ） | 不要 | — | 出典表示で再配布可（C9 で確認済み） | いまの地球 |
-| 探査機の位置・距離 | [NASA JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html) | Actions で1日1回 | 不要 | 未確認 | API の説明に利用条件の記載が見当たらない → **C14** | M7 |
-| 毎日の地球の画像 | [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api) | ブラウザから直接（地図タイル） | 不要 | ○（`Access-Control-Allow-Origin: *` を確認） | 「full and open」。決まった謝辞の文がある → **C15** で書き方を確認 | M10 |
-| 宇宙天気（Kp 指数） | [NOAA SWPC](https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json) | ブラウザか Actions | 不要 | ○（同上） | 未確認 → **C15** | M11 |
+| 探査機の位置・距離 | [NASA JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html) | Actions で1日1回 | 不要 | ×（サイトに API を埋め込まない決まり） | 取得は Fair Use Policy に沿えば可（1件ずつ・キャッシュ・連絡先入りの User-Agent）。**数値を自分のサイトに出すには JPL SSD の許可が要る**（C14 で確認済み）→ オーナーが問い合わせ済み（2026-10-03）、返事待ち | M7 |
+| 毎日の地球の画像 | [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api) | ブラウザから直接（地図タイル） | 不要 | ○（`Access-Control-Allow-Origin: *` を確認） | 教育・情報の目的で使ってよい（ESDIS の利用方針）。決まった謝辞の文がある。NASA 以外のデータのレイヤーは、その組織の条件に従う（C15 で確認済み） | M10 |
+| 宇宙天気（Kp 指数） | [NOAA SWPC](https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json) | ブラウザか Actions | 不要 | ○（同上） | パブリックドメイン。合法な目的なら自由に使える。更新の周期に合わせて取る・失敗したら1分以上あける・公認と思わせない・ロゴは使わない（C15 で確認済み） | M11 |
 | 世界の打ち上げ予定 | [The Space Devs「Launch Library 2」](https://thespacedevs.com/llapi)（公式機関ではない。日付は各機関の公式で確かめる） | Actions で6時間ごと | 不要（1時間 15 回まで） | — | 自由に使ってよい・付加価値なしの転送は控える・キャッシュ推奨・出典表示は推奨（C8 で確認済み）。画面では「参考」の印を付ける（2026-10-02 オーナー決定） | M4 v1 ✅ |
 | JAXA の地球観測データ | [JAXA Earth API](https://data.earth.jaxa.jp/ja/) | Actions | 不要（登録・上限なしと記載） | 未確認 | データごとのライセンス（STAC に記載）。「JAXA Earth API」と出典 | M10（日本） |
 | ひまわりの画像 | [気象衛星センター](https://www.data.jma.go.jp/mscweb/ja/general/note.html) | — | — | — | 出典を書けば利用できる。加工したらそう書く | ひまわりのカード（判断待ち、9.） |
@@ -202,10 +202,11 @@ M6（公開準備）の残り（ライセンス C5・名前 C6・乗員 C10・�
 | 番号 | 内容 | 使う場所 |
 |---|---|---|
 | C8（既存） | Launch Library 2 の利用条件。**世界の打ち上げに必須なので順番を上げる** | M4 v1 |
-| C14 | JPL Horizons の利用条件と出典の書き方。軌道の出どころ（JAXA・ESA の航法データ）に別の条件がないか | M7 |
-| C15 | NASA GIBS・NOAA SWPC の利用条件と出典の書き方 | M10・M11 |
+| C14 | JPL Horizons の利用条件と出典の書き方。軌道の出どころ（JAXA・ESA の航法データ）に別の条件がないか。→ 確認済み（2026-10-03）：数値を自分のサイトに出すには許可が要る | M7 |
+| C15 | NASA GIBS・NOAA SWPC の利用条件と出典の書き方。→ 確認済み（2026-10-03）：どちらもブラウザから直接読んでよい | M10・M11 |
 | C6（既存を拡大） | 日本語の名前の決め方。世界の機体・探査機の日本での呼び方（公的機関が使う名前） | 全部 |
 | C12 形式 | 世界の機体・探査機のカード（1機ずつ）：天宮・ハッブル・ボイジャー1号・ジェイムズ・ウェッブ宇宙望遠鏡・ベピコロンボ など | M5・M7 |
+| C16 | 遠くを見る部屋の探査機10機（ジェイムズ・ウェッブ宇宙望遠鏡・パーカー・ソーラー・プローブ・ベピコロンボ（みお）・パーサヴィアランス・MMX・はやぶさ2・ジュノー・ニュー・ホライズンズ・ボイジャー1号・ボイジャー2号。2026-10-03 オーナー決定）のいまの状態・日本での呼び方・公式ページ | M7 v0 |
 | G（Grok） | 世界の予定の動き（打ち上げの延期、到着日の変更）を週に1回 | M4・M7・M8 |
 
 ---
