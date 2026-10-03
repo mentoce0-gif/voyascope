@@ -1,0 +1,228 @@
+/* 遠くを見る部屋（M7 v0）。部屋を開いたときだけ読む（js/far/room.js）。色と文字は style.css と同じ */
+
+/* ---------- 部屋（画面いっぱいのダイアログ） ---------- */
+dialog.far-room {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--navy-900);
+  color: var(--text);
+  overflow: hidden;
+}
+dialog.far-room[open] { display: flex; flex-direction: column; }
+dialog.far-room::backdrop { background: var(--navy-900); }
+
+.far-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: calc(env(safe-area-inset-top) + 10px) var(--gutter) 10px;
+  border-bottom: 1px solid var(--panel-border);
+  background: rgba(5, 14, 31, 0.94);
+}
+.far-back {
+  appearance: none;
+  flex: none;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--mint-dim);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mint);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.far-back:hover { background: var(--mint-faint); }
+.far-titles { min-width: 0; }
+.far-title { margin: 0; font-size: 1.05rem; line-height: 1.35; color: var(--amber); }
+.far-sub { margin: 0; font-size: 0.75rem; color: var(--text-dim); }
+.far-at { margin-left: 4px; font-size: 0.7rem; }
+
+.far-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom); }
+.far-fly-wrap, .far-ladder-wrap, .far-about { max-width: 980px; margin: 0 auto; padding: 12px var(--gutter) 4px; }
+
+/* ---------- 光になって飛ぶ ---------- */
+.far-fly {
+  position: relative;
+  height: min(68dvh, 640px);
+  min-height: 340px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--navy-900);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.far-fly:active { cursor: grabbing; }
+.fly-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.fly-hud {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  text-align: right;
+  pointer-events: none;
+  text-shadow: 0 0 8px var(--navy-900), 0 0 2px var(--navy-900);
+}
+.fly-km { font-size: clamp(18px, 5.2vw, 32px); line-height: 1.15; color: var(--amber); font-variant-numeric: tabular-nums; }
+.fly-sub { font-size: 12px; color: var(--text); font-variant-numeric: tabular-nums; }
+.fly-warp { font-size: 12px; color: var(--mint); }
+.fly-warp[data-warp="true"] { color: var(--amber); }
+.fly-hint {
+  position: absolute;
+  inset: 44% 0 auto;
+  text-align: center;
+  font-size: 15px;
+  color: var(--text);
+  pointer-events: none;
+  transition: opacity 0.4s;
+  text-shadow: 0 0 8px var(--navy-900);
+}
+.fly-card {
+  position: absolute;
+  left: 12px;
+  bottom: 64px;
+  display: grid;
+  gap: 3px;
+  width: min(340px, calc(100% - 24px));
+  max-height: calc(100% - 150px);
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--mint-dim);
+  border-radius: 8px;
+  background: rgba(12, 33, 64, 0.93);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  cursor: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.fly-card[data-off="true"] { opacity: 0; transform: translateY(8px); pointer-events: none; }
+.fc-name { font-size: 0.98rem; font-weight: 700; color: var(--mint); }
+.fc-dist .mono { color: var(--amber); font-size: 0.95rem; }
+.fc-how { color: var(--text-dim); font-size: 0.74rem; }
+.fc-lt .mono { color: var(--text); }
+.fc-line, .fc-ev { margin: 2px 0 0; }
+.fc-ev { color: var(--amber); font-size: 0.78rem; }
+.fc-more {
+  appearance: none;
+  justify-self: start;
+  margin-top: 4px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--mint-dim);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--mint);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.fc-more:hover { background: var(--mint-faint); }
+.fc-tag, .li-tag {
+  margin-left: 8px;
+  padding: 0 6px;
+  border: 1px solid var(--text-dim);
+  border-radius: 3px;
+  font-size: 0.66rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  vertical-align: 2px;
+}
+.far-fly-foot { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.far-fly-foot .btn { min-height: 44px; }
+
+.far-h3 { margin: 18px 0 4px; font-size: 1rem; color: var(--mint); }
+.far-note { margin: 8px 0; font-size: 0.8rem; line-height: 1.75; color: var(--text-dim); }
+.far-note b { color: var(--text); font-weight: 700; }
+
+/* ---------- 距離のはしご ---------- */
+.ladder { list-style: none; margin: 8px 0 0; padding: 0; }
+.rung {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-top: 1px dashed var(--navy-600);
+}
+.rung-scale { padding-top: 10px; font-size: 0.74rem; color: var(--text-dim); }
+.rung-items { list-style: none; display: grid; gap: 6px; margin: 0; padding: 0; }
+.rung-empty { padding-top: 8px; color: var(--navy-600); }
+.lad-item {
+  appearance: none;
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--navy-600);
+  border-radius: 8px;
+  background: rgba(12, 33, 64, 0.6);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lad-item:hover { border-color: var(--mint-dim); }
+.lad-item.landmark { border-style: dashed; background: transparent; }
+.lad-item.light-day { border-color: var(--amber-dim); }
+.li-name { font-size: 0.9rem; font-weight: 700; }
+.lad-item.probe .li-name { color: var(--mint); }
+.lad-item.light-day .li-name { color: var(--amber); }
+.li-meta { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: 0.78rem; }
+.li-meta > .mono { color: var(--amber); }
+.li-how, .li-lt { color: var(--text-dim); }
+.li-ev { font-size: 0.76rem; color: var(--amber); }
+.ev-left { color: var(--text-dim); }
+.pending-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; margin: 8px 0; padding: 0; }
+
+.far-about-list { margin: 6px 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: 0.8rem; line-height: 1.75; color: var(--text-dim); }
+.far-about-list b { color: var(--text); }
+.far-about { padding-bottom: 28px; }
+
+.far-room .btn:focus-visible, .far-back:focus-visible, .lad-item:focus-visible, .fc-more:focus-visible, .far-fly:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* ---------- 探査機のカード（くわしい） ---------- */
+.far-card-inner .pc-kicker { margin: 0; font-size: 0.68rem; letter-spacing: 0.16em; color: var(--text-dim); }
+.far-card-inner .pc-title { margin: 0; padding-right: 44px; }
+.far-card-inner .pc-en { margin: 0 0 10px; font-size: 0.8rem; color: var(--text-dim); }
+.pc-facts { display: grid; margin: 0; }
+.pc-row { display: grid; grid-template-columns: 5.2em minmax(0, 1fr); gap: 8px; padding: 9px 0; border-top: 1px solid var(--panel-border); }
+.pc-row dt { font-size: 0.82rem; color: var(--mint); }
+.pc-row dd { margin: 0; font-size: 0.86rem; line-height: 1.7; }
+.pc-row dd .mono { color: var(--amber); }
+.pc-ev + .pc-ev { margin-top: 4px; }
+.src { margin-left: 6px; font-size: 0.72rem; color: var(--mint); text-underline-offset: 3px; white-space: nowrap; }
+
+@media (max-width: 600px) {
+  .far-head { gap: 10px; }
+  .far-back { padding: 0 12px; }
+  .far-title { font-size: 0.98rem; }
+  .far-sub { font-size: 0.7rem; }
+  .far-at { display: block; margin-left: 0; }
+  .rung { grid-template-columns: 70px minmax(0, 1fr); gap: 8px; }
+  .rung-scale { font-size: 0.68rem; }
+  .fly-card { bottom: 60px; font-size: 0.8rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fly-card, .fly-hint { transition: none; }
+}
