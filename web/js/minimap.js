@@ -1,32 +1,11 @@
 // 地上軌跡のミニ地図（正距円筒図法。横360×縦180 の SVG）
+// 陸地の線（scripts/lib/minimap-land.mjs）も、この式で前もって作る
 const x = (lng) => (lng + 180).toFixed(1);
 const y = (lat) => (90 - lat).toFixed(1);
+export { x as minimapX, y as minimapY };
 
-// 陸地の GeoJSON を SVG の path 文字列にする（最初に1回だけ）
-export function landPath(geojson) {
-  const rings = [];
-  for (const f of geojson.features) {
-    const g = f.geometry;
-    const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
-    for (const poly of polys) {
-      const outer = poly[0];
-      // 細かすぎる点は間引く（ミニ地図なので 1° 未満の差は見えない）
-      let d = "";
-      let last = null;
-      for (const [lng, lat] of outer) {
-        const px = x(lng);
-        const py = y(lat);
-        const key = `${Math.round(lng)},${Math.round(lat)}`;
-        if (key === last) continue;
-        last = key;
-        d += `${d ? "L" : "M"}${px} ${py}`;
-      }
-      if (d) rings.push(d + "Z");
-    }
-  }
-  return rings.join("");
-}
-
+// land：陸地の path 文字列（data/land-minimap.json。scripts/build-minimap-land.mjs が前もって作る）。
+// 届く前は空文字（海と軌跡だけを描き、届いたら描き直す）
 export function renderMinimap(svg, { land, segments, pos }) {
   const past = [];
   const future = [];
