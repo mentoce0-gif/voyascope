@@ -350,7 +350,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   const listEl = $("#craft-list");
   const renderFamTabs = () => {
     const tab = (f) =>
-      `<button type="button" class="fam-tab" data-fam="${f.id}" aria-pressed="${f.id === listFilter}">${esc(f.label)}</button>`;
+      `<button type="button" class="fam-tab" data-fam="${f.id}" aria-pressed="${f.id === listFilter}"><span class="fam-label">${esc(f.label)}</span><span class="fam-bold" aria-hidden="true">${esc(f.label)}</span></button>`;
+    // 太字の見えない文字を重ねて、選んだとき（太字）でもタブの幅が変わらない（ほかのタブがずれない）ようにする
     // 左は家族で絞るタブ。右の2つは見る画面の切り替え：「予定」は次の出来事（公式の日付）、「観測」は今夜の空（ISS の見える通過）
     famTabs.innerHTML =
       `<span class="fam-group">${[{ id: "all", label: "すべて" }, ...present].map(tab).join("")}</span>` +
