@@ -16,7 +16,8 @@ test("太陽の赤緯：夏至は約+23.4°、冬至は約−23.4°、秋分は�
 });
 
 const pref = (name) => JSON.parse(readFileSync("config/prefectures.json", "utf8")).prefectures.find((p) => p.name === name);
-const orbit = JSON.parse(readFileSync("web/data/orbits/iss.json", "utf8"));
+// 見える通過は、季節によって10日以上ない時期がある。自動で更新される web/data/orbits/iss.json ではなく、固定した軌道（2026-09-30）で確かめる
+const orbit = JSON.parse(readFileSync("tests/fixtures/iss-orbit-2026-09-30.json", "utf8"));
 const satrec = satrecFromOrbit(orbit);
 
 test("太陽の高さ：東京の正午は高く、夜は地平線の下", () => {
