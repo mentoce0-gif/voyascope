@@ -151,6 +151,7 @@ NASA JPL の Horizons（https://ssd-api.jpl.nasa.gov/doc/horizons.html）で、�
 **C15　今日の地球の画像（NASA GIBS）と宇宙天気（NOAA SWPC）の利用条件**
 - NASA GIBS（https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api）の毎日の地球の画像（VIIRS・MODIS のトゥルーカラーなど）を、ブラウザから直接読み込んで表示すること。利用条件、出典（謝辞）の決まった文、ほかのサイトから読み込む頻度の注意
 - NOAA SWPC（https://www.swpc.noaa.gov/）の Kp 指数（例：https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json）を表示すること。利用条件、出典表示、取得の頻度の注意
+- どちらも、①利用者のブラウザから直接読み込む方法と、②GitHub Actions で取得して自分のサイト（GitHub Pages）から配る方法の、それぞれについての可否と条件。NASA JPL の別の API には「Webサイトに埋め込んではいけない」という決まりがあったので、GIBS と SWPC に同じような決まりがないかも確かめる
 - どちらも、非公式ファンサイトで使うときに禁止されていること（公認と誤解される表現・ロゴなど）
 
 ---
