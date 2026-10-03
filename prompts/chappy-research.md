@@ -92,7 +92,10 @@ LICENSE_DRAFT.md のチェックリストを埋める。
 - このライセンスが OSI 定義の「オープンソース」に当たらないことの確認
 
 **C6　名前の確認**
-「VOYASCOPE」と同じ・よく似た名前のアプリ、Web サービス、GitHub リポジトリ、登録商標（日本・米国）がないか。見つかったものは URL つきで。
+アプリの名前「VOYASCOPE」（読み方は決めていない）と同じ・よく似た名前がないかを調べる。つづりや読みの近いもの（例：VOYASCOPE、VOYA SCOPE、VOYASCOP、VOYAGESCOPE、ボヤスコープ、ヴォヤスコープ）も含める。
+- 登録商標：日本（特許庁の J-PlatPat）と米国（USPTO の商標検索）。見つかったものは、登録番号・権利者・状態（登録／出願中／失効）・区分（とくに第9類＝アプリ・ソフトウェア、第41類＝教育・娯楽、第42類＝オンラインのサービス）と、そのページの URL
+- 同じ・よく似た名前のアプリ（App Store・Google Play）、Web サービス、ドメイン（voyascope.com・voyascope.jp など）、GitHub のリポジトリ・組織。URL つきで
+- 検索のページが開けないとき、結果を URL で示せないときは、「未確認」に書く（推測で「なし」と書かない）
 
 **C7　画像の利用条件**
 NASA と JAXA について、画像・ロゴ・ミッションパッチを非公式ファンサイトで使うときの条件（使ってよいもの、クレジットの書き方、ロゴの禁止事項）。
@@ -153,7 +156,21 @@ NASA JPL の Horizons（https://ssd-api.jpl.nasa.gov/doc/horizons.html）で、�
 **C15　今日の地球の画像（NASA GIBS）と宇宙天気（NOAA SWPC）の利用条件**
 - NASA GIBS（https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api）の毎日の地球の画像（VIIRS・MODIS のトゥルーカラーなど）を、ブラウザから直接読み込んで表示すること。利用条件、出典（謝辞）の決まった文、ほかのサイトから読み込む頻度の注意
 - NOAA SWPC（https://www.swpc.noaa.gov/）の Kp 指数（例：https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json）を表示すること。利用条件、出典表示、取得の頻度の注意
+- どちらも、①利用者のブラウザから直接読み込む方法と、②GitHub Actions で取得して自分のサイト（GitHub Pages）から配る方法の、それぞれについての可否と条件。NASA JPL の別の API には「Webサイトに埋め込んではいけない」という決まりがあったので、GIBS と SWPC に同じような決まりがないかも確かめる
 - どちらも、非公式ファンサイトで使うときに禁止されていること（公認と誤解される表現・ロゴなど）
+
+**C16　遠くを見る部屋の探査機10機（いまの状態・日本での呼び方・公式ページ）**
+「遠くを見る部屋」（地球からの距離を、桁ごとのはしごで見せる画面）に置く10機について、いまの状態を公式ソースで確認する。対象：ジェイムズ・ウェッブ宇宙望遠鏡、パーカー・ソーラー・プローブ、ベピコロンボ（日本の「みお」を含む）、パーサヴィアランス、MMX、はやぶさ2、ジュノー、ニュー・ホライズンズ、ボイジャー1号、ボイジャー2号
+- 1機ずつ、次の項目を確認する。カードJSON は機体ごとに `<id>.json` の形で書く（id：`jwst`、`parker-solar-probe`、`bepicolombo`、`perseverance`、`mmx`、`hayabusa2`、`juno`、`new-horizons`、`voyager-1`、`voyager-2`）
+  - `name`：ja は「日本の公的機関（JAXA・国立天文台など）が使う呼び方 → 運用機関の正式名のカタカナ → 英名」の順で、確認できたもの。en は公式の英語名
+  - `operator`（運用機関。value は配列）、`launch_date`（MMX は公式の打ち上げ予定日を書き、note に「予定」）
+  - `status`：`operating`（運用中）／`ended`（運用終了。終了日を note に）／`not_launched`（打ち上げ前）
+  - `location`：いまどこで何をしているかを1文で（例：火星の地上を走行中、木星を周回中、太陽系の外へ向かって飛行中）
+  - `mission`：任務を中高生に分かる1文で（60字以内）
+  - `next_event`：これから1年以内に、公式に予定されている出来事と日付（なければ書かない）
+  - `official_links`：運用機関の公式ページ（最大2つ）
+  - 公式ページに「地球からの距離」が日付つきで載っていれば、その値と日付（載っていなければ書かない。自分で計算して書かない）
+- 運用を終えたかどうかを公式に確認できないものは「未確認」に書く（推測で「運用中」と書かない）
 
 ---
 
