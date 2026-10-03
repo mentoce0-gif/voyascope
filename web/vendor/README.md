@@ -7,10 +7,13 @@ CDN を使わないのは、ローカルプレビューだけで動かすため�
 |---|---|---|---|
 | `globe.gl.min.js` | npm `globe.gl` の `dist/globe.gl.min.js`（three.js を内蔵） | 2.46.2（three 0.186.1） | MIT（`globe.gl.LICENSE`、`three.LICENSE`） |
 | `satellite.min.js` | npm `satellite.js` から必要な関数だけを esbuild でまとめたもの | 7.1.0 | MIT（`satellite.js.LICENSE.md`） |
+| `astronomy.min.js` | npm `astronomy-engine` から必要な関数だけを esbuild でまとめたもの（遠くを見る部屋で、月・太陽・惑星までの距離を計算する） | 2.1.19 | MIT（`astronomy-engine.LICENSE.txt`。ファイルの先頭にも残している） |
 
-`THIRD_PARTY_NOTICES.txt` は、上の2つに入っているライブラリ（globe.gl の依存を含む46パッケージ：MIT・ISC・Apache-2.0・Unlicense・0BSD）のライセンス全文。下の「作り直し方」で npm install したあと `node scripts/build-notices.mjs /tmp/vendor/node_modules` で作り直す。
+`THIRD_PARTY_NOTICES.txt` は、globe.gl と satellite.js に入っているライブラリ（globe.gl の依存を含む46パッケージ：MIT・ISC・Apache-2.0・Unlicense・0BSD）のライセンス全文。下の「作り直し方」で npm install したあと `node scripts/build-notices.mjs /tmp/vendor/node_modules` で作り直す。
 
 `web/data/land-110m.geojson` は npm `world-atlas`（Natural Earth 1:110m、パブリックドメイン）から `scripts/build-land.cjs` で作った（world-atlas は ISC：`world-atlas.LICENSE`）。画面ではこれを読まず、ここから前もって計算したミニ地図の陸地（`web/data/land-minimap.json`、`scripts/build-minimap-land.mjs`）を読む。
+
+`astronomy.min.js`（gzip 後 約21KB）は、遠くを見る部屋を開いたときだけ読む（起動の読み込み量に入れない。`config/size-budget.json` の far）。npm のパッケージにライセンスのファイルがないため、ソースの先頭に書かれた MIT License の全文を `astronomy-engine.LICENSE.txt` に取り出している。
 
 `globe.gl.min.js` は大きい（gzip 後 約510KB）ので、`index.html` の `<link rel="preload">` で最初に読み始め、実行は `js/main.js` がする（ページに `<script>` で書くと、届くまでほかの読み込みが止まる。タスク012）。
 
@@ -26,6 +29,16 @@ export { propagate, gstime } from "./node_modules/satellite.js/dist/propagation.
 export { eciToGeodetic, eciToEcf, ecfToLookAngles, degreesLat, degreesLong, degreesToRadians } from "./node_modules/satellite.js/dist/transforms.js";
 JS
 npx esbuild entry.mjs --bundle --format=esm --minify --legal-comments=inline --outfile=<repo>/web/vendor/satellite.min.js
+```
+
+astronomy-engine（`GeoVector` などの4つだけ。月・太陽・惑星の位置の計算に使う）：
+
+```
+mkdir /tmp/astro && cd /tmp/astro && npm init -y && npm install astronomy-engine@2.1.19
+cat > entry.mjs <<'JS'
+export { GeoVector, Body, MakeTime, KM_PER_AU } from "./node_modules/astronomy-engine/esm/astronomy.js";
+JS
+npx esbuild entry.mjs --bundle --format=esm --minify --legal-comments=inline --outfile=<repo>/web/vendor/astronomy.min.js
 ```
 
 satellite.js の入口（`index.js`）は WebAssembly 版も一緒に読み込むため、使う関数だけを直接まとめている。

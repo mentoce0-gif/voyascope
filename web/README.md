@@ -30,6 +30,8 @@ npx serve web              # または python3 -m http.server -d web
 | `js/events.js` | 予定（次の出来事・これから行く）：日本時間の日付・残り時間・一覧と詳細の表示 |
 | `js/view.js` | 表示切替（すべて／日本のみ／衛星のみ／打ち上げ予定のみ）：日本の決め方と、それぞれの表示で出すもの。選んだ表示はブラウザに覚える |
 | `js/launches.js` | 世界の打ち上げ（参考）：日本時間の日時・残り時間・公式の予定との重なりの除外・射場のピンのまとめ・「参考」の印・一覧と詳細の表示 |
+| `js/far/` | 遠くを見る部屋（タスク013）。「遠くを見る」を押したときに読む（起動では読まない）。`room.js`＝部屋（画面いっぱいのダイアログ・開け閉め・データ）、`fly.js`＝光になって飛ぶ（星・地球・通り過ぎる場所・物差し・操作）、`distance.js`＝地球からの距離（月・太陽・惑星はブラウザで計算）と数の書き方、`probe-card.js`＝探査機のカードと距離のはしご |
+| `css/far.css` | 遠くを見る部屋の見た目（部屋を開いたときに読む） |
 | `data/orbits/iss.json` | 軌道データ（CelesTrak の OMM JSON。TLE でも動く。取得日時・エポック・出典URLを含む） |
 | `data/prefectures.json` | 都道府県の代表地点（`config/prefectures.json` のコピー） |
 | `data/craft-index.json` | 表示する機体の一覧（`npm run sync:web` で作る） |
@@ -40,12 +42,14 @@ npx serve web              # または python3 -m http.server -d web
 | `data/land-110m.geojson` | 陸地の形（Natural Earth）。画面では読まない（ミニ地図の陸地の元） |
 | `data/land-minimap.json` | ミニ地図の陸地（計算済みの SVG の線）。`land-110m.geojson` から `npm run build:minimap-land` で作る。起動のあとに裏で読む |
 | `data/places.json` | 「いま、どこの上？」の地名（Natural Earth から `scripts/build-places.mjs` で作る）。起動のあとに裏で読む |
+| `data/probes.json` | 遠くを見る部屋の探査機（`curation/probes/` から `npm run sync:web` で作る）。部屋を開いたときに読む |
 | `vendor/` | ライブラリ（`vendor/README.md`） |
 
 ## メモ
 
 - 読み込みの順番（タスク012、スマホで軽くするため）：3D 表示のライブラリ（`vendor/globe.gl.min.js`）は `index.html` の preload で最初に読み始め、`js/main.js` が実行する。データと並べて読み、地名とミニ地図の陸地は「観測を開始」を押せるようになってから裏で読む。フォントは画面の表示を止めずに読む
 - 読み込み量の上限は `config/size-budget.json`（CI で確かめる。手元では `npm run check:size`）。超えたら、まず小さくできないか（画像を縮める・あとから読む）を考える
+- 遠くを見る部屋（`#far`）：入口は地球の上の「遠くを見る」。開いているあいだは地球の描画を止める。ブラウザの「戻る」で閉じる。`#far` つきの URL で開くと、「観測を開始」のあとすぐに部屋が開く。距離の出し方は `docs/tasks/013-far-room.md`
 - 軌道データの基準時刻（エポック）から7日以上離れると、画面下に「ずれている可能性」を表示する（自動更新が止まったときの目印にもなる）
 - カードは `examples/` の見本を読むので、常に「見本・出典確認中」を表示する（`main.js` の `isSample: true`）
 - 「滞在」には、打ち上げ済みで帰還日が来ていないチームを出す（観測時刻で判断するので、早送りすると変わる）
