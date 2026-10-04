@@ -66,7 +66,7 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
 .map-link { display: flex; align-items: center; gap: 9px; min-height: 44px; font-size: 12px; letter-spacing: 0.08em; text-decoration: none; }
 .map-link svg { width: 16px; }
 
-.telemetry { position: absolute; right: var(--side); top: 132px; text-align: right; pointer-events: none; text-shadow: 0 1px 12px #050e1f, 0 1px 3px #050e1f; }
+.telemetry { position: absolute; right: var(--side); top: 132px; text-align: right; pointer-events: none; text-shadow: 0 0 2px #050e1f, 0 1px 3px #050e1f, 0 1px 12px #050e1f, 0 0 26px rgba(5, 14, 31, 0.85); } /* 明るい木星の上でも読める */
 .metric-label { font-size: 11px; letter-spacing: 0.16em; color: var(--dim); }
 .metric-label .approx { margin-left: 6px; font-size: 10px; letter-spacing: 0; color: var(--amber); }
 .distance { margin: 6px 0 10px; font: 400 clamp(26px, 2.6vw, 40px)/1.05 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; color: var(--amber); white-space: nowrap; }
@@ -133,7 +133,8 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
 .footline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .footline p { margin: 0; font-size: 10px; color: var(--dim); }
 .footline button { font-size: 11px; color: var(--dim); }
-.model-note { position: absolute; right: var(--side); bottom: 204px; margin: 0; font-size: 9px; letter-spacing: 0.04em; color: var(--dim); opacity: 0.7; pointer-events: none; }
+.model-note { position: absolute; right: var(--side); bottom: 204px; margin: 0; font-size: 9px; letter-spacing: 0.04em; color: var(--dim); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+.journey.model-on .model-note { opacity: 0.75; } /* 探査機の模型が見えているあいだだけ */
 .nogl { position: absolute; inset: 30% 10% auto; margin: 0; text-align: center; color: var(--dim); }
 
 /* 次の行き先の照準（3D の位置に重ねる） */
@@ -352,7 +353,7 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
       <canvas id="rear-cv"></canvas>
       <figcaption><span>うしろ：地球</span><span>見かけの大きさ</span><b id="rear-size"></b></figcaption>
     </figure>
-    <div class="chapter-rail" aria-hidden="true"><span id="chapter-num">00</span><div class="rail-line"><i id="rail-fill"></i></div><span>07</span></div>
+    <div class="chapter-rail" aria-hidden="true"><span id="chapter-num">00</span><div class="rail-line"><i id="rail-fill"></i></div><span id="chapter-total">08</span></div>
     <div class="scene-tag" id="scene-tag" aria-hidden="true"><span class="tag-line"></span><span id="scene-name">EARTH</span><small id="scene-caption">高さ 100 km から、出発</small></div>
 
     <div class="story" id="story">
@@ -378,7 +379,7 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
       <canvas id="ruler" aria-hidden="true"></canvas>
       <div class="footline"><p id="warp-note">光より速く進むのはワープ（作り話）です</p><button type="button" id="home">地表へ戻る ↶</button></div>
     </div>
-    <p class="model-note">天体・機体・航路は演出用のイメージです</p>
+    <p class="model-note">公式を参考にしたイメージ</p>
   </section>
 
   <section class="atlas" id="ladder" aria-labelledby="ladder-title">
@@ -401,7 +402,7 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
     <footer>
       <p>↑ ↓・PageUp／PageDown で飛ぶ ／ Home で地表へ</p>
       <p>天体・機体の配置とスイングバイの航路は、距離を感じるための演出です。実際の航路・向き・大きさとは異なります。</p>
-      <p>※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません。距離と文は 2026年10月3日の VOYASCOPE のカード（出典つき）から写した固定の値です。</p>
+      <p>※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません。距離と文は VOYASCOPE のカード（出典つき）から写した固定の値です（距離は 2026年10月3日 21時）。</p>
       <details class="notes">
         <summary>この試作の工夫（Claude 案 × Codex 案）</summary>
         <ul>
@@ -412,7 +413,9 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
           <li>探査機と太陽のそばは「回りこむ」：探査機には向きを変えるほどの重力がないので、スイングバイとは呼ばない</li>
           <li>地球は出発のときだけ前に見えて、すぐ後ろへ回る。そのあとは左上の「うしろ」の窓で、小さくなっていく地球を見る（見かけの大きさは本当の値）</li>
           <li>パーサヴィアランスは火星の地面にいるので、宇宙に浮かべず、望遠の窓で見る</li>
-          <li>探査機の姿は Codex 案の模型をそのまま使った（演出用のイメージ）。新しくは作っていない</li>
+          <li>探査機の模型は、公式のページの写真と説明を参考に Codex が作ったもの（far-room-models.js、2026-10-04）。画面の注記は「公式を参考にしたイメージ」だけ（2026-10-04 オーナー）</li>
+          <li>光と質感：太陽の光らしい白い主光で、模型に影ができる。宇宙の暗さに合わせて、映り込みを少し控えた。火星の地面には、ローバーの影が落ちる</li>
+          <li>ジュノー：木星の重力でスイングバイ。機体は、本当の速さ（1分に2回）で回っている</li>
           <li>「探査機をもっと知る」は VOYASCOPE のカード（出典つき）だけで書いた。Codex 案の詳しい説明は、出典をまだ確かめていないので使っていない</li>
           <li>太陽・水星・火星は、地球からの距離の桁がほぼ同じ（1.5億〜2.5億 km）。スイングバイが重ならないように、そこだけ航路をゆっくり進む</li>
           <li>動きを減らす設定：星を流さず、傾けず、押した場所へすぐ移る</li>
@@ -430,7 +433,7 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
   <p class="sub" id="detail-sub"></p>
   <dl class="facts" id="detail-facts"></dl>
   <ul class="links" id="detail-links"></ul>
-  <p class="detail-note">姿は演出用のイメージです（実物の形・大きさとは違います）。事実はそれぞれの「出典」で確かめられます。</p>
+  <p class="detail-note">事実はそれぞれの「出典」で確かめられます。</p>
 </dialog>
 <div class="sr-only" id="announcer" role="status" aria-live="polite" aria-atomic="true"></div>
 
@@ -438,7 +441,8 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
 <script>
 "use strict";
 // 遠くを見る部屋：合わせた試作。さわり心地＝Claude 案（far-room-visual-claude.html）、表示＝Codex 案（far-room-visual-codex.html）、
-// 航路＝スイングバイの弧をつないだ道。探査機の姿は Codex 案の模型をそのまま使う。依頼文：prompts/codex-far-room-visual.md
+// 航路＝スイングバイの弧をつないだ道。探査機の模型は Codex が作った far-room-models.js（公式を参考にしたイメージ）。
+// 依頼文：prompts/codex-far-room-visual.md・prompts/codex-far-room-models.md
 
 // ---------- 調整できる値 ----------
 const TUNE = {
@@ -467,7 +471,7 @@ const TUNE = {
   PIXEL_RATIO_MAX: 1.75,
 };
 
-// ---------- 固定データ（依頼文と同じ。数字と文を足さない） ----------
+// ---------- 固定データ（依頼文と同じ。ジュノーは VOYASCOPE のカード（2026-10-04 に追加）から写した。数字と文を足さない） ----------
 const C = 299792.458;
 const LY = C * 86400 * 365.25;
 const LIGHT_DAY = 25902068371;
@@ -480,6 +484,7 @@ const PLACES = [
   { id: "sun", kind: "landmark", name: "太陽", km: 149692153, how: "いまの距離（計算）", text: "いま見ている太陽の光は、8 分 19 秒前に太陽を出た光" },
   { id: "bepicolombo", kind: "probe", name: "ベピコロンボ（みお）", km: 170871161, how: "水星までの距離（計算）", text: "8年かけて太陽系の内側を旅し、いま水星に着こうとしている（最後の接近の途中）", event: "11月21日（土）　水星を回る軌道に入る（あと49日）" },
   { id: "perseverance", kind: "probe", name: "パーサヴィアランス", km: 246566337, how: "火星までの距離（計算）", text: "火星の地面を走りながら調べている。2026年6月に、走った距離がフルマラソン分（42.195km）になった" },
+  { id: "juno", kind: "probe", name: "ジュノー", km: 881336902, how: "木星までの距離（計算）", text: "木星のまわりを回りながら、木星とその衛星を調べている。2016年7月4日に木星を回りはじめてから、10年になった" },
   { id: "new-horizons", kind: "probe", name: "ニュー・ホライズンズ", km: 9500000000, approx: true, how: "2026年6月23日の値", text: "冥王星よりずっと遠い「カイパーベルト」を飛んでいる。2026年6月に、ほぼ1年の冬眠から目覚めた" },
   { id: "light-day", kind: "light-day", name: "1光日", km: LIGHT_DAY, how: "光が24時間で進む距離", text: "ボイジャー1号は 11月18日（水）19:16、ここに届く予定（NASA）。人がつくったもので、はじめて" },
 ];
@@ -498,6 +503,8 @@ const ESA_BEPI = "https://www.esa.int/Science_Exploration/Space_Science/BepiColo
 const JAXA_MIO = "https://mio.isas.jaxa.jp/mission/";
 const JPL_PERS = "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/";
 const NASA_PERS = "https://science.nasa.gov/mission/mars-2020-perseverance/";
+const NASA_JUNO = "https://science.nasa.gov/mission/juno/";
+const NASA_THEBE = "https://science.nasa.gov/photojournal/nasas-juno-misson-captures-jupiter-moon-thebe/";
 const NASA_NH = "https://science.nasa.gov/mission/new-horizons/";
 const NASA_NH_WAKE = "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/";
 const CARDS = {
@@ -535,6 +542,17 @@ const CARDS = {
     ],
     links: [["NASA「Mars 2020 Perseverance」", NASA_PERS], ["JPL の記事（2026年6月23日）", JPL_PERS]],
   },
+  juno: {
+    en: "Juno",
+    facts: [
+      ["いま", "木星のまわりを回りながら、木星とその衛星を調べている。2016年7月4日に木星を回りはじめてから、10年になった", NASA_JUNO],
+      ["任務", "木星の厚い雲の下を調べて、木星がどうやってでき、どう変わってきたかを明らかにする。木星で働く、はじめての太陽電池の探査機", NASA_JUNO],
+      ["状態", "運用中。2026年5月1日に、木星の衛星テーベの近くを通って写真を撮った（NASA の5月5日の公開）（10月4日に確認）", NASA_THEBE],
+      ["運用", "NASA。NASA のジェット推進研究所（JPL）がミッションをまとめ、ロッキード・マーティンが探査機を動かしている", NASA_JUNO],
+      ["打ち上げ", "2011年8月5日（木星を回る軌道に入ったのは2016年7月4日）", NASA_JUNO],
+    ],
+    links: [["NASA「Juno」", NASA_JUNO], ["NASA の画像と説明（2026年5月5日）", NASA_THEBE]],
+  },
   "new-horizons": {
     en: "New Horizons",
     facts: [
@@ -552,11 +570,12 @@ const CARDS = {
 // swing: gravity=重力でスイングバイ（大きく曲がって飛び出す）／around=まわりを回りこむ（探査機と太陽）
 const LOOK = {
   moon: { kind: "body", body: "moon", R: 2.6, kq: 3.0, turn: 78, tilt: -14, bank: 1, size: 1, swing: "gravity", by: "月", en: "THE MOON" },
-  jwst: { kind: "model", model: "webb", R: 1.75, kq: 2.6, turn: 36, tilt: 12, bank: 0.5, size: 1, swing: "around", en: "JAMES WEBB SPACE TELESCOPE" },
+  jwst: { kind: "model", model: "jwst", R: 1.75, kq: 2.6, turn: 36, tilt: 12, bank: 0.5, size: 1, swing: "around", en: "JAMES WEBB SPACE TELESCOPE" },
   sun: { kind: "body", body: "sun", R: 3.6, kq: 2.9, turn: 40, tilt: -8, bank: 0.5, size: 0.62, swing: "around", en: "THE SUN" },
-  bepicolombo: { kind: "duo", body: "mercury", model: "bepi", R: 1.5, mR: 1.6, kq: 2.6, turn: 70, tilt: 14, bank: 1, size: 1, swing: "gravity", by: "水星", en: "BEPICOLOMBO" },
+  bepicolombo: { kind: "duo", body: "mercury", model: "bepicolombo", R: 1.5, mR: 1.6, kq: 2.6, turn: 70, tilt: 14, bank: 1, size: 1, swing: "gravity", by: "水星", en: "BEPICOLOMBO" },
   perseverance: { kind: "body", body: "mars", R: 2.4, kq: 3.0, turn: 76, tilt: -10, bank: 1, size: 1, swing: "gravity", by: "火星", lens: true, en: "PERSEVERANCE" },
-  "new-horizons": { kind: "model", model: "horizons", R: 1.5, kq: 2.7, turn: 32, tilt: 12, bank: 0.5, size: 0.72, swing: "around", en: "NEW HORIZONS" },
+  juno: { kind: "duo", body: "jupiter", model: "juno", R: 3.0, mR: 1.75, kq: 2.6, turn: 66, tilt: 10, bank: 1, size: 1, swing: "gravity", by: "木星", rpm: 2, en: "JUNO" }, // rpm：1分に2回まわる（NASA のジュノーのページ）
+  "new-horizons": { kind: "model", model: "new-horizons", R: 1.5, kq: 2.7, turn: 32, tilt: 12, bank: 0.5, size: 0.72, swing: "around", en: "NEW HORIZONS" },
   "light-day": { kind: "gate", R: 7, size: 1, swing: "gate", en: "ONE LIGHT-DAY" },
 };
 // その場所へ向かうときの言葉（Codex 案）
@@ -566,6 +585,7 @@ const TRAVEL = {
   sun: "光の生まれる方へ。",
   bepicolombo: "その先に、旅する機体。",
   perseverance: "もうひとつの地面へ。",
+  juno: "いちばん大きな惑星へ。",
   "new-horizons": "遠さの、桁を越える。",
   "light-day": "光の一日を、追い越す。",
 };
@@ -846,7 +866,7 @@ function cameraQuat(s, camPos, out) {
 }
 
 // ---------- 景色 ----------
-let skyScene, mainScene, lensScene, lensCam, skyGroup, starMat, routeMat, routePts, earth, earthMat, atmo, dawn, bodies = {}, models = {}, gate, dust, sunGlows = [];
+let skyScene, mainScene, lensScene, lensCam, skyGroup, starMat, routeMat, routePts, earth, earthMat, atmo, dawn, bodies = {}, models = {}, gate, dust, sunGlows = [], keyLight, rover;
 let kit;
 function flatMat(hex, opacity = 1) {
   return new THREE.ShaderMaterial({
@@ -939,164 +959,478 @@ function landTexture() {
   return t;
 }
 
-// 探査機の模型（Codex 案の far-room-visual-codex.html から、そのまま移した。形は演出用のイメージ）
-function makeKit() {
-  const imgs = [];
-  for (let i = 0; i < 6; i++) {
-    const c = document.createElement("canvas"); c.width = c.height = 128;
-    const x = c.getContext("2d"), g = x.createLinearGradient(0, 0, 128, 128);
-    g.addColorStop(0, "#143057"); g.addColorStop(0.15, "#d9f4ea"); g.addColorStop(0.23, "#143057"); g.addColorStop(0.55, "#050e1f"); g.addColorStop(0.8, "#07142b"); g.addColorStop(1, "#ffb547");
-    x.fillStyle = g; x.fillRect(0, 0, 128, 128); x.fillStyle = "rgba(217,244,234,.8)"; x.fillRect(12 + i * 7, 0, 11, 75);
-    imgs.push(c);
-  }
-  const env = new THREE.CubeTexture(imgs); env.needsUpdate = true;
-  const bc = document.createElement("canvas"); bc.width = bc.height = 128;
-  const bx = bc.getContext("2d");
-  let seed = 43;
-  const r = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-  bx.fillStyle = "#8fb3a8"; bx.fillRect(0, 0, 128, 128);
-  for (let i = 0; i < 180; i++) { bx.strokeStyle = `rgba(${r() > 0.5 ? "217,244,234" : "5,14,31"},${0.08 + r() * 0.25})`; bx.beginPath(); const a = r() * 128, b = r() * 128; bx.moveTo(a, b); bx.lineTo(a + r() * 20 - 10, b + r() * 24 - 12); bx.stroke(); }
-  const bump = new THREE.CanvasTexture(bc); bump.wrapS = bump.wrapT = THREE.RepeatWrapping; bump.repeat.set(2, 2);
-  const mat = (color, metalness, roughness, extra = {}) => new THREE.MeshStandardMaterial({ color, metalness, roughness, envMap: env, envMapIntensity: 0.7, ...extra });
-  const mirror = new THREE.ShaderMaterial({
-    vertexShader: "varying vec3 N,V,P;void main(){N=normalize(normalMatrix*normal);vec4 mv=modelViewMatrix*vec4(position,1.);V=normalize(-mv.xyz);P=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*mv;}",
-    fragmentShader: "precision highp float;varying vec3 N,V,P;void main(){vec3 n=normalize(N),v=normalize(V);vec3 r=reflect(-v,n);float band=pow(.5+.5*sin(r.x*7.+r.y*2.5+P.y*.48+P.x*.32),3.);float edge=pow(1.-abs(dot(n,v)),2.);vec3 c=mix(vec3(.22,.095,.019),vec3(.98,.62,.16),.22+band*.7);float light=pow(max(dot(reflect(normalize(vec3(.4,-.8,-1.)),n),v),0.),18.);c+=vec3(.5,.42,.23)*light;float reflection=pow(max(0.,1.-abs(r.x*.75+r.y*.45+P.x*.055-.1)),32.);c+=vec3(.65,.53,.3)*reflection;c=mix(c,vec3(.99,.82,.42),edge*.35);gl_FragColor=vec4(c,1.);}",
-  });
-  const M = {
-    gold: mat(0xffb547, 0.83, 0.28, { bumpMap: bump, bumpScale: 0.035 }), mirror,
-    silver: mat(0x8fb3a8, 0.92, 0.4, { side: THREE.DoubleSide, bumpMap: bump, bumpScale: 0.026, envMapIntensity: 0.38 }),
-    white: mat(0xd9f4ea, 0.35, 0.48), dark: mat(0x07142b, 0.65, 0.4, { envMapIntensity: 0.12 }), black: mat(0x050e1f, 0.35, 0.65, { envMapIntensity: 0.04 }),
-    blue: mat(0x143057, 0.75, 0.3, { envMapIntensity: 0.1 }), mint: mat(0x5ef2c2, 0.4, 0.35),
+// 探査機の模型：Codex が作った docs/design/far-room-models.js を、そのまま入れた（export を外し、1つの関数の中に閉じただけ）。
+// 公式のページの写真と説明を参考にしたイメージ。依頼文：prompts/codex-far-room-models.md
+const CRAFT = (() => {
+  /* VOYASCOPE — independently constructed, unofficial shape studies.
+   * three.js r128 core only. No external assets. +Y up; neutral bounds = 2.
+   * makeKit once per renderer/application; caller owns its materials/textures.
+   */
+  const PI = Math.PI, TAU = PI * 2;
+  const NASA = 'https://science.nasa.gov/';
+  const REF = {
+    jwst: [NASA+'mission/webb/', NASA+'3d-resources/james-webb-space-telescope-a/'],
+    parker: [NASA+'mission/parker-solar-probe/', NASA+'resource/parker-solar-probe-3d-model/'],
+    bepi: ['https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury','https://www.esa.int/ESA_Multimedia/Images/2018/10/BepiColombo_arrival_at_Mercury_timeline','https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet','https://mio.isas.jaxa.jp/mission/'],
+    rover: [NASA+'mission/mars-2020-perseverance/',NASA+'3d-resources/mars-2020-perseverance-rover/'],
+    mmx: ['https://www.mmx.jaxa.jp/','https://www.mmx.jaxa.jp/gallery/'],
+    haya: ['https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2','https://www.hayabusa2.jaxa.jp/'],
+    juno: [NASA+'mission/juno/',NASA+'resource/juno-3d-model/'],
+    nh: [NASA+'mission/new-horizons/',NASA+'resource/new-horizons-3d-model/'],
+    voyager: [NASA+'mission/voyager/voyager-1/',NASA+'resource/voyager-3d-model/']
   };
-  const K = {
-    env, M,
-    mesh(p, geo, m, x = 0, y = 0, z = 0) { const o = new THREE.Mesh(geo, typeof m === "string" ? M[m] : m); o.position.set(x, y, z); p.add(o); return o; },
-    box(p, w, h, d, m, x = 0, y = 0, z = 0) {
-      const b = Math.min(0.025, w * 0.1, h * 0.1, d * 0.1), shape = new THREE.Shape(), a = w / 2 - b, c = h / 2 - b;
-      shape.moveTo(-a, -c); shape.lineTo(a, -c); shape.lineTo(a, c); shape.lineTo(-a, c); shape.closePath();
-      const geo = new THREE.ExtrudeGeometry(shape, { depth: d - 2 * b, bevelEnabled: true, bevelSize: b, bevelThickness: b, bevelSegments: 1, steps: 1 });
-      geo.center();
-      return K.mesh(p, geo, m, x, y, z);
-    },
-    cylinder(p, r1, r2, h, m, x = 0, y = 0, z = 0, n = 24) { return K.mesh(p, new THREE.CylinderGeometry(r1, r2, h, n), m, x, y, z); },
-    rod(p, a, b, r = 0.022, m = "silver") {
-      const start = new THREE.Vector3(...a), end = new THREE.Vector3(...b), diff = end.clone().sub(start);
-      const o = K.cylinder(p, r, r, diff.length(), m);
-      o.position.copy(start.add(end).multiplyScalar(0.5));
-      o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), diff.normalize());
-      return o;
-    },
-    panel(p, x, y, z, w, h) {
-      const g = new THREE.Group(); p.add(g); g.position.set(x, y, z);
-      K.box(g, w, h, 0.04, "silver"); K.box(g, w - 0.05, h - 0.05, 0.015, "blue", 0, 0, 0.031);
-      const cell = new THREE.MeshStandardMaterial({ color: 0x143057, metalness: 0.65, roughness: 0.28, envMap: env, envMapIntensity: 0.08 });
-      const geo = new THREE.BoxGeometry(w / 8 - 0.017, h / 5 - 0.017, 0.016), inst = new THREE.InstancedMesh(geo, cell, 40), dummy = new THREE.Object3D();
-      let i = 0;
-      for (let a = 0; a < 8; a++) for (let b = 0; b < 5; b++) { dummy.position.set(-w / 2 + w / 16 + (a * w) / 8, -h / 2 + h / 10 + (b * h) / 5, 0.05); dummy.updateMatrix(); inst.setMatrixAt(i++, dummy.matrix); }
-      g.add(inst);
-      return g;
-    },
-    dish(p, r, x, y, z) {
-      const pts = [];
-      for (let i = 0; i <= 20; i++) { const d = (i / 20) * r; pts.push(new THREE.Vector2(d, (d * d) / (r * 1.7))); }
-      const dish = K.mesh(p, new THREE.LatheGeometry(pts, 48), new THREE.MeshStandardMaterial({ color: 0xd9f4ea, metalness: 0.65, roughness: 0.33, side: THREE.DoubleSide, envMap: env, envMapIntensity: 0.4 }), x, y, z);
-      dish.rotation.x = Math.PI / 2;
-      const g = new THREE.Group(); g.position.set(x, y, z); p.add(g);
-      for (let i = 0; i < 3; i++) { const a = (i * Math.PI * 2) / 3; K.rod(g, [Math.cos(a) * r * 0.8, Math.sin(a) * r * 0.8, r * 0.37], [0, 0, r * 0.95], 0.013, "dark"); }
-      K.cylinder(g, 0.07, 0.1, 0.2, "gold", 0, 0, r * 0.92).rotation.x = Math.PI / 2;
-      return dish;
-    },
-  };
-  return K;
-}
-function webbModel(K) {
-  const g = new THREE.Group();
-  for (let layer = 0; layer < 5; layer++) {
-    const w = 2.18 - layer * 0.055, z = 2.8 - layer * 0.09, y = -1.05 + layer * 0.066;
-    const corners = [[-w, -0.15], [0, -z], [w, -0.15], [0, z * 0.74]], vertices = [];
-    const point = (side, u, v) => { const a = corners[side], b = corners[(side + 1) % 4], px = (a[0] * (1 - v) + b[0] * v) * u, pz = (a[1] * (1 - v) + b[1] * v) * u; return [px, y + Math.sin(px * 18 + pz * 13) * 0.007 + Math.sin(px * 4 + pz * 3) * 0.024 + u * u * 0.045, pz]; };
-    for (let side = 0; side < 4; side++) for (let row = 0; row < 16; row++) for (let col = 0; col < 16; col++) {
-      const a = point(side, row / 16, col / 16), b = point(side, (row + 1) / 16, col / 16), c = point(side, (row + 1) / 16, (col + 1) / 16), d = point(side, row / 16, (col + 1) / 16);
-      vertices.push(...a, ...c, ...b, ...a, ...d, ...c);
+
+  function makeKit(T) {
+    let seed=319;
+    const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};
+    function texture(draw, color=false) {
+      const c=document.createElement('canvas'); c.width=c.height=128;
+      draw(c.getContext('2d'));
+      const t=new T.CanvasTexture(c); t.wrapS=t.wrapT=T.RepeatWrapping;
+      if(color)t.encoding=T.sRGBEncoding;
+      return t;
     }
-    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3)); geo.computeVertexNormals();
-    K.mesh(g, geo, "silver");
-    const pts = corners.map(([px, pz]) => new THREE.Vector3(px, y + 0.045, pz)); pts.push(pts[0]);
-    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0xd9f4ea, transparent: true, opacity: 0.26 })));
+    const foil=texture(c=>{
+      c.fillStyle='#888';c.fillRect(0,0,128,128);
+      for(let i=0;i<650;i++){
+        const x=random()*128,y=random()*128,v=45+random()*170;
+        c.strokeStyle=`rgb(${v},${v},${v})`;c.lineWidth=.35+random()*.65;
+        c.beginPath();c.moveTo(x,y);c.lineTo(x+(random()-.5)*22,y+(random()-.5)*22);c.stroke();
+      }
+    });
+    const cells=texture(c=>{
+      c.fillStyle='#10284d';c.fillRect(0,0,128,128);
+      for(let x=0;x<128;x+=16){
+        c.fillStyle=x%32?'#142d50':'#102443';c.fillRect(x+1,1,14,126);
+        c.fillStyle='#617e9d';c.fillRect(x,0,.6,128);
+        c.fillStyle='#a5a7a0';c.fillRect(x+7,0,.5,128);
+      }
+      c.fillStyle='#395472'; for(let y=0;y<128;y+=16)c.fillRect(0,y,128,.6);
+    },true);
+    // A tiny procedural reflection field, not an image asset or another light.
+    const faces=Array.from({length:6},(_,i)=>{
+      const c=document.createElement('canvas');c.width=c.height=64;
+      const g=c.getContext('2d'),a=g.createLinearGradient(0,0,64,64);
+      a.addColorStop(0,i===2?'#e4dfd3':'#73716b');a.addColorStop(.42,'#a6a098');
+      a.addColorStop(.5,'#eee7d9');a.addColorStop(.58,'#85827b');a.addColorStop(1,'#464540');
+      g.fillStyle=a;g.fillRect(0,0,64,64);return c;
+    });
+    const env=new T.CubeTexture(faces);env.encoding=T.sRGBEncoding;env.needsUpdate=true;
+    const mat=(name,color,metalness,roughness,extra={})=>{
+      const m=new T.MeshStandardMaterial({color,metalness,roughness,envMap:env,envMapIntensity:.45,...extra});m.color.convertSRGBToLinear();m.name=name;return m;
+    };
+    return {
+      gold:mat('foil-gold',0xbd882c,.78,.4,{bumpMap:foil,bumpScale:.006}),
+      silver:mat('silver',0xb5c1c6,.8,.34),
+      white:mat('ceramic-white',0xd7dedb,.18,.54),
+      black:mat('carbon-black',0x10141c,.3,.65),
+      navy:mat('deep-navy',0x143057,.42,.45),
+      solar:mat('solar-cells',0xffffff,.62,.3,{map:cells}),
+      mirror:mat('gold-mirror',0xe7b94f,1,.12,{envMapIntensity:1.25}),
+      textures:{foil,cells,env}
+    };
   }
-  K.box(g, 0.85, 0.5, 0.75, "gold", 0, -1.36, 0); K.rod(g, [0, -1, 0], [0, 1, -0.3], 0.09, "dark");
-  const mirror = new THREE.Group(); mirror.position.set(0, 0.5, -0.5); mirror.rotation.x = -0.06; g.add(mirror);
-  const radius = 0.365;
-  for (let q = -2; q <= 2; q++) for (let r = -2; r <= 2; r++) {
-    if (Math.abs(q + r) > 2 || (q === 0 && r === 0)) continue;
-    const x = Math.sqrt(3) * radius * (q + r / 2), y = 1.5 * radius * r;
-    const geo = new THREE.CylinderGeometry(radius * 0.97, radius * 0.97, 0.055, 6); geo.rotateX(Math.PI / 2);
-    const m = K.mesh(mirror, geo, "mirror", x, y, 0.03 * (x * x + y * y)); m.rotation.set(-y * 0.04, x * 0.04, 0);
-    const bg = new THREE.CylinderGeometry(radius, radius, 0.07, 6); bg.rotateX(Math.PI / 2);
-    const border = K.mesh(mirror, bg, "dark", x, y, -0.055); border.rotation.set(-y * 0.04, x * 0.04, 0);
+
+  // Per-model geometry cache and per-parent instance batches. No geometry crosses
+  // model ownership boundaries; independent parts remain actual THREE.Groups.
+  function builder(T,K) {
+    const root=new T.Group(),content=new T.Group();root.add(content);
+    const geometries=new Map(),batches=new Map(),dummy=new T.Object3D();
+    const v=new T.Vector3(),a=new T.Vector3(),up=new T.Vector3(0,1,0);
+    function geo(key,fn){if(!geometries.has(key))geometries.set(key,fn());return geometries.get(key);}
+    const box=()=>geo('box',()=>new T.BoxGeometry(1,1,1));
+    const cyl=(n=24,top=1)=>geo('c'+n+':'+top,()=>new T.CylinderGeometry(top,1,1,n,1,false));
+    function put(g,m,p=[0,0,0],s=[1,1,1],r=[0,0,0],parent=content){
+      dummy.position.set(...p);dummy.scale.set(...s);dummy.rotation.set(...r);dummy.updateMatrix();
+      let by=batches.get(parent);if(!by){by=new Map();batches.set(parent,by);}
+      const key=g.uuid+':'+m;let b=by.get(key);
+      if(!b){b={g,mat:K[m],matrices:[]};by.set(key,b);}b.matrices.push(dummy.matrix.clone());
+    }
+    function group(name,p=[0,0,0],r=[0,0,0],parent=content){const g=new T.Group();g.name=name;g.position.set(...p);g.rotation.set(...r);parent.add(g);return g;}
+    function B(m,p,s,r=[0,0,0],par=content){put(box(),m,p,s,r,par);}
+    function C(m,p,radius,height,r=[0,0,0],par=content,n=24,top=1){put(cyl(n,top),m,p,[radius,height,radius],r,par);}
+    function rod(m,start,end,r=.02,par=content,n=8){
+      a.set(...start);v.set(...end).sub(a);const len=v.length();
+      dummy.quaternion.setFromUnitVectors(up,v.normalize());const e=new T.Euler().setFromQuaternion(dummy.quaternion);
+      C(m,[(start[0]+end[0])/2,(start[1]+end[1])/2,(start[2]+end[2])/2],r,len,[e.x,e.y,e.z],par,n);
+    }
+    function ring(m,p,r,t=.015,rot=[0,0,0],par=content){
+      put(geo('torus',()=>new T.TorusGeometry(1,.025,6,40)),m,p,[r,r,t/.025],rot,par);
+    }
+    function ball(m,p,s,par=content){put(geo('sphere',()=>new T.SphereGeometry(1,16,10)),m,p,s,[0,0,0],par);}
+    function panel(w,h,p,rot=[0,0,0],par=content,nx=8,ny=6){
+      const g=group('solar-array',p,rot,par);
+      B('silver',[0,0,0],[w+.06,.045,h+.06],[0,0,0],g);
+      B('black',[0,-.03,0],[w,.035,h],[0,0,0],g);
+      // Distinct cell tiles, instanced in a single draw per panel.
+      for(let x=0;x<nx;x++)for(let y=0;y<ny;y++)
+        B('solar',[(x+.5-nx/2)*w/nx,.03,(y+.5-ny/2)*h/ny],[w/nx*.955,.008,h/ny*.96],[0,0,0],g);
+      for(const x of [-w/2,w/2])B('silver',[x,.045,0],[.018,.018,h],[0,0,0],g);
+      for(const z of [-h/2,h/2])B('silver',[0,.045,z],[w,.018,.018],[0,0,0],g);
+      return g;
+    }
+    function dish(radius,p,rot=[0,0,0],par=content,material='white'){
+      const g=group('high-gain-antenna',p,rot,par);
+      const d=geo('dish',()=>{
+        const pts=[];for(let i=0;i<=12;i++){let x=i/12;pts.push(new T.Vector2(Math.max(.001,x),.28*x*x));}
+        for(let i=12;i>=0;i--){let x=i/12;pts.push(new T.Vector2(Math.max(.001,x),.28*x*x-.025));}
+        return new T.LatheGeometry(pts,48);
+      });
+      put(d,material,[0,0,0],[radius,radius,radius],[0,0,0],g);
+      ring('silver',[0,.28*radius,0],radius,.013*radius,[PI/2,0,0],g);
+      for(let i=0;i<3;i++){const t=i*TAU/3;rod('silver',[Math.cos(t)*radius*.86,radius*.21,Math.sin(t)*radius*.86],[0,radius*.72,0],radius*.012,g);}
+      C('gold',[0,radius*.72,0],radius*.09,radius*.12,[0,0,0],g);
+      C('silver',[0,-radius*.1,0],radius*.22,radius*.18,[0,0,0],g);
+      return g;
+    }
+    function rtg(p,rot,par=content,scale=1){
+      const g=group('RTG',p,rot,par),s=scale;
+      C('black',[0,0,0],.2*s,.8*s,[0,0,0],g,32);
+      for(const y of [-.39,-.28,.28,.39])C('silver',[0,y*s,0],.208*s,.028*s,[0,0,0],g,32);
+      for(let i=0;i<8;i++){let t=i*PI/4;B('black',[Math.cos(t)*.24*s,0,Math.sin(t)*.24*s],[.2*s,.75*s,.018*s],[0,-t,0],g);}
+      C('silver',[0,.44*s,0],.08*s,.12*s,[0,0,0],g);
+      return g;
+    }
+    function bolts(p,w,h,par=content,rot=[0,0,0]){
+      const g=group('fasteners',p,rot,par);
+      for(let x of [-w/2,0,w/2])for(let z of [-h/2,h/2])C('silver',[x,0,z],.018,.016,[0,0,0],g,8);
+    }
+    function truss(start,end,width=.15,par=content){
+      const g=group('truss',start,[0,0,0],par),delta=new T.Vector3(...end).sub(new T.Vector3(...start)),len=delta.length();
+      g.quaternion.setFromUnitVectors(up,delta.normalize());
+      const corners=[[-width,0,-width],[width,0,-width],[0,0,width]];
+      for(let i=0;i<3;i++)rod('silver',corners[i],[corners[i][0],len,corners[i][2]],width*.08,g);
+      const n=Math.ceil(len/(width*3));
+      for(let j=0;j<n;j++)for(let i=0;i<3;i++){
+        let c=corners[i],d=corners[(i+1)%3];
+        rod('silver',[c[0],j*len/n,c[2]],[d[0],(j+1)*len/n,d[2]],width*.045,g,6);
+      }
+      return g;
+    }
+    function finish(refs,guessed,pose,extra={}){
+      let triangles=0,meshes=0,instances=0;
+      for(const [parent,by] of batches)for(const b of by.values()){
+        const mesh=new T.InstancedMesh(b.g,b.mat,b.matrices.length);mesh.frustumCulled=false;
+        b.matrices.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;parent.add(mesh);
+        triangles+=(b.g.index?b.g.index.count:b.g.attributes.position.count)/3*b.matrices.length;meshes++;instances+=b.matrices.length;
+      }
+      // r128 Box3.setFromObject ignores instance transforms: compute exact bounds.
+      content.updateMatrixWorld(true);const bounds=new T.Box3(),m=new T.Matrix4();
+      for(const [parent,by] of batches)for(const b of by.values())for(const local of b.matrices){
+        m.multiplyMatrices(parent.matrixWorld,local);const pos=b.g.attributes.position;
+        for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i).applyMatrix4(m);bounds.expandByPoint(v);}
+      }
+      const center=bounds.getCenter(new T.Vector3()),size=bounds.getSize(new T.Vector3()),scale=2/Math.max(size.x,size.y,size.z);
+      content.scale.setScalar(scale);content.position.copy(center).multiplyScalar(-scale);
+      root.name='VOYASCOPE shape study';
+      root.userData={pose,refs:[...refs],guessed,triangles,meshes,instances,normalizedSize:size.multiplyScalar(scale).toArray(),...extra};
+      root.updateMatrixWorld(true);return root;
+    }
+    return {T,K,root,content,geo,put,B,C,rod,ring,ball,group,panel,dish,rtg,bolts,truss,finish};
   }
-  for (const a of [[-1.27, -0.5, 0], [1.27, -0.5, 0], [0, 1.48, 0]]) K.rod(mirror, a, [0, 0.03, 1.88], 0.026, "dark");
-  K.cylinder(mirror, 0.2, 0.2, 0.07, "mirror", 0, 0.03, 1.88).rotation.x = Math.PI / 2;
-  K.panel(g, 0, -1.62, 1.35, 1, 0.48).rotation.x = -0.45;
-  g.userData.pose = [0.26, -0.43, -0.16];
-  return g;
-}
-function bepiModel(K) {
-  const g = new THREE.Group();
-  K.box(g, 1.15, 1.5, 1.1, "silver", 0, -0.1, 0); K.box(g, 1.18, 0.55, 1.13, "gold", 0, -1.13, 0);
-  K.cylinder(g, 0.59, 0.59, 0.52, "gold", 0, 1, 0, 8); K.cylinder(g, 0.64, 0.64, 0.04, "silver", 0, 1.27, 0, 8);
-  for (let i = 0; i < 9; i++) K.box(g, 0.07, 1.15, 0.018, "dark", -0.47 + i * 0.115, -0.12, 0.562);
-  K.dish(g, 0.36, 0, 0.2, 0.79);
-  for (const sign of [-1, 1]) {
-    K.rod(g, [sign * 0.6, -0.55, 0], [sign * 1.4, -0.55, 0], 0.045);
-    for (let j = 0; j < 2; j++) K.panel(g, sign * (1.93 + j * 1.12), -0.5, 0, 1.08, 1.3);
-    K.rod(g, [sign * 0.5, 1.1, 0], [sign * 1.45, 1.7, 0.1], 0.015, "silver");
+
+  function jwst(T,K){
+    const b=builder(T,K),{B,C,rod,group,put,geo,panel}=b;
+    // Original kite surfaces, five separate layers; meter-like internal units.
+    for(let l=0;l<5;l++){
+      const s=1-l*.018,y=l*.19;
+      const coords=[[0,y,-10.5*s],[-6.9*s,y+.12,-2.4*s],[-6.5*s,y+.04,3*s],[0,y-.13,10.5*s],[6.5*s,y+.04,3*s],[6.9*s,y+.12,-2.4*s]];
+      const membrane=geo('membrane',()=>{
+      const g=new T.BufferGeometry(),p=[],idx=[],segments=36,rings=8;
+      for(let j=0;j<=rings;j++)for(let k=0;k<segments;k++){
+        const r=j/rings,edge=k/6,n=Math.floor(edge),t=edge-n,a=coords[n],c=coords[(n+1)%6];
+        p.push((a[0]*(1-t)+c[0]*t)*r,y+.11*(1-r)+(a[1]*(1-t)+c[1]*t-y)*r+.022*Math.sin(r*39+k*.8)*r,(a[2]*(1-t)+c[2]*t)*r);
+      }
+      for(let j=0;j<rings;j++)for(let k=0;k<segments;k++){
+        const a=j*segments+k,c=j*segments+(k+1)%segments,d=c+segments,e=a+segments;
+        idx.push(a,c,e,c,d,e,a,e,c,c,e,d);
+      }
+      g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setIndex(idx);
+      // Back-to-back thin faces use explicit normals instead of transparent foil.
+      const ng=g.toNonIndexed();ng.computeVertexNormals();g.dispose();return ng;
+      });
+      put(membrane,l===4?'silver':'white',[0,y,0],[s,1,s]);
+      for(let i=0;i<6;i++)rod('silver',coords[i],coords[(i+1)%6],.024);
+      for(let i of [0,1,3,5])rod('silver',[0,y+.12,0],coords[i],.013);
+    }
+    B('gold',[0,-.5,0],[2.4,1,2.9]);B('black',[0,-1.06,0],[2.15,.12,2.6]);
+    for(let x of [-1,1])for(let z of [-1.1,1.1])rod('silver',[x,-.8,z],[x*4,.25,z*6],.065);
+    C('silver',[0,1.65,-1.55],.24,2.6);B('black',[0,3.4,-2.3],[2.2,3.1,.7]);
+    const mirror=group('18-primary-mirror-segments',[0,4.6,-1.8]);
+    const hex=geo('hex',()=>new T.CylinderGeometry(.745,.745,.085,6));
+    // Axial hex ring of radius two, central segment omitted = 18 segments.
+    const centers=[];
+    for(let q=-2;q<=2;q++)for(let r=-2;r<=2;r++)if(Math.abs(q+r)<=2&&(q||r))centers.push([Math.sqrt(3)*.76*(q+r/2),1.5*.76*r]);
+    centers.forEach(([x,y])=>{
+      put(hex,'black',[x,y,-.12],[1.04,1.4,1.04],[PI/2,0,0],mirror);
+      put(hex,'mirror',[x,y,0],[1,1,1],[PI/2,0,0],mirror);
+      rod('black',[x,y,-.18],[x*.65,y*.65,-.65],.042,mirror);
+    });
+    B('black',[0,3.85,-1.32],[.8,.65,.75]);
+    for(const p of [[-2.8,3,-1.75],[2.8,3,-1.75],[0,7.6,-1.75]])rod('black',p,[0,4.2,3.6],.07);
+    C('mirror',[0,4.2,3.6],.36,.13,[PI/2,0,0]);
+    C('black',[0,4.2,3.73],.42,.13,[PI/2,0,0]);
+    b.dish(.65,[.4,-1.5,1],[PI,0,0]);panel(2.1,3.4,[0,-1.05,-3.5],[0,0,.2],b.content,8,10);
+    return b.finish(REF.jwst,['遮熱膜のたわみ、裏面の補強と配線位置は見た目から補完。膜の間隔を強調。'],[.57,-.57,-.08]);
   }
-  K.cylinder(g, 0.18, 0.26, 0.28, "dark", 0, -1.55, 0);
-  g.userData.pose = [0.18, -0.42, 0.15];
-  return g;
-}
-function horizonsModel(K) {
-  const g = new THREE.Group();
-  const bus = K.mesh(g, new THREE.CylinderGeometry(1.03, 1.03, 0.75, 3), "gold", 0, -0.28, 0); bus.rotation.y = 0.5;
-  K.dish(g, 1.08, 0, 0.35, 0.06); K.cylinder(g, 0.18, 0.18, 0.9, "silver", 0, 0.15, 0); K.box(g, 0.63, 0.5, 0.55, "gold", 0.67, -0.37, 0.15);
-  K.cylinder(g, 0.26, 0.26, 1.2, "dark", -1.02, -0.15, 0.1).rotation.z = 0.23;
-  for (let i = 0; i < 10; i++) { const fin = K.cylinder(g, 0.37, 0.37, 0.025, "silver", -1.02 + Math.sin(0.23) * (i * 0.1 - 0.4), -0.55 + i * 0.1, 0.1); fin.rotation.z = 0.23; }
-  K.box(g, 0.33, 0.32, 0.5, "dark", 0.7, -0.13, 0.52); K.cylinder(g, 0.13, 0.13, 0.42, "black", 0.7, -0.13, 0.9).rotation.x = Math.PI / 2;
-  for (const sign of [-1, 1]) K.rod(g, [sign * 0.35, -0.25, 0], [sign * 0.85, -0.95, 0.3], 0.025);
-  g.userData.pose = [0.2, -0.4, 0.25];
-  return g;
-}
-function roverModel(K) {
-  const g = new THREE.Group();
-  K.box(g, 1.9, 0.57, 1.25, "white", 0, 0, 0); K.box(g, 1.78, 0.055, 1.4, "silver", 0, 0.33, 0); K.box(g, 0.72, 0.5, 0.78, "gold", -0.42, -0.03, 0);
-  K.rod(g, [0.5, 0.3, 0.15], [0.5, 1.52, 0.15], 0.067, "silver"); K.box(g, 0.58, 0.24, 0.28, "white", 0.5, 1.48, 0.15);
-  for (let i = 0; i < 2; i++) K.cylinder(g, 0.067, 0.067, 0.08, "black", 0.32 + i * 0.31, 1.49, 0.32).rotation.x = Math.PI / 2;
-  K.rod(g, [-0.55, 0.35, -0.25], [-0.55, 1.12, -0.25], 0.016); K.cylinder(g, 0.18, 0.18, 0.09, "white", -0.55, 0.43, -0.2);
-  for (const side of [-1, 1]) for (let i = 0; i < 3; i++) {
-    const px = -0.98 + i * 0.98, pz = side * 0.96;
-    K.cylinder(g, 0.34, 0.34, 0.24, "dark", px, -0.6, pz, 32).rotation.x = Math.PI / 2;
-    K.cylinder(g, 0.16, 0.16, 0.255, "silver", px, -0.6, pz, 24).rotation.x = Math.PI / 2;
-    K.rod(g, [i === 0 ? -0.6 : 0.5, -0.08, side * 0.55], [px, -0.58, pz], 0.048, "silver");
-    const geom = new THREE.BoxGeometry(0.034, 0.034, 0.245), inst = new THREE.InstancedMesh(geom, K.M.silver, 18), dummy = new THREE.Object3D();
-    for (let j = 0; j < 18; j++) { const a = (j * Math.PI) / 9; dummy.position.set(px + Math.cos(a) * 0.335, -0.6 + Math.sin(a) * 0.335, pz); dummy.rotation.z = a; dummy.updateMatrix(); inst.setMatrixAt(j, dummy.matrix); }
-    g.add(inst);
+
+  function parker(T,K){
+    const b=builder(T,K),{B,C,rod,panel,group}=b;
+    C('gold',[0,-.18,0],.52,1.5,[0,0,0],b.content,8);
+    B('black',[0,-.7,.48],[.65,.4,.08]);B('silver',[0,.35,0],[.94,.14,.8]);
+    // 11.43 cm shield on a 2.3 m diameter reference envelope.
+    C('black',[0,.98,0],1.15,.1143,[0,PI/8,0],b.content,8);
+    C('white',[0,1.042,0],1.143,.009,[0,PI/8,0],b.content,8);
+    for(let i=0;i<6;i++){let t=i*TAU/6;rod('black',[Math.cos(t)*.4,.44,Math.sin(t)*.4],[Math.cos(t)*.85,.92,Math.sin(t)*.85],.036);}
+    for(const s of [-1,1]){
+      rod('silver',[s*.4,-.15,0],[s*.9,-.43,0],.04);
+      panel(.95,.55,[s*1.13,-.53,0],[0,0,-s*.4],b.content,8,4);
+      for(const z of [-.46,.46])rod('silver',[s*.5,-.6,z],[s*1.8,-1.2,z*1.7],.013);
+      for(let y of [-.45,-.05,.3])B('black',[s*.51,y,.18],[.06,.22,.25]);
+    }
+    C('silver',[0,-1.02,0],.44,.12);b.dish(.37,[0,-1.14,0],[PI,0,0]);
+    rod('silver',[0,-.65,-.3],[0,-2.2,-.62],.018);B('black',[0,-2.15,-.62],[.12,.12,.16]);
+    for(let i=0;i<5;i++){let t=i*TAU/5;C('black',[Math.cos(t)*.44,-.83,Math.sin(t)*.44],.07,.17,[PI,0,0],b.content,12,.4);}
+    for(const x of [-.23,.23])C('navy',[x,-.15,.53],.09,.07,[PI/2,0,0]);
+    b.bolts([0,.43,0],.7,.65);
+    return b.finish(REF.parker,['盾の支持骨格、裏側の計器、配線は簡略化。翼の角度は鑑賞用の近似。'],[.3,-.55,-.28]);
   }
-  K.rod(g, [0.85, 0.1, 0.4], [1.32, -0.1, 0.55], 0.055, "silver"); K.rod(g, [1.32, -0.1, 0.55], [1.64, -0.42, 0.2], 0.05, "silver");
-  K.cylinder(g, 0.17, 0.17, 0.3, "white", 1.64, -0.43, 0.2).rotation.z = 0.4;
-  K.cylinder(g, 0.26, 0.26, 0.55, "silver", -1.02, 0.4, 0).rotation.z = -0.3;
-  for (let i = 0; i < 6; i++) K.box(g, 0.55, 0.022, 0.57, "dark", -1.02, 0.18 + i * 0.09, 0);
-  K.mesh(g, new THREE.CylinderGeometry(2, 2.15, 0.12, 64), new THREE.MeshStandardMaterial({ color: 0x5a2a16, roughness: 1 }), 0, -1.02, 0);
-  for (let i = 0; i < 18; i++) { const a = i * 2.399; K.mesh(g, new THREE.DodecahedronGeometry(0.025 + (i % 4) * 0.018, 0), K.M.dark, Math.cos(a) * (1.3 + (i % 3) * 0.2), -0.94, Math.sin(a) * (1.3 + (i % 3) * 0.2)); }
-  return g;
+
+  function bepicolombo(T,K){
+    const b=builder(T,K),{B,C,rod,group,panel}=b;
+    const mpo=group('MPO'),mosif=group('MOSIF',[0,1.3,0]),mio=group('Mio',[0,1.3,0]);
+    B('gold',[0,0,0],[2.4,1.7,2.2],[0,0,0],mpo);
+    B('white',[0,.05,-1.14],[3.7,1.5,.08],[0,0,0],mpo);
+    for(let x=-1.72;x<1.8;x+=.18)B('silver',[x,.05,-1.197],[.025,1.37,.018],[0,0,0],mpo);
+    for(const x of [-1.23,1.23])B('white',[x,0,0],[.055,1.6,1.85],[0,0,0],mpo);
+    for(let x of [-.8,0,.8])B('black',[x,-.08,1.112],[.45,.55,.025],[0,0,0],mpo);
+    b.dish(.57,[-.72,.83,.72],[.75,0,.32],mpo);
+    rod('silver',[1.2,.05,0],[1.65,.05,0],.065,mpo);
+    // The single MPO wing extends 7.5 m from the bus. No MTM or MTM wings.
+    for(let i=0;i<3;i++)panel(2.26,1.55,[2.31+i*2.36,.05,0],[0,0,.08],mpo,12,8);
+    B('silver',[4.95,-.005,0],[7.5,.065,.12],[0,0,0],mpo);
+    for(let x of [-.7,.7])for(let z of [-.7,.7])C('black',[x,-.95,z],.13,.24,[PI,0,0],mpo,12,.45);
+    // Mio is fully housed within an independently movable, open-topped MOSIF.
+    C('black',[0,.24,0],.9,1.1,[0,PI/8,0],mio,8);
+    C('silver',[0,-.28,0],.91,.08,[0,PI/8,0],mio,8);
+    C('silver',[0,.8,0],.91,.06,[0,PI/8,0],mio,8);
+    for(let i=0;i<8;i++){
+      const a=i*TAU/8,x=Math.sin(a),z=Math.cos(a);
+      B('solar',[x*.836,.32,z*.836],[.65,.8,.015],[0,a,0],mio);
+      B('gold',[x*1.065,.2,z*1.065],[.91,1.5,.085],[0,a,0],mosif);
+      B('black',[x*1.014,.2,z*1.014],[.84,1.44,.018],[0,a,0],mosif);
+      rod('silver',[x*1.11,-.55,z*1.11],[x*1.11,.96,z*1.11],.022,mosif);
+    }
+    C('silver',[0,-.59,0],1.12,.08,[0,PI/8,0],mosif,8);
+    C('white',[0,.95,0],.2,.15,[0,0,0],mio);
+    return b.finish(REF.bepi,['MOSIF内側、MPO背面の計器・配線と固定具は近似。2026年10月4日の構成を表現。'],[.37,-.62,.07],{parts:{mpo,mosif,mio},configurationDate:'2026-10-04'});
+  }
+
+  function perseverance(T,K){
+    const b=builder(T,K),{B,C,rod,ring,group}=b;
+    B('white',[0,.6,0],[1.55,.5,2.08]);B('silver',[0,.89,0],[1.66,.09,2.15]);
+    B('black',[0,.31,0],[1.18,.16,1.65]);
+    for(const s of [-1,1]){
+      B('white',[s*.81,.59,0],[.07,.34,1.65]);
+      for(let j=0;j<9;j++)B('silver',[s*.86,.58,-.73+j*.18],[.015,.28,.022]);
+      // Two connected rocker/bogie arms, three wheels per side.
+      const h=[s*.88,.56,0],joint=[s*1.02,.32,.35];
+      rod('black',h,[s*1.1,.02,-1.04],.071);rod('black',h,joint,.071);
+      rod('silver',joint,[s*1.1,.02,.09],.062);rod('silver',joint,[s*1.1,.02,1.08],.062);
+      C('silver',h,.13,.14,[0,0,PI/2]);
+      for(let z of [-1.04,.09,1.08]){
+        const wheel=group('wheel',[s*1.11,0,z],[0,0,PI/2]);
+        C('black',[0,0,0],.32,.28,[0,0,0],wheel,40);
+        for(let yy of [-.146,.146]){
+          ring('silver',[0,yy,0],.245,.019,[PI/2,0,0],wheel);
+          C('silver',[0,yy,0],.071,.026,[0,0,0],wheel,16);
+          for(let j=0;j<6;j++){const a=j*TAU/6;rod('silver',[0,yy,0],[Math.sin(a)*.24,yy,Math.cos(a)*.24],.017,wheel);}
+        }
+        // Independent raised grousers instead of a smooth toy tire.
+        for(let j=0;j<32;j++){let a=j*TAU/32;B('silver',[Math.sin(a)*.321,0,Math.cos(a)*.321],[.012,.265,.014],[0,a,0],wheel);}
+      }
+    }
+    // Remote sensing mast and two camera eyes.
+    C('white',[-.48,1.41,-.62],.085,1.0);
+    B('white',[-.48,1.97,-.62],[.62,.31,.32]);B('black',[-.48,2.01,-.81],[.57,.14,.03]);
+    for(const x of [-.64,-.32]){C('black',[x,1.97,-.84],.081,.09,[PI/2,0,0]);C('navy',[x,1.97,-.897],.061,.012,[PI/2,0,0]);}
+    C('black',[-.48,2.21,-.65],.091,.15);C('silver',[-.48,1.72,-.61],.14,.1);
+    // Folded front arm and instrument turret, not a flag panel.
+    rod('white',[.5,.65,-1.03],[.7,.37,-1.44],.09);
+    rod('silver',[.7,.37,-1.44],[-.47,.37,-1.42],.07);
+    for(let x of [-.47,.7])C('silver',[x,.38,-1.43],.13,.15,[PI/2,0,0]);
+    C('white',[-.62,.42,-1.45],.22,.25,[0,0,0],b.content,12);
+    for(let i=0;i<4;i++){let a=i*PI/2;C('black',[-.62+Math.cos(a)*.17,.29,-1.45+Math.sin(a)*.17],.044,.11);}
+    const power=group('rear-power',[0,1.02,1.08],[.5,0,0]);b.rtg([0,0,0],[0,0,0],power,.78);
+    for(const s of [-1,1])rod('white',[s*.42,.85,.64],[s*.28,1.47,1.32],.055);
+    b.dish(.23,[.5,1.04,.05],[.2,0,.25]);
+    C('white',[.55,1.06,-.72],.12,.28);rod('black',[.68,.93,.72],[.68,1.9,.72],.011);
+    B('white',[-.48,1.02,.48],[.48,.2,.38]);B('gold',[.1,.956,-.4],[.25,.018,.28]);
+    for(let x of [-.52,0,.52])for(let z of [-.76,0,.76])b.bolts([x,.95,z],.34,.3);
+    for(let i=0;i<4;i++)C('silver',[-.45+i*.3,.96,.77],.055,.06);
+    for(const [x,z,w,h] of [[.22,-.65,.31,.17],[-.28,.12,.32,.12],[.48,.52,.24,.2]]){
+      B('white',[x,1+h/2,z],[w,h,.25]);B('black',[x,1+h+.005,z],[w*.8,.015,.18]);
+      for(let n=0;n<4;n++)B('silver',[x-w*.32+n*w*.21,1+h+.019,z],[.012,.012,.15]);
+    }
+    for(const s of [-1,1]){
+      rod('gold',[s*.65,.97,-.9],[s*.65,.97,.73],.015);
+      rod('gold',[s*.65,.97,-.9],[s*.32,1.01,-.91],.015);
+      for(let z of [-.62,-.07,.46])B('silver',[s*.65,.98,z],[.055,.025,.035]);
+    }
+    B('silver',[-.49,2.035,-.63],[.63,.035,.34]);
+    for(const x of [-.7,-.26])C('black',[x,2.065,-.815],.024,.035,[PI/2,0,0]);
+    return b.finish(REF.rover,['車輪の溝数、腹面の機器、アームの関節・配線は簡略化。旗とヘリコプターは省略。'],[.27,-2.45,0]);
+  }
+
+  function mmx(T,K){
+    const b=builder(T,K),{B,C,rod,group,panel}=b;
+    const outbound=group('outbound',[0,-1.32,0]),explore=group('explore'),ret=group('return',[0,1.03,0]);
+    C('silver',[0,0,0],.8,1.15,[0,0,0],outbound,24);
+    C('gold',[0,.43,0],.88,.2,[0,0,0],outbound,12);
+    for(let i=0;i<8;i++){const a=i*TAU/8;rod('silver',[Math.sin(a)*.85,-.5,Math.cos(a)*.85],[Math.sin(a)*.85,.5,Math.cos(a)*.85],.025,outbound);}
+    C('black',[0,-.7,0],.24,.38,[0,0,0],outbound,24,.4);
+    B('gold',[0,0,0],[2.1,1.3,1.7],[0,0,0],explore);
+    for(let x of [-1.07,1.07])B('white',[x,0,0],[.04,1.16,1.5],[0,0,0],explore);
+    for(const s of [-1,1]){
+      rod('silver',[s*1.05,.24,0],[s*1.8,.24,0],.055,explore);
+      for(let i=0;i<3;i++)panel(1.12,2.1,[s*(2.15+i*1.22),.24,0],[0,0,s*.06],explore,8,12);
+      for(let z of [-.68,.68]){
+        rod('silver',[s*.85,-.3,z],[s*1.52,-1.05,z*1.9],.047,explore);
+        rod('silver',[s*.83,.1,z],[s*1.52,-1.05,z*1.9],.025,explore);
+        C('black',[s*1.52,-1.08,z*1.9],.18,.06,[0,0,0],explore,16);
+      }
+    }
+    B('gold',[0,.03,0],[1.55,.78,1.35],[0,0,0],ret);
+    b.dish(.73,[0,.12,.71],[PI/2,0,0],ret,'black');
+    b.dish(.35,[.35,-.24,.97],[PI/2,0,0],outbound,'black');
+    C('gold',[.4,.62,-.18],.28,.36,[0,0,0],ret,24,.6);
+    B('white',[-.57,.52,-.18],[.2,.3,.38],[0,0,0],ret);
+    rod('silver',[-.46,.5,-.38],[-.46,1.2,-.5],.025,ret);
+    C('black',[-.46,1.19,-.5],.09,.12,[0,0,0],ret);
+    for(let x of [-.72,.72])for(let z of [-.53,.53])B('black',[x,.45,z],[.15,.12,.18],[0,0,0],ret);
+    C('silver',[.65,-.85,.43],.12,.5,[0,0,0],explore);
+    return b.finish(REF.mmx,['写真の三段構成を基本形で再構成。翼の展開角、脚・裏面の計器、固定具は近似。6面図は使用していない。'],[.38,-.5,.05],{parts:{outbound,explore,return:ret}});
+  }
+
+  function hayabusa2(T,K){
+    const b=builder(T,K),{B,C,rod,panel}=b;
+    B('gold',[0,0,0],[1.05,1.16,.95]);
+    for(const x of [-.48,.48]){B('silver',[x,0,.488],[.035,1.1,.025]);B('silver',[x,0,-.488],[.035,1.1,.025]);}
+    for(const s of [-1,1]){
+      b.truss([s*.5,.12,0],[s*.94,.12,0],.08);
+      for(let i=0;i<2;i++)panel(.85,1.35,[s*(1.34+i*.9),.12,0],[0,0,.04*s],b.content,8,10);
+    }
+    // Flat high- and medium-gain antennas, rather than parabolic dishes.
+    for(const [x,r] of [[-.27,.29],[.3,.24]]){
+      C('silver',[x,.7,0],.07,.2);C('white',[x,.82,0],r,.035);
+      b.ring('silver',[x,.84,0],r,.012,[PI/2,0,0]);
+    }
+    C('black',[0,-.95,.2],.085,.7);C('silver',[0,-1.36,.2],.18,.16,[0,0,0],b.content,24,.45);
+    for(let y=-1.2;y<-.62;y+=.075)C('silver',[0,y,.2],.091,.009);
+    B('black',[0,0,-.5],[.67,.63,.07]);
+    for(let x of [-.18,.18])for(let y of [-.18,.18]){
+      C('silver',[x,y,-.565],.139,.11,[PI/2,0,0]);C('black',[x,y,-.629],.112,.014,[PI/2,0,0]);
+      b.ring('silver',[x,y,-.645],.08,.009);
+    }
+    for(const [x,y,r] of [[-.3,.2,.09],[.13,.32,.07],[.3,-.18,.1]]){
+      C('black',[x,y,.535],r,.09,[PI/2,0,0]);C('navy',[x,y,.589],r*.7,.014,[PI/2,0,0]);
+    }
+    for(let x of [-.3,.28])B('black',[x,-.38,.5],[.22,.18,.03]);
+    rod('silver',[.4,.4,-.3],[.57,1.25,-.5],.012);
+    for(let x of [-.42,.42])for(let z of [-.35,.35])C('silver',[x,-.64,z],.045,.14,[0,0,0],b.content,12,.5);
+    b.bolts([0,.586,0],.83,.7);
+    return b.finish(REF.haya,['裏面のイオンエンジン細部、配線・小型計器は近似。帰還カプセルは付けていない。'],[.42,-.6,-.08]);
+  }
+
+  function juno(T,K){
+    const b=builder(T,K),{B,C,rod,group,panel}=b;
+    C('gold',[0,0,0],1.75,3.5,[0,PI/6,0],b.content,6);
+    C('black',[0,1.73,0],1.78,.1,[0,PI/6,0],b.content,6);
+    b.dish(1.25,[0,1.77,0],[0,0,0],b.content,'silver');
+    C('silver',[0,-1.89,0],.55,.27);C('black',[0,-2.12,0],.43,.3,[0,0,0],b.content,24,.4);
+    for(let i=0;i<3;i++){
+      const wing=group('radial-wing',[0,0,0],[0,i*TAU/3,0]);
+      rod('silver',[0,0,1.45],[0,0,2.2],.12,wing);
+      // Three articulated bays per 9 m radial wing.
+      for(let j=0;j<3;j++)panel(2.65,2.85,[0,0,2.965+j*2.96],[0,0,0],wing,10,14);
+      for(const x of [-1.26,1.26])rod('silver',[x,-.07,1.75],[x,-.07,10.25],.035,wing);
+      if(i===0){b.truss([0,0,10.25],[0,0,11.15],.2,wing);B('white',[0,.05,11.2],[.7,.24,.55],[0,0,0],wing);}
+    }
+    for(let i=0;i<6;i++){let a=i*TAU/6;B('black',[Math.sin(a)*1.54,.1,Math.cos(a)*1.54],[.6,1.5,.06],[0,a,0]);}
+    rod('silver',[1.2,-.6,0],[3,-2.3,-1],.025);rod('silver',[-1.2,-.6,0],[-3,-2.3,-1],.025);
+    B('white',[.9,.9,1.4],[.5,.4,.2]);
+    return b.finish(REF.juno,['翼のセル分割、背面機器・配線を簡略化。翼端の磁力計架台は写真から近似。'],[.82,-.22,.12],{spinAxis:[0,1,0]});
+  }
+
+  function newHorizons(T,K){
+    const b=builder(T,K),{B,C,rod}=b;
+    const shape=new T.Shape();shape.moveTo(-.85,-.65);shape.lineTo(.95,-.48);shape.lineTo(-.35,.83);shape.closePath();
+    const g=new T.ExtrudeGeometry(shape,{depth:.65,bevelEnabled:false});g.rotateX(-PI/2);g.translate(0,-.325,0);
+    b.put(g,'gold');B('silver',[0,-.36,0],[1.1,.04,.8]);
+    b.dish(.74,[-.2,.47,.02],[.02,0,.02]);
+    C('gold',[-.2,.32,.02],.35,.2);
+    rod('silver',[-.5,.02,-.42],[-1.04,.02,-.54],.1);
+    b.rtg([-1.3,.02,-.54],[0,0,PI/2],b.content,1.1);
+    B('black',[.59,.19,-.25],[.3,.38,.32]);C('black',[.57,.43,-.27],.16,.31);C('navy',[.57,.595,-.27],.13,.019);
+    B('white',[.37,.34,.34],[.34,.022,.28]);B('navy',[.32,.02,.69],[.28,.24,.027]);
+    for(let p of [[-.42,-.37,.45],[.55,-.37,-.4],[-.67,-.37,-.41]])C('black',p,.067,.18,[0,0,0],b.content,12,.4);
+    C('white',[.24,.38,-.38],.21,.04);
+    rod('gold',[.72,-.08,-.23],[.82,.63,-.23],.022);
+    b.bolts([-.45,.333,-.4],.5,.25);
+    return b.finish(REF.nh,['三角形バスの裏面、観測機器の奥行き、配線・固定具は近似。RTGは1基。'],[.43,-.55,-.15]);
+  }
+
+  function voyager(T,K){
+    const b=builder(T,K),{B,C,rod,group}=b;
+    C('black',[0,0,0],.8,.55,[0,PI/10,0],b.content,10);
+    C('silver',[0,-.27,0],.83,.06,[0,PI/10,0],b.content,10);
+    for(let i=0;i<10;i++){
+      const a=i*TAU/10;B(i%3?'black':'gold',[Math.sin(a)*.77,0,Math.cos(a)*.77],[.38,.43,.018],[0,a,0]);
+      rod('silver',[Math.sin(a)*.8,-.23,Math.cos(a)*.8],[Math.sin(a)*.8,.22,Math.cos(a)*.8],.018);
+    }
+    b.dish(1.8,[0,.55,0]);C('silver',[0,.38,0],.55,.28);
+    // The instrument platform and RTG boom extend on opposite sides.
+    b.truss([.55,0,0],[2.72,.18,.1],.17);
+    const platform=group('scan-platform',[2.78,.2,.1],[0,.1,.15]);
+    B('silver',[0,0,0],[.7,.1,.65],[0,0,0],platform);
+    for(let x of [-.22,.22]){
+      C('black',[x,.23,0],.15,.4,[PI/2,0,0],platform);
+      C('navy',[x,.23,.215],.124,.012,[PI/2,0,0],platform);
+    }
+    B('white',[0,.3,-.32],[.23,.34,.2],[0,0,0],platform);
+    b.truss([-.6,-.1,0],[-1.45,-.33,0],.13);
+    const rtgs=group('three-RTGs',[-1.45,-.33,0],[0,0,PI/2]);
+    for(let i=0;i<3;i++)b.rtg([0,.43+i*.88,0],[0,0,0],rtgs,.9);
+    b.truss([-.3,-.12,-.5],[-1.25,-.7,-5.7],.12);
+    B('black',[-1.25,-.7,-5.74],[.2,.2,.15]);
+    for(const s of [-1,1])rod('silver',[s*.32,-.2,0],[s*2.5,-2.4,1.1],.012);
+    // Plain gold record: no etching, inscription, badge, flag or organization mark.
+    C('mirror',[0,-.025,.79],.26,.025,[PI/2,0,0]);
+    for(let x of [-.45,.45])C('black',[x,-.4,.24],.065,.18,[PI,0,0],b.content,12,.5);
+    return b.finish(REF.voyager,['観測台の小型機器、ブームの格子・配線を簡略化。レコードは無地。1号と2号で共有。'],[.6,-.7,-.19]);
+  }
+
+  const MODELS={jwst,'parker-solar-probe':parker,bepicolombo,perseverance,mmx,hayabusa2,juno,'new-horizons':newHorizons,voyager};
+
+  function disposeModel(group){
+    const seen=new Set();group.traverse(o=>{if(o.geometry&&!seen.has(o.geometry)){seen.add(o.geometry);o.geometry.dispose();}});
+  }
+  return { makeKit, MODELS, disposeModel };
+})();
+// 模型は、いちばん長い辺が 2 になるように作ってある（userData.normalizedSize）。部品を InstancedMesh でまとめているので、
+// r128 の Box3.setFromObject では大きさを測れない。いちばん長い辺 = 2R になるように、R 倍するだけにする
+// 光に合わせた質感（2026-10-04）：宇宙の暗さに合わせて映り込みを少し控え、金の断熱材のしわを少し強く、白い面は少し粗くする
+function naturalKit(K) {
+  for (const m of Object.values(K)) if (m.isMaterial && m !== K.mirror) m.envMapIntensity *= 0.7;
+  K.gold.bumpScale = 0.009; K.gold.roughness = 0.36;
+  K.white.roughness = 0.62;
+  K.solar.roughness = 0.26;
 }
-// 模型の大きさを、いちばん長い辺 = 2R にそろえる
-function fitModel(g, R) {
-  const box = new THREE.Box3().setFromObject(g), size = box.getSize(new THREE.Vector3()), ctr = box.getCenter(new THREE.Vector3());
-  const k = (2 * R) / Math.max(size.x, size.y, size.z);
+function holdModel(g, R) {
   const holder = new THREE.Group();
-  g.position.sub(ctr); holder.add(g); holder.scale.setScalar(k);
+  holder.add(g); holder.scale.setScalar(R);
   holder.userData.inner = g;
+  g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   return holder;
 }
 
@@ -1106,6 +1440,8 @@ if (renderer) {
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.1;
+  renderer.shadowMap.enabled = true; // 模型の影（主光の1つだけ。見ている模型のまわりだけを測る）
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   skyScene = new THREE.Scene();
   mainScene = new THREE.Scene();
   mainScene.add(camera);
@@ -1253,18 +1589,26 @@ if (renderer) {
           float craters = 1.0 - smoothstep(0.08, 0.24, noise(vO * 40.0));
           col = mix(vec3(0.30, 0.28, 0.26), vec3(0.62, 0.58, 0.53), fbm(vO * 6.0));
           col *= 0.75 + fbm(vO * 30.0) * 0.4 - craters * 0.22;
-        } else {
+        } else if (uKind < 3.5) {
           float dark = smoothstep(0.5, 0.7, fbm(vO * 2.2 + 4.0));
           col = mix(vec3(0.46, 0.17, 0.07), vec3(0.80, 0.42, 0.20), fbm(vO * 3.2));
           col = mix(col, vec3(0.28, 0.12, 0.07), dark * 0.6);
           float cap = smoothstep(0.86, 0.93, abs(normalize(vO).y) + fbm(vO * 8.0) * 0.05);
           col = mix(col, vec3(0.92, 0.90, 0.86), cap);
           col *= 0.85 + fbm(vO * 24.0) * 0.3;
+        } else {
+          // 木星：緯度にそった縞（明るい帯と暗い帯）。太さの違う縞を重ね、境目を少し乱す（演出の絵）
+          vec3 u = normalize(vO);
+          float f = u.y * 17.0 + (fbm(vec3(u.x * 3.0, u.y * 10.0, u.z * 3.0)) - 0.5) * 1.8;
+          float band = 0.55 * sin(f) + 0.3 * sin(f * 2.3 + 1.7) + 0.15 * sin(f * 5.1 + 0.4);
+          col = mix(vec3(0.46, 0.35, 0.26), vec3(0.72, 0.66, 0.57), smoothstep(-0.45, 0.55, band));
+          col = mix(col, vec3(0.56, 0.48, 0.40), smoothstep(0.55, 0.95, abs(u.y)) * 0.8);
+          col *= 0.86 + fbm(vO * 14.0 + vec3(0.0, u.y * 6.0, 0.0)) * 0.26;
         }
         col *= 0.035 + 1.15 * lit;
         float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
-        vec3 rimC = uKind > 2.5 ? vec3(1.0, 0.55, 0.35) : vec3(0.55, 0.7, 0.9);
-        col += rimC * rim * (0.06 + 0.5 * max(nl, 0.0)) * (uKind > 2.5 ? 0.9 : 0.35);
+        vec3 rimC = uKind > 3.5 ? vec3(0.95, 0.82, 0.66) : uKind > 2.5 ? vec3(1.0, 0.55, 0.35) : vec3(0.55, 0.7, 0.9);
+        col += rimC * rim * (0.06 + 0.5 * max(nl, 0.0)) * (uKind > 3.5 ? 0.6 : uKind > 2.5 ? 0.9 : 0.35);
         gl_FragColor = vec4(col, uAlpha);
       }`,
     transparent: true,
@@ -1273,6 +1617,7 @@ if (renderer) {
   bodies.moon = new THREE.Mesh(sphere, bodyMat(1));
   bodies.mercury = new THREE.Mesh(sphere, bodyMat(2));
   bodies.mars = new THREE.Mesh(sphere, bodyMat(3));
+  bodies.jupiter = new THREE.Mesh(sphere, bodyMat(4));
   bodies.sun = new THREE.Mesh(sphere, new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uAlpha: { value: 1 } },
     vertexShader: bodyVS,
@@ -1290,16 +1635,21 @@ if (renderer) {
   for (const [hex, k, o] of [[0xfff0c8, 3.0, 1.6], [0xffb547, 6.2, 0.9], [0xff7a2e, 13, 0.4]]) { const gm = glowMesh(hex, o); gm.userData.k = k; sunGlows.push(gm); mainScene.add(gm); }
   for (const b of Object.values(bodies)) mainScene.add(b);
 
-  // 探査機の模型（Codex 案）と、まわりの光（カメラについて回る：いつも左上の前から照らす）
-  kit = makeKit();
-  models.webb = webbModel(kit);
-  models.bepi = bepiModel(kit);
-  models.horizons = horizonsModel(kit);
-  camera.add(new THREE.AmbientLight(0xd9f4ea, 0.24));
-  for (const [hex, inten, from] of [[0xd9f4ea, 1.7, [-3, 5, 7]], [0xffb547, 1.5, [5, 2, -4]], [0x5ef2c2, 0.25, [-6, -2, 1]]]) {
+  // 探査機の模型（Codex が作った9つのうち、航路にいる4機。公式を参考にしたイメージ）
+  kit = CRAFT.makeKit(THREE);
+  naturalKit(kit);
+  for (const id of ["jwst", "bepicolombo", "juno", "new-horizons"]) models[id] = CRAFT.MODELS[id](THREE, kit);
+  // 光：太陽の光らしい白い主光（影をつくる）と、弱い補助光。補助光はカメラについて回り、主光も「カメラから見て左上の前」の向きを保つ。
+  // 主光の影は、見ている模型のまわりだけを測る（render で毎回置き直す）
+  camera.add(new THREE.AmbientLight(0xc9d6e6, 0.12));
+  for (const [hex, inten, from] of [[0xffcf9a, 0.55, [5, 2, -4]], [0x5ef2c2, 0.12, [-6, -2, 1]]]) {
     const L = new THREE.DirectionalLight(hex, inten); L.position.set(...from); camera.add(L); L.target.position.set(0, 0, 0); camera.add(L.target);
   }
-  for (const [key, g] of Object.entries(models)) { models[key] = g; mainScene.add(g); }
+  keyLight = new THREE.DirectionalLight(0xfff2e2, 2.6);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(1024, 1024);
+  keyLight.shadow.bias = -0.0005;
+  mainScene.add(keyLight, keyLight.target);
 
   // 1光日の輪（アンバー）
   gate = new THREE.Group();
@@ -1353,10 +1703,26 @@ if (renderer) {
     depthWrite: false, depthTest: false,
   })));
   lensScene.children[0].renderOrder = -1;
-  models.rover = roverModel(kit);
-  lensScene.add(models.rover);
-  lensScene.add(new THREE.AmbientLight(0xd9f4ea, 0.3));
-  for (const [hex, inten, from] of [[0xffe2c4, 1.8, [-3, 5, 4]], [0xffb547, 1.0, [5, 2, -4]]]) { const L = new THREE.DirectionalLight(hex, inten); L.position.set(...from); lensScene.add(L); }
+  // 火星の地面と、パーサヴィアランス（公式を参考にしたイメージ）。太陽の光が、地面に影を落とす
+  rover = holdModel(CRAFT.MODELS.perseverance(THREE, kit), 1.45);
+  const roverInner = rover.userData.inner, half = (roverInner.userData.normalizedSize[1] * rover.scale.y) / 2;
+  rover.rotation.y = roverInner.userData.pose[1];
+  lensScene.add(rover);
+  const soil = new THREE.MeshStandardMaterial({ color: 0x7c4128, roughness: 1, metalness: 0 });
+  soil.color.convertSRGBToLinear();
+  const ground = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.75, 0.12, 64), soil);
+  ground.position.y = -half - 0.06; ground.receiveShadow = true; lensScene.add(ground);
+  for (let i = 0; i < 18; i++) {
+    const a = i * 2.399, r = 1.25 + (i % 3) * 0.32;
+    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.03 + (i % 4) * 0.02, 0), soil);
+    rock.position.set(Math.cos(a) * r, -half + 0.01, Math.sin(a) * r); rock.castShadow = rock.receiveShadow = true; lensScene.add(rock);
+  }
+  lensScene.add(new THREE.HemisphereLight(0xe2b68c, 0x5a2814, 0.42));
+  const lensKey = new THREE.DirectionalLight(0xfff0dc, 2.3);
+  lensKey.position.set(-3, 6, 3); lensKey.castShadow = true; lensKey.shadow.mapSize.set(1024, 1024);
+  Object.assign(lensKey.shadow.camera, { left: -3, right: 3, top: 3, bottom: -3, near: 0.5, far: 20 });
+  lensKey.shadow.bias = -0.0005; lensKey.shadow.normalBias = 0.02;
+  lensScene.add(lensKey);
 }
 
 // 航路と景色の置き場所を、画面の形に合わせて作り直す
@@ -1387,7 +1753,7 @@ function placeScene() {
       if (lk.body === "sun") for (const gm of sunGlows) { gm.position.copy(st.center); gm.scale.setScalar(lk.R * gm.userData.k); st.objects.push(gm); }
     }
     if (lk.model) {
-      const holder = models[lk.model].userData.holder ?? (models[lk.model].userData.holder = (() => { const h = fitModel(models[lk.model], lk.mR ?? lk.R); mainScene.add(h); return h; })());
+      const holder = models[lk.model].userData.holder ?? (models[lk.model].userData.holder = (() => { const h = holdModel(models[lk.model], lk.mR ?? lk.R); mainScene.add(h); return h; })());
       holder.position.copy(st.focus);
       const inner = holder.userData.inner;
       inner.userData.spin = inner.userData.spin ?? 0;
@@ -1697,7 +2063,7 @@ function setStory(mode, st) {
     $("scene-name").textContent = "THE JOURNEY CONTINUES"; $("scene-caption").textContent = "まだ、先がある。";
   } else if (mode === "encounter") {
     const pl = st.pl, n = String(st.i + 1).padStart(2, "0");
-    $("eyebrow").textContent = `${n} / 07 · ${pl.kind === "probe" ? "探査機のとなりで" : pl.kind === "light-day" ? "光の1日" : "くらべる目安"}`;
+    $("eyebrow").textContent = `${n} / ${String(PLACES.length).padStart(2, "0")} · ${pl.kind === "probe" ? "探査機のとなりで" : pl.kind === "light-day" ? "光の1日" : "くらべる目安"}`;
     $("hero-title").innerHTML = pl.id === "jwst" ? "ジェイムズ・ウェッブ<br>宇宙望遠鏡" : esc(pl.name);
     $("hero-text").textContent = pl.text;
     meta.hidden = false;
@@ -1905,7 +2271,7 @@ function render(now, dt, p, km, warp, m) {
   // 天体・模型：近い場所だけ出す
   for (const b of Object.values(bodies)) b.visible = false;
   for (const g of sunGlows) g.visible = false;
-  for (const key of ["webb", "bepi", "horizons"]) if (models[key].userData.holder) models[key].userData.holder.visible = false;
+  for (const g of Object.values(models)) if (g.userData.holder) g.userData.holder.visible = false;
   gate.visible = false; dust.visible = false;
   for (const st of ROUTE.stops) {
     const dist = camera.position.distanceTo(st.focus);
@@ -1918,10 +2284,28 @@ function render(now, dt, p, km, warp, m) {
       if (sunGlows.includes(o)) o.quaternion.copy(camera.quaternion);
     }
     if (st.lk.body === "sun") bodies.sun.material.uniforms.uTime.value = reduce ? 0 : t;
-    if (st.model && !reduce) { const inner = st.model.userData.inner; inner.rotation.y += dt * 0.05; }
+    if (st.model && !reduce) {
+      // ジュノーは本体の軸のまわりを、本当の速さ（1分に2回）で回る。ほかの機体は、ゆっくり向きを変えるだけ
+      const inner = st.model.userData.inner;
+      if (st.lk.rpm) inner.children[0].rotation.y += (dt * st.lk.rpm * Math.PI * 2) / 60;
+      else inner.rotation.y += dt * 0.05;
+    }
     if (st.lk.kind === "gate") { gate.userData.halo.quaternion.copy(camera.quaternion).premultiply(tmpQ.copy(gate.quaternion).invert()); }
     if (st.pl.id === "new-horizons") dust.material.uniforms.uAlpha.value = 0.55 * smooth01((60 - dist) / 30);
     dust.material.uniforms.uScale.value = Math.min(pixelRatio, 2) * (FI.H / 800);
+  }
+
+  // 主光の影：いちばん近くに見えている模型のまわりだけを測る
+  let nearM = null, nearD = Infinity;
+  for (const st of ROUTE.stops) if (st.model?.visible) { const d = camera.position.distanceTo(st.model.position); if (d < nearD) { nearD = d; nearM = st.model; } }
+  keyLight.castShadow = !!nearM;
+  if (nearM) {
+    const R = nearM.scale.x, sc = keyLight.shadow.camera;
+    tmpV.copy(KEY_DIR).applyQuaternion(camera.quaternion);
+    keyLight.target.position.copy(nearM.position); keyLight.target.updateMatrixWorld();
+    keyLight.position.copy(nearM.position).addScaledVector(tmpV, 6 * R);
+    sc.left = sc.bottom = -1.5 * R; sc.right = sc.top = 1.5 * R; sc.near = 0.5 * R; sc.far = 9 * R; sc.updateProjectionMatrix();
+    keyLight.shadow.normalBias = 0.012 * R;
   }
 
   // 次の行き先の照準（遠くに小さく見えているあいだ）
@@ -1947,6 +2331,9 @@ function render(now, dt, p, km, warp, m) {
   const lens = $("lens"), line = $("lens-line"), pin = $("lens-pin");
   lens.classList.toggle("on", lensOn); line.classList.toggle("on", lensOn); pin.classList.toggle("on", lensOn);
   journey.classList.toggle("lens-on", lensOn);
+  // 「公式を参考にしたイメージ」：探査機の模型が見えているあいだだけ出す
+  const mst = m.st;
+  journey.classList.toggle("model-on", lensOn || (!!mst?.lk.model && (m.mode === "encounter" || m.mode === "swing" || m.mode === "rest")));
   let lensRect = null;
   if (lensW > 0.5) {
     tmpV.copy(per.center).project(camera);
@@ -1962,7 +2349,7 @@ function render(now, dt, p, km, warp, m) {
     line.style.width = `${Math.max(0, dd - lr - 6)}px`;
     line.style.transform = `translate3d(${lx + Math.cos(ang) * lr}px, ${ly + Math.sin(ang) * lr}px, 0) rotate(${ang}rad)`;
     lensRect = { x: lx - lr, y: ly - lr, w: 2 * lr };
-    if (!reduce) models.rover.rotation.y += dt * 0.12;
+    if (!reduce) rover.rotation.y += dt * 0.12;
   }
 
   // 描く
@@ -1988,6 +2375,7 @@ function render(now, dt, p, km, warp, m) {
   }
 }
 const tmpQ = renderer ? new THREE.Quaternion() : null;
+const KEY_DIR = renderer ? new THREE.Vector3(-3, 5, 7).normalize() : null; // 主光の向き（カメラから見て左上の前）
 function wake() { idleFrames = 0; if (!raf && visible && !document.hidden) { lastT = performance.now(); raf = requestAnimationFrame(frame); } }
 
 new ResizeObserver(() => size()).observe(journey);
