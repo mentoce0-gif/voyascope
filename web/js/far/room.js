@@ -67,7 +67,7 @@ export async function createFarRoom({ events = [], onClose = () => {} } = {}) {
     <div class="far-scroll">
       <section class="far-fly-wrap" aria-labelledby="far-fly-title">
         <h3 id="far-fly-title" class="visually-hidden">光になって飛ぶ</h3>
-        <div class="far-fly" tabindex="0" aria-label="遠くへ飛ぶ画面。上へスワイプか ↑ キーで遠くへ、下へスワイプか ↓ キーで地球へ戻る。Home キーで地表へ"></div>
+        <div class="far-fly" tabindex="0" aria-label="遠くへ飛ぶ画面。下へスワイプか ↑ キーで遠くへ、上へスワイプか ↓ キーで地球へ戻る。Home キーで地表へ"></div>
         <div class="far-fly-foot">
           <button type="button" class="btn" data-far-reset>地表へ戻る</button>
           <button type="button" class="btn" data-far-ladder>↓ 距離のはしご（一覧）</button>
