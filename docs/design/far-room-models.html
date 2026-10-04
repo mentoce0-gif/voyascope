@@ -1,0 +1,110 @@
+<!doctype html>
+<!-- オーナーが Codex で作った、探査機の模型の確認ページ（2026-10-04）。依頼文：prompts/codex-far-room-models.md
+     Claude Code が直したのは、出典を確かめていない説明2つ（ウェッブの鏡の枚数・パーサヴィアランスの車輪の数）を、確かめた言葉に替えたところだけ -->
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050e1f">
+<title>VOYASCOPE — 探査機の標本室</title>
+<style>
+:root{color-scheme:dark;--bg:#050e1f;--text:#d9f4ea;--dim:#8fb3a8;--mint:#5ef2c2;--amber:#ffb547;--line:#8fb3a826}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:"Yu Gothic UI","Hiragino Kaku Gothic ProN",Meiryo,sans-serif}button,a,summary{touch-action:manipulation}button{font:inherit;color:inherit;cursor:pointer}button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--mint);outline-offset:5px}button{min-width:44px;min-height:44px}a{color:var(--mint)}
+.app{max-width:1680px;margin:auto;padding:0 48px}header{height:91px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.brand{font:500 19px/1 monospace;letter-spacing:.2em;display:flex;gap:13px;align-items:center}.brand svg{width:25px;height:25px;color:var(--mint)}.header-note{font-size:11px;letter-spacing:.16em;color:var(--dim)}.header-note:before{content:"";display:inline-block;width:5px;height:5px;background:var(--mint);border-radius:50%;margin-right:10px}
+main{position:relative}.intro{position:absolute;z-index:2;top:36px;left:0;pointer-events:none}.eyebrow{font:10px/1.5 monospace;letter-spacing:.2em;color:var(--mint);margin:0 0 14px}.intro h1{font-size:clamp(20px,2.05vw,30px);font-weight:400;letter-spacing:.06em;margin:0 0 8px}.intro .sub{font-size:11px;color:var(--dim);margin:0;letter-spacing:.06em}.specimen-index{position:absolute;right:0;top:35px;text-align:right;z-index:2}.index{font:300 38px/1 monospace;color:var(--text)}.index small{font-size:13px;color:var(--dim)}.specimen-index p{font:9px/1 monospace;letter-spacing:.17em;color:var(--dim)}
+#stage{height:clamp(450px,65vh,630px);position:relative;overflow:hidden;isolation:isolate;cursor:grab;touch-action:none}#stage:active{cursor:grabbing}#stage canvas{width:100%;height:100%;display:block;position:relative;z-index:1}#stage:before{content:"";position:absolute;inset:12% 12% 0;border-radius:50%;background:radial-gradient(ellipse,#14305755,transparent 66%);pointer-events:none}#stage:after{content:"";position:absolute;width:46%;height:46%;border:1px solid #8fb3a811;left:27%;top:24%;border-radius:50%;transform:rotate(-16deg);pointer-events:none;z-index:0}.stage-label{position:absolute;bottom:20px;left:0;z-index:2;color:var(--dim);font:9px/1.5 monospace;letter-spacing:.12em;pointer-events:none}.stage-label span{color:var(--mint)}.tools{position:absolute;right:0;bottom:12px;z-index:3;display:flex;gap:8px}.tools button{border:1px solid var(--line);background:#071225b8;border-radius:50%;width:44px;height:44px;font:17px monospace}.tools button:hover{border-color:var(--mint);color:var(--mint)}
+.info{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;padding:20px 0 23px;border-top:1px solid var(--line)}.model-name{font-size:clamp(22px,2.3vw,34px);font-weight:400;letter-spacing:.025em;line-height:1.4;margin:0 0 8px}.model-key{color:var(--dim);font:10px/1.5 monospace;letter-spacing:.16em;text-transform:uppercase;margin:0}.metrics{display:flex;gap:36px}.metric span{display:block;font:9px/1.5 monospace;color:var(--dim);letter-spacing:.08em;margin-bottom:7px}.metric strong{font:400 22px/1 monospace;color:var(--amber)}.metric small{font-size:10px;margin-left:3px;color:var(--dim)}
+.navigation{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:16px 0}.nav-btn{border:0;background:none;font-size:12px;letter-spacing:.12em;min-width:92px;display:flex;gap:17px;align-items:center;padding:8px 0}.nav-btn:hover{color:var(--mint)}.nav-btn b{font:20px monospace;font-weight:400}.dots{display:flex;gap:3px}.dot{width:34px;min-width:34px;min-height:44px;padding:0;border:0;background:none;position:relative}.dot:after{content:"";width:4px;height:4px;border-radius:50%;position:absolute;background:#8fb3a84d;top:20px;left:15px}.dot[aria-current="true"]:after{width:19px;height:3px;border-radius:0;left:8px;background:var(--mint)}
+footer{border-top:1px solid var(--line);padding:16px 0 22px;color:var(--dim);font-size:10px;line-height:1.9;display:flex;justify-content:space-between;gap:18px}footer p{margin:0}.method{max-width:730px;padding-bottom:26px;font-size:11px;line-height:1.9;color:var(--dim)}summary{cursor:pointer;min-height:44px;padding:12px 0;color:var(--text)}.method ul{padding-left:19px;margin:8px 0}.method a{word-break:break-all}.method .source{display:inline-block;margin-right:16px}.error{position:absolute;inset:35% 16% auto;text-align:center;color:var(--amber);font-size:13px;z-index:4;line-height:1.8}.error[hidden]{display:none}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+@media(min-width:1100px){#stage canvas{transform:translateY(14px)}}
+@media(max-width:700px){.app{padding:0 22px}header{height:72px}.brand{font-size:16px;letter-spacing:.14em}.header-note{font-size:9px;letter-spacing:.05em}.intro{top:25px}.intro h1{font-size:20px}.eyebrow{font-size:9px;margin-bottom:9px}.intro .sub{font-size:9px}.specimen-index{top:27px}.index{font-size:27px}.index small{font-size:11px}.specimen-index p{font-size:7px;letter-spacing:.08em}#stage{height:400px}.stage-label{font-size:8px;max-width:180px;bottom:15px;line-height:1.8}.tools{gap:6px;bottom:9px}.info{grid-template-columns:1fr;gap:19px;padding:18px 0 21px}.model-name{font-size:22px;line-height:1.35;min-height:30px;margin-bottom:7px}.model-key{font-size:9px}.metrics{gap:0;justify-content:space-between}.metric strong{font-size:21px}.metric span{font-size:8px;margin-bottom:5px}.navigation{padding:7px 0}.nav-btn{min-width:68px;gap:9px;font-size:11px}.dots{gap:0}.dot{width:20px;min-width:20px}.dot:after{left:8px}.dot[aria-current="true"]:after{left:4px;width:12px}footer{padding:12px 0;display:block;font-size:9px}footer p+p{margin-top:3px}.method{font-size:10px}.error{inset:40% 10% auto}}
+@media(max-width:360px){.app{padding:0 15px}.dots{display:none}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand"><svg viewBox="0 0 30 30" fill="none" aria-hidden="true"><ellipse cx="15" cy="15" rx="14" ry="5.5" transform="rotate(-40 15 15)" stroke="currentColor"/><circle cx="15" cy="15" r="6" stroke="currentColor"/><circle cx="25" cy="6" r="2" fill="currentColor"/></svg>VOYASCOPE</div><div class="header-note">遠くを見る部屋</div></header>
+<main>
+<div class="intro"><p class="eyebrow">THE EXPLORERS / SHAPE STUDIES</p><h1>探査機の標本室</h1><p class="sub">旅の途中で出会う、9つのかたち。</p></div>
+<div class="specimen-index"><div class="index"><span id="index">01</span><small> / 09</small></div><p>CRAFT ARCHIVE</p></div>
+<div id="stage" role="group" aria-label="探査機の3D模型。ドラッグして回転できます。">
+<div class="stage-label"><span>＋</span> DRAG TO EXPLORE<br>ドラッグで回転 · ホイールで拡大</div>
+<div class="tools"><button id="zoomOut" aria-label="縮小">−</button><button id="zoomIn" aria-label="拡大">＋</button><button id="reset" aria-label="最初の向きに戻す">↺</button><button id="pause" aria-label="自動回転を停止" aria-pressed="false">Ⅱ</button></div>
+<p class="error" id="error">模型を読み込んでいます…</p>
+</div>
+<section class="info" aria-live="polite" aria-atomic="true">
+<div><h2 class="model-name" id="name">ジェイムズ・ウェッブ宇宙望遠鏡</h2><p class="model-key" id="key">JWST / GOLD MIRROR / 5-LAYER SUNSHIELD</p></div>
+<div class="metrics"><div class="metric"><span>TRIANGLES / 三角形</span><strong id="tri">—</strong></div><div class="metric"><span>MESHES / 描画部品</span><strong id="mesh">—</strong></div><div class="metric"><span>BUILD / 生成時間</span><strong id="ms">—</strong><small>ms</small></div></div>
+</section>
+<nav class="navigation" aria-label="模型を切り替える"><button class="nav-btn" id="prev"><b aria-hidden="true">←</b> 前へ</button><div class="dots" id="dots"></div><button class="nav-btn" id="next">次へ <b aria-hidden="true">→</b></button></nav>
+</main>
+<footer><p>形の目安です。公式の模型ではありません</p><p>※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません</p></footer>
+<details class="method"><summary>形の手がかりと、補ったところ</summary><p id="guessed"></p><p id="sources"></p><p>三角形数はインスタンスの個数を含む描画数。生成時間は、この端末での呼び出し1回の実測です。GPUへの転送・初回シェーダー準備は含みません。</p></details>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script type="module">
+import {makeKit,MODELS,disposeModel} from './far-room-models.js';
+const $=id=>document.getElementById(id),T=window.THREE;
+const catalog=[
+ ['jwst','ジェイムズ・ウェッブ宇宙望遠鏡','GOLD MIRROR / 5-LAYER SUNSHIELD'],
+ ['parker-solar-probe','パーカー・ソーラー・プローブ','THERMAL SHIELD'],
+ ['bepicolombo','ベピコロンボ（みお）','MPO + MOSIF + MIO'],
+ ['perseverance','パーサヴィアランス','ROVER ON MARS'],
+ ['mmx','火星衛星探査機（MMX）','THREE MODULES'],
+ ['hayabusa2','はやぶさ２','BEYOND THE SAMPLE RETURN'],
+ ['juno','ジュノー','THREE SOLAR WINGS'],
+ ['new-horizons','ニュー・ホライズンズ','ONE RTG'],
+ ['voyager','ボイジャー1号・2号','THREE RTGS / ONE SHARED MODEL']
+];
+let renderer;
+try{if(!T)throw Error('three.jsを読み込めませんでした。ネット接続を確認してください。');renderer=new T.WebGLRenderer({antialias:true,alpha:true});}
+catch(e){$('error').textContent=e.message;throw e;}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.outputEncoding=T.sRGBEncoding;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;renderer.setClearColor(0x050e1f,0);renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
+const stage=$('stage');stage.prepend(renderer.domElement);
+const scene=new T.Scene(),camera=new T.PerspectiveCamera(35,1,.01,60);scene.add(camera);camera.position.z=4.5;
+const ambient=new T.AmbientLight(0xd9f4ea,.24);camera.add(ambient);
+for(const [color,power,pos] of [[0xd9f4ea,1.7,[-3,5,7]],[0xffb547,1.5,[5,2,-4]],[0x5ef2c2,.25,[-6,-2,1]]]){
+ const l=new T.DirectionalLight(color,power);l.position.set(...pos);camera.add(l);camera.add(l.target);
+ if(power===1.7){l.castShadow=true;l.shadow.mapSize.set(1024,1024);Object.assign(l.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:.1,far:30});l.shadow.bias=-.0003;l.shadow.normalBias=.006;}
+}
+const kit=makeKit(T),rig=new T.Group(),pose=new T.Group(),spin=new T.Group();scene.add(rig);rig.add(pose);pose.add(spin);
+const motion=matchMedia('(prefers-reduced-motion: reduce)');let paused=motion.matches,index=0,model=null,zoom=1,drag=null,spinAxis=new T.Vector3(0,1,0),last=performance.now(),viewPoints=[],viewCenter=new T.Vector3();
+function syncPause(){const off=paused||motion.matches;$('pause').textContent=off?'▷':'Ⅱ';$('pause').setAttribute('aria-label',motion.matches?'動きを減らす設定により自動回転は停止中':off?'自動回転を再開':'自動回転を停止');$('pause').setAttribute('aria-pressed',String(off));}
+function reset(){rig.rotation.set(0,0,0);spin.rotation.set(0,0,0);pose.rotation.set(...model.userData.pose);pose.position.copy(viewCenter).negate();zoom=1;resize();}
+function show(i){
+ index=(i+catalog.length)%catalog.length;
+ if(model){spin.remove(model);disposeModel(model);}
+ const [key,name,tag]=catalog[index],start=performance.now();model=MODELS[key](T,kit);const ms=performance.now()-start;
+ spin.add(model);spinAxis.fromArray(model.userData.spinAxis||[0,1,0]);
+ model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
+ const box=new T.Box3(),v=new T.Vector3(),rot=new T.Matrix4().makeRotationFromEuler(new T.Euler(...model.userData.pose)),local=new T.Matrix4(),world=new T.Matrix4(),mat=new T.Matrix4();viewPoints=[];
+ // The module returns fresh world matrices in neutral pose. Include instances.
+ model.traverse(o=>{if(!o.isMesh)return;const pos=o.geometry.attributes.position;for(let j=0;j<(o.isInstancedMesh?o.count:1);j++){if(o.isInstancedMesh){o.getMatrixAt(j,local);world.multiplyMatrices(o.matrixWorld,local);}else world.copy(o.matrixWorld);mat.multiplyMatrices(rot,world);for(let k=0;k<pos.count;k++){v.fromBufferAttribute(pos,k).applyMatrix4(mat);box.expandByPoint(v);viewPoints.push(v.x,v.y,v.z);}}});
+ box.getCenter(viewCenter);reset();
+ $('name').textContent=name;$('key').textContent=key+' / '+tag;$('index').textContent=String(index+1).padStart(2,'0');
+ $('tri').textContent=model.userData.triangles.toLocaleString('en-US');$('mesh').textContent=model.userData.meshes;$('ms').textContent=ms.toFixed(2);
+ $('guessed').textContent=model.userData.guessed.join(' ');$('sources').replaceChildren();
+ model.userData.refs.forEach((url,n)=>{const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.className='source';a.textContent='公式の参考ページ '+(n+1)+' ↗';$('sources').append(a);});
+ document.querySelectorAll('.dot').forEach((d,j)=>d.setAttribute('aria-current',String(j===index)));
+ stage.setAttribute('aria-label',name+'の3D模型。ドラッグして回転できます。');$('error').hidden=true;
+}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();const usable=w<700?.69:.8,tan=Math.tan(35*Math.PI/360);let fit=0;for(let i=0;i<viewPoints.length;i+=3){const x=viewPoints[i]-viewCenter.x,y=viewPoints[i+1]-viewCenter.y,z=viewPoints[i+2]-viewCenter.z;fit=Math.max(fit,z+Math.abs(x)/(tan*camera.aspect*.85),z+Math.abs(y)/(tan*usable));}camera.position.z=fit*1.04/zoom;rig.position.y=w<700?-.16:0;}
+catalog.forEach((c,i)=>{const btn=document.createElement('button');btn.className='dot';btn.setAttribute('aria-label',c[1]+'を表示');btn.addEventListener('click',()=>show(i));$('dots').append(btn);});
+$('prev').onclick=()=>show(index-1);$('next').onclick=()=>show(index+1);
+$('pause').onclick=()=>{if(!motion.matches)paused=!paused;syncPause();};$('reset').onclick=reset;
+function setZoom(delta){zoom=Math.max(.7,Math.min(2,zoom+delta));resize();}
+$('zoomIn').onclick=()=>setZoom(.15);$('zoomOut').onclick=()=>setZoom(-.15);
+addEventListener('keydown',e=>{if(e.target.closest('a,summary,input,select,textarea'))return;if(e.key==='ArrowLeft'){e.preventDefault();show(index-1);}if(e.key==='ArrowRight'){e.preventDefault();show(index+1);}});
+stage.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY};stage.setPointerCapture(e.pointerId);});
+stage.addEventListener('pointermove',e=>{if(!drag)return;rig.rotation.y+=(e.clientX-drag.x)*.007;rig.rotation.x+=(e.clientY-drag.y)*.007;drag={x:e.clientX,y:e.clientY};});
+const end=()=>drag=null;stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);stage.addEventListener('lostpointercapture',end);
+stage.addEventListener('wheel',e=>{e.preventDefault();setZoom(-Math.sign(e.deltaY)*.08);},{passive:false});
+motion.addEventListener('change',()=>{paused=motion.matches;syncPause();});addEventListener('resize',resize);
+syncPause();show(0);
+function frame(now){requestAnimationFrame(frame);const dt=Math.min((now-last)/1000,.05);last=now;if(!document.hidden){if(!paused&&!motion.matches&&!drag)spin.rotateOnAxis(spinAxis,dt*.085);renderer.render(scene,camera);}}
+requestAnimationFrame(frame);
+addEventListener('pagehide',()=>{if(model)disposeModel(model);Object.values(kit).forEach(m=>{if(m.isMaterial)m.dispose();});Object.values(kit.textures).forEach(t=>t.dispose());renderer.dispose();},{once:true});
+</script>
+<script>if(location.protocol==='file:'){document.getElementById('error').textContent='この確認ページはローカルサーバーで開いてください。outputs フォルダーで npx serve . を実行します。';}</script>
+</body>
+</html>
