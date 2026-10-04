@@ -10,7 +10,7 @@
 
 ## 公開ページ
 
-**https://mentoce0-gif.github.io/voyascope/**
+**https://mentoce0-gif.github.io/voyascope/**（仮の公開先。のちに Cloudflare Pages に移します）
 
 ## お願いと公開停止について
 
