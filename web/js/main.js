@@ -356,6 +356,24 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     famTabs.innerHTML =
       `<span class="fam-group">${[{ id: "all", label: "すべて" }, ...present].map(tab).join("")}</span>` +
       `<span class="fam-group fam-views">${[{ id: "planned", label: "予定" }, { id: "tonight", label: "観測" }].map(tab).join("")}</span>`;
+    fitFamTabs();
+  };
+  // PC：タブが1行に入らないとき（ブラウザの文字を大きくしているときなど）は、入る大きさまで文字だけを小さくする
+  // すき間と余白は px なので、文字の幅だけが割合で縮む。10px より小さくはしない（それでも入らなければ横に送る）
+  const fitFamTabs = () => {
+    famTabs.style.removeProperty("--fam-fit");
+    if (isNarrow() || !famTabs.clientWidth) return;
+    const over = famTabs.scrollWidth - famTabs.clientWidth;
+    if (over <= 0) return;
+    const tabs = [...famTabs.querySelectorAll(".fam-tab")];
+    const textWidth = tabs.reduce((sum, t) => {
+      const cs = getComputedStyle(t);
+      const edges = ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"].reduce((a, k) => a + parseFloat(cs[k]), 0);
+      return sum + t.getBoundingClientRect().width - edges;
+    }, 0);
+    const fontPx = parseFloat(getComputedStyle(tabs[0]).fontSize);
+    const fit = Math.max(10 / fontPx, (textWidth - over - 2) / textWidth); // 2px は丸めの分の余裕
+    famTabs.style.setProperty("--fam-fit", fit.toFixed(3));
   };
   // 名前（日本語・英語・id）で探す。全角・半角や大文字・小文字の違いは無視する
   const fold = (t) => String(t ?? "").normalize("NFKC").toLowerCase().replace(/\s+/g, "");
@@ -977,6 +995,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   let lastWarning = "";
 
   renderFamTabs();
+  // 一覧のパネルの大きさが変わったとき（画面の大きさ・PC とスマホの切り替え）と、フォントを読み終わったときに、タブを入れ直す
+  new ResizeObserver(fitFamTabs).observe(listPanel);
+  document.fonts?.ready.then(fitFamTabs);
   setView(viewMode); // 覚えている表示（なければ「すべて」）。一覧も描く
   syncControls();
 

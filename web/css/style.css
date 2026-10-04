@@ -339,11 +339,12 @@ body { overflow: hidden; }
 .fam-bold { font-weight: 700; visibility: hidden; }
 .fam-tab[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); }
 .fam-tab[aria-pressed="true"] .fam-label { font-weight: 700; }
-/* PC：タブを1行に並べる（パネルの幅 330px に入る大きさ。入らないときは横に送る） */
+/* PC：タブを1行に並べる（パネルの幅 330px に入る大きさ）。ブラウザの文字を大きくしていて入らないときは、
+   main.js の fitFamTabs が --fam-fit で文字だけを小さくする */
 @media (min-width: 901px) {
   .fam-tabs { flex-wrap: nowrap; gap: 4px; }
   .fam-group { gap: 2px; }
-  .fam-tab { font-size: 0.75rem; padding: 5px 5px; }
+  .fam-tab { font-size: calc(0.75rem * var(--fam-fit, 1)); padding: 5px 5px; }
   .list-panel { scrollbar-width: thin; scrollbar-gutter: stable; } /* スクロールバーが出ても消えても、中の幅が変わらない */
 }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
