@@ -91,7 +91,7 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
 .rail-line { position: relative; width: 1px; height: 105px; background: var(--line); }
 .rail-line i { position: absolute; left: 0; top: 0; width: 1px; height: 0; background: var(--amber); }
 
-.scene-tag { position: absolute; left: 74%; top: 67%; display: flex; flex-direction: column; align-items: flex-start; font: 11px var(--mono); letter-spacing: 0.2em; color: var(--text); pointer-events: none; transition: opacity 0.4s; text-shadow: 0 1px 10px #050e1f; }
+.scene-tag { position: absolute; left: 74%; bottom: 250px; display: flex; flex-direction: column; align-items: flex-start; font: 11px var(--mono); letter-spacing: 0.2em; color: var(--text); pointer-events: none; transition: opacity 0.4s; text-shadow: 0 1px 10px #050e1f; }
 .scene-tag small { margin-top: 8px; font: 11px var(--body); letter-spacing: 0.06em; color: var(--dim); }
 .tag-line { width: 43px; height: 1px; margin-bottom: 14px; background: var(--mint); opacity: 0.65; }
 .journey.moving .scene-tag, .journey.rest .scene-tag { opacity: 0; }
@@ -133,8 +133,17 @@ svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-widt
 .footline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .footline p { margin: 0; font-size: 10px; color: var(--dim); }
 .footline button { font-size: 11px; color: var(--dim); }
-.model-note { position: absolute; right: var(--side); bottom: 204px; margin: 0; font-size: 9px; letter-spacing: 0.04em; color: var(--dim); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+.model-note { position: absolute; right: var(--side); bottom: 196px; margin: 0; font-size: 9px; letter-spacing: 0.04em; color: var(--dim); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
 .journey.model-on .model-note { opacity: 0.75; } /* 探査機の模型が見えているあいだだけ */
+/* そばで観測中：ドラッグで周りから眺められることを知らせる（1回なぞったら出さない）。
+   PC の右下は、下のボタン（上の端が下から 186px）から上へ積む：注記 → この案内 → 英名の札。画面が低くても重ならない */
+.look-hint { position: absolute; left: 74%; bottom: 222px; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 11px; letter-spacing: 0.06em; color: var(--mint); opacity: 0; transition: opacity 0.5s; pointer-events: none; text-shadow: 0 1px 8px #050e1f; }
+.look-hint svg { width: 16px; height: 16px; }
+.journey.encounter:not(.looked) .look-hint { opacity: 0.9; }
+.story-en { display: none; }
+/* 先へ進むボタン：そばで観測中は、ゆっくり脈打って「ここから先へ」と知らせる */
+@keyframes nudge { 0% { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0.5); } 70% { box-shadow: 0 0 0 14px rgba(94, 242, 194, 0); } 100% { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0); } }
+.journey.encounter .primary .arrow { border-color: var(--mint); animation: nudge 2.2s ease-out infinite; }
 .nogl { position: absolute; inset: 30% 10% auto; margin: 0; text-align: center; color: var(--dim); }
 
 /* 次の行き先の照準（3D の位置に重ねる） */
@@ -233,11 +242,16 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
   .rear canvas { width: 58px; height: 58px; }
   .rear figcaption { font-size: 9px; }
   .rear figcaption b { font-size: 9.5px; }
-  .chapter-rail { left: 22px; top: 242px; gap: 10px; font-size: 9px; transition: opacity 0.4s; }
+  .chapter-rail { display: none; } /* 何番目かは、名前の上の「02 / 08」で分かる。名前と重ならないように出さない */
   .journey.lens-on .chapter-rail { opacity: 0; }
   .journey:not([data-mode="intro"]) .interaction-hint { display: none; }
   .rail-line { height: 56px; }
-  .scene-tag { left: auto; right: 20px; top: 41%; align-items: flex-end; font-size: 9px; letter-spacing: 0.12em; }
+  .scene-tag { display: none; } /* 英名は、名前の上の1行に出す（.story-en） */
+  .journey.encounter .story-en { display: block; margin-top: 6px; font: 10px/1.4 var(--mono); letter-spacing: 0.16em; color: var(--dim); }
+  .look-hint { left: 0; right: 0; top: calc(var(--band-bottom, 46%) - 26px); bottom: auto; justify-content: center; font-size: 10.5px; }
+  .journey.lens-on .look-hint { opacity: 0 !important; } /* 火星の望遠の窓の文字と重ならないように */
+  .journey.gate-on .look-hint { top: calc(var(--band-bottom, 46%) + 6px); } /* 1光日：輪の目盛りにかからないよう、輪と名前のあいだに */
+  .lens span { left: auto; right: 0; transform: translate(0, 8px); } /* 窓は右はしにあるので、文字は窓の右にそろえる（画面からはみ出さない） */
   .scene-tag small { display: none; }
   .tag-line { width: 25px; margin-bottom: 9px; }
   .story { left: 22px; right: 22px; width: auto; bottom: 194px; }
@@ -247,6 +261,8 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
   .journey.encounter .story { bottom: 182px; }
   .journey.encounter .story h2 { margin: 10px 0; font-size: 29px; line-height: 1.4; letter-spacing: 0.025em; }
   .journey.encounter .story p { font-size: 12px; line-height: 1.9; }
+  .journey.encounter .story h2.fit { font-size: min(29px, calc((100vw - 44px) / 15.6)); white-space: nowrap; } /* ジェイムズ・ウェッブ宇宙望遠鏡（15文字）を1行に縮めて、説明が上へ伸びないように */
+  .story h2.fit .br-wide { display: none; }
   .journey[data-mode="end"] .story h2 { font-size: 34px; }
   .hero-meta { margin-top: 10px; font-size: 11px; line-height: 1.7; }
   .hero-meta small { font-size: 10px; }
@@ -291,6 +307,15 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
   dialog { padding: 42px 22px 20px; }
   dialog h2 { font-size: 23px; }
   .fact { grid-template-columns: minmax(0, 1fr); }
+}
+/* 低いスマホ（アプリの中・ブラウザのバーが出ているとき）：説明を詰めて、着いた場所を見る場所を広げる */
+@media (max-width: 900px) and (max-height: 780px) {
+  .journey.encounter .story { bottom: 172px; }
+  .journey.encounter .story h2 { margin: 4px 0 6px; font-size: 25px; line-height: 1.35; }
+  .journey.encounter .story p { font-size: 11.5px; line-height: 1.75; }
+  .hero-meta { margin-top: 6px; font-size: 10.5px; line-height: 1.6; }
+  .hero-meta small { font-size: 9.5px; }
+  .detail-link { margin-top: 0; }
 }
 @media (max-width: 360px) {
   .story h2 { font-size: 38px; }
@@ -358,6 +383,7 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
 
     <div class="story" id="story">
       <div class="eyebrow" id="eyebrow">A JOURNEY BEYOND / 光の旅</div>
+      <div class="story-en" id="story-en" aria-hidden="true"></div>
       <h2 id="hero-title">その先の、<br>まだ先へ。</h2>
       <p id="hero-text">光になって、地球の輪の外へ。<br>遠くで旅をつづける探査機に、会いにいこう。</p>
       <div class="hero-meta" id="hero-meta" hidden></div>
@@ -380,6 +406,7 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
       <div class="footline"><p id="warp-note">光より速く進むのはワープ（作り話）です</p><button type="button" id="home">地表へ戻る ↶</button></div>
     </div>
     <p class="model-note">公式を参考にしたイメージ</p>
+    <p class="look-hint" id="look-hint" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"/></svg><span id="look-hint-text">ドラッグで、まわりから眺める</span></p>
   </section>
 
   <section class="atlas" id="ladder" aria-labelledby="ladder-title">
@@ -665,6 +692,7 @@ const reduceQuery = matchMedia("(prefers-reduced-motion: reduce)");
 let reduce = reduceQuery.matches;
 const coarse = matchMedia("(pointer: coarse)").matches;
 if (!coarse) $("hint-text").innerHTML = "ホイールか ↑ キーで自由に飛ぶ<small>↓ キーで地球の方へ。Home で地表へ</small>";
+$("look-hint-text").textContent = coarse ? "指でなぞって、まわりから眺める" : "ドラッグか ← → キーで、まわりから眺める";
 const say = (t) => { $("announcer").textContent = t; };
 
 // 距離のはしご（Codex 案の形）
@@ -712,13 +740,17 @@ function frameInfo() {
   const t = smooth01((aspect - 0.62) / (1.25 - 0.62)); // 0 = 縦長（スマホ）、1 = 横長（PC）
   const vfov = lerp(TUNE.FOV_PORTRAIT, TUNE.FOV_LANDSCAPE, t);
   const tv = Math.tan((vfov * DEG) / 2), th = tv * aspect;
+  // 縦長の画面：着いた場所（天体・機体）を、上の数字（地球からの距離）の下から、下の説明（名前・文）の上までのあいだに収める。
+  // 画面が低いとき（アプリの中・ブラウザのバーが出ているとき）は、小さく・上に置いて、名前に重ならないようにする
+  const bandTop = 150, bandBottom = Math.max(bandTop + 90, H - (H < 781 ? 400 : 440));
+  const band = bandBottom - bandTop, cy = bandTop + band / 2, rPx = Math.min(0.58 * (W / 2), band * 0.5);
   return {
-    W, H, aspect, t, vfov, tv, th, portrait: t < 0.5,
+    W, H, aspect, t, vfov, tv, th, portrait: t < 0.5, bandTop, bandBottom,
     // 着いたときに、見せたいもの（天体・機体）を置く画面の場所（中央が 0、右と上が +1）と見かけの半径
-    focus: { x: lerp(0.04, 0.4, t), y: lerp(0.36, 0.03, t) },
+    focus: { x: lerp(0.04, 0.4, t), y: lerp(1 - (2 * cy) / H, 0.03, t) },
     orbit: { x: lerp(1.8, 0.85, t), y: lerp(0.12, 0.05, t) }, // スイングバイの弧の上：天体の中心は画面の右の外。縁だけが右に見える
     around: { x: lerp(0.03, 0.3, t), y: lerp(0.3, 0.03, t) }, // 回りこむ弧の上：機体を見つづける
-    aR: lerp(Math.atan(0.58 * th), Math.atan(0.5 * tv), t),
+    aR: lerp(Math.atan((rPx / (W / 2)) * th), Math.atan(0.5 * tv), t),
     startPitch: lerp(14, 3, t) * DEG, // 出発のとき、地平線を見せるために下を向く
   };
 }
@@ -838,7 +870,7 @@ function lookAtNdc(camPos, target, x, y, out) {
   return out.multiply(qTmp.setFromAxisAngle(AX, -Math.atan(y * FI.tv)));
 }
 function encounterQuat(camPos, st, out) {
-  const f = st.lk.kind === "gate" ? { x: 0, y: FI.portrait ? 0.14 : 0.02 } : FI.focus;
+  const f = st.lk.kind === "gate" ? { x: 0, y: FI.portrait ? FI.focus.y : 0.02 } : FI.focus; // 縦長：上の数字と下の説明のあいだ
   return lookAtNdc(camPos, st.focus, f.x, f.y, out);
 }
 // 弧の上の向き。スイングバイは天体を画面の右はしに置いたまま回る（縁が流れ、空が回る）。回りこむときは機体を見つづける
@@ -1724,7 +1756,7 @@ if (renderer) {
   // 火星の地面と、パーサヴィアランス（公式を参考にしたイメージ）。太陽の光が、地面に影を落とす
   rover = holdModel(CRAFT.MODELS.perseverance(THREE, kit), 1.45);
   const roverInner = rover.userData.inner, half = (roverInner.userData.normalizedSize[1] * rover.scale.y) / 2;
-  rover.rotation.y = roverInner.userData.pose[1];
+  rover.rotation.y = rover.userData.spin = roverInner.userData.pose[1];
   lensScene.add(rover);
   const soil = new THREE.MeshStandardMaterial({ color: 0x7c4128, roughness: 1, metalness: 0 });
   soil.color.convertSRGBToLinear();
@@ -1746,6 +1778,7 @@ if (renderer) {
 // 航路と景色の置き場所を、画面の形に合わせて作り直す
 function placeScene() {
   FI = frameInfo();
+  journey.style.setProperty("--band-bottom", `${FI.bandBottom}px`);
   ROUTE = buildRoute();
   if (!renderer) return;
   // 航路の点
@@ -1778,9 +1811,15 @@ function placeScene() {
       inner.userData.spin = inner.userData.spin ?? 0;
       holder.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(e.set(...(lk.mPose ?? inner.userData.pose))));
       st.model = holder; st.objects.push(holder);
+      // 回りこんで見るときの中心（模型）と、引く量（どの向きから見ても、模型の全体が着いたときの円に収まるように）
+      st.pivot = holder.position;
+      const [sx, sy, sz] = inner.userData.normalizedSize;
+      st.lookOut = Math.max(1, 0.5 * Math.hypot(sx, sy, sz));
+    } else {
+      st.pivot = st.focus; st.lookOut = 1; // 天体だけ：球なので、どの向きでも同じ大きさ
     }
     if (lk.kind === "gate") {
-      gate.position.copy(st.center); gate.scale.setScalar(lk.R);
+      gate.position.copy(st.center); gate.scale.setScalar(lk.R * (FI.portrait ? 0.72 : 1)); // 縦長：輪を小さくして、上の数字と下の名前にかからないようにする
       gate.quaternion.setFromUnitVectors(AZ, st.normal);
       st.objects.push(gate);
     }
@@ -1793,6 +1832,7 @@ let s = 0; // 航路の上の位置（3D の単位）
 let v = 0; // 速さ（単位/秒。+ が遠くへ）
 let trip = null; // 案内つきの飛行 { from, to, t0, dur, target }
 let pointer = null;
+const look = { yaw: 0, pitch: 0, yawTo: 0, st: null }; // そばで観測中：ドラッグで回りこんで見る角度（ラジアン。yawTo はキーで回すときの行き先）と、その場所
 let snap = null; // 吸い寄せている場所
 let kickFov = 0;
 let lastT = performance.now(), raf = 0, visible = true, started = false;
@@ -1833,7 +1873,7 @@ function announce(st) {
 // いまの様子：intro（地表の近く）／encounter（場所のそば）／swing（弧の上）／travel（案内つきで飛行中）／free（自由に飛行中）／rest（途中で止まっている）／end
 function modeNow() {
   const sw = ROUTE.stops.find((st) => st.lk.kind !== "gate" && s > st.sE + 0.6 && s < st.sX + 1);
-  if (trip || pointer || Math.abs(v) > 0.5) return { mode: sw ? "swing" : trip ? "travel" : "free", st: sw };
+  if (trip || (pointer && !pointer.look) || Math.abs(v) > 0.5) return { mode: sw ? "swing" : trip ? "travel" : "free", st: sw };
   if (s < 0.3) return { mode: "intro" };
   if (s > ROUTE.len - 0.3) return { mode: "end" };
   const st = ROUTE.stops.find((x) => Math.abs(s - x.sE) < 0.6);
@@ -1844,13 +1884,29 @@ function modeNow() {
 // ---------- 操作：指・マウス・ホイール・キー（Claude 案と同じ） ----------
 viewport.addEventListener("pointerdown", (e) => {
   if (e.pointerType === "mouse" && e.button !== 0) return;
-  cancelTrip(); snap = null;
-  pointer = { id: e.pointerId, y: e.clientY };
+  const m = modeNow();
+  if (m.mode === "encounter" && renderer) {
+    // そばで観測中：なぞると、見せたもののまわりを回りこんで見る（ここでは飛ばない。先へは「その先へ」のボタンで）
+    pointer = { id: e.pointerId, x: e.clientX, y: e.clientY, look: true };
+    look.st = m.st;
+    journey.classList.add("looked");
+  } else {
+    cancelTrip(); snap = null;
+    pointer = { id: e.pointerId, y: e.clientY };
+  }
   viewport.setPointerCapture(e.pointerId);
   wake();
 });
 viewport.addEventListener("pointermove", (e) => {
   if (!pointer || pointer.id !== e.pointerId) return;
+  if (pointer.look) {
+    const dx = e.clientX - pointer.x, dy = e.clientY - pointer.y;
+    pointer.x = e.clientX; pointer.y = e.clientY;
+    look.yaw = look.yawTo = look.yaw - dx * 0.008; // 右へなぞると、右へ回って見える
+    look.pitch = clamp(look.pitch - dy * 0.006, -1.0, 1.0); // 下へなぞると、上から見下ろす
+    wake();
+    return;
+  }
   const dy = pointer.y - e.clientY; pointer.y = e.clientY;
   push(dy * TUNE.SWIPE_GAIN);
 });
@@ -1870,6 +1926,8 @@ document.addEventListener("keydown", (e) => {
   const r = journey.getBoundingClientRect();
   if (r.bottom < innerHeight * 0.5 || r.top > innerHeight * 0.5) return;
   const k = { ArrowUp: TUNE.KEY_PUSH, ArrowDown: -TUNE.KEY_PUSH, PageUp: TUNE.PAGE_PUSH, PageDown: -TUNE.PAGE_PUSH }[e.key];
+  const turn = { ArrowLeft: 0.26, ArrowRight: -0.26 }[e.key];
+  if (turn) { const m = modeNow(); if (m.mode === "encounter" && renderer) { e.preventDefault(); look.st = m.st; look.yawTo += turn; journey.classList.add("looked"); wake(); } return; }
   if (k) { e.preventDefault(); if (reduce) keyStep(Math.sign(k)); else push(k); }
   else if (e.key === "Home") { e.preventDefault(); startTrip(0, "home"); }
 });
@@ -2070,6 +2128,7 @@ function setStory(mode, st) {
   const meta = $("hero-meta"), ev = $("hero-event"), det = $("details");
   if (mode === "moving" || mode === "travel" || mode === "free" || mode === "swing" || mode === "rest") return;
   meta.hidden = ev.hidden = det.hidden = true;
+  $("hero-title").classList.toggle("fit", mode === "encounter" && st.pl.id === "jwst"); // スマホでは1行に縮めて収める（PC は2行のまま）
   if (mode === "intro") {
     $("eyebrow").textContent = "A JOURNEY BEYOND / 光の旅";
     $("hero-title").innerHTML = "その先の、<br>まだ先へ。";
@@ -2083,13 +2142,14 @@ function setStory(mode, st) {
   } else if (mode === "encounter") {
     const pl = st.pl, n = String(st.i + 1).padStart(2, "0");
     $("eyebrow").textContent = `${n} / ${String(PLACES.length).padStart(2, "0")} · ${pl.kind === "probe" ? "探査機のとなりで" : pl.kind === "light-day" ? "光の1日" : "くらべる目安"}`;
-    $("hero-title").innerHTML = pl.id === "jwst" ? "ジェイムズ・ウェッブ<br>宇宙望遠鏡" : esc(pl.name);
+    $("hero-title").innerHTML = pl.id === "jwst" ? 'ジェイムズ・ウェッブ<br class="br-wide">宇宙望遠鏡' : esc(pl.name);
     $("hero-text").textContent = pl.text;
     meta.hidden = false;
     meta.innerHTML = `${esc(distText(pl))} ／ 光で ${esc(lightTime(pl.km / C, pl.approx))}<small>${esc(pl.how)}</small>`;
     if (pl.event) { ev.hidden = false; ev.textContent = pl.event; }
     det.hidden = !CARDS[pl.id];
     $("scene-name").textContent = st.lk.en;
+    $("story-en").textContent = st.lk.en;
     $("scene-caption").textContent = pl.kind === "probe" ? "いま、あなたのすぐそばに。" : "光の旅の、ひとつの目印。";
   }
 }
@@ -2231,7 +2291,7 @@ function frame(now) {
   $("rear").dataset.off = String(rearA <= 0);
   if (rearA > 0) { drawRear(km, rearA); $("rear-size").textContent = angleText((2 * Math.asin(EARTH_R / (EARTH_R + km))) / DEG); }
 
-  const moving = s !== before || v !== 0 || !!trip || !!pointer || kickFov > 0.01;
+  const moving = s !== before || v !== 0 || !!trip || !!pointer || kickFov > 0.01 || look.yawTo !== look.yaw;
   if (moving) idleFrames = 0; else idleFrames++;
   // 止まっているあいだは、ゆっくり回る模型や星のまたたきのために1コマおきに描く（動きを減らす設定では描くのをやめる）
   if (renderer && (moving || idleFrames < 3 || (!reduce && idleFrames % 2 === 0))) render(now, dt, p, km, warp, m);
@@ -2244,7 +2304,29 @@ function render(now, dt, p, km, warp, m) {
   prevPos.copy(camPos);
   // カメラ：航路の上。向きは「進む向き」と「着いた場所を見る向き」を混ぜ、弧では傾ける。ワープでは視野が広がる
   cameraQuat(s, camPos, qTarget);
-  if (!started || reduce) camera.quaternion.copy(qTarget);
+  // そばで観測中の「回りこんで見る」：見せたもの（模型。なければ天体）を中心に、カメラごと回す（見せたものは画面の同じ場所のまま）。
+  // 離れるとき（その先へ・はじいたとき）は、角度を 0 に戻しながら航路に乗る
+  qBase.copy(qTarget);
+  const here = m.mode === "encounter" ? m.st : null;
+  if (look.st && look.st !== here) {
+    const k = reduce ? 0 : Math.exp(-dt / 0.22);
+    look.yaw = look.yawTo = look.yaw * k; look.pitch *= k;
+    if (Math.abs(look.yaw) + Math.abs(look.pitch) < 1e-3) { look.yaw = look.yawTo = look.pitch = 0; look.st = null; }
+  } else if (look.st && look.yawTo !== look.yaw) {
+    look.yaw += (look.yawTo - look.yaw) * (reduce ? 1 : 1 - Math.exp(-dt / 0.12)); // キーで回すときは、なめらかに
+    if (Math.abs(look.yawTo - look.yaw) < 1e-4) look.yaw = look.yawTo;
+  }
+  if (look.st && (look.yaw || look.pitch)) {
+    const F = look.st.pivot;
+    qLookY.setFromAxisAngle(look.st.axis, look.yaw);
+    vRight.set(1, 0, 0).applyQuaternion(qTarget).applyQuaternion(qLookY);
+    qLookP.setFromAxisAngle(vRight, look.pitch).multiply(qLookY);
+    // 回すほど少し引く（模型の対角線が見えても、名前の上に出ない）
+    const out = 1 + (look.st.lookOut - 1) * smooth01((Math.abs(look.yaw) + Math.abs(look.pitch)) / 0.5);
+    camPos.sub(F).multiplyScalar(out).applyQuaternion(qLookP).add(F);
+    qTarget.premultiply(qLookP);
+  }
+  if (!started || reduce || (look.st && look.st === here)) camera.quaternion.copy(qTarget); // 回りこんで見ているあいだは、位置と向きを一緒に動かす（見せたものが画面の同じ場所のまま）
   else camera.quaternion.slerp(qTarget, 1 - Math.exp(-dt / 0.07));
   started = true;
   kickFov = Math.max(0, kickFov - dt * 1.6);
@@ -2320,7 +2402,7 @@ function render(now, dt, p, km, warp, m) {
   keyLight.castShadow = !!nearM;
   if (nearM) {
     const R = nearM.scale.x, sc = keyLight.shadow.camera;
-    tmpV.copy(KEY_DIR).applyQuaternion(camera.quaternion);
+    tmpV.copy(KEY_DIR).applyQuaternion(qBase); // 回りこんで見ても、光（太陽）の向きは変えない
     keyLight.target.position.copy(nearM.position); keyLight.target.updateMatrixWorld();
     keyLight.position.copy(nearM.position).addScaledVector(tmpV, 6 * R);
     sc.left = sc.bottom = -1.5 * R; sc.right = sc.top = 1.5 * R; sc.near = 0.5 * R; sc.far = 9 * R; sc.updateProjectionMatrix();
@@ -2350,6 +2432,7 @@ function render(now, dt, p, km, warp, m) {
   const lens = $("lens"), line = $("lens-line"), pin = $("lens-pin");
   lens.classList.toggle("on", lensOn); line.classList.toggle("on", lensOn); pin.classList.toggle("on", lensOn);
   journey.classList.toggle("lens-on", lensOn);
+  journey.classList.toggle("gate-on", m.mode === "encounter" && m.st?.lk.kind === "gate");
   // 「公式を参考にしたイメージ」：探査機の模型が見えているあいだだけ出す
   const mst = m.st;
   journey.classList.toggle("model-on", lensOn || (!!mst?.lk.model && (m.mode === "encounter" || m.mode === "swing" || m.mode === "rest")));
@@ -2358,8 +2441,10 @@ function render(now, dt, p, km, warp, m) {
     tmpV.copy(per.center).project(camera);
     const mx = (tmpV.x * 0.5 + 0.5) * FI.W, my = (-tmpV.y * 0.5 + 0.5) * FI.H;
     const mr = (per.lk.R / camera.position.distanceTo(per.center)) / Math.tan((camera.fov * DEG) / 2) * (FI.H / 2);
-    const lr = FI.portrait ? 58 : 92;
-    const lx = clamp(mx - mr * (FI.portrait ? 0.95 : 1.35), lr + 12, FI.W - lr - 12), ly = clamp(my + mr * (FI.portrait ? 0.42 : 0.45), lr + 90, FI.portrait ? FI.H * 0.44 - lr * 0.2 : FI.H - lr - 230);
+    const lr = FI.portrait ? clamp((FI.bandBottom - FI.bandTop) * 0.36, 44, 58) : 92;
+    // 縦長：右がわ、上の数字（約175px まで）の下から、説明より上（窓の下の文字の分もあける）。横長：火星の左下
+    const lx = FI.portrait ? FI.W - lr - 14 : clamp(mx - mr * 1.35, lr + 12, FI.W - lr - 12);
+    const ly = FI.portrait ? clamp(my + mr * 0.42, 176 + lr, Math.max(176 + lr, FI.bandBottom - lr - 24)) : clamp(my + mr * 0.45, lr + 90, FI.H - lr - 230);
     lens.style.width = lens.style.height = `${2 * lr}px`;
     lens.style.transform = `translate3d(${lx - lr}px, ${ly - lr}px, 0)`;
     const px = mx - mr * 0.3, py = my + mr * 0.25;
@@ -2368,7 +2453,9 @@ function render(now, dt, p, km, warp, m) {
     line.style.width = `${Math.max(0, dd - lr - 6)}px`;
     line.style.transform = `translate3d(${lx + Math.cos(ang) * lr}px, ${ly + Math.sin(ang) * lr}px, 0) rotate(${ang}rad)`;
     lensRect = { x: lx - lr, y: ly - lr, w: 2 * lr };
-    if (!reduce) rover.rotation.y += dt * 0.12;
+    // 窓の中のローバーは、ゆっくり回る。なぞると、その分だけ回して見られる
+    if (!reduce) rover.userData.spin += dt * 0.12;
+    rover.rotation.y = rover.userData.spin + (look.st === per ? look.yaw : 0);
   }
 
   // 描く
@@ -2395,6 +2482,7 @@ function render(now, dt, p, km, warp, m) {
 }
 const tmpQ = renderer ? new THREE.Quaternion() : null;
 const KEY_DIR = renderer ? new THREE.Vector3(-3, 5, 7).normalize() : null; // 主光の向き（カメラから見て左上の前）
+const qBase = renderer ? new THREE.Quaternion() : null, qLookY = renderer ? new THREE.Quaternion() : null, qLookP = renderer ? new THREE.Quaternion() : null, vRight = renderer ? new THREE.Vector3() : null;
 function wake() { idleFrames = 0; if (!raf && visible && !document.hidden) { lastT = performance.now(); raf = requestAnimationFrame(frame); } }
 
 new ResizeObserver(() => size()).observe(journey);
