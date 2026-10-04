@@ -235,10 +235,11 @@ function parker(T,K){
 function bepicolombo(T,K){
   const b=builder(T,K),{B,C,rod,group,panel}=b;
   const mpo=group('MPO'),mosif=group('MOSIF',[0,1.3,0]),mio=group('Mio',[0,1.3,0]);
-  B('gold',[0,0,0],[2.4,1.7,2.2],[0,0,0],mpo);
-  B('white',[0,.05,-1.14],[3.7,1.5,.08],[0,0,0],mpo);
-  for(let x=-1.72;x<1.8;x+=.18)B('silver',[x,.05,-1.197],[.025,1.37,.018],[0,0,0],mpo);
-  for(const x of [-1.23,1.23])B('white',[x,0,0],[.055,1.6,1.85],[0,0,0],mpo);
+  // Colours follow ESA's "BepiColombo arrival at Mercury timeline" (white/grey stack after MTM separation).
+  B('white',[0,0,0],[2.4,1.7,2.2],[0,0,0],mpo);
+  B('silver',[0,.05,-1.14],[3.7,1.5,.08],[0,0,0],mpo);
+  for(let x=-1.72;x<1.8;x+=.18)B('white',[x,.05,-1.197],[.025,1.37,.018],[0,0,0],mpo);
+  for(const x of [-1.23,1.23])B('silver',[x,0,0],[.055,1.6,1.85],[0,0,0],mpo);
   for(let x of [-.8,0,.8])B('black',[x,-.08,1.112],[.45,.55,.025],[0,0,0],mpo);
   b.dish(.57,[-.72,.83,.72],[.75,0,.32],mpo);
   rod('silver',[1.2,.05,0],[1.65,.05,0],.065,mpo);
@@ -246,20 +247,25 @@ function bepicolombo(T,K){
   for(let i=0;i<3;i++)panel(2.26,1.55,[2.31+i*2.36,.05,0],[0,0,.08],mpo,12,8);
   B('silver',[4.95,-.005,0],[7.5,.065,.12],[0,0,0],mpo);
   for(let x of [-.7,.7])for(let z of [-.7,.7])C('black',[x,-.95,z],.13,.24,[PI,0,0],mpo,12,.45);
-  // Mio is fully housed within an independently movable, open-topped MOSIF.
+  // Mio sits inside MOSIF, a white sunshield shell that widens towards its open top and leaves one side open.
   C('black',[0,.24,0],.9,1.1,[0,PI/8,0],mio,8);
   C('silver',[0,-.28,0],.91,.08,[0,PI/8,0],mio,8);
   C('silver',[0,.8,0],.91,.06,[0,PI/8,0],mio,8);
+  const tilt=(a,t)=>{const e=new T.Euler().setFromRotationMatrix(new T.Matrix4().makeRotationY(a).multiply(new T.Matrix4().makeRotationX(t)));return [e.x,e.y,e.z];};
+  const y0=-.55,y1=.95,r0=1.0,r1=1.25,slope=Math.atan2(r1-r0,y1-y0),k=1/Math.cos(PI/8);
+  const open=new Set([0,1,7]); // the +Z side stays open, so Mio shows from the usual viewing side
+  const corner=(j,y,r)=>{const a=j*TAU/8+PI/8;return [Math.sin(a)*r*k,y,Math.cos(a)*r*k];};
   for(let i=0;i<8;i++){
-    const a=i*TAU/8,x=Math.sin(a),z=Math.cos(a);
+    const a=i*TAU/8,x=Math.sin(a),z=Math.cos(a),rm=(r0+r1)/2;
     B('solar',[x*.836,.32,z*.836],[.65,.8,.015],[0,a,0],mio);
-    B('gold',[x*1.065,.2,z*1.065],[.91,1.5,.085],[0,a,0],mosif);
-    B('black',[x*1.014,.2,z*1.014],[.84,1.44,.018],[0,a,0],mosif);
-    rod('silver',[x*1.11,-.55,z*1.11],[x*1.11,.96,z*1.11],.022,mosif);
+    if(open.has(i))continue;
+    B('white',[x*rm,(y0+y1)/2,z*rm],[2*rm*Math.tan(PI/8)+.02,(y1-y0)/Math.cos(slope),.05],tilt(a,-slope),mosif);
+    for(const j of [i-1,i]){rod('silver',corner(j,y0,r0),corner(j,y1,r1),.022,mosif);}
+    rod('silver',corner(i-1,y1,r1),corner(i,y1,r1),.02,mosif);
   }
   C('silver',[0,-.59,0],1.12,.08,[0,PI/8,0],mosif,8);
   C('white',[0,.95,0],.2,.15,[0,0,0],mio);
-  return b.finish(REF.bepi,['MOSIF内側、MPO背面の計器・配線と固定具は近似。2026年10月4日の構成を表現。'],[.37,-.62,.07],{parts:{mpo,mosif,mio},configurationDate:'2026-10-04'});
+  return b.finish(REF.bepi,['色と MOSIF の形は ESA の到着の時刻表の図（白と灰色）に合わせた近似。MOSIF の内側、MPO 背面の計器・配線と固定具は近似。2026年10月4日の構成を表現。'],[.37,-.62,.07],{parts:{mpo,mosif,mio},configurationDate:'2026-10-04'});
 }
 
 function perseverance(T,K){
