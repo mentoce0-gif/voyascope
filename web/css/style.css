@@ -254,6 +254,7 @@ body { overflow: hidden; }
   --panel-border: rgba(94, 242, 194, 0.18);
   --top-h: 72px;
   --bottom-h: 138px;
+  --nav-h: 0px; /* 部屋の帯の高さ（PC だけ 48px） */
 }
 
 /* ヘッダー */
@@ -304,7 +305,7 @@ body { overflow: hidden; }
 .side-panel {
   position: absolute;
   z-index: 10;
-  top: var(--top-h);
+  top: calc(var(--top-h) + var(--nav-h));
   bottom: calc(var(--bottom-h) + 8px);
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -1059,7 +1060,7 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 .globe-top {
   position: absolute;
   z-index: 6;
-  top: calc(var(--top-h) + 4px);
+  top: calc(var(--top-h) + var(--nav-h) + 4px);
   left: 362px;
   display: flex;
   align-items: center;
@@ -1122,7 +1123,7 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 .earth-info {
   position: absolute;
   z-index: 6;
-  top: calc(var(--top-h) + 48px); /* 表示切替の下 */
+  top: calc(var(--top-h) + var(--nav-h) + 48px); /* 表示切替の下 */
   left: 362px;
   padding: 10px 14px;
   border: 1px solid var(--panel-border);
@@ -1152,6 +1153,62 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 .menu-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* ---------- 狭い画面：一覧と詳細は下から出るシート ---------- */
+/* ---------- 部屋の帯と、右の「次の出来事」の列（PC。イメージ図の A 案。2026-10-04 オーナー） ---------- */
+/* 部屋の帯：上のバーの下の真ん中。いまある部屋だけ（地球のまわり・遠くを見る・これから行く）。スマホは出さない */
+.room-nav { display: none; }
+.next-panel { display: none; }
+@media (min-width: 901px) {
+  :root { --nav-h: 48px; }
+  .room-nav {
+    position: absolute;
+    z-index: 11;
+    top: var(--top-h);
+    left: 50%;
+    transform: translateX(-50%);
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .room-nav button {
+    appearance: none;
+    height: 36px;
+    padding: 0 18px;
+    border: 1px solid var(--navy-600);
+    border-radius: 18px;
+    background: rgba(5, 14, 31, 0.6);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+  }
+  .room-nav button[aria-current="true"] { background: var(--mint); border-color: var(--mint); color: #04211a; font-weight: 700; }
+  .room-nav button[aria-busy="true"] { cursor: progress; opacity: 0.75; }
+  .room-nav button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  /* 帯と同じものは、地球の上に出さない（遠くを見る部屋の入口、打ち上げ予定のみ＝これから行く） */
+  .far-open, .view-switch [data-view="launches"] { display: none; }
+  /* 地球の注記：左の一覧と右（列・詳細）のあいだの真ん中に。入らなければ2行に */
+  .scale-note { left: 362px; right: var(--right-gap, 16px); width: fit-content; max-width: calc(100vw - 362px - var(--right-gap, 16px)); margin: 0 auto; transform: none; white-space: normal; text-wrap: balance; text-align: center; }
+  #app.has-selected .scale-note { --right-gap: 452px; }
+}
+@media (min-width: 901px) and (hover: hover) {
+  .room-nav button:not([aria-current="true"]):hover { border-color: var(--mint-dim); background: rgba(94, 242, 194, 0.08); }
+}
+/* 右の列：広い画面（1181px から）だけ。詳細を開いているあいだと、一覧で「予定」を見ているあいだ（左に同じものが出る）は出さない */
+@media (min-width: 1181px) {
+  .next-panel { display: block; right: 16px; width: 340px; padding: 16px; }
+  #app.has-selected .next-panel, #app.list-planned .next-panel { display: none; }
+  #app:not(.has-selected):not(.list-planned) .scale-note { --right-gap: 372px; }
+}
+.next-panel .events-head { gap: 4px 10px; }
+.next-panel-title { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--mint); letter-spacing: 0.04em; }
+.next-panel-body { margin-top: 12px; }
+.next-panel .event-item { grid-template-columns: 64px 1fr 12px; align-items: start; padding: 10px 12px; border-radius: 10px; }
+.next-panel .event-when { font-size: 0.8rem; }
+.event-desc { font-size: 0.74rem; line-height: 1.6; color: var(--text-dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
 @media (max-width: 900px) {
   :root { --top-h: 56px; --switch-h: 44px; }
   /* 上のバーは1行：ロゴ（下に時刻）・今夜・LIVE・メニュー */

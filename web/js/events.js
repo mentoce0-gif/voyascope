@@ -156,9 +156,10 @@ export function publisherOf(url) {
 
 const regionsText = (ev) => (ev.regions ?? []).map((r) => REGION_LABELS[r] ?? r).join("・");
 
-// ---------- 一覧（「予定」タブ） ----------
+// ---------- 一覧（「予定」タブ・PC の右の列「次の出来事」） ----------
 // tonight：今夜の ISS の通過（計算）。{ day, time, title, sub }
-export function eventsListHtml(events, now, { tonight = null } = {}) {
+// summary：予定の説明（出典つき）も出す（PC の右の列。イメージ図の形）。出典の機関は、日付と説明の両方の出典から
+export function eventsListHtml(events, now, { tonight = null, summary = false } = {}) {
   const rows = [];
   if (tonight) {
     rows.push(`<li><button type="button" class="event-item event-tonight" data-go="tonight">
@@ -171,12 +172,14 @@ export function eventsListHtml(events, now, { tonight = null } = {}) {
     const [d1, d2] = whenShort(ev, now);
     const left = countdownText(ev, now);
     const postponed = statusOf(ev) === "postponed";
+    const desc = summary && ev.summary?.value ? `<span class="event-desc">${esc(ev.summary.value)}</span>` : "";
+    const publishers = [...new Set([ev.when.source, summary ? ev.summary?.source : null].filter(Boolean).map(publisherOf))].join("・");
     rows.push(`<li><button type="button" class="event-item" data-event="${esc(ev.id)}">
       <span class="event-when mono"><span>${esc(d1)}</span><span>${esc(d2)}</span></span>
       <span class="event-main">
-        <span class="event-title">${esc(ev.title.ja)}${postponed ? ` <span class="st-badge down">延期</span>` : ""}</span>
+        <span class="event-title">${esc(ev.title.ja)}${postponed ? ` <span class="st-badge down">延期</span>` : ""}</span>${desc}
         <span class="event-sub">${esc(KIND_LABELS[ev.kind] ?? "")}・${esc(regionsText(ev))}${left && !postponed ? `<span class="event-left mono">${esc(left)}</span>` : ""}</span>
-        <span class="event-src">出典：${esc(publisherOf(ev.when.source))}</span>
+        <span class="event-src">出典：${esc(publishers)}</span>
       </span>
       <span class="chev" aria-hidden="true">›</span>
     </button></li>`);

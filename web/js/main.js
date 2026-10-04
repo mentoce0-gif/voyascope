@@ -311,8 +311,11 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       const top = $(".top-bar").offsetHeight + ($("#view-switch")?.offsetHeight ?? 0);
       const dy = sheetTops.length ? Math.round((top + Math.min(...sheetTops)) / 2 - globeEl.clientHeight / 2) : -40;
       setOffset(0, dy);
-    } else setOffset(detailPanel.hidden ? 150 : -20, -30);
+    } else setOffset(!detailPanel.hidden ? -20 : nextPanelShown() ? 0 : 150, -30);
   };
+  // 右の「次の出来事」の列（PC の広い画面）が出ているか。出し分けは style.css（詳細・一覧の「予定」のあいだは出さない）
+  const nextPanel = $("#next-panel");
+  const nextPanelShown = () => getComputedStyle(nextPanel).display !== "none";
   let lastOffset = "";
   const setOffset = (x, y) => {
     if (`${x},${y}` === lastOffset) return;
@@ -433,6 +436,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     worldSection.hidden = !planned;
     listEl.hidden = tonight || planned;
     $("#list-title").hidden = tonight || planned;
+    app.classList.toggle("list-planned", planned);
+    placeGlobe();
     // 一覧と地球をそろえる：「予定」タブは「打ち上げ予定のみ」。予定から離れたら「すべて」に戻す
     if (!fromView) {
       if (planned && viewMode !== "launches") setView("launches", { fromList: true });
@@ -496,7 +501,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       } else if (listFilter !== "all" && listFilter !== "tonight") showListFilter("all", { fromView: true });
     }
     $("#list-title").textContent = mode === "japan" ? "注目・日本のみ" : "注目";
-    $("#events-sub").textContent = mode === "japan" ? "日本のものだけ・公式の日付だけ" : "日本と世界・公式の日付だけ";
+    $("#events-sub").textContent = $("#next-panel-sub").textContent = mode === "japan" ? "日本のものだけ・公式の日付だけ" : "日本と世界・公式の日付だけ";
+    updateRoomNav();
     renderList();
     renderEvents();
   }
@@ -518,6 +524,27 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     if (!b) return;
     setView(b.dataset.view);
     lookForView(b.dataset.view);
+  });
+  // ---------- 部屋の帯（PC）：地球のまわり・遠くを見る・これから行く（2026-10-04 オーナー：イメージ図の A 案） ----------
+  // 「これから行く」＝打ち上げ予定のみの表示（射場のピン）と一覧の「予定」。「地球のまわり」に戻ると「すべて」。
+  // 「遠くを見る」は、下の「遠くを見る部屋」のところで開く。PC では、地球の上の「遠くを見る」と「打ち上げ予定のみ」は帯と同じなので出さない（style.css）
+  const roomNav = $("#room-nav");
+  function updateRoomNav() {
+    const room = viewMode === "launches" ? "launch" : "earth";
+    for (const b of roomNav.querySelectorAll('[data-room]:not([data-room="far"])')) {
+      if (b.dataset.room === room) b.setAttribute("aria-current", "true");
+      else b.removeAttribute("aria-current");
+    }
+  }
+  roomNav.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-room]");
+    if (!b || b.dataset.room === "far") return;
+    if (b.dataset.room === "earth") {
+      if (viewMode === "launches") setView("all"); // 日本のみ・衛星のみの表示のときは、そのまま
+      return;
+    }
+    if (viewMode !== "launches") setView("launches");
+    lookForView("launches");
   });
 
   // 環：PC は下のバー、スマホは一覧の下。どちらで切り替えても両方そろえる
@@ -858,6 +885,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   let eventsHtml = "";
   let worldHtml = "";
   let nextHtml = "";
+  const nextPanelBody = $("#next-panel-body");
+  let nextPanelHtml = "";
   $("#world-fetched").textContent = launchesData?.fetched_at ? `取得：${jstShort(launchesData.fetched_at)}（日本時間）` : "";
   // 今夜〜明日の ISS の見える通過（計算）を、予定の先頭に出す
   const tonightRow = () => {
@@ -882,6 +911,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       // 書き換えると押しかけのボタンが消えるので、変わったときだけ
       if (html !== eventsHtml) eventsBody.innerHTML = eventsHtml = html;
     }
+    // 右の列（PC の広い画面）。画面の幅を変えたときにすぐ出せるよう、隠れているあいだも作っておく（変わったときだけ書き換える）
+    const nextPanelNew = eventsListHtml(listed, now, { tonight: tonightRow(), summary: true });
+    if (nextPanelNew !== nextPanelHtml) nextPanelBody.innerHTML = nextPanelHtml = nextPanelNew;
     // 上のバー：いちばん近い予定（延期なら「延期」と出る）
     const next = listed[0];
     const chip = next ? nextChipHtml(next, now) : "";
@@ -925,11 +957,13 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     }
   }
   nextChip.addEventListener("click", () => openListTab("planned"));
-  eventsBody.addEventListener("click", (e) => {
-    const b = e.target.closest("[data-event]");
-    if (b) return selectEvent(events.find((ev) => ev.id === b.dataset.event));
-    if (e.target.closest('[data-go="tonight"]')) showListFilter("tonight");
-  });
+  for (const body of [eventsBody, nextPanelBody]) {
+    body.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-event]");
+      if (b) return selectEvent(events.find((ev) => ev.id === b.dataset.event));
+      if (e.target.closest('[data-go="tonight"]')) showListFilter("tonight");
+    });
+  }
   worldBody.addEventListener("click", (e) => {
     const b = e.target.closest("[data-launch]");
     if (b) selectLaunch(world.find((l) => l.id === b.dataset.launch));
@@ -952,6 +986,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   // 開いているあいだは地球の描画を止める。ブラウザの「戻る」で閉じられるように、履歴に #far を足す
   const farBtn = $("#far-open");
   const farLabel = farBtn.querySelector(".far-open-label");
+  const farNav = roomNav.querySelector('[data-room="far"]');
+  const farOpeners = [farBtn, farNav];
+  let farOpener = farBtn; // 閉じたら、押したボタンにフォーカスを戻す
   let far = null;
   let farLoading = null;
   let farEntry = null; // 履歴の #far をどう作ったか：pushed（押した）／history（進む）／initial（#far つきで開いた）
@@ -963,19 +1000,21 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
         farLoading = null; // もう一度押したら読み直す
         throw e;
       }));
-  for (const type of ["pointerenter", "focus", "touchstart"]) farBtn.addEventListener(type, () => loadFar().catch(() => {}), { passive: true, once: true });
-  async function openFar(entry) {
-    if (roomOpen || farBtn.getAttribute("aria-busy") === "true") return;
-    farBtn.setAttribute("aria-busy", "true");
+  for (const el of farOpeners) for (const type of ["pointerenter", "focus", "touchstart"]) el.addEventListener(type, () => loadFar().catch(() => {}), { passive: true, once: true });
+  async function openFar(entry, opener = isNarrow() ? farBtn : farNav) {
+    if (roomOpen || farOpeners.some((el) => el.getAttribute("aria-busy") === "true")) return;
+    farOpener = opener;
+    opener.setAttribute("aria-busy", "true");
     try {
       far = await loadFar();
     } catch (e) {
       console.error(e);
-      farLabel.textContent = "読み込めませんでした";
-      setTimeout(() => (farLabel.textContent = "遠くを見る"), 4000);
+      const label = opener === farBtn ? farLabel : farNav;
+      label.textContent = "読み込めませんでした";
+      setTimeout(() => (label.textContent = "遠くを見る"), 4000);
       return;
     } finally {
-      farBtn.removeAttribute("aria-busy");
+      opener.removeAttribute("aria-busy");
     }
     roomOpen = true;
     farEntry = entry;
@@ -991,9 +1030,10 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       else history.back();
     }
     farEntry = null;
-    farBtn.focus();
+    farOpener.focus();
   }
-  farBtn.addEventListener("click", () => openFar("pushed"));
+  farBtn.addEventListener("click", () => openFar("pushed", farBtn));
+  farNav.addEventListener("click", () => openFar("pushed", farNav));
   addEventListener("popstate", () => {
     if (location.hash === "#far") openFar("history");
     else if (roomOpen) far.close();

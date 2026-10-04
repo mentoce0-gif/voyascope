@@ -128,6 +128,23 @@ test("今夜の通過（計算）を先頭に出す", () => {
   assert.equal(eventsListHtml([], new Date()), `<p class="k small">いま載せている予定はありません。</p>`);
 });
 
+test("PC の右の列：予定の説明（出典つき）も出す。出典の機関は日付と説明の両方から（重ねない）", () => {
+  const card = JSON.parse(readFileSync("curation/events/mmx-launch.json", "utf8"));
+  const now = at("2026-10-01T09:00:00Z");
+  const html = eventsListHtml([card], now, { summary: true });
+  assert.match(html, /class="event-desc"/);
+  assert.ok(html.includes(card.summary.value));
+  assert.match(html, /出典：JAXA</); // 日付も説明も JAXA
+  // 一覧の「予定」タブ（いままでの形）は説明を出さない
+  assert.doesNotMatch(eventsListHtml([card], now), /event-desc/);
+  // 説明の出典がちがう機関なら、両方を書く
+  const mixed = { ...card, summary: { ...card.summary, source: "https://www.esa.int/" } };
+  assert.match(eventsListHtml([mixed], now, { summary: true }), /出典：JAXA・ESA</);
+  // 説明がない予定も出せる
+  const plain = { ...card, summary: undefined };
+  assert.doesNotMatch(eventsListHtml([plain], now, { summary: true }), /event-desc/);
+});
+
 test("詳細：出典を項目ごとに、打ち上げは残り時間と射場", () => {
   const card = JSON.parse(readFileSync("curation/events/mmx-launch.json", "utf8"));
   const html = eventPanelHtml(card, at("2026-10-01T09:20:00Z"));

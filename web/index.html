@@ -61,6 +61,14 @@
       </div>
     </header>
 
+    <!-- 部屋の切り替え（PC）。いまある部屋だけを出す（2026-10-04 オーナー：イメージ図の A 案）。
+         「これから行く」は、打ち上げ予定のみの表示（射場のピン）と一覧の「予定」 -->
+    <nav id="room-nav" class="room-nav" aria-label="部屋">
+      <button type="button" data-room="earth" aria-current="true">地球のまわり</button>
+      <button type="button" data-room="far">遠くを見る</button>
+      <button type="button" data-room="launch">これから行く</button>
+    </nav>
+
     <div class="globe-top">
       <!-- 地球の上：表示切替（地球と一覧に出すもの）。押したものが光る -->
       <div class="view-switch" id="view-switch" role="group" aria-label="地球と一覧に出すもの">
@@ -130,6 +138,16 @@
       <div id="detail-body"></div>
     </aside>
 
+    <!-- 右：次の出来事（PC の広い画面。詳細を開いているあいだと、一覧で「予定」を見ているあいだは出さない） -->
+    <aside id="next-panel" class="side-panel next-panel" aria-labelledby="next-panel-title">
+      <div class="events-head">
+        <h2 id="next-panel-title" class="next-panel-title">次の出来事</h2>
+        <span class="k" id="next-panel-sub">日本と世界・公式の日付だけ</span>
+      </div>
+      <div id="next-panel-body" class="next-panel-body"></div>
+      <p class="events-note k small">日付は運用している機関（JAXA・NASA・ESA など）の公式発表どおりで、日本時間で書いています。遅れたら「延期」とだけ書きます。出典は予定ごとに出しています。</p>
+    </aside>
+
     <!-- 環のスケール注記 -->
     <p class="scale-note k small"><span class="wide-only">環は内側から <b>低軌道</b>（約200〜2,000 km）・<b>中軌道</b>・<b>静止軌道</b>（約36,000 km）。半径は比較用で、実距離ではありません。</span><span class="narrow-only">環：内から<b>低・中・静止軌道</b>。半径は実距離ではありません</span></p>
 
@@ -182,7 +200,7 @@
       <p>軌道データは時間がたつと少しずつずれていくので、6時間ごとに自動で取り直しています。それでも、実際の位置と少し差が出ることがあります。</p>
       <p id="about-tle" class="mono small"></p>
       <h3>表示の切り替え</h3>
-      <p>地球の上のボタンで、地球と一覧に出すものを切り替えられます（すべて・日本のみ・衛星のみ・打ち上げ予定のみ）。<b>日本のみ</b>は、運用している機関に日本の機関（JAXA・気象庁・内閣府など）が入っている機体（ISS も入ります）と、日本の予定・日本の射場からの打ち上げです。選んだ表示は、このブラウザにだけ覚えておきます。</p>
+      <p>地球の上のボタンで、地球と一覧に出すものを切り替えられます（すべて・日本のみ・衛星のみ・打ち上げ予定のみ）。PC では、上の帯で部屋を切り替えます（地球のまわり・遠くを見る・これから行く）。「これから行く」が、打ち上げ予定のみの表示です。<b>日本のみ</b>は、運用している機関に日本の機関（JAXA・気象庁・内閣府など）が入っている機体（ISS も入ります）と、日本の予定・日本の射場からの打ち上げです。選んだ表示は、このブラウザにだけ覚えておきます。</p>
       <h3>環（わ）について</h3>
       <p>地球のまわりの3本の環は、低軌道・中軌道・静止軌道の目安です。違いが見えるように<b>半径を比較用に描いていて、実際の距離とは違います</b>。低軌道の機体は約90分で地球を一周して「流れ」、静止軌道の機体は地球と同じ速さで回るので「止まって」見えます。早送りで確かめてみてください。</p>
       <h3>「状態」について</h3>
