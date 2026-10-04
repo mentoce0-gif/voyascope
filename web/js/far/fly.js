@@ -1,5 +1,5 @@
 // 遠くを見る部屋：光になって飛ぶ（体感の案 D。docs/design/far-room-feel.md）
-// 位置は「地球からの距離の桁」（log10 km）で持つ。上へスワイプで遠くへ、下へスワイプで戻る。
+// 位置は「地球からの距離の桁」（log10 km）で持つ。下へスワイプで遠くへ、上へスワイプで戻る（2026-10-04 オーナー）。
 // はじく強さで速さが変わり、約1秒で止まる（試作と同じ）。光より速く進むのはワープ（作り話）で、
 // 右上の「光で◯秒」が本当の光の速さ。動きを減らす設定では、星を流さず、押した場所へすぐ移る
 import { C_KM_S, LIGHT_DAY_KM, kmFullJa, kmShortJa, lightTimeJa, lightYearsJa } from "./distance.js";
@@ -46,7 +46,7 @@ export function createFly(root, { stops: initialStops, reduceMotion = false, coa
       <span class="fly-sub mono" data-hud="lt"></span>
       <span class="fly-warp mono" data-hud="warp">停止中</span>
     </div>
-    <div class="fly-hint" aria-hidden="true">${coarse ? "↑ 上へスワイプして飛ぶ" : "↑ ホイールか ↑ キーで飛ぶ"}</div>
+    <div class="fly-hint" aria-hidden="true">${coarse ? "↓ 下へスワイプして飛ぶ" : "↑ ホイールか ↑ キーで飛ぶ"}</div>
     <div class="fly-card" data-off="true" aria-live="polite"></div>`;
   const cv = root.querySelector("canvas");
   const ctx = cv.getContext("2d");
@@ -114,7 +114,7 @@ export function createFly(root, { stops: initialStops, reduceMotion = false, coa
   });
   root.addEventListener("pointermove", (e) => {
     if (!drag) return;
-    const dy = drag.y - e.clientY;
+    const dy = e.clientY - drag.y; // 下へなぞると遠くへ（宇宙を手前へ引き寄せる向き）
     drag.y = e.clientY;
     push(dy * 0.004);
   });

@@ -25,7 +25,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
-html { background: var(--navy-900); }
+html { background: var(--navy-900); overscroll-behavior: none; } /* 下へなぞって飛ぶので、ページの引き下ろし（再読み込み）を起こさない */
 body { margin: 0; background: var(--navy-900); color: var(--text); font-family: var(--body); font-size: 14px; line-height: 1.6; -webkit-text-size-adjust: 100%; }
 button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 button { font: inherit; color: inherit; cursor: pointer; min-height: 44px; min-width: 44px; padding: 0; border: 0; background: none; }
@@ -340,7 +340,7 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
 <main>
   <section id="journey" class="journey" data-mode="intro" aria-labelledby="page-title">
     <h1 id="page-title" class="sr-only">遠くを見る部屋（合わせた試作）</h1>
-    <div id="viewport" class="viewport" tabindex="0" role="group" aria-label="宇宙を飛ぶ画面。上へスワイプか ↑ キーで遠くへ、下へスワイプか ↓ キーで地球の方へ。Home キーで地表へ戻る" aria-describedby="warp-note">
+    <div id="viewport" class="viewport" tabindex="0" role="group" aria-label="宇宙を飛ぶ画面。下へスワイプか ↑ キーで遠くへ、上へスワイプか ↓ キーで地球の方へ。Home キーで地表へ戻る" aria-describedby="warp-note">
       <canvas id="space" aria-hidden="true"></canvas>
     </div>
     <div class="vignette" aria-hidden="true"></div>
@@ -393,7 +393,7 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
     <div class="travel-label" id="travel-label" aria-hidden="true"><span id="travel-word">地球を、離れる。</span><small id="travel-sub">NEXT / 月</small></div>
 
     <div class="journey-controls">
-      <p class="interaction-hint" id="hint"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21V3m-4 4 4-4 4 4"/></svg><span id="hint-text">上へはじいて自由に飛ぶ<small>下へはじくと地球の方へ</small></span></p>
+      <p class="interaction-hint" id="hint"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path id="hint-arrow" d="M12 3v18m-4-4 4 4 4-4"/></svg><span id="hint-text">下へはじいて自由に飛ぶ<small>上へはじくと地球の方へ</small></span></p>
       <button type="button" id="primary" class="primary">
         <span class="primary-text"><span id="primary-label">旅をはじめる</span><small id="primary-sub">まずは月へ</small></span>
         <span class="arrow" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
@@ -691,7 +691,7 @@ const journey = $("journey"), viewport = $("viewport"), canvas = $("space");
 const reduceQuery = matchMedia("(prefers-reduced-motion: reduce)");
 let reduce = reduceQuery.matches;
 const coarse = matchMedia("(pointer: coarse)").matches;
-if (!coarse) $("hint-text").innerHTML = "ホイールか ↑ キーで自由に飛ぶ<small>↓ キーで地球の方へ。Home で地表へ</small>";
+if (!coarse) { $("hint-text").innerHTML = "ホイールか ↑ キーで自由に飛ぶ<small>↓ キーで地球の方へ。Home で地表へ</small>"; $("hint-arrow").setAttribute("d", "M12 21V3m-4 4 4-4 4 4"); }
 $("look-hint-text").textContent = coarse ? "指でなぞって、まわりから眺める" : "ドラッグか ← → キーで、まわりから眺める";
 const say = (t) => { $("announcer").textContent = t; };
 
@@ -1907,7 +1907,8 @@ viewport.addEventListener("pointermove", (e) => {
     wake();
     return;
   }
-  const dy = pointer.y - e.clientY; pointer.y = e.clientY;
+  // 下へなぞると遠くへ（宇宙を手前へ引き寄せる向き。2026-10-04 オーナー）。上へなぞると地球の方へ
+  const dy = e.clientY - pointer.y; pointer.y = e.clientY;
   push(dy * TUNE.SWIPE_GAIN);
 });
 const endDrag = (e) => { if (pointer && pointer.id === e.pointerId) { pointer = null; wake(); } };
