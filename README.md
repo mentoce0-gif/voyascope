@@ -30,8 +30,9 @@
 | M1 | 画面の骨組みと環（低軌道・中軌道・静止軌道） | 完了 |
 | M2 | 日本の第一棚（ひまわり・みちびき・だいち・いぶき・ひので） | 完了 |
 | M3 | 今夜・頭の上（県を選ぶと ISS の通過が分かる） | 完了 |
-| M4 | これから行く（公式の打ち上げ予定1件） | 調査待ち |
+| M4 | これから行く（公式の打ち上げ予定1件） | v0 完了（MMX・10/20）。v1 完了（世界の打ち上げ・「参考」の印つき） |
 | M5 | 通信の帯・世界のネームド・公開準備 | 調査・判断待ち |
+| M8 | 次の出来事（日本と世界の公式の予定） | v0 完了（5件） |
 
 見せ方の方針は [docs/sky-families.md](docs/sky-families.md) にあります。
 
@@ -62,15 +63,17 @@
 npm install
 npm run validate            # curation/ を検証
 npm run validate:examples   # 見本を検証（出典未確認なのでエラーが出るのが正常）
+npm test                    # テスト
+npm run check:size          # 読み込み量が上限の中か（スマホで重くしない。上限は config/size-budget.json）
 ```
 
 ## ライセンス
 
 | 対象 | ライセンス |
 |---|---|
-| プログラム（`web/` の HTML・CSS・JavaScript、`scripts/`、`schema/`、`tests/`、`config/`） | [MIT License](LICENSE) |
+| プログラム（`web/` の HTML・CSS・JavaScript、`scripts/`、`schema/`、`tests/`、`config/`、`docs/design/` の試作の HTML・JavaScript） | [MIT License](LICENSE) |
 | VOYASCOPE が書いた文章（カードの説明文、`docs/` など） | [CC BY 4.0](CONTENT_LICENSE.md) |
-| ロゴ・ブランド画像（`web/assets/brand/`、`docs/design/`） | 作者が権利を持つ（自由に使ってよいものとしては配らない） |
-| 軌道データ・地名・画像・ライブラリなど | それぞれの提供元の条件（[CONTENT_LICENSE.md](CONTENT_LICENSE.md)、[web/vendor/THIRD_PARTY_NOTICES.txt](web/vendor/THIRD_PARTY_NOTICES.txt)） |
+| ロゴ・ブランド画像と完成図（`web/assets/brand/`、`docs/design/` の画像） | 作者が権利を持つ（自由に使ってよいものとしては配らない） |
+| 軌道データ・探査機の距離・打ち上げ予定・地名・画像・ライブラリなど | それぞれの提供元の条件（[CONTENT_LICENSE.md](CONTENT_LICENSE.md)、[web/vendor/README.md](web/vendor/README.md)） |
 
 上の「お願い」はライセンスの条件ではありません。

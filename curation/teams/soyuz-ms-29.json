@@ -1,0 +1,64 @@
+{
+  "id": "soyuz-ms-29",
+  "name": {
+    "value": "ソユーズMS-29",
+    "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+    "as_of": "2026-10-03",
+    "note": "JAXA の飛行名は 75S"
+  },
+  "vehicle": {
+    "value": "ソユーズMS-29宇宙船",
+    "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+    "as_of": "2026-10-03"
+  },
+  "destination": "iss",
+  "launch_date": {
+    "value": "2026-07-14",
+    "source": "https://www.nasa.gov/blogs/spacestation/2026/07/14/soyuz-spacecraft-launches-new-crew-for-station-arrival-today/",
+    "as_of": "2026-10-03",
+    "note": "打ち上げ済み"
+  },
+  "return_date": {
+    "value": "2027-04",
+    "source": "https://www.nasa.gov/blogs/spacestation/2026/07/14/soyuz-spacecraft-launches-new-crew-for-station-arrival-today/",
+    "as_of": "2026-10-03",
+    "note": "予定：2027年4月（NASA）。日付はまだ発表されていない"
+  },
+  "crew": [
+    {
+      "astronaut": "pyotr-dubrov",
+      "role": {
+        "value": "コマンダー",
+        "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+        "as_of": "2026-10-03"
+      }
+    },
+    {
+      "astronaut": "anna-kikina",
+      "role": {
+        "value": "フライトエンジニア",
+        "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+        "as_of": "2026-10-03"
+      }
+    },
+    {
+      "astronaut": "anil-menon",
+      "role": {
+        "value": "フライトエンジニア",
+        "source": "https://humans-in-space.jaxa.jp/iss/crew/",
+        "as_of": "2026-10-03"
+      }
+    }
+  ],
+  "official_links": [
+    {
+      "label": "NASA ソユーズMS-29 の打ち上げ",
+      "url": "https://www.nasa.gov/blogs/spacestation/2026/07/14/soyuz-spacecraft-launches-new-crew-for-station-arrival-today/"
+    },
+    {
+      "label": "JAXA ISS滞在クルー",
+      "url": "https://humans-in-space.jaxa.jp/iss/crew/"
+    }
+  ],
+  "updated_at": "2026-10-03"
+}

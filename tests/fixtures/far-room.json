@@ -1,0 +1,698 @@
+{
+  "$comment": "遠くを見る部屋のテスト用（2026-10-03 の curation/probes と curation/events を写したもの）。カードを直してもテストが変わらないように、ここは手で直さない",
+  "probes": [
+    {
+      "id": "bepicolombo",
+      "name": {
+        "ja": "ベピコロンボ（みお）",
+        "en": "BepiColombo"
+      },
+      "operator": {
+        "value": [
+          "ESA",
+          "JAXA"
+        ],
+        "source": "https://mio.isas.jaxa.jp/mission/",
+        "as_of": "2026-10-03",
+        "note": "「みお」は JAXA、MPO は ESA が担当"
+      },
+      "launch_date": {
+        "value": "2018-10-20",
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet",
+        "as_of": "2026-10-03"
+      },
+      "status": {
+        "value": "operating",
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-03",
+        "note": "ESA の最新情報（2026年9月28日の更新）"
+      },
+      "location": {
+        "value": "8年かけて太陽系の内側を旅し、いま水星に着こうとしている（最後の接近の途中）",
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-03"
+      },
+      "mission": {
+        "value": "JAXA の「みお」と ESA の MPO、2機の探査機を水星のまわりに送り、水星を同時に観測する",
+        "source": "https://mio.isas.jaxa.jp/mission/",
+        "as_of": "2026-10-03"
+      },
+      "distance": {
+        "method": "planet",
+        "body": "Mercury",
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-03",
+        "note": "水星に着く途中なので、水星までの距離を目安として出す"
+      },
+      "events": [
+        "bepicolombo-mercury-orbit",
+        "bepicolombo-mio-separation"
+      ],
+      "official_links": [
+        {
+          "label": "ESA「BepiColombo の水星到着」最新情報",
+          "url": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+        },
+        {
+          "label": "JAXA 水星磁気圏探査機「みお」",
+          "url": "https://mio.isas.jaxa.jp/mission/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "hayabusa2",
+      "name": {
+        "ja": "はやぶさ２",
+        "en": "Hayabusa2"
+      },
+      "operator": {
+        "value": [
+          "JAXA"
+        ],
+        "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2",
+        "as_of": "2026-10-03"
+      },
+      "launch_date": {
+        "value": "2014-12-03",
+        "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2",
+        "as_of": "2026-10-03"
+      },
+      "status": {
+        "value": "operating",
+        "source": "https://www.hayabusa2.jaxa.jp/topics/20260928_IES/",
+        "as_of": "2026-10-03",
+        "note": "2026年8月にイオンエンジンの電源の一部が故障。別の組み合わせ（クロス運転）で運用を続ける"
+      },
+      "location": {
+        "value": "最後の目的地の小惑星 1998 KY26（2031年に着く予定）をめざして飛んでいる",
+        "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2",
+        "as_of": "2026-10-03"
+      },
+      "mission": {
+        "value": "小惑星リュウグウの表面の物質（サンプル）を地球に届けたあと、「拡張ミッション」で別の小惑星をめざす",
+        "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2",
+        "as_of": "2026-10-03"
+      },
+      "distance": {
+        "method": "pending"
+      },
+      "events": [
+        "hayabusa2-earth-swingby"
+      ],
+      "official_links": [
+        {
+          "label": "ISAS 小惑星探査機「はやぶさ２」",
+          "url": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2"
+        },
+        {
+          "label": "はやぶさ２ トピックス（2026年9月28日）",
+          "url": "https://www.hayabusa2.jaxa.jp/topics/20260928_IES/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "jwst",
+      "name": {
+        "ja": "ジェイムズ・ウェッブ宇宙望遠鏡",
+        "en": "James Webb Space Telescope"
+      },
+      "operator": {
+        "value": [
+          "NASA",
+          "ESA",
+          "CSA"
+        ],
+        "source": "https://science.nasa.gov/mission/webb/",
+        "as_of": "2026-10-03",
+        "note": "NASA・ESA（欧州）・CSA（カナダ）の共同ミッション"
+      },
+      "launch_date": {
+        "value": "2021-12-25",
+        "source": "https://science.nasa.gov/mission/webb/",
+        "as_of": "2026-10-03"
+      },
+      "status": {
+        "value": "operating",
+        "source": "https://science.nasa.gov/mission/webb/",
+        "as_of": "2026-10-03",
+        "note": "2026年8月6日に撮った画像が公開されている"
+      },
+      "location": {
+        "value": "地球のまわりではなく、地球から約150万km離れた「L2」という場所で、太陽のまわりを回っている",
+        "source": "https://science.nasa.gov/mission/webb/",
+        "as_of": "2026-10-03"
+      },
+      "mission": {
+        "value": "ビッグバンのあとの最初の光から太陽系の移り変わりまで、宇宙の歴史のすべての時代を調べる",
+        "source": "https://science.nasa.gov/mission/webb/",
+        "as_of": "2026-10-03"
+      },
+      "distance": {
+        "method": "typical",
+        "value": 1500000,
+        "unit": "km",
+        "source": "https://science.nasa.gov/mission/webb/",
+        "as_of": "2026-10-03",
+        "note": "L2 までの目安（NASA の説明の値）。その日の距離ではない"
+      },
+      "official_links": [
+        {
+          "label": "NASA「James Webb Space Telescope」",
+          "url": "https://science.nasa.gov/mission/webb/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "mmx",
+      "name": {
+        "ja": "火星衛星探査機（MMX）",
+        "en": "MMX (Martian Moons eXploration)"
+      },
+      "operator": {
+        "value": [
+          "JAXA"
+        ],
+        "source": "https://www.mmx.jaxa.jp/",
+        "as_of": "2026-10-03",
+        "note": "NASA・CNES・DLR・ESA なども参加する国際的なプロジェクト"
+      },
+      "launch_date": {
+        "value": "2026-10-20",
+        "source": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html",
+        "as_of": "2026-10-03",
+        "note": "予定。日本時間 4時41分03秒"
+      },
+      "status": {
+        "value": "not_launched",
+        "source": "https://www.jaxa.jp/about/president/presslec/202609_j.html",
+        "as_of": "2026-10-03"
+      },
+      "location": {
+        "value": "種子島宇宙センターで、打ち上げに向けた準備（射場整備作業）をしている",
+        "source": "https://www.jaxa.jp/about/president/presslec/202609_j.html",
+        "as_of": "2026-10-03"
+      },
+      "mission": {
+        "value": "火星の衛星フォボスを観測し、表面の砂や岩石を地球に持ち帰る",
+        "source": "https://www.mmx.jaxa.jp/",
+        "as_of": "2026-10-03"
+      },
+      "distance": {
+        "method": "on_earth"
+      },
+      "events": [
+        "mmx-launch"
+      ],
+      "official_links": [
+        {
+          "label": "MMX プロジェクトサイト",
+          "url": "https://www.mmx.jaxa.jp/"
+        },
+        {
+          "label": "JAXA プレスリリース（MMX の打上げ）",
+          "url": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "new-horizons",
+      "name": {
+        "ja": "ニュー・ホライズンズ",
+        "en": "New Horizons"
+      },
+      "operator": {
+        "value": [
+          "NASA",
+          "Johns Hopkins APL"
+        ],
+        "source": "https://science.nasa.gov/mission/new-horizons/",
+        "as_of": "2026-10-03",
+        "note": "ジョンズ・ホプキンズ大学の応用物理研究所（APL）が運用している"
+      },
+      "launch_date": {
+        "value": "2006-01-19",
+        "source": "https://science.nasa.gov/mission/new-horizons/",
+        "as_of": "2026-10-03"
+      },
+      "status": {
+        "value": "operating",
+        "source": "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/",
+        "as_of": "2026-10-03",
+        "note": "2026年6月23日に、冬眠から目覚めて元気だと確かめられた"
+      },
+      "location": {
+        "value": "冥王星よりずっと遠い「カイパーベルト」を飛んでいる。2026年6月に、ほぼ1年の冬眠から目覚めた",
+        "source": "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/",
+        "as_of": "2026-10-03"
+      },
+      "mission": {
+        "value": "2015年に冥王星を近くから調べた、はじめての探査機。2019年には、さらに遠くの天体も近くから調べた",
+        "source": "https://science.nasa.gov/mission/new-horizons/",
+        "as_of": "2026-10-03"
+      },
+      "distance": {
+        "method": "dated",
+        "value": 9500000000,
+        "unit": "km",
+        "at": "2026-06-23",
+        "source": "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/",
+        "as_of": "2026-10-03",
+        "note": "冬眠から目覚めたと確かめた日の、約95億km（NASA の2026年7月7日の記事）"
+      },
+      "official_links": [
+        {
+          "label": "NASA「New Horizons」",
+          "url": "https://science.nasa.gov/mission/new-horizons/"
+        },
+        {
+          "label": "NASA の記事（2026年7月7日）",
+          "url": "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "parker-solar-probe",
+      "name": {
+        "ja": "パーカー・ソーラー・プローブ",
+        "en": "Parker Solar Probe"
+      },
+      "operator": {
+        "value": [
+          "NASA",
+          "Johns Hopkins APL"
+        ],
+        "source": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/",
+        "as_of": "2026-10-03",
+        "note": "ジョンズ・ホプキンズ大学の応用物理研究所（APL）が、NASA のために運用している"
+      },
+      "launch_date": {
+        "value": "2018-08-12",
+        "source": "https://science.nasa.gov/mission/parker-solar-probe/",
+        "as_of": "2026-10-03"
+      },
+      "status": {
+        "value": "operating",
+        "source": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/",
+        "as_of": "2026-10-03",
+        "note": "2026年9月7日に「正常に動いている」という信号が届いた"
+      },
+      "location": {
+        "value": "太陽のまわりを回っている。2026年9月の最接近では、太陽から約610万kmまで近づき、時速約69万kmで飛んだ",
+        "source": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/",
+        "as_of": "2026-10-03",
+        "note": "NASA の値は 3.8 million miles・時速 430,000 miles"
+      },
+      "mission": {
+        "value": "「太陽にさわる」ための探査機。2021年に、はじめてコロナ（太陽の上の方の大気）の中を飛んだ",
+        "source": "https://science.nasa.gov/mission/parker-solar-probe/",
+        "as_of": "2026-10-03"
+      },
+      "distance": {
+        "method": "pending"
+      },
+      "official_links": [
+        {
+          "label": "NASA「Parker Solar Probe」",
+          "url": "https://science.nasa.gov/mission/parker-solar-probe/"
+        },
+        {
+          "label": "NASA のブログ（2026年9月10日）",
+          "url": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "perseverance",
+      "name": {
+        "ja": "パーサヴィアランス",
+        "en": "Perseverance"
+      },
+      "operator": {
+        "value": [
+          "NASA",
+          "JPL"
+        ],
+        "source": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/",
+        "as_of": "2026-10-03",
+        "note": "NASA のジェット推進研究所（JPL）が運用している"
+      },
+      "launch_date": {
+        "value": "2020-07-30",
+        "source": "https://science.nasa.gov/mission/mars-2020-perseverance/",
+        "as_of": "2026-10-03",
+        "note": "火星への着陸は2021年2月18日"
+      },
+      "status": {
+        "value": "operating",
+        "source": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/",
+        "as_of": "2026-10-03",
+        "note": "JPL の2026年6月23日の記事"
+      },
+      "location": {
+        "value": "火星の地面を走りながら調べている。2026年6月に、走った距離がフルマラソン分（42.195km）になった",
+        "source": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/",
+        "as_of": "2026-10-03"
+      },
+      "mission": {
+        "value": "火星で、むかしの微生物の生命のしるしを探し、岩や土の試料を集める",
+        "source": "https://science.nasa.gov/mission/mars-2020-perseverance/",
+        "as_of": "2026-10-03"
+      },
+      "distance": {
+        "method": "planet",
+        "body": "Mars",
+        "source": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/",
+        "as_of": "2026-10-03",
+        "note": "火星の地面にいるので、火星までの距離"
+      },
+      "official_links": [
+        {
+          "label": "NASA「Mars 2020 Perseverance」",
+          "url": "https://science.nasa.gov/mission/mars-2020-perseverance/"
+        },
+        {
+          "label": "JPL の記事（2026年6月23日）",
+          "url": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "voyager-1",
+      "name": {
+        "ja": "ボイジャー1号",
+        "en": "Voyager 1"
+      },
+      "operator": {
+        "value": [
+          "NASA",
+          "JPL"
+        ],
+        "source": "https://science.nasa.gov/mission/voyager/voyager-1/",
+        "as_of": "2026-10-03"
+      },
+      "launch_date": {
+        "value": "1977-09-05",
+        "source": "https://science.nasa.gov/mission/voyager/voyager-1/",
+        "as_of": "2026-10-03"
+      },
+      "status": {
+        "value": "operating",
+        "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+        "as_of": "2026-10-03",
+        "note": "電力を節約するため、観測装置を少しずつ止めながら運用している（2026年4月17日に1台止めた）"
+      },
+      "location": {
+        "value": "太陽圏の外の「恒星間空間」を飛んでいる。人がつくったもので、いちばん遠くにある",
+        "source": "https://science.nasa.gov/mission/voyager/voyager-1/",
+        "as_of": "2026-10-03"
+      },
+      "mission": {
+        "value": "木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った。いまもデータを送っている",
+        "source": "https://science.nasa.gov/mission/voyager/voyager-1/",
+        "as_of": "2026-10-03"
+      },
+      "distance": {
+        "method": "pending"
+      },
+      "events": [
+        "voyager-1-one-light-day"
+      ],
+      "official_links": [
+        {
+          "label": "NASA「Voyager 1」",
+          "url": "https://science.nasa.gov/mission/voyager/voyager-1/"
+        },
+        {
+          "label": "NASA「Where Are Voyager 1 and Voyager 2 Now?」",
+          "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    },
+    {
+      "id": "voyager-2",
+      "name": {
+        "ja": "ボイジャー2号",
+        "en": "Voyager 2"
+      },
+      "operator": {
+        "value": [
+          "NASA",
+          "JPL"
+        ],
+        "source": "https://science.nasa.gov/mission/voyager/voyager-2/",
+        "as_of": "2026-10-03"
+      },
+      "launch_date": {
+        "value": "1977-08-20",
+        "source": "https://science.nasa.gov/mission/voyager/voyager-2/",
+        "as_of": "2026-10-03"
+      },
+      "status": {
+        "value": "operating",
+        "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+        "as_of": "2026-10-03",
+        "note": "電力を節約するため、観測装置を少しずつ止めながら運用している"
+      },
+      "location": {
+        "value": "太陽圏の外の「恒星間空間」を飛んでいる（2018年12月に入った）",
+        "source": "https://science.nasa.gov/mission/voyager/voyager-2/",
+        "as_of": "2026-10-03"
+      },
+      "mission": {
+        "value": "天王星と海王星を訪れた、ただ1つの探査機。いまは恒星間空間を飛んでいる",
+        "source": "https://science.nasa.gov/mission/voyager/voyager-2/",
+        "as_of": "2026-10-03"
+      },
+      "distance": {
+        "method": "pending"
+      },
+      "official_links": [
+        {
+          "label": "NASA「Voyager 2」",
+          "url": "https://science.nasa.gov/mission/voyager/voyager-2/"
+        },
+        {
+          "label": "NASA「Where Are Voyager 1 and Voyager 2 Now?」",
+          "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
+        }
+      ],
+      "updated_at": "2026-10-03"
+    }
+  ],
+  "events": [
+    {
+      "id": "bepicolombo-mercury-orbit",
+      "kind": "arrival",
+      "regions": [
+        "world",
+        "japan"
+      ],
+      "title": {
+        "ja": "ベピコロンボが水星を回る軌道に入る",
+        "en": "BepiColombo enters orbit around Mercury"
+      },
+      "summary": {
+        "value": "ESA と JAXA の水星探査。ESA の MPO と JAXA の「みお」の2機で水星を回るのは、この計画が初めて",
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-01"
+      },
+      "when": {
+        "value": {
+          "date": "2026-11-21"
+        },
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-01",
+        "note": "ESA の発表は日付だけ（時刻なし）"
+      },
+      "links": [
+        {
+          "label": "ESA ベピコロンボ到着の最新情報（英語）",
+          "url": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+        },
+        {
+          "label": "JAXA 国際水星探査計画 BepiColombo／みお",
+          "url": "https://www.jaxa.jp/projects/sas/bepi/index_j.html"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    },
+    {
+      "id": "bepicolombo-mio-separation",
+      "kind": "separation",
+      "regions": [
+        "world",
+        "japan"
+      ],
+      "title": {
+        "ja": "「みお」と MPO が分かれる",
+        "en": "MPO and Mio separate"
+      },
+      "summary": {
+        "value": "水星を回る軌道に入ったあと、2機が分かれる。観測の本番は2027年4月から",
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-01"
+      },
+      "when": {
+        "value": {
+          "from": "2026-12-09",
+          "to": "2026-12-10"
+        },
+        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+        "as_of": "2026-10-01",
+        "note": "ESA の発表は「9–10 December 2026」"
+      },
+      "links": [
+        {
+          "label": "ESA ベピコロンボ到着の最新情報（英語）",
+          "url": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+        },
+        {
+          "label": "JAXA 国際水星探査計画 BepiColombo／みお",
+          "url": "https://www.jaxa.jp/projects/sas/bepi/index_j.html"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    },
+    {
+      "id": "hayabusa2-earth-swingby",
+      "kind": "flyby",
+      "regions": [
+        "japan"
+      ],
+      "title": {
+        "ja": "はやぶさ2 の地球スイングバイ",
+        "en": "Hayabusa2 Earth swing-by"
+      },
+      "summary": {
+        "value": "拡張ミッション（はやぶさ2♯）の次の目標。探査の対象は、小惑星トリフネ（2026年7月5日にフライバイ成功）と 1998 KY26",
+        "source": "https://www.hayabusa2.jaxa.jp/enjoy/material/press/Hayabusa2_Press_20260730.pdf",
+        "as_of": "2026-10-01"
+      },
+      "when": {
+        "value": {
+          "month": "2027-12"
+        },
+        "source": "https://www.hayabusa2.jaxa.jp/enjoy/material/press/Hayabusa2_Press_20260730.pdf",
+        "as_of": "2026-10-01",
+        "note": "記者説明会資料（2026-07-30）の「次の目標（2027年12月の地球スイングバイ）」"
+      },
+      "links": [
+        {
+          "label": "JAXA はやぶさ2 プロジェクト",
+          "url": "https://www.hayabusa2.jaxa.jp/"
+        },
+        {
+          "label": "記者説明会資料（2026-07-30、PDF）",
+          "url": "https://www.hayabusa2.jaxa.jp/enjoy/material/press/Hayabusa2_Press_20260730.pdf"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    },
+    {
+      "id": "mmx-launch",
+      "kind": "launch",
+      "regions": [
+        "japan"
+      ],
+      "title": {
+        "ja": "MMX の打ち上げ",
+        "en": "MMX launch"
+      },
+      "summary": {
+        "value": "火星の衛星フォボスからサンプルを持ち帰る計画の探査機。2031年度に、人類初の火星圏からのサンプルリターンをめざす",
+        "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+        "as_of": "2026-10-01",
+        "note": "打上げ計画書「2.5 火星衛星探査機(MMX)の概要」"
+      },
+      "when": {
+        "value": {
+          "at": "2026-10-19T19:41:03Z"
+        },
+        "source": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html",
+        "as_of": "2026-10-01"
+      },
+      "window_end": {
+        "value": "2026-11-07",
+        "source": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html",
+        "as_of": "2026-10-01",
+        "note": "予備期間は10月21日〜11月7日。予備期間中の時刻は日ごとに決まる"
+      },
+      "vehicle": {
+        "value": "H3ロケット10号機（H3-24L）",
+        "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+        "as_of": "2026-10-01"
+      },
+      "site": {
+        "label": "種子島",
+        "name": {
+          "value": "種子島宇宙センター 大型ロケット第2射点（鹿児島県）",
+          "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+          "as_of": "2026-10-01"
+        },
+        "position": {
+          "value": {
+            "lat": 30.401,
+            "lng": 130.9776
+          },
+          "source": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
+          "as_of": "2026-10-01",
+          "note": "計画書にある第1射点の座標（30°24′03.47″N、130°58′39.20″E）。第2射点はすぐ隣"
+        }
+      },
+      "links": [
+        {
+          "label": "JAXA プレスリリース（MMX の打上げ）",
+          "url": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html"
+        },
+        {
+          "label": "JAXA 打上げ計画書（PDF）",
+          "url": "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf"
+        },
+        {
+          "label": "MMX プロジェクトサイト",
+          "url": "https://www.mmx.jaxa.jp/"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    },
+    {
+      "id": "voyager-1-one-light-day",
+      "kind": "milestone",
+      "regions": [
+        "world"
+      ],
+      "title": {
+        "ja": "ボイジャー1号が地球から1光日に",
+        "en": "Voyager 1 reaches one light-day from Earth"
+      },
+      "summary": {
+        "value": "光で24時間かかる距離（約259億 km）。人がつくったもので、ここまで届くのはボイジャー1号が初めて",
+        "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+        "as_of": "2026-10-01"
+      },
+      "when": {
+        "value": {
+          "at": "2026-11-18T10:16:07Z"
+        },
+        "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+        "as_of": "2026-10-01",
+        "note": "NASA の発表は 2026年11月18日 2時16分07秒（米国太平洋標準時）"
+      },
+      "links": [
+        {
+          "label": "NASA「Where Are Voyager 1 and Voyager 2 Now?」",
+          "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
+        }
+      ],
+      "updated_at": "2026-10-01"
+    }
+  ]
+}

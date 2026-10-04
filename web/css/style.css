@@ -10,6 +10,9 @@
   --amber-dim: rgba(255, 181, 71, 0.6);
   --text: #d9f4ea;
   --text-dim: #8fb3a8;
+  /* 参考（公式の発表ではない情報）：点線と、この青灰色で見分ける */
+  --ref: #a8bce0;
+  --ref-dim: rgba(168, 188, 224, 0.5);
   --danger: #ff7a6b;
   --font-body: "Zen Kaku Gothic New", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -251,6 +254,7 @@ body { overflow: hidden; }
   --panel-border: rgba(94, 242, 194, 0.18);
   --top-h: 72px;
   --bottom-h: 138px;
+  --nav-h: 0px; /* 部屋の帯の高さ（PC だけ 48px） */
 }
 
 /* ヘッダー */
@@ -301,7 +305,7 @@ body { overflow: hidden; }
 .side-panel {
   position: absolute;
   z-index: 10;
-  top: var(--top-h);
+  top: calc(var(--top-h) + var(--nav-h));
   bottom: calc(var(--bottom-h) + 8px);
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -314,22 +318,36 @@ body { overflow: hidden; }
 .detail-panel { right: 16px; width: 420px; padding: 14px 16px 12px; }
 .sheet-handle { display: none; }
 
-.fam-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.fam-tabs { display: flex; flex-wrap: wrap; gap: 4px 6px; overflow-x: auto; scrollbar-width: none; }
 .fam-tabs::-webkit-scrollbar { display: none; }
-.fam-tab[data-fam="tonight"] { margin-left: auto; }
+.fam-group { display: flex; gap: 3px; }
+.fam-views { margin-left: auto; } /* 「予定」「観測」は右にまとめる（入らなければ2つ一緒に次の行へ） */
 .fam-tab {
   appearance: none;
+  display: inline-grid; /* 文字と、太字の幅をとる見えない文字を重ねる。選んで太字になっても幅が変わらない */
+  justify-items: center;
   border: 1px solid transparent;
   background: rgba(94, 242, 194, 0.06);
   color: var(--text);
   font: inherit;
   font-size: 0.78rem;
-  padding: 5px 10px;
+  padding: 5px 6px;
   border-radius: 6px;
   cursor: pointer;
   white-space: nowrap;
 }
-.fam-tab[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); font-weight: 700; }
+.fam-tab > span { grid-area: 1 / 1; }
+.fam-bold { font-weight: 700; visibility: hidden; }
+.fam-tab[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); }
+.fam-tab[aria-pressed="true"] .fam-label { font-weight: 700; }
+/* PC：タブを1行に並べる（パネルの幅 330px に入る大きさ）。ブラウザの文字を大きくしていて入らないときは、
+   main.js の fitFamTabs が --fam-fit で文字だけを小さくする */
+@media (min-width: 901px) {
+  .fam-tabs { flex-wrap: nowrap; gap: 4px; }
+  .fam-group { gap: 2px; }
+  .fam-tab { font-size: calc(0.75rem * var(--fam-fit, 1)); padding: 5px 5px; }
+  .list-panel { scrollbar-width: thin; scrollbar-gutter: stable; } /* スクロールバーが出ても消えても、中の幅が変わらない */
+}
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .search { display: block; margin: 0 0 10px; position: relative; }
 .search::before {
@@ -507,6 +525,9 @@ body { overflow: hidden; }
 .ov-art { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 6px; border: 1px solid var(--panel-border); }
 .ov-figure figcaption { margin-top: 4px; line-height: 1.5; }
 .ov-figure figcaption a { color: var(--text-dim); }
+/* ひまわりの最新画像（801×641。切り取らない） */
+.ov-live { display: block; width: 100%; aspect-ratio: 801 / 641; object-fit: contain; background: #000; border-radius: 6px; border: 1px solid var(--panel-border); }
+.live-sat.failed { display: none; }
 .craft-thumb {
   width: 34px;
   height: 34px;
@@ -803,6 +824,217 @@ body { overflow: hidden; }
   max-width: 46vw;
 }
 
+/* 上のバー：次の出来事（狭い画面では一覧の「予定」タブだけ） */
+.next-chip {
+  appearance: none;
+  margin-right: 12px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--mint-dim);
+  background: rgba(94, 242, 194, 0.08);
+  color: var(--mint);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 30vw;
+}
+.next-chip .next-k { margin-right: 8px; color: var(--text-dim); font-size: 0.72rem; }
+.next-chip .next-left { margin-left: 8px; }
+.tonight-chip:focus-visible, .next-chip:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+@media (max-width: 1100px) { .next-chip { display: none; } }
+
+/* 予定（次の出来事）：一覧の「予定」タブ */
+.events {
+  margin: -2px -2px 12px;
+  padding: 10px 10px 8px;
+  border: 1px solid var(--mint-dim);
+  border-radius: 8px;
+  background: rgba(94, 242, 194, 0.04);
+}
+.events-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+.events-title { margin: 0; font-size: 0.95rem; color: var(--mint); letter-spacing: 0.08em; }
+.events-body { margin-top: 8px; }
+.events-note { margin-top: 8px !important; line-height: 1.5; }
+.event-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.event-item {
+  appearance: none;
+  width: 100%;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 62px 1fr 12px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: rgba(12, 33, 64, 0.6);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.event-item:hover { border-color: var(--mint-dim); }
+.event-item:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.event-tonight { border-color: rgba(255, 181, 71, 0.5); background: rgba(255, 181, 71, 0.07); }
+.event-when { display: flex; flex-direction: column; font-size: 0.78rem; line-height: 1.35; color: var(--mint); }
+.event-tonight .event-when { color: var(--amber); }
+.event-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.event-title { font-size: 0.9rem; font-weight: 700; }
+.event-sub { font-size: 0.74rem; color: var(--text-dim); }
+.event-left { margin-left: 8px; color: var(--mint); white-space: nowrap; }
+.event-src { font-size: 0.68rem; color: var(--text-dim); }
+/* 予定の詳細：残り時間 */
+.event-countdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: rgba(94, 242, 194, 0.07);
+}
+.event-countdown .mono { font-size: 1.35rem; font-weight: 700; color: var(--mint); letter-spacing: 0.02em; }
+.event-h { margin: 14px 0 6px; font-size: 0.85rem; color: var(--mint); }
+.event-rows .plate-row { grid-template-columns: 24px 4.3em 1fr; } /* 「予備期間」「ロケット」を1行に */
+
+/* 地球の上の射場のピン（ひし形。打ち上がるまで軌道は描かない） */
+.site-marker {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.site-marker .diamond {
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--c);
+  background: var(--navy-900);
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--c) 60%, transparent);
+}
+/* 名前はひし形の真下に（機体の名前は右上に出るので、重なりにくい） */
+.site-marker .tag {
+  position: absolute;
+  left: 50%;
+  top: 33px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--c);
+  white-space: nowrap;
+  text-shadow: 0 0 6px var(--navy-900);
+}
+.site-marker.selected .diamond { outline: 2px solid var(--c); outline-offset: 4px; }
+/* 名前が重なったピン：名前を隠す（ひし形は残る。マウスを乗せる・キーボードで選ぶと出る） */
+.site-marker.tag-hidden .tag { visibility: hidden; }
+.site-marker.tag-hidden:hover .tag, .site-marker.tag-hidden:focus-visible .tag { visibility: visible; }
+/* 一覧の行にマウスを乗せているあいだ：同じ射場のピンを光らせる */
+.site-marker.peek .diamond { outline: 2px dashed var(--c); outline-offset: 5px; }
+.site-marker.peek .tag { color: var(--text); }
+.site-marker:focus-visible { outline: 2px solid var(--amber); outline-offset: -8px; border-radius: 50%; }
+/* 凡例：予定はひし形 */
+.fam-dot.fam-planned { width: 8px; height: 8px; border-radius: 1px; background: none; border: 1.5px solid var(--c); transform: rotate(45deg); }
+
+/* ---------- 参考（公式の発表ではない情報）：点線の「参考」の印と、ホバー・フォーカスで出る説明 ---------- */
+.ref-mark {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 5px;
+  border: 1px dashed var(--ref);
+  border-radius: 3px;
+  color: var(--ref);
+  font-size: 0.66rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  vertical-align: 1px;
+  white-space: nowrap;
+}
+/* 説明の吹き出し：行（または見出し）の幅いっぱいに、すぐ下へ出す。少し待ってから出す（一覧の上をなぞったときにちらつかない） */
+.ref-tip {
+  position: absolute;
+  z-index: 5;
+  left: 8px;
+  right: 8px;
+  top: calc(100% + 4px);
+  padding: 6px 9px;
+  border: 1px dashed var(--ref);
+  border-radius: 6px;
+  background: rgba(5, 14, 31, 0.96);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.74rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  white-space: normal;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0s linear 0.15s;
+}
+.event-item.is-ref, .ref-anchor { position: relative; }
+.event-list li:last-child .event-item.is-ref .ref-tip { top: auto; bottom: calc(100% + 4px); } /* 最後の行は上に */
+@media (hover: hover) {
+  .event-item.is-ref:hover .ref-tip,
+  .ref-anchor .ref-mark:hover .ref-tip,
+  .site-marker.is-ref:hover .ref-tip { opacity: 1; visibility: visible; transition-delay: 0.25s, 0.25s; }
+}
+.event-item.is-ref:focus-visible .ref-tip,
+.site-marker.is-ref:focus-visible .ref-tip { opacity: 1; visibility: visible; transition-delay: 0s, 0s; }
+@media (prefers-reduced-motion: reduce) { .ref-tip { transition: none; } }
+
+/* 予定タブの下の段：世界の打ち上げ（公式の予定の箱とは、点線と色で分ける） */
+.events.world { border-style: dashed; border-color: var(--ref-dim); background: rgba(168, 188, 224, 0.04); }
+.world-title { color: var(--ref); }
+.event-item.is-ref { border-style: dashed; }
+.event-item.is-ref:hover { border-color: var(--ref); }
+.event-item.is-ref .event-when,
+.event-item.is-ref .event-left { color: var(--ref); }
+/* 1行ずつに収める（名前が長ければ末尾を省く。全部の名前は詳細と読み上げに出る） */
+.ref-line { display: flex; align-items: baseline; min-width: 0; }
+.ref-line .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ref-line .event-left { flex: none; margin-left: 6px; }
+/* 一覧の行では、印は日時の下にそろえて置く */
+.event-when .ref-mark { align-self: flex-start; margin: 3px 0 0; font-family: var(--font-body); }
+
+/* 詳細：説明の文は常に出す */
+.ref-note {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px !important;
+  padding: 8px 10px;
+  border: 1px dashed var(--ref-dim);
+  border-radius: 8px;
+  background: rgba(168, 188, 224, 0.06);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.ref-note .ref-mark { margin-left: 0; flex: none; }
+.class-chip.ref-chip { --c: var(--ref); border-style: dashed; }
+.event-countdown.ref-box { border-style: dashed; background: rgba(168, 188, 224, 0.07); }
+.event-countdown.ref-box .mono { color: var(--ref); }
+
+/* 地球の上の世界の打ち上げのピン：点線のひし形。説明は名前の下に */
+.site-marker.is-ref { --c: var(--ref); }
+.site-marker.is-ref .diamond { border-style: dashed; box-shadow: none; }
+.site-marker.is-ref .tag .ref-mark { margin-left: 2px; padding: 0 3px; font-size: 9px; vertical-align: 1px; }
+.site-marker.is-ref .ref-tip { left: 50%; right: auto; top: 54px; width: 230px; transform: translateX(-50%); }
+
 /* ---------- このアプリについて（ダイアログ） ---------- */
 dialog.card {
   width: min(560px, calc(100vw - 2 * var(--gutter)));
@@ -824,10 +1056,74 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 #about-tle { white-space: pre-line; }
 
 /* 地球の左上：現在の地球 */
+/* 地球の上：表示切替と、遠くを見る部屋への入口（PC は横に並べる） */
+.globe-top {
+  position: absolute;
+  z-index: 6;
+  top: calc(var(--top-h) + var(--nav-h) + 4px);
+  left: 362px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* 地球の上の表示切替（すべて／日本のみ／衛星のみ／打ち上げ予定のみ）。押しているものはミント色 */
+.view-switch {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--mint-dim);
+  border-radius: 999px;
+  background: rgba(4, 12, 28, 0.72);
+  backdrop-filter: blur(4px);
+}
+.view-switch button {
+  appearance: none;
+  position: relative;
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.view-switch button:hover { background: var(--mint-faint); }
+.view-switch button[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); font-weight: 700; }
+.view-switch button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.view-switch .vs-short { display: none; }
+/* 遠くを見る部屋への入口：ほかの部屋へ行くボタンなので、表示切替（ミント）と分けてアンバーにする */
+.far-open {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border: 1px solid var(--amber-dim);
+  border-radius: 999px;
+  background: rgba(255, 181, 71, 0.1);
+  color: var(--amber);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+.far-open:hover { background: rgba(255, 181, 71, 0.2); }
+.far-open:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.far-open[aria-busy="true"] { cursor: progress; opacity: 0.75; }
+.far-open .chev { font-size: 1rem; line-height: 1; }
+/* 幅の狭い PC で詳細を開いているあいだは隠す（詳細のパネルと重なるため。閉じると戻る） */
+@media (min-width: 901px) and (max-width: 1180px) { #app.has-selected .globe-top { display: none; } }
+
 .earth-info {
   position: absolute;
   z-index: 6;
-  top: calc(var(--top-h) + 4px);
+  top: calc(var(--top-h) + var(--nav-h) + 48px); /* 表示切替の下 */
   left: 362px;
   padding: 10px 14px;
   border: 1px solid var(--panel-border);
@@ -857,8 +1153,64 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 .menu-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
 /* ---------- 狭い画面：一覧と詳細は下から出るシート ---------- */
+/* ---------- 部屋の帯と、右の「次の出来事」の列（PC。イメージ図の A 案。2026-10-04 オーナー） ---------- */
+/* 部屋の帯：上のバーの下の真ん中。いまある部屋だけ（地球のまわり・遠くを見る・これから行く）。スマホは出さない */
+.room-nav { display: none; }
+.next-panel { display: none; }
+@media (min-width: 901px) {
+  :root { --nav-h: 48px; }
+  .room-nav {
+    position: absolute;
+    z-index: 11;
+    top: var(--top-h);
+    left: 50%;
+    transform: translateX(-50%);
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .room-nav button {
+    appearance: none;
+    height: 36px;
+    padding: 0 18px;
+    border: 1px solid var(--navy-600);
+    border-radius: 18px;
+    background: rgba(5, 14, 31, 0.6);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+  }
+  .room-nav button[aria-current="true"] { background: var(--mint); border-color: var(--mint); color: #04211a; font-weight: 700; }
+  .room-nav button[aria-busy="true"] { cursor: progress; opacity: 0.75; }
+  .room-nav button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  /* 帯と同じものは、地球の上に出さない（遠くを見る部屋の入口、打ち上げ予定のみ＝これから行く） */
+  .far-open, .view-switch [data-view="launches"] { display: none; }
+  /* 地球の注記：左の一覧と右（列・詳細）のあいだの真ん中に。入らなければ2行に */
+  .scale-note { left: 362px; right: var(--right-gap, 16px); width: fit-content; max-width: calc(100vw - 362px - var(--right-gap, 16px)); margin: 0 auto; transform: none; white-space: normal; text-wrap: balance; text-align: center; }
+  #app.has-selected .scale-note { --right-gap: 452px; }
+}
+@media (min-width: 901px) and (hover: hover) {
+  .room-nav button:not([aria-current="true"]):hover { border-color: var(--mint-dim); background: rgba(94, 242, 194, 0.08); }
+}
+/* 右の列：広い画面（1181px から）だけ。詳細を開いているあいだと、一覧で「予定」を見ているあいだ（左に同じものが出る）は出さない */
+@media (min-width: 1181px) {
+  .next-panel { display: block; right: 16px; width: 340px; padding: 16px; }
+  #app.has-selected .next-panel, #app.list-planned .next-panel { display: none; }
+  #app:not(.has-selected):not(.list-planned) .scale-note { --right-gap: 372px; }
+}
+.next-panel .events-head { gap: 4px 10px; }
+.next-panel-title { margin: 0; font-size: 1.25rem; font-weight: 700; color: var(--mint); letter-spacing: 0.04em; }
+.next-panel-body { margin-top: 12px; }
+.next-panel .event-item { grid-template-columns: 64px 1fr 12px; align-items: start; padding: 10px 12px; border-radius: 10px; }
+.next-panel .event-when { font-size: 0.8rem; }
+.event-desc { font-size: 0.74rem; line-height: 1.6; color: var(--text-dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
 @media (max-width: 900px) {
-  :root { --top-h: 56px; }
+  :root { --top-h: 56px; --switch-h: 44px; }
   /* 上のバーは1行：ロゴ（下に時刻）・今夜・LIVE・メニュー */
   .top-bar {
     display: grid;
@@ -909,9 +1261,19 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
   }
   .side-panel.expanded {
-    max-height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
-    height: calc(100dvh - var(--top-h) - var(--bottom-h) - 8px);
+    max-height: calc(100dvh - var(--top-h) - var(--switch-h) - var(--bottom-h) - 8px);
+    height: calc(100dvh - var(--top-h) - var(--switch-h) - var(--bottom-h) - 8px);
   }
+  /* シートを全部の高さに広げたときは、上に少しだけ見える地球の名前を消す（上のバーの文字と重なるため） */
+  #app:has(.side-panel.expanded) #globe .tag { visibility: hidden; }
+  /* 表示切替：上のバーのすぐ下に左寄せ。押せる範囲を44pxに */
+  /* シートを全部に広げても隠れないように、シートより上に置き、シートはその下から */
+  .globe-top { display: contents; }
+  .view-switch { position: absolute; z-index: 21; left: 12px; top: calc(var(--top-h) + 2px); max-width: calc(100vw - 24px); }
+  /* 入口は表示切替の下の右。一覧・詳細のシートを広げたときは、シートの下に隠れる */
+  .far-open { position: absolute; z-index: 19; right: 12px; top: calc(var(--top-h) + var(--switch-h) + 8px); min-height: 40px; }
+  .view-switch button { padding: 6px 10px; font-size: 0.8rem; }
+  .view-switch button::after { content: ""; position: absolute; inset: -7px -1px; }
   /* つまみ：スクロールしても上に残る。押すと広げる／縮める、下へ引くと閉じる */
   .sheet-handle {
     position: sticky;
@@ -981,7 +1343,9 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   .bottom-bar .warning { grid-column: 1 / -1; }
   /* 一覧を詰めて、カードが多く見えるように */
   .list-panel .list-title { display: none; }
-  .list-panel .fam-tabs { margin-bottom: 8px; }
+  .list-panel .fam-tabs { margin-bottom: 8px; flex-wrap: nowrap; gap: 4px; }
+  .fam-group { gap: 4px; }
+  .fam-tab { padding: 5px 10px; }
   .search { margin-bottom: 8px; }
   .search input { padding-top: 7px; padding-bottom: 7px; }
   .craft-item { padding: 6px 10px; }
@@ -1007,4 +1371,10 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* とても狭い画面（幅380px未満）では、表示切替を短い名前に（読み上げは長い名前のまま） */
+@media (max-width: 379px) {
+  .view-switch .vs-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .view-switch .vs-short { display: inline; }
 }

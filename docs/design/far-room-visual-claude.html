@@ -1,0 +1,975 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>遠くを見る部屋 Claude案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+/* Layout: 画面いっぱいの「飛ぶ舞台」（3D）に計器を重ねる（右上＝距離、左＝桁の目盛り、下＝物差し）→ 下へスクロールで距離のはしご。
+   見た目の試作（Claude 案）。依頼文 prompts/codex-far-room-visual.md と同じ条件で作った。暗い宇宙の1つの見た目に決めている */
+:root {
+  --navy-900: #050e1f;
+  --navy-800: #07142b;
+  --navy-700: #0c2140;
+  --navy-600: #143057;
+  --mint: #5ef2c2;
+  --amber: #ffb547;
+  --text: #d9f4ea;
+  --text-dim: #8fb3a8;
+  --mint-dim: rgba(94, 242, 194, 0.5);
+  --mint-faint: rgba(94, 242, 194, 0.12);
+  --amber-dim: rgba(255, 181, 71, 0.55);
+  --amber-faint: rgba(255, 181, 71, 0.12);
+  --glass: rgba(7, 20, 43, 0.78);
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --gutter: 16px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--navy-900); color: var(--text); }
+body { margin: 0; font-family: var(--font-body); font-size: 15px; line-height: 1.7; -webkit-text-size-adjust: 100%; }
+.page { padding-inline: var(--gutter); padding-block: 12px 40px; max-width: 1180px; margin: 0 auto; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+/* ---------- 見出し ---------- */
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 4px 12px; }
+.eyebrow { margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; color: var(--mint); }
+.top h1 { margin: 2px 0 0; font-size: clamp(22px, 6vw, 30px); line-height: 1.25; letter-spacing: 0.04em; color: var(--text); text-wrap: balance; }
+.top .sub { margin: 2px 0 0; font-size: 12.5px; color: var(--text-dim); }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
+  border: 1px solid var(--mint-dim); border-radius: 999px; background: transparent; color: var(--mint);
+  font-size: 13px; cursor: pointer; white-space: nowrap;
+}
+.pill:hover { background: var(--mint-faint); }
+.pill[aria-pressed="true"] { background: var(--mint); color: var(--navy-900); font-weight: 700; }
+.pill.amber { border-color: var(--amber-dim); color: var(--amber); }
+.pill.amber:hover { background: var(--amber-faint); }
+
+/* ---------- 飛ぶ舞台 ---------- */
+.stage {
+  position: relative;
+  height: min(80svh, 760px);
+  min-height: 440px;
+  margin-inline: calc(-1 * var(--gutter));
+  overflow: hidden;
+  background: var(--navy-900);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  isolation: isolate;
+}
+.stage:active { cursor: grabbing; }
+@media (min-width: 760px) { .stage { margin-inline: 0; border-radius: 14px; border: 1px solid rgba(94, 242, 194, 0.16); } }
+.stage canvas { position: absolute; display: block; }
+.gl { inset: 0; width: 100%; height: 100%; }
+.scan { position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay; }
+.vignette { position: absolute; inset: 0; pointer-events: none; z-index: 1; opacity: 0;
+  background: radial-gradient(ellipse at 50% 46%, transparent 38%, rgba(255, 181, 71, 0.10) 70%, rgba(5, 14, 31, 0.85) 100%); }
+.flash { position: absolute; inset: 0; pointer-events: none; z-index: 2; opacity: 0;
+  background: radial-gradient(circle at 50% 46%, rgba(94, 242, 194, 0.28), transparent 60%); }
+.flash.gate { background: radial-gradient(circle at 50% 46%, rgba(255, 181, 71, 0.45), transparent 65%); }
+
+/* 計器（右上） */
+.hud { position: absolute; z-index: 3; top: 8px; right: 6px; display: grid; justify-items: end; gap: 1px; padding: 6px 10px 8px 28px; text-align: right; pointer-events: none;
+  border-radius: 10px; background: radial-gradient(ellipse at 100% 0%, rgba(5, 14, 31, 0.78), rgba(5, 14, 31, 0.45) 60%, rgba(5, 14, 31, 0) 100%); }
+.hud .tag { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; color: var(--mint); opacity: 0.85; }
+.hud .km { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: clamp(19px, 6.2vw, 38px); line-height: 1.1; color: var(--amber);
+  text-shadow: 0 0 14px rgba(255, 181, 71, 0.45), 0 0 2px rgba(5, 14, 31, 0.9); }
+.hud .row { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--text); text-shadow: 0 0 6px var(--navy-900); }
+.hud .speed { margin-top: 4px; font-family: var(--font-mono); font-size: 12px; color: var(--mint); text-shadow: 0 0 6px var(--navy-900); }
+.hud .speed[data-warp="true"] { color: var(--amber); }
+.hud .fiction { display: inline-block; margin-left: 6px; padding: 0 5px; border: 1px solid currentColor; border-radius: 3px; font-family: var(--font-body); font-size: 10px; }
+
+/* 桁の目盛り（左）・物差し（下）は 2D の canvas */
+.gauge { left: 0; top: 0; width: 64px; z-index: 3; pointer-events: none; }
+.tape { left: 0; bottom: 0; width: 100%; height: 66px; z-index: 3; pointer-events: none; }
+
+/* 天体の名前（3D の位置に重ねる） */
+.labels { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.lbl { position: absolute; left: 0; top: 0; display: grid; gap: 0; white-space: nowrap; transform: translate3d(-999px, -999px, 0); will-change: transform; }
+.lbl .n { font-size: 12.5px; font-weight: 700; color: var(--text); text-shadow: 0 0 6px var(--navy-900), 0 0 2px var(--navy-900); }
+.lbl .d { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); text-shadow: 0 0 6px var(--navy-900); }
+.lbl.probe .n { color: var(--mint); }
+.lbl.gate .n { color: var(--amber); }
+.reticle { position: absolute; left: 0; top: 0; width: 34px; height: 34px; margin: -17px 0 0 -17px; transform: translate3d(-999px, -999px, 0); will-change: transform; }
+.reticle i { position: absolute; width: 9px; height: 9px; border: 1.5px solid var(--mint); transition: all 0.35s; }
+.reticle i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; }
+.reticle i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+.reticle i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; }
+.reticle i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+.reticle.lock i:nth-child(1) { left: 7px; top: 7px; }
+.reticle.lock i:nth-child(2) { right: 7px; top: 7px; }
+.reticle.lock i:nth-child(3) { left: 7px; bottom: 7px; }
+.reticle.lock i:nth-child(4) { right: 7px; bottom: 7px; }
+
+.hint { position: absolute; z-index: 3; left: 0; right: 0; top: 40%; text-align: center; pointer-events: none; transition: opacity 0.5s; }
+.hint b { display: inline-block; padding: 8px 16px; border: 1px solid var(--mint-dim); border-radius: 999px; background: rgba(5, 14, 31, 0.6); font-weight: 400; font-size: 14px; color: var(--text); animation: bob 2.2s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-8px); } }
+
+/* 通り過ぎた場所のカード */
+.card {
+  position: absolute; z-index: 4; left: 12px; bottom: 76px;
+  width: min(360px, calc(100% - 24px)); max-height: calc(100% - 190px); overflow: auto;
+  padding: 0; border: 1px solid var(--mint-dim); border-radius: 10px;
+  background: var(--glass); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 0 24px rgba(94, 242, 194, 0.12);
+  transition: opacity 0.3s, transform 0.3s; cursor: auto; user-select: text; -webkit-user-select: text;
+}
+.card[data-off="true"] { opacity: 0; transform: translateY(10px); pointer-events: none; }
+.card[data-off="false"] ~ .warpnote { opacity: 0; }
+.card.gate { border-color: var(--amber-dim); box-shadow: 0 0 28px rgba(255, 181, 71, 0.16); }
+.card .bar { display: flex; justify-content: space-between; gap: 8px; padding: 6px 12px; border-bottom: 1px solid var(--mint-faint);
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; color: var(--mint); }
+.card.gate .bar { color: var(--amber); border-color: var(--amber-faint); }
+.card .body { display: grid; gap: 4px; padding: 10px 12px 12px; }
+.card .name { font-size: 17px; font-weight: 700; line-height: 1.35; color: var(--text); }
+.card .chip { margin-left: 8px; padding: 1px 6px; border: 1px solid var(--text-dim); border-radius: 3px; font-size: 10.5px; font-weight: 400; color: var(--text-dim); vertical-align: 2px; }
+.card .dist { font-family: var(--font-mono); font-size: 16px; color: var(--amber); }
+.card .how { font-size: 11.5px; color: var(--text-dim); }
+.card .lt { font-size: 13px; }
+.card .lt .mono { color: var(--mint); }
+.card .txt { margin: 2px 0 0; font-size: 13.5px; line-height: 1.7; }
+.card .ev { margin: 0; font-size: 12.5px; color: var(--amber); }
+.card .typed { animation: type 0.5s steps(24, end); }
+@media (max-width: 480px) { .card .name { font-size: 15.5px; } .card .dist { font-size: 15px; } .card .txt { font-size: 13px; } .card .body { padding: 8px 12px 10px; } }
+.card.moving .lt, .card.moving .txt, .card.moving .ev { display: none; }
+.stage:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
+@keyframes type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+.warpnote { position: absolute; z-index: 3; right: 10px; bottom: 70px; max-width: calc(100% - 20px); margin: 0; padding: 3px 8px; border-radius: 4px;
+  background: rgba(5, 14, 31, 0.7); font-size: 11px; line-height: 1.5; color: var(--text-dim); text-align: right; pointer-events: none; white-space: nowrap; }
+.warpnote b { color: var(--amber); font-weight: 700; }
+.nogl { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--text-dim); }
+
+.under { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-block: 12px 4px; }
+.under .note { flex: 1 1 260px; min-width: 0; margin: 0; font-size: 12.5px; color: var(--text-dim); }
+
+/* ---------- 距離のはしご ---------- */
+.ladder-wrap { padding-block: 26px 8px; }
+.ladder-wrap h2 { margin: 0; font-size: 20px; letter-spacing: 0.04em; text-wrap: balance; }
+.ladder-wrap .lead { margin: 4px 0 14px; font-size: 13px; color: var(--text-dim); }
+.ladder { list-style: none; margin: 0; padding: 0; position: relative; }
+.ladder::before { content: ""; position: absolute; left: 82px; top: 6px; bottom: 6px; width: 1px;
+  background: linear-gradient(var(--mint-dim), rgba(255, 181, 71, 0.6)); }
+.rung { position: relative; display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 24px; padding-block: 10px; }
+.rung::before { content: ""; position: absolute; left: 78px; top: 22px; width: 9px; height: 9px; border-radius: 50%; background: var(--navy-900); border: 1.5px solid var(--mint); }
+.rung.empty::before { border-color: var(--navy-600); }
+.rung .scale { padding-top: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); text-align: right; }
+.rung .items { display: grid; gap: 8px; min-width: 0; }
+.rung .none { padding-top: 10px; font-size: 12px; color: var(--navy-600); }
+.item {
+  display: grid; gap: 2px; width: 100%; min-height: 44px; padding: 10px 14px; text-align: left; cursor: pointer;
+  border: 1px solid rgba(94, 242, 194, 0.18); border-radius: 10px; background: linear-gradient(90deg, rgba(12, 33, 64, 0.85), rgba(12, 33, 64, 0.35)); color: var(--text);
+}
+.item:hover { border-color: var(--mint-dim); }
+.item.landmark { background: transparent; border-style: dashed; }
+.item.gate { border-color: var(--amber-dim); background: linear-gradient(90deg, rgba(255, 181, 71, 0.12), rgba(12, 33, 64, 0.3)); }
+.item .n { font-size: 15px; font-weight: 700; }
+.item.probe .n { color: var(--mint); }
+.item.gate .n { color: var(--amber); }
+.item .m { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 12px; color: var(--text-dim); }
+.item .m .mono { color: var(--amber); }
+.item .e { font-size: 12px; color: var(--amber); }
+.pending { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 8px; list-style: none; margin: 10px 0 0; padding: 0; }
+.pending li { padding: 10px 14px; border: 1px solid rgba(143, 179, 168, 0.25); border-radius: 10px; }
+.pending .n { font-weight: 700; color: var(--text); }
+.pending .t { margin: 2px 0 0; font-size: 12.5px; color: var(--text-dim); }
+.ladder-wrap h3 { margin: 26px 0 0; font-size: 15px; color: var(--mint); }
+.ladder-wrap h3 + .lead { margin-bottom: 0; }
+
+.foot { margin-top: 28px; padding-top: 14px; border-top: 1px solid rgba(94, 242, 194, 0.14); font-size: 12px; color: var(--text-dim); }
+.foot details { margin-top: 10px; }
+.foot summary { cursor: pointer; color: var(--mint); min-height: 44px; display: flex; align-items: center; }
+.foot ul { margin: 6px 0 0; padding-left: 1.2em; display: grid; gap: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hint b { animation: none; }
+  .card, .hint, .reticle i { transition: none; }
+  .card .typed { animation: none; }
+}
+</style>
+
+<div class="page">
+  <header class="top">
+    <div>
+      <p class="eyebrow">VOYASCOPE · FAR ROOM · 見た目の試作（Claude 案）</p>
+      <h1>遠くを見る部屋</h1>
+      <p class="sub">地球からの距離と、光で届く時間。2026年10月3日 21:00 の値で固定した試作です</p>
+    </div>
+  </header>
+
+  <section class="stage" id="stage" tabindex="0" aria-label="遠くへ飛ぶ画面。上へスワイプか ↑ キーで遠くへ、下へスワイプか ↓ キーで地球へ戻る。Home キーで地表へ">
+    <canvas class="gl" id="gl" aria-hidden="true"></canvas>
+    <div class="scan" aria-hidden="true"></div>
+    <div class="vignette" id="vignette" aria-hidden="true"></div>
+    <div class="flash" id="flash" aria-hidden="true"></div>
+    <div class="labels" id="labels" aria-hidden="true"></div>
+    <canvas class="gauge" id="gauge" aria-hidden="true"></canvas>
+    <canvas class="tape" id="tape" aria-hidden="true"></canvas>
+    <div class="hud" aria-hidden="true">
+      <span class="tag">地球からの距離</span>
+      <span class="km" id="hud-km">100 km</span>
+      <span class="row" id="hud-ly"></span>
+      <span class="row" id="hud-lt"></span>
+      <span class="speed" id="hud-speed" data-warp="false">停止中</span>
+    </div>
+    <div class="hint" id="hint" aria-hidden="true"><b>↑ 上へスワイプして飛ぶ</b></div>
+    <div class="card" id="card" data-off="true" aria-live="polite"></div>
+    <p class="warpnote"><b>光より速く進むのはワープ（作り話）です</b></p>
+  </section>
+
+  <div class="under">
+    <button type="button" class="pill" id="to-surface">地表へ戻る</button>
+    <button type="button" class="pill amber" id="to-ladder">↓ 距離のはしご</button>
+    <button type="button" class="pill" id="sound" aria-pressed="false">音：オフ</button>
+    <p class="note">右上の「光で◯秒」が本当の光の速さです。下の物差しは「0〜いまの距離」。遠くへ行くほど縮尺が変わり、通り過ぎた場所の印は左へ押しつぶされていきます。左の目盛りは「桁」。1目盛り上がるごとに10倍遠い。</p>
+  </div>
+
+  <section class="ladder-wrap" id="ladder-wrap" aria-labelledby="ladder-title">
+    <h2 id="ladder-title">距離のはしご</h2>
+    <p class="lead">1段下がるごとに10倍遠くなります。名前を押すと、その距離まで飛びます。</p>
+    <ol class="ladder" id="ladder"></ol>
+    <h3>いまの距離は準備中</h3>
+    <p class="lead">探査機の位置のデータを使えるようになってから、距離を出します。</p>
+    <ul class="pending" id="pending"></ul>
+  </section>
+
+  <footer class="foot">
+    <p>※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません。距離と文は 2026年10月3日の VOYASCOPE のカード（出典つき）から写した固定の値です。</p>
+    <details>
+      <summary>この試作の工夫（Claude 案）</summary>
+      <ul>
+        <li>位置は「距離の桁」で持ち、1桁を同じ奥行き（60）にした3D の通り道を飛ぶ。月・太陽・惑星・探査機は、その桁の位置で横を通り過ぎる</li>
+        <li>星は通り道のまわりで流れ、速いほど長い線になる。光より速いと、視野が広がり、まわりが暗くなる（ワープは作り話と、いつも書いている）</li>
+        <li>地球は出発のときは大きな地平線と大気の光。遠くへ行くほど小さく沈む</li>
+        <li>太陽はにじむ光とゆらぐ表面。1光日は、くぐり抜けるアンバーのゲート</li>
+        <li>探査機は光る目印と照準。近づくと照準がしまり、通り過ぎるとカードが出る（音をオンにすると、小さな音も鳴る）</li>
+        <li>左の目盛りで「いま何桁目か」、下の物差しで「0〜いまの距離」の縮尺の変わり方が見える</li>
+        <li>通り過ぎる場所の近くでは、少しだけ止まりやすい（SNAP）</li>
+        <li>動きを減らす設定では、星を流さず、視野も揺れも変えず、押した場所へすぐ移る</li>
+        <li>重いときは、自動で描く細かさを下げる（1秒に42コマを下回ったら）</li>
+        <li>調整できる値は、ファイルの先頭の TUNE にまとめた（はじく強さ・止まるまで・最高速・星の数・視野・止まりやすさ）</li>
+      </ul>
+    </details>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// 遠くを見る部屋：見た目の試作（Claude 案）。依頼文：prompts/codex-far-room-visual.md
+// ---------- 調整できる値 ----------
+const TUNE = {
+  SPACING: 60, // 1桁あたりの奥行き（3D の単位）
+  FRICTION: 0.2, // 1秒で速さがこの倍になる（約1秒で止まる）
+  SWIPE_GAIN: 0.0045, // 指を1px動かしたときの速さ（桁/秒）
+  WHEEL_GAIN: 0.0015, // ホイール1単位あたり
+  KEY_PUSH: 0.35, // ↑↓キー1回
+  MAX_V: 3.2, // 速さの上限（桁/秒）
+  SNAP: 1.2, // 通り過ぎる場所の近くで止まりやすくする強さ（0 で無効）
+  STAR_COUNT: 1500,
+  FOV: 58, // 視野（度）
+  FOV_WARP: 80, // いちばん速いワープのときの視野
+  SHOW_AHEAD: 2.2, // 何桁先から天体が見え始めるか
+  LEAD: 9, // 天体をその距離より少し先（3D の単位）に置く。着いたときに正面に見えるように
+  PIXEL_RATIO_MAX: 2,
+};
+
+// ---------- 固定データ（依頼文と同じ。数字と文を足さない） ----------
+const C = 299792.458;
+const LY = C * 86400 * 365.25;
+const P0 = 2; // 100 km
+const LIGHT_DAY = 25902068371;
+const PMAX = Math.log10(LIGHT_DAY) + 0.22; // 1光日のゲートをくぐった少し先まで
+const PLACES = [
+  { id: "moon", kind: "landmark", name: "月", km: 370080, how: "いまの距離（計算）", text: "光なら 1.2 秒で着く。ここまでは、ほとんど一瞬" },
+  { id: "jwst", kind: "probe", name: "ジェイムズ・ウェッブ宇宙望遠鏡", km: 1500000, approx: true, how: "目安（その日の距離ではない）", text: "地球のまわりではなく、地球から約150万km離れた「L2」という場所で、太陽のまわりを回っている" },
+  { id: "sun", kind: "landmark", name: "太陽", km: 149692153, how: "いまの距離（計算）", text: "いま見ている太陽の光は、8 分 19 秒前に太陽を出た光" },
+  { id: "bepicolombo", kind: "probe", name: "ベピコロンボ（みお）", km: 170871161, how: "水星までの距離（計算）", text: "8年かけて太陽系の内側を旅し、いま水星に着こうとしている（最後の接近の途中）", event: "11月21日（土）　水星を回る軌道に入る（あと49日）" },
+  { id: "perseverance", kind: "probe", name: "パーサヴィアランス", km: 246566337, how: "火星までの距離（計算）", text: "火星の地面を走りながら調べている。2026年6月に、走った距離がフルマラソン分（42.195km）になった" },
+  { id: "new-horizons", kind: "probe", name: "ニュー・ホライズンズ", km: 9500000000, approx: true, how: "2026年6月23日の値", text: "冥王星よりずっと遠い「カイパーベルト」を飛んでいる。2026年6月に、ほぼ1年の冬眠から目覚めた" },
+  { id: "light-day", kind: "light-day", name: "1光日", km: LIGHT_DAY, how: "光が24時間で進む距離", text: "ボイジャー1号は 11月18日（水）19:16、ここに届く予定（NASA）。人がつくったもので、はじめて" },
+];
+const GROUND = [{ id: "mmx", name: "火星衛星探査機（MMX）", text: "打ち上げ前", event: "10月20日（火）4:41　MMX の打ち上げ（あと16日7時間）" }];
+const PENDING = [
+  { id: "parker-solar-probe", name: "パーカー・ソーラー・プローブ", text: "太陽のまわりを回っている。2026年9月の最接近では、太陽から約610万kmまで近づき、時速約69万kmで飛んだ" },
+  { id: "hayabusa2", name: "はやぶさ２", text: "最後の目的地の小惑星 1998 KY26（2031年に着く予定）をめざして飛んでいる" },
+  { id: "voyager-1", name: "ボイジャー1号", text: "太陽圏の外の「恒星間空間」を飛んでいる。人がつくったもので、いちばん遠くにある" },
+  { id: "voyager-2", name: "ボイジャー2号", text: "太陽圏の外の「恒星間空間」を飛んでいる（2018年12月に入った）" },
+];
+for (const s of PLACES) s.p = Math.log10(s.km);
+
+// ---------- 数の書き方 ----------
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const group = (n) => Math.round(n).toLocaleString("ja-JP");
+function roundSig(x, sig) { if (!x) return 0; const p = 10 ** (Math.floor(Math.log10(Math.abs(x))) - sig + 1); return Math.round(x / p) * p; }
+function kmJa(km, sig = 3) {
+  const r = roundSig(km, sig);
+  if (r >= 1e8) { const o = Math.floor(r / 1e8), m = Math.round((r - o * 1e8) / 1e4); return `${group(o)}億${m ? `${group(m)}万` : ""} km`; }
+  if (r >= 1e4) { const m = Math.floor(r / 1e4), rest = Math.round(r - m * 1e4); return `${group(m)}万${rest ? group(rest) : ""} km`; }
+  return `${group(r)} km`;
+}
+function kmShort(km, sig = 3) {
+  const r = roundSig(km, sig), f = (v) => String(+v.toPrecision(sig));
+  if (r >= 1e8) return `${f(r / 1e8)}億km`;
+  if (r >= 1e4) return `${f(r / 1e4)}万km`;
+  return `${group(r)}km`;
+}
+function lightTime(s, approx = false) {
+  s = Math.max(0, s);
+  if (approx) {
+    if (s < 60) return `約 ${Math.round(s)} 秒`;
+    if (s < 3600) return `約 ${Math.round(s / 60)} 分`;
+    const m10 = Math.round(s / 600) * 10, h = Math.floor(m10 / 60), m = m10 % 60;
+    return `約 ${h} 時間${m ? ` ${m} 分` : ""}`;
+  }
+  if (s < 1) return `${s.toFixed(4)} 秒`;
+  if (s < 60) return `${s.toFixed(1)} 秒`;
+  s = Math.round(s);
+  if (s < 3600) return `${Math.floor(s / 60)} 分 ${s % 60} 秒`;
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return `${h} 時間${m ? ` ${m} 分` : ""}`;
+}
+const SUP = { "-": "⁻", 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
+function lightYears(km) {
+  const ly = km / LY;
+  if (ly >= 1e-4) return `${ly.toFixed(5)} 光年`;
+  const [m, e] = ly.toExponential(1).split("e");
+  return `${m}×10${String(Number(e)).replace(/./g, (c) => SUP[c])} 光年`;
+}
+const distText = (s) => (s.approx ? `約 ${kmJa(s.km, 2)}` : kmJa(s.km));
+const distShort = (s) => (s.approx ? `約${kmShort(s.km, 2)}` : kmShort(s.km));
+function niceStep(span) { const raw = span / 4, e = 10 ** Math.floor(Math.log10(raw)), m = raw / e; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * e; }
+const decadeName = (e) => (e >= 8 ? `${10 ** (e - 8)}億` : e >= 4 ? `${10 ** (e - 4)}万` : `${10 ** e}`);
+
+// ---------- ページの部品 ----------
+const $ = (id) => document.getElementById(id);
+const stage = $("stage");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const coarse = matchMedia("(pointer: coarse)").matches;
+$("hint").firstElementChild.textContent = coarse ? "↑ 上へスワイプして飛ぶ" : "↑ ホイールか ↑ キーで飛ぶ";
+
+// はしご
+(function buildLadder() {
+  const rows = [];
+  rows.push(`<li class="rung"><span class="scale">地上</span><div class="items">${GROUND.map((g) => `<div class="item probe" role="group"><span class="n">${esc(g.name)}</span><span class="m">${esc(g.text)}</span><span class="e">${esc(g.event)}</span></div>`).join("")}</div></li>`);
+  for (let e = 5; e <= 10; e++) {
+    const here = PLACES.filter((s) => Math.floor(s.p) === e);
+    rows.push(`<li class="rung${here.length ? "" : " empty"}"><span class="scale">${decadeName(e)} km〜</span><div class="items">${
+      here.map((s) => `<button type="button" class="item ${s.kind === "light-day" ? "gate" : s.kind}" data-go="${s.id}">
+        <span class="n">${esc(s.name)}</span>
+        <span class="m"><span class="mono">${esc(distShort(s))}</span><span>${esc(s.how)}</span><span>光で ${esc(lightTime(s.km / C, s.approx))}</span></span>
+        ${s.event ? `<span class="e">${esc(s.event)}</span>` : ""}${s.kind === "light-day" ? `<span class="e">ボイジャー1号が 11月18日（水）19:16 にここへ（NASA の予告）</span>` : ""}
+      </button>`).join("") || `<span class="none">—</span>`
+    }</div></li>`);
+  }
+  $("ladder").innerHTML = rows.join("");
+  $("pending").innerHTML = PENDING.map((s) => `<li><span class="n">${esc(s.name)}</span><p class="t">${esc(s.text)}</p></li>`).join("");
+})();
+
+// ---------- 状態 ----------
+let p = P0, v = 0, trip = null, shown = undefined, lastT = performance.now(), visible = true, hintHidden = false;
+const hideHint = () => { if (!hintHidden) { hintHidden = true; $("hint").style.opacity = "0"; } };
+function push(dv) { trip = null; v = Math.max(-TUNE.MAX_V, Math.min(TUNE.MAX_V, v + dv)); hideHint(); audio.wake(); }
+function flyTo(km) {
+  const to = Math.max(P0, Math.min(PMAX, Math.log10(km)));
+  hideHint(); v = 0;
+  if (reduce) { p = to; trip = null; } else trip = { from: p, to, t0: null, dur: 800 + Math.min(1900, Math.abs(to - p) * 280) };
+}
+const passedStop = (q) => [...PLACES].reverse().find((s) => q >= s.p - 0.02) ?? null;
+
+// 操作：指・マウス・ホイール・キー
+let drag = null;
+stage.addEventListener("pointerdown", (e) => {
+  if (e.target.closest(".card")) return;
+  drag = { y: e.clientY }; stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener("pointermove", (e) => { if (!drag) return; const dy = drag.y - e.clientY; drag.y = e.clientY; push(dy * TUNE.SWIPE_GAIN); });
+const endDrag = () => (drag = null);
+stage.addEventListener("pointerup", endDrag);
+stage.addEventListener("pointercancel", endDrag);
+stage.addEventListener("wheel", (e) => {
+  if (p <= P0 + 1e-6 && e.deltaY > 0 && v <= 0) return; // 地表で下へ回したら、ページを下へ
+  e.preventDefault(); push(-e.deltaY * TUNE.WHEEL_GAIN);
+}, { passive: false });
+stage.addEventListener("keydown", (e) => {
+  const k = { ArrowUp: TUNE.KEY_PUSH, ArrowDown: -TUNE.KEY_PUSH, PageUp: 1, PageDown: -1 }[e.key];
+  if (k) { push(k); e.preventDefault(); } else if (e.key === "Home") { flyTo(100); e.preventDefault(); }
+});
+$("to-surface").addEventListener("click", () => flyTo(100));
+$("to-ladder").addEventListener("click", () => $("ladder-wrap").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }));
+$("ladder").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-go]");
+  if (!b) return;
+  const s = PLACES.find((x) => x.id === b.dataset.go);
+  stage.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+  flyTo(s.km);
+  stage.focus({ preventScroll: true });
+});
+
+// ---------- 音（ブラウザの中で作る音だけ。最初は消しておく） ----------
+const audio = (() => {
+  let ctx = null, master, hum, humGain, filt, noise, noiseGain, on = false;
+  function start() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = 0.0; master.connect(ctx.destination);
+    hum = ctx.createOscillator(); hum.type = "sawtooth"; hum.frequency.value = 42;
+    filt = ctx.createBiquadFilter(); filt.type = "lowpass"; filt.frequency.value = 220;
+    humGain = ctx.createGain(); humGain.gain.value = 0.05;
+    hum.connect(filt); filt.connect(humGain); humGain.connect(master); hum.start();
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    noise = ctx.createBufferSource(); noise.buffer = buf; noise.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 900; bp.Q.value = 0.7;
+    noiseGain = ctx.createGain(); noiseGain.gain.value = 0;
+    noise.connect(bp); bp.connect(noiseGain); noiseGain.connect(master); noise.start();
+  }
+  return {
+    toggle() {
+      on = !on;
+      if (on && !ctx) start();
+      if (ctx) { ctx.resume(); master.gain.setTargetAtTime(on ? 0.22 : 0, ctx.currentTime, 0.08); }
+      return on;
+    },
+    wake() { if (ctx && on) ctx.resume(); },
+    update(speedNorm, warp) {
+      if (!ctx || !on) return;
+      const t = ctx.currentTime;
+      hum.frequency.setTargetAtTime(42 + speedNorm * 70, t, 0.1);
+      filt.frequency.setTargetAtTime(220 + speedNorm * 900, t, 0.1);
+      noiseGain.gain.setTargetAtTime(warp * 0.06, t, 0.15);
+    },
+    ping(gate = false) {
+      if (!ctx || !on) return;
+      const t = ctx.currentTime;
+      for (const [f, d] of gate ? [[392, 0], [587, 0.05], [784, 0.1]] : [[1046, 0], [1568, 0.06]]) {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = gate ? "triangle" : "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0, t + d); g.gain.linearRampToValueAtTime(gate ? 0.18 : 0.12, t + d + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + d + (gate ? 1.2 : 0.5));
+        o.connect(g); g.connect(master); o.start(t + d); o.stop(t + d + 1.3);
+      }
+    },
+  };
+})();
+$("sound").addEventListener("click", (e) => {
+  const on = audio.toggle();
+  e.currentTarget.setAttribute("aria-pressed", String(on));
+  e.currentTarget.textContent = on ? "音：オン" : "音：オフ";
+});
+
+// ---------- 3D ----------
+const glCanvas = $("gl");
+let renderer;
+try {
+  if (!window.THREE) throw new Error("three.js を読み込めません");
+  renderer = new THREE.WebGLRenderer({ canvas: glCanvas, antialias: false, powerPreference: "high-performance" });
+} catch (err) {
+  stage.insertAdjacentHTML("beforeend", `<div class="nogl">この端末では 3D で表示できません。下の「距離のはしご」で見られます。</div>`);
+}
+
+const NOISE = `
+float hash(vec3 p){ p = fract(p * 0.3183099 + vec3(0.11, 0.17, 0.13)); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float noise(vec3 x){ vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(hash(i), hash(i + vec3(1.,0.,0.)), f.x), mix(hash(i + vec3(0.,1.,0.)), hash(i + vec3(1.,1.,0.)), f.x), f.y),
+             mix(mix(hash(i + vec3(0.,0.,1.)), hash(i + vec3(1.,0.,1.)), f.x), mix(hash(i + vec3(0.,1.,1.)), hash(i + vec3(1.,1.,1.)), f.x), f.y), f.z); }
+float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * noise(p); p = p * 2.03 + 1.7; a *= 0.5; } return s; }
+`;
+
+function glowTexture(inner = "rgba(255,255,255,1)", mid = "rgba(255,255,255,0.25)") {
+  const c = document.createElement("canvas"); c.width = c.height = 128;
+  const g = c.getContext("2d"), r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, inner); r.addColorStop(0.18, mid); r.addColorStop(1, "rgba(255,255,255,0)");
+  g.fillStyle = r; g.fillRect(0, 0, 128, 128);
+  return new THREE.CanvasTexture(c);
+}
+function ringTexture() {
+  const c = document.createElement("canvas"); c.width = c.height = 128;
+  const g = c.getContext("2d"); g.strokeStyle = "rgba(255,255,255,0.9)"; g.lineWidth = 4;
+  g.beginPath(); g.arc(64, 64, 52, 0, Math.PI * 2); g.stroke();
+  return new THREE.CanvasTexture(c);
+}
+// 背景の星雲（1回だけ描いて、遠い球に貼る）
+function nebulaTexture() {
+  const c = document.createElement("canvas"); c.width = 1024; c.height = 512;
+  const g = c.getContext("2d");
+  g.fillStyle = "#050e1f"; g.fillRect(0, 0, 1024, 512);
+  const blobs = [
+    [180, 260, 260, "rgba(20, 48, 87, 0.55)"], [520, 180, 300, "rgba(12, 33, 64, 0.65)"], [760, 330, 240, "rgba(94, 242, 194, 0.07)"],
+    [900, 140, 200, "rgba(255, 181, 71, 0.05)"], [330, 420, 220, "rgba(94, 242, 194, 0.05)"], [640, 60, 180, "rgba(110, 120, 220, 0.08)"],
+  ];
+  for (const [x, y, r, col] of blobs) for (const dx of [-1024, 0, 1024]) {
+    const gr = g.createRadialGradient(x + dx, y, 0, x + dx, y, r); gr.addColorStop(0, col); gr.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = gr; g.fillRect(0, 0, 1024, 512);
+  }
+  const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping; return t;
+}
+
+let W = 0, H = 0, dpr = 1, kA = 1, hudRect = { l: 0, t: 0, r: 0, b: 0 };
+let camera, skyScene, mainScene, earthScene, orthoCam, starLines, starPoints, earthMat, nebula, objects = [], gate;
+
+if (renderer) {
+  renderer.setClearColor(0x050e1f, 1);
+  renderer.autoClear = false;
+  camera = new THREE.PerspectiveCamera(TUNE.FOV, 1, 0.1, 1600);
+  skyScene = new THREE.Scene();
+  mainScene = new THREE.Scene();
+  earthScene = new THREE.Scene();
+  orthoCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+  // 背景
+  nebula = new THREE.Mesh(new THREE.SphereGeometry(900, 32, 16), new THREE.MeshBasicMaterial({ map: nebulaTexture(), side: THREE.BackSide, depthWrite: false }));
+  skyScene.add(nebula);
+
+  // 星：通り道のまわりに置き、シェーダーで奥行きをくり返す。速いほど長い線
+  const N = TUNE.STAR_COUNT, L = 300;
+  const head = new Float32Array(N * 3), col = new Float32Array(N * 3), seg = new Float32Array(N * 6), segTail = new Float32Array(N * 2), segCol = new Float32Array(N * 6);
+  for (let i = 0; i < N; i++) {
+    const a = Math.random() * Math.PI * 2, r = 2.2 + 70 * Math.sqrt(Math.random());
+    const x = Math.cos(a) * r, y = Math.sin(a) * r * 0.85, z = Math.random() * L;
+    const tint = Math.random();
+    const c3 = tint < 0.12 ? [1.0, 0.82, 0.55] : tint < 0.3 ? [0.62, 0.95, 0.85] : [0.85, 0.9, 1.0];
+    head.set([x, y, z], i * 3); col.set(c3, i * 3);
+    seg.set([x, y, z, x, y, z], i * 6); segTail.set([0, 1], i * 2); segCol.set([...c3, ...c3], i * 6);
+  }
+  const starUniforms = { uTravel: { value: 0 }, uLen: { value: 0 }, uDepth: { value: L }, uScale: { value: 1 }, uTime: { value: 0 } };
+  const starVS = `
+    uniform float uTravel, uLen, uDepth, uScale, uTime;
+    attribute vec3 aColor; attribute float aTail;
+    varying vec3 vColor; varying float vAlpha;
+    void main(){
+      vec3 q = position;
+      float dz = mod(q.z - uTravel, uDepth);
+      q.z = cameraPosition.z - dz - 0.4 - aTail * uLen;
+      vec4 mv = modelViewMatrix * vec4(q, 1.0);
+      gl_Position = projectionMatrix * mv;
+      float far = smoothstep(uDepth, uDepth * 0.72, dz);
+      float near = smoothstep(0.0, 3.0, dz);
+      float tw = 0.75 + 0.25 * sin(uTime * 1.7 + position.x * 3.1 + position.y * 1.3);
+      vAlpha = far * near * (1.0 - aTail * 0.92) * tw;
+      vColor = aColor;
+      gl_PointSize = clamp(uScale * 20.0 / -mv.z, 1.0, 4.5);
+    }`;
+  const lineMat = new THREE.ShaderMaterial({
+    uniforms: starUniforms, vertexShader: starVS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    fragmentShader: `varying vec3 vColor; varying float vAlpha; void main(){ gl_FragColor = vec4(vColor, vAlpha * 0.9); }`,
+  });
+  const pointMat = new THREE.ShaderMaterial({
+    uniforms: starUniforms, vertexShader: starVS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    fragmentShader: `varying vec3 vColor; varying float vAlpha; void main(){ vec2 d = gl_PointCoord - 0.5; float a = smoothstep(0.5, 0.0, length(d)); gl_FragColor = vec4(vColor, vAlpha * a); }`,
+  });
+  const lg = new THREE.BufferGeometry();
+  lg.setAttribute("position", new THREE.BufferAttribute(seg, 3));
+  lg.setAttribute("aTail", new THREE.BufferAttribute(segTail, 1));
+  lg.setAttribute("aColor", new THREE.BufferAttribute(segCol, 3));
+  starLines = new THREE.LineSegments(lg, lineMat); starLines.frustumCulled = false; skyScene.add(starLines);
+  const pg = new THREE.BufferGeometry();
+  pg.setAttribute("position", new THREE.BufferAttribute(head, 3));
+  pg.setAttribute("aTail", new THREE.BufferAttribute(new Float32Array(N), 1));
+  pg.setAttribute("aColor", new THREE.BufferAttribute(col, 3));
+  starPoints = new THREE.Points(pg, pointMat); starPoints.frustumCulled = false; skyScene.add(starPoints);
+  starLines.userData.u = starUniforms;
+
+  // 地球：画面の下の大きな地平線から、遠くへ行くほど小さく沈む（画面に重ねて描く）
+  earthMat = new THREE.ShaderMaterial({
+    uniforms: { uRes: { value: new THREE.Vector2(1, 1) }, uC: { value: new THREE.Vector2() }, uR: { value: 100 }, uAlpha: { value: 1 }, uTime: { value: 0 } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    fragmentShader: `${NOISE}
+      uniform vec2 uRes, uC; uniform float uR, uAlpha, uTime; varying vec2 vUv;
+      void main(){
+        vec2 px = vUv * uRes; vec2 d = px - uC; float dist = length(d); float edge = dist - uR;
+        float rimW = clamp(uR * 0.045, 4.0, 26.0);
+        if (edge > 0.0) {
+          float glow = exp(-edge / rimW);
+          gl_FragColor = vec4(vec3(0.45, 0.75, 1.0), glow * 0.75 * uAlpha);
+          return;
+        }
+        vec2 n2 = d / uR; float nz = sqrt(max(0.0, 1.0 - dot(n2, n2)));
+        vec3 n = vec3(n2, nz);
+        vec3 L = normalize(vec3(0.62, 0.55, 0.56));
+        float lam = max(dot(n, L), 0.0);
+        float zoom = clamp(uR / max(uRes.y, 1.0), 0.02, 60.0);
+        vec3 sp = n * (3.0 + pow(max(zoom, 1.0), 0.85) * 2.6);
+        float land = fbm(sp + vec3(4.1, 1.3, 0.0));
+        float cloud = fbm(sp * 1.7 + vec3(uTime * 0.01, 0.0, 2.0));
+        vec3 ocean = mix(vec3(0.03, 0.12, 0.28), vec3(0.08, 0.27, 0.52), lam);
+        vec3 ground = mix(vec3(0.10, 0.20, 0.12), vec3(0.42, 0.38, 0.24), smoothstep(0.55, 0.75, land));
+        vec3 c = mix(ocean, ground, smoothstep(0.52, 0.56, land));
+        c = mix(c, vec3(0.92, 0.95, 1.0), smoothstep(0.55, 0.75, cloud) * 0.85);
+        c *= 0.12 + 1.05 * lam;
+        float rim = exp(edge / (rimW * 1.3));
+        c = mix(c, vec3(0.45, 0.75, 1.0), rim * (0.25 + 0.6 * lam));
+        gl_FragColor = vec4(c, uAlpha);
+      }`,
+    transparent: true, depthTest: false, depthWrite: false,
+  });
+  earthScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), earthMat));
+
+  // 月・水星・火星（表面はコードで描く）
+  const planetVS = `varying vec3 vN, vO, vV; void main(){ vO = normal; vN = normalize(mat3(modelMatrix) * normal); vec4 wp = modelMatrix * vec4(position, 1.0); vV = normalize(cameraPosition - wp.xyz); gl_Position = projectionMatrix * viewMatrix * wp; }`;
+  const planetMat = (a, b, scale, rim) => new THREE.ShaderMaterial({
+    uniforms: { uA: { value: new THREE.Color(a) }, uB: { value: new THREE.Color(b) }, uRim: { value: new THREE.Color(rim) }, uScale: { value: scale }, uAlpha: { value: 0 } },
+    vertexShader: planetVS,
+    fragmentShader: `${NOISE}
+      uniform vec3 uA, uB, uRim; uniform float uScale, uAlpha; varying vec3 vN, vO, vV;
+      void main(){
+        float n = fbm(vO * uScale);
+        float crater = smoothstep(0.62, 0.66, fbm(vO * uScale * 2.3 + 5.0));
+        vec3 base = mix(uA, uB, smoothstep(0.3, 0.75, n)) * (1.0 - crater * 0.25);
+        vec3 N = normalize(vN); vec3 L = normalize(vec3(0.55, 0.45, 0.7));
+        float lam = max(dot(N, L), 0.0);
+        float rim = pow(1.0 - max(dot(N, normalize(vV)), 0.0), 2.6);
+        gl_FragColor = vec4(base * (0.06 + 1.1 * lam) + uRim * rim * (0.2 + lam) * 0.7, uAlpha);
+      }`,
+    transparent: true,
+  });
+  const sunMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uAlpha: { value: 0 } },
+    vertexShader: planetVS,
+    fragmentShader: `${NOISE}
+      uniform float uTime, uAlpha; varying vec3 vN, vO, vV;
+      void main(){
+        float n = fbm(vO * 5.0 + vec3(uTime * 0.12, uTime * 0.07, 0.0));
+        float mu = max(dot(normalize(vN), normalize(vV)), 0.0);
+        vec3 core = vec3(1.0, 0.97, 0.86), limbC = vec3(1.0, 0.55, 0.16);
+        vec3 c = mix(limbC, core, pow(mu, 0.55));
+        c *= 0.9 + 0.22 * (n - 0.5);
+        gl_FragColor = vec4(c * 1.15, uAlpha);
+      }`,
+    transparent: true,
+  });
+
+  const glowTex = glowTexture(), ringTex = ringTexture();
+  const glow = (color, size, opacity = 1) => {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending }));
+    s.scale.set(size, size, 1); s.userData.base = opacity; return s;
+  };
+
+  // 置き場所（横・縦のずれ）。縦長の画面では横を詰める
+  const LAYOUT = {
+    moon: { x: 2.3, y: 0.7, r: 1.0 },
+    jwst: { x: -2.2, y: 1.6 },
+    sun: { x: 2.5, y: 2.4, r: 2.0 },
+    bepicolombo: { x: -2.6, y: 0.5, r: 0.55 },
+    perseverance: { x: 2.0, y: 0.1, r: 0.8 },
+    "new-horizons": { x: -1.8, y: 1.6 },
+    "light-day": { x: 0, y: 0, r: 4.6 },
+  };
+  for (const s of PLACES) {
+    const lay = LAYOUT[s.id];
+    const g = new THREE.Group();
+    const mats = [], sprites = [];
+    if (s.id === "moon") { const m = planetMat(0x6f7a88, 0xd4dbe4, 2.4, 0x9fb8d8); mats.push(m); g.add(new THREE.Mesh(new THREE.SphereGeometry(lay.r, 48, 32), m)); }
+    if (s.id === "sun") {
+      mats.push(sunMat); g.add(new THREE.Mesh(new THREE.SphereGeometry(lay.r, 48, 32), sunMat));
+      const a = glow(0xfff0c8, lay.r * 3.4, 1.0), b = glow(0xffb547, lay.r * 7, 0.55), c2 = glow(0xff7a2e, lay.r * 14, 0.25); sprites.push(a, b, c2); g.add(a, b, c2);
+    }
+    if (s.id === "bepicolombo") { const m = planetMat(0x5a5753, 0xb9b2a8, 3.0, 0xc9c0b4); mats.push(m); g.add(new THREE.Mesh(new THREE.SphereGeometry(lay.r, 40, 28), m)); }
+    if (s.id === "perseverance") { const m = planetMat(0x7a2e14, 0xd9773e, 2.2, 0xffa070); mats.push(m); g.add(new THREE.Mesh(new THREE.SphereGeometry(lay.r, 48, 32), m)); }
+    if (s.kind === "probe") {
+      // 探査機は光る目印（姿を作らない）
+      const off = lay.r ? [lay.r * 1.25, lay.r * 0.75, 0] : [0, 0, 0];
+      const core = glow(0xffffff, 0.32, 1), halo = glow(0x5ef2c2, 1.9, 0.85);
+      const ring = new THREE.Sprite(new THREE.SpriteMaterial({ map: ringTex, color: 0x5ef2c2, transparent: true, opacity: 0.6, depthWrite: false, blending: THREE.AdditiveBlending }));
+      ring.scale.set(0.9, 0.9, 1); ring.userData.base = 0.6; ring.userData.ring = true;
+      for (const sp of [core, halo, ring]) sp.position.set(...off);
+      sprites.push(core, halo, ring); g.add(core, halo, ring);
+      g.userData.beacon = new THREE.Vector3(...off);
+    }
+    if (s.kind === "light-day") {
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xffb547, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+      const tor = new THREE.Mesh(new THREE.TorusGeometry(lay.r, 0.04, 8, 220), ringMat);
+      const tor2 = new THREE.Mesh(new THREE.TorusGeometry(lay.r * 1.08, 0.015, 6, 220), ringMat);
+      const ticks = [];
+      for (let i = 0; i < 72; i++) {
+        const a = (i / 72) * Math.PI * 2, r0 = lay.r * (i % 6 ? 1.02 : 0.95), r1 = lay.r * 1.06;
+        ticks.push(Math.cos(a) * r0, Math.sin(a) * r0, 0, Math.cos(a) * r1, Math.sin(a) * r1, 0);
+      }
+      const tg = new THREE.BufferGeometry(); tg.setAttribute("position", new THREE.Float32BufferAttribute(ticks, 3));
+      const tickMat = new THREE.LineBasicMaterial({ color: 0xffb547, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      g.add(tor, tor2, new THREE.LineSegments(tg, tickMat));
+      mats.push(ringMat, tickMat);
+      const halo = glow(0xffb547, lay.r * 3.2, 0.12); sprites.push(halo); g.add(halo);
+      gate = g;
+    }
+    g.userData = { ...g.userData, s, lay, mats, sprites };
+    mainScene.add(g);
+    objects.push(g);
+  }
+
+  // ニュー・ホライズンズのあたりに、うすい氷のちり（飾り）
+  const dust = [];
+  for (let i = 0; i < 520; i++) {
+    const a = Math.random() * Math.PI * 2, r = 1.2 + 14 * Math.random(), q = 9.62 + Math.random() * 0.28;
+    dust.push(Math.cos(a) * r, Math.sin(a) * r * 0.8, -(q - P0) * TUNE.SPACING - TUNE.LEAD);
+  }
+  const dg = new THREE.BufferGeometry(); dg.setAttribute("position", new THREE.Float32BufferAttribute(dust, 3));
+  const dustMat = new THREE.PointsMaterial({ color: 0xbfd6ea, size: 0.09, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+  const dustPts = new THREE.Points(dg, dustMat); dustPts.userData.dust = true;
+  mainScene.add(dustPts);
+  mainScene.userData.dust = dustMat;
+}
+
+// 名前と照準（3D の位置に重ねる HTML）
+const labelEls = new Map();
+for (const s of PLACES) {
+  const el = document.createElement("div");
+  el.className = `lbl ${s.kind === "light-day" ? "gate" : s.kind}`;
+  el.innerHTML = `<span class="n">${esc(s.name)}</span><span class="d">${esc(distShort(s))}</span>`;
+  $("labels").append(el);
+  let ret = null;
+  if (s.kind === "probe") { ret = document.createElement("div"); ret.className = "reticle"; ret.innerHTML = "<i></i><i></i><i></i><i></i>"; $("labels").append(ret); }
+  labelEls.set(s.id, { el, ret });
+}
+
+// ---------- 大きさ ----------
+const gaugeCv = $("gauge"), tapeCv = $("tape"), gctx = gaugeCv.getContext("2d"), tctx = tapeCv.getContext("2d");
+let pixelRatio = Math.min(window.devicePixelRatio || 1, TUNE.PIXEL_RATIO_MAX);
+function size() {
+  W = stage.clientWidth; H = stage.clientHeight; dpr = window.devicePixelRatio || 1;
+  kA = Math.max(0.5, Math.min(1.35, W / H));
+  if (renderer) {
+    renderer.setPixelRatio(pixelRatio); renderer.setSize(W, H, false);
+    camera.aspect = W / H; camera.updateProjectionMatrix();
+    earthMat.uniforms.uRes.value.set(W, H);
+    for (const g of objects) { const { lay, s } = g.userData; g.position.set(lay.x * kA, lay.y * (0.75 + 0.25 * kA), -(s.p - P0) * TUNE.SPACING - TUNE.LEAD); }
+  }
+  hudRect = { l: W - Math.min(380, W * 0.72), t: 0, r: W, b: 140 };
+  const gh = Math.max(120, H - 66 - 150);
+  gaugeCv.style.top = "128px"; gaugeCv.style.height = `${gh}px`;
+  gaugeCv.width = 64 * dpr; gaugeCv.height = gh * dpr; gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  tapeCv.width = W * dpr; tapeCv.height = 66 * dpr; tctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+new ResizeObserver(size).observe(stage);
+new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(stage);
+
+// ---------- 計器 ----------
+const hud = { km: $("hud-km"), ly: $("hud-ly"), lt: $("hud-lt"), speed: $("hud-speed") };
+let hudAt = 0;
+function speedInfo(km) {
+  const kmps = Math.abs(km * Math.LN10 * v);
+  if (Math.abs(v) < 0.01) return { text: "停止中", warp: 0, kmps: 0 };
+  if (kmps < C) return { text: `秒速 ${group(kmps)} km`, warp: 0, kmps };
+  const ratio = kmps / C;
+  return { text: `ワープ中：光の ${group(ratio)} 倍`, warp: Math.min(1, Math.log10(ratio + 1) / 3.2), kmps };
+}
+function drawHud(km, now, sp) {
+  if (now - hudAt < 50 && Math.abs(v) > 0.01) return;
+  hudAt = now;
+  hud.km.textContent = `${group(km)} km`;
+  hud.ly.textContent = lightYears(km);
+  hud.lt.textContent = `光で ${lightTime(km / C)}`;
+  hud.speed.innerHTML = sp.warp > 0 ? `${esc(sp.text)}<span class="fiction">作り話</span>` : esc(sp.text);
+  hud.speed.dataset.warp = String(sp.warp > 0);
+}
+// 左：桁の目盛り（下が地表、上が1光日）
+function drawGauge(q) {
+  const h = gaugeCv.height / dpr, top = 8, bot = h - 8, span = bot - top;
+  const yOf = (pp) => bot - ((pp - P0) / (PMAX - P0)) * span;
+  gctx.clearRect(0, 0, 64, h);
+  gctx.strokeStyle = "rgba(94,242,194,0.35)"; gctx.lineWidth = 1;
+  gctx.beginPath(); gctx.moveTo(14, top); gctx.lineTo(14, bot); gctx.stroke();
+  gctx.font = "9.5px 'JetBrains Mono', monospace"; gctx.textAlign = "left"; gctx.textBaseline = "middle";
+  for (let e = 2; e <= 10; e++) {
+    const y = yOf(e);
+    gctx.strokeStyle = e <= q ? "rgba(255,181,71,0.8)" : "rgba(94,242,194,0.45)";
+    gctx.beginPath(); gctx.moveTo(10, y); gctx.lineTo(18, y); gctx.stroke();
+    gctx.fillStyle = e <= q ? "rgba(255,181,71,0.85)" : "rgba(143,179,168,0.8)";
+    gctx.fillText(decadeName(e), 21, y);
+  }
+  for (const s of PLACES) {
+    const y = yOf(s.p);
+    gctx.fillStyle = s.kind === "probe" ? "#5ef2c2" : s.kind === "light-day" ? "#ffb547" : "#c9d3e0";
+    gctx.beginPath(); gctx.arc(14, y, 2.4, 0, Math.PI * 2); gctx.fill();
+  }
+  const y = yOf(q);
+  gctx.shadowColor = "#ffb547"; gctx.shadowBlur = 8; gctx.fillStyle = "#ffb547";
+  gctx.beginPath(); gctx.moveTo(4, y - 5); gctx.lineTo(11, y); gctx.lineTo(4, y + 5); gctx.closePath(); gctx.fill();
+  gctx.shadowBlur = 0;
+}
+// 下：物差し（0〜いまの距離）
+function drawTape(km) {
+  const w = W, x0 = 16, x1 = w - 16, y = 40, len = x1 - x0;
+  tctx.clearRect(0, 0, w, 66);
+  const grd = tctx.createLinearGradient(0, 0, 0, 66); grd.addColorStop(0, "rgba(5,14,31,0)"); grd.addColorStop(0.35, "rgba(5,14,31,0.82)"); grd.addColorStop(1, "rgba(5,14,31,0.95)");
+  tctx.fillStyle = grd; tctx.fillRect(0, 0, w, 66);
+  tctx.strokeStyle = "rgba(143,179,168,0.8)"; tctx.lineWidth = 1.2;
+  tctx.beginPath(); tctx.moveTo(x0, y); tctx.lineTo(x1, y); tctx.stroke();
+  const step = niceStep(km);
+  tctx.font = "10px 'JetBrains Mono', monospace"; tctx.textAlign = "center"; tctx.fillStyle = "rgba(143,179,168,0.95)";
+  for (let val = 0, i = 0; val <= km * 1.0001; val += step, i++) {
+    const x = x0 + (val / km) * len;
+    tctx.beginPath(); tctx.moveTo(x, y); tctx.lineTo(x, y - 8); tctx.stroke();
+    for (let k = 1; k < 5; k++) { const xs = x0 + ((val + (step * k) / 5) / km) * len; if (xs <= x1) { tctx.beginPath(); tctx.moveTo(xs, y); tctx.lineTo(xs, y - 4); tctx.stroke(); } }
+    if (i > 0 && x < x1 - 64) tctx.fillText(kmShort(val), x, y + 15);
+  }
+  tctx.textAlign = "left"; tctx.fillText("0", x0 - 2, y + 15);
+  tctx.textAlign = "right"; tctx.fillStyle = "#ffb547"; tctx.fillText("いまここ", x1, y + 15);
+  tctx.textAlign = "left"; tctx.fillStyle = "#5ef2c2"; tctx.font = "11px 'Zen Kaku Gothic New', sans-serif";
+  tctx.fillText(`物差し　1目盛り＝${kmShort(step / 5)}`, x0, 18);
+  for (const s of PLACES) {
+    if (s.km > km) continue;
+    const x = x0 + (s.km / km) * len;
+    tctx.fillStyle = s.kind === "probe" ? "#5ef2c2" : s.kind === "light-day" ? "#ffb547" : "#c9d3e0";
+    tctx.beginPath(); tctx.moveTo(x, y - 2); tctx.lineTo(x - 4, y - 10); tctx.lineTo(x + 4, y - 10); tctx.closePath(); tctx.fill();
+  }
+}
+
+// 通り過ぎた場所のカード
+const card = $("card");
+function showCard(s) {
+  if (!s) { card.dataset.off = "true"; return; }
+  const gateCls = s.kind === "light-day";
+  card.className = `card${gateCls ? " gate" : ""}${card.classList.contains("moving") ? " moving" : ""}`;
+  card.innerHTML = `
+    <div class="bar"><span>${gateCls ? "GATE · 通過" : s.kind === "probe" ? "TARGET · 通過" : "LANDMARK · 通過"}</span><span>${esc(lightYears(s.km))}</span></div>
+    <div class="body">
+      <span class="name">${esc(s.name)}${s.kind === "landmark" ? `<span class="chip">くらべる目安</span>` : ""}</span>
+      <span><span class="dist">${esc(distText(s))}</span>　<span class="how">${esc(s.how)}</span></span>
+      <span class="lt">光で <span class="mono">${esc(lightTime(s.km / C, s.approx))}</span></span>
+      <p class="txt typed">${esc(s.text)}</p>
+      ${s.event ? `<p class="ev">${esc(s.event)}</p>` : ""}
+    </div>`;
+  card.dataset.off = "false";
+}
+function pulse(gateHit) {
+  if (reduce) return;
+  const f = $("flash");
+  f.classList.toggle("gate", gateHit);
+  f.animate([{ opacity: 0.0 }, { opacity: 1 }, { opacity: 0 }], { duration: gateHit ? 900 : 520, easing: "ease-out" });
+}
+
+// ---------- 毎フレーム ----------
+const tmp = typeof THREE !== "undefined" ? new THREE.Vector3() : null;
+let frameMs = 16, frames = 0, qualityAt = 0, idle = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.05, (now - lastT) / 1000 || 0);
+  frameMs = frameMs * 0.95 + (now - lastT) * 0.05;
+  lastT = now;
+  const before = p;
+  if (trip) {
+    trip.t0 ??= now;
+    const u = Math.max(0, Math.min(1, (now - trip.t0) / trip.dur));
+    const e = u < 0.5 ? 4 * u * u * u : 1 - (-2 * u + 2) ** 3 / 2;
+    p = trip.from + (trip.to - trip.from) * e;
+    v = dt > 0 ? (p - before) / dt : 0;
+    if (u >= 1) { p = trip.to; trip = null; v = 0; }
+  } else {
+    p = Math.max(P0, Math.min(PMAX, p + v * dt));
+    if (p === P0 || p === PMAX) v = 0;
+    // 通り過ぎる場所の近くでは、少しだけ止まりやすい
+    let near = 0;
+    for (const s of PLACES) near = Math.max(near, 1 - Math.abs(p - s.p) / 0.06);
+    const fr = TUNE.FRICTION ** (dt * (1 + TUNE.SNAP * Math.max(0, near) * (Math.abs(v) < 0.8 ? 1 : 0)));
+    v *= fr;
+    if (Math.abs(v) < 0.002) v = 0;
+  }
+  const s = passedStop(p);
+  if (s !== shown) {
+    const forward = shown === undefined ? false : (s?.p ?? 0) > (shown?.p ?? 0);
+    shown = s;
+    showCard(s);
+    if (s && forward && s.kind !== "light-day") { pulse(false); audio.ping(false); }
+  }
+  const gateP = Math.log10(LIGHT_DAY) + TUNE.LEAD / TUNE.SPACING;
+  if (before < gateP && p >= gateP) { pulse(true); audio.ping(true); }
+  // 速く動いているあいだは、カードを小さく（名前と距離だけ）
+  const fast = Math.abs(v) > 0.35 || !!trip;
+  if (fast !== card.classList.contains("moving")) card.classList.toggle("moving", fast);
+  if (!visible || document.hidden) return;
+  const moving = p !== before || v !== 0 || !!trip;
+  const km = 10 ** p;
+  const sp = speedInfo(km);
+  audio.update(Math.min(1, Math.abs(v) / TUNE.MAX_V), sp.warp);
+  drawHud(km, now, sp);
+  drawGauge(p);
+  drawTape(km);
+  $("vignette").style.opacity = reduce ? "0" : String(sp.warp * 0.9);
+  if (!renderer) return;
+
+  const dm = mainScene.userData.dust;
+  if (dm) dm.opacity = 0.6 * Math.max(0, Math.min(1, (0.9 - Math.abs(p - 9.75)) / 0.4));
+  // カメラ：距離の桁に合わせて奥へ。ワープでは視野が広がり、少し揺れる
+  const camZ = -(p - P0) * TUNE.SPACING;
+  const warp = reduce ? 0 : sp.warp;
+  camera.fov = TUNE.FOV + (TUNE.FOV_WARP - TUNE.FOV) * warp;
+  camera.updateProjectionMatrix();
+  const shake = warp * 0.06;
+  camera.position.set(shake ? (Math.random() - 0.5) * shake : 0, shake ? (Math.random() - 0.5) * shake : 0, camZ);
+  nebula.position.copy(camera.position);
+  nebula.rotation.y = -camZ * 0.00035;
+  const u = starLines.userData.u;
+  u.uTravel.value = -camZ;
+  u.uTime.value = reduce ? 0 : now / 1000;
+  u.uScale.value = Math.min(pixelRatio, 2) * (H / 800);
+  const unitsPerSec = Math.abs(v) * TUNE.SPACING;
+  u.uLen.value = reduce ? 0 : Math.sign(v) * Math.min(38, unitsPerSec * 0.075);
+
+  // 地球（画面の上に重ねる）
+  const rPx = Math.min(H * 8, (6371 / km) * H * 0.9);
+  const f = Math.max(0, Math.min(1, (p - P0) / 2.5));
+  const topY = H * 0.6 + (H - 74 - H * 0.6) * f;
+  earthMat.uniforms.uR.value = rPx;
+  earthMat.uniforms.uC.value.set(W / 2, H - topY - rPx);
+  earthMat.uniforms.uAlpha.value = rPx < 0.6 ? 0 : Math.min(1, rPx / 2);
+  earthMat.uniforms.uTime.value = now / 1000;
+
+  // 天体：何桁か先から見え始め、横を通り過ぎる
+  const taken = [hudRect];
+  const order = [...objects].sort((a, b) => (a.userData.s.p - p) - (b.userData.s.p - p));
+  const labelPos = new Map();
+  for (const g of order) {
+    const { s: o, mats, sprites, lay } = g.userData;
+    const ahead = (o.p - p); // 桁
+    let a = Math.min(1, Math.max(0, (TUNE.SHOW_AHEAD - ahead) / 0.5)) * (ahead > -0.4 ? 1 : 0);
+    g.visible = a > 0.002;
+    for (const m of mats) { if (m.uniforms) m.uniforms.uAlpha.value = a; else m.opacity = a * (o.kind === "light-day" ? 0.95 : 1); }
+    for (const spr of sprites) {
+      const pulseK = spr.userData.ring && !reduce ? 0.65 + 0.35 * Math.sin(now / 380) : 1;
+      spr.material.opacity = (spr.userData.base ?? 1) * a * pulseK;
+      if (spr.userData.ring && !reduce) { const k = 0.8 + 0.6 * ((now / 1400) % 1); spr.scale.set(k, k, 1); spr.material.opacity *= 1 - ((now / 1400) % 1); }
+    }
+    if (o.id === "sun") mats[0].uniforms.uTime.value = reduce ? 0 : now / 1000;
+    // 名前と照準
+    const { el, ret } = labelEls.get(o.id);
+    const anchor = g.userData.beacon ? tmp.copy(g.userData.beacon).add(g.position) : tmp.copy(g.position).add(new THREE.Vector3(0, (lay.r ?? 0.6) * (o.kind === "light-day" ? 1.0 : 1.25), 0));
+    anchor.project(camera);
+    const onScreen = anchor.z < 1 && Math.abs(anchor.x) < 1.15 && Math.abs(anchor.y) < 1.15 && a > 0.15 && ahead < 1.6 && !(o.kind === "light-day" && ahead < 0.3);
+    if (onScreen) {
+      const x = (anchor.x * 0.5 + 0.5) * W, y = (-anchor.y * 0.5 + 0.5) * H;
+      const lw = (el.dataset.w ||= String(o.name.length * 13 + 12)) * 1;
+      const lx = Math.max(8, Math.min(W - lw - 8, x + 24));
+      const rect = { l: lx, t: y - 16, r: lx + lw, b: y + 22 };
+      const free = !taken.some((q) => rect.l < q.r && q.l < rect.r && rect.t < q.b && q.t < rect.b);
+      if (free) taken.push(rect);
+      el.style.transform = free ? `translate3d(${lx}px, ${y - 14}px, 0)` : "translate3d(-999px,-999px,0)";
+      el.style.opacity = String(Math.min(1, a * 1.4));
+      if (ret) { ret.style.transform = `translate3d(${x}px, ${y}px, 0)`; ret.classList.toggle("lock", ahead < 0.35 && ahead > -0.05); ret.style.opacity = String(a); }
+    } else {
+      el.style.transform = "translate3d(-999px,-999px,0)";
+      if (ret) ret.style.transform = "translate3d(-999px,-999px,0)";
+    }
+  }
+
+  if (!moving && ++idle % 2) return;
+  renderer.clear();
+  renderer.render(skyScene, camera);
+  renderer.render(earthScene, orthoCam);
+  renderer.render(mainScene, camera);
+
+  // 重いときは、描く細かさを自動で下げる
+  frames++;
+  if (now - qualityAt > 2500 && frames > 90) {
+    qualityAt = now; frames = 0;
+    if (frameMs > 24 && pixelRatio > 1) { pixelRatio = Math.max(1, pixelRatio - 0.25); size(); }
+  }
+}
+size();
+requestAnimationFrame(frame);
+</script>

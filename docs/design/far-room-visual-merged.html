@@ -1,0 +1,2494 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>遠くを見る部屋 合わせた試作</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: 画面いっぱいの宇宙（3D の航路を飛ぶ）に、Codex 案の表示（左下に大きな名前と説明・右上に距離・下に物差し・右下に「その先へ →」）を重ねる。
+   下へスクロールすると距離のはしご。操作感は Claude 案、表示は Codex 案、航路はスイングバイの弧をつないだ道。宇宙の暗い1つの見た目に決めている */
+:root {
+  --navy-900: #050e1f;
+  --navy-800: #07142b;
+  --navy-700: #0c2140;
+  --navy-600: #143057;
+  --mint: #5ef2c2;
+  --amber: #ffb547;
+  --text: #d9f4ea;
+  --dim: #8fb3a8;
+  --line: rgba(143, 179, 168, 0.2);
+  --mint-line: rgba(94, 242, 194, 0.45);
+  --shade: rgba(5, 14, 31, 0.6);
+  --body: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --side: 5%;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--navy-900); overscroll-behavior: none; } /* 下へなぞって飛ぶので、ページの引き下ろし（再読み込み）を起こさない */
+body { margin: 0; background: var(--navy-900); color: var(--text); font-family: var(--body); font-size: 14px; line-height: 1.6; -webkit-text-size-adjust: 100%; }
+button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button { font: inherit; color: inherit; cursor: pointer; min-height: 44px; min-width: 44px; padding: 0; border: 0; background: none; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 4px; }
+svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip { position: absolute; z-index: 40; top: -80px; left: 12px; padding: 12px 16px; border-radius: 8px; background: var(--navy-700); }
+.skip:focus { top: 8px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font: 10px/1.6 var(--mono); letter-spacing: 0.2em; color: var(--mint); }
+
+/* ---------- 飛ぶ舞台 ---------- */
+.journey { position: relative; height: calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: 620px; max-height: 1300px; overflow: hidden; isolation: isolate; background: var(--navy-900); }
+.viewport { position: absolute; inset: 0; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.viewport:active { cursor: grabbing; }
+.viewport:focus-visible { outline-offset: -4px; }
+#space { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.vignette { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(5, 14, 31, 0.55), transparent 52%), linear-gradient(0deg, #050e1f 0%, rgba(5, 14, 31, 0.62) 10%, transparent 36%, transparent 80%, rgba(5, 14, 31, 0.45)); }
+.warp-vignette { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
+.flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 46%, rgba(94, 242, 194, 0.26), transparent 62%); }
+.flash.gate { background: radial-gradient(circle at 50% 46%, rgba(255, 181, 71, 0.42), transparent 66%); }
+.overlay { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+.topbar { position: absolute; top: 0; left: 0; right: 0; height: 96px; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--side); pointer-events: none; }
+.topbar a, .topbar button { pointer-events: auto; }
+.brand { display: flex; align-items: center; gap: 12px; min-height: 44px; font: 500 19px var(--mono); letter-spacing: 0.16em; text-decoration: none; }
+.brand svg { width: 29px; height: 29px; color: var(--mint); }
+.brand-room { margin-left: 8px; padding-left: 20px; border-left: 1px solid var(--line); font: 12px var(--body); letter-spacing: 0.15em; color: var(--dim); }
+.top-actions { display: flex; align-items: center; gap: 18px; }
+.round { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 50%; }
+.round .on { display: none; }
+.round[aria-pressed="true"] { color: var(--mint); border-color: var(--mint-line); }
+.round[aria-pressed="true"] .on { display: inline; }
+.round[aria-pressed="true"] .off { display: none; }
+.map-link { display: flex; align-items: center; gap: 9px; min-height: 44px; font-size: 12px; letter-spacing: 0.08em; text-decoration: none; }
+.map-link svg { width: 16px; }
+
+.telemetry { position: absolute; right: var(--side); top: 132px; text-align: right; pointer-events: none; text-shadow: 0 0 2px #050e1f, 0 1px 3px #050e1f, 0 1px 12px #050e1f, 0 0 26px rgba(5, 14, 31, 0.85); } /* 明るい木星の上でも読める */
+.metric-label { font-size: 11px; letter-spacing: 0.16em; color: var(--dim); }
+.metric-label .approx { margin-left: 6px; font-size: 10px; letter-spacing: 0; color: var(--amber); }
+.distance { margin: 6px 0 10px; font: 400 clamp(26px, 2.6vw, 40px)/1.05 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; color: var(--amber); white-space: nowrap; }
+.distance small { margin-left: 8px; font-size: 12px; letter-spacing: 0; color: var(--dim); }
+.submetrics { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 16px; font: 11px var(--mono); color: var(--dim); }
+.submetrics b { font-weight: 400; color: var(--text); }
+.speed { margin-top: 8px; font: 11px var(--mono); color: var(--dim); }
+.speed.warp { color: var(--amber); }
+.speed .fiction { margin-left: 6px; padding: 0 5px; border: 1px solid currentColor; border-radius: 3px; font: 10px var(--body); }
+
+.top-status { position: absolute; left: var(--side); top: 134px; display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.14em; color: var(--dim); pointer-events: none; }
+.status-dot { width: 5px; height: 5px; flex-shrink: 0; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px var(--mint); }
+
+/* うしろの窓：離れていく地球（見かけの大きさは本当の値） */
+.rear { position: absolute; left: var(--side); top: 164px; margin: 0; display: flex; align-items: center; gap: 12px; pointer-events: none; transition: opacity 0.6s; }
+.rear[data-off="true"] { opacity: 0; }
+.rear canvas { display: block; width: 76px; height: 76px; }
+.rear figcaption { display: grid; gap: 3px; font-size: 10px; letter-spacing: 0.08em; color: var(--dim); text-shadow: 0 1px 8px #050e1f; }
+.rear figcaption b { font: 400 11px var(--mono); font-variant-numeric: tabular-nums; color: var(--text); }
+
+.chapter-rail { position: absolute; left: 25px; top: 44%; display: flex; flex-direction: column; align-items: center; gap: 16px; font: 10px var(--mono); color: var(--dim); pointer-events: none; }
+.rail-line { position: relative; width: 1px; height: 105px; background: var(--line); }
+.rail-line i { position: absolute; left: 0; top: 0; width: 1px; height: 0; background: var(--amber); }
+
+.scene-tag { position: absolute; left: 74%; bottom: 250px; display: flex; flex-direction: column; align-items: flex-start; font: 11px var(--mono); letter-spacing: 0.2em; color: var(--text); pointer-events: none; transition: opacity 0.4s; text-shadow: 0 1px 10px #050e1f; }
+.scene-tag small { margin-top: 8px; font: 11px var(--body); letter-spacing: 0.06em; color: var(--dim); }
+.tag-line { width: 43px; height: 1px; margin-bottom: 14px; background: var(--mint); opacity: 0.65; }
+.journey.moving .scene-tag, .journey.rest .scene-tag { opacity: 0; }
+
+.story { position: absolute; left: 8.5%; bottom: 224px; width: min(520px, 46vw); pointer-events: none; transition: opacity 0.6s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); text-shadow: 0 2px 30px rgba(5, 14, 31, 0.6); }
+.story h2 { margin: 22px 0; font-size: clamp(52px, 6vw, 90px); font-weight: 500; line-height: 1.25; letter-spacing: 0.07em; text-wrap: balance; }
+.story p { max-width: 440px; margin: 0; font-size: 14px; line-height: 2.1; letter-spacing: 0.05em; color: var(--dim); }
+.hero-meta { margin-top: 16px; font: 12px/1.9 var(--mono); color: var(--amber); }
+.hero-meta small { display: block; margin-top: 2px; font: 11px var(--body); color: var(--dim); }
+.hero-event { margin-top: 8px; font-size: 12px; line-height: 1.8; color: var(--amber); }
+.detail-link { display: inline-flex; align-items: center; gap: 24px; margin-top: 10px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--text); pointer-events: auto; }
+.detail-link span { font: 18px var(--mono); color: var(--mint); }
+@media (min-width: 901px) { .journey.encounter .story { width: min(600px, 48vw); } }
+.journey.encounter .story h2 { margin: 14px 0 16px; font-size: clamp(32px, 3.4vw, 50px); line-height: 1.38; letter-spacing: 0.03em; word-break: keep-all; }
+.journey.moving .story, .journey.rest .story { opacity: 0; transform: translateY(24px); }
+.journey.moving .story button, .journey.rest .story button { visibility: hidden; }
+
+.travel-label { position: absolute; left: 8.5%; bottom: 250px; display: flex; flex-direction: column; gap: 16px; opacity: 0; transform: translateY(20px); transition: opacity 0.6s, transform 0.8s; pointer-events: none; text-shadow: 0 2px 24px rgba(5, 14, 31, 0.7); }
+.travel-label > span { font-size: 31px; letter-spacing: 0.15em; }
+.travel-label small { font: 11px/1.7 var(--mono); letter-spacing: 0.12em; color: var(--mint); }
+.journey.moving .travel-label, .journey.rest .travel-label { opacity: 1; transform: none; }
+
+.journey-controls { position: absolute; left: 8.5%; right: var(--side); bottom: 128px; display: flex; align-items: center; justify-content: space-between; gap: 24px; pointer-events: none; }
+.journey-controls button { pointer-events: auto; }
+.interaction-hint { margin: 0; display: flex; align-items: center; gap: 12px; font-size: 12px; letter-spacing: 0.08em; color: var(--dim); }
+.interaction-hint svg { width: 16px; height: 28px; color: var(--mint); }
+.interaction-hint small { display: block; margin-top: 5px; font-size: 10px; opacity: 0.75; }
+.primary { display: flex; align-items: center; gap: 26px; min-height: 58px; margin-left: auto; text-align: right; font-size: 15px; letter-spacing: 0.1em; }
+.primary-text { display: grid; gap: 3px; }
+.primary-text small { font-size: 10px; letter-spacing: 0.04em; color: var(--dim); }
+.primary .arrow { display: grid; place-items: center; width: 58px; height: 58px; border: 1px solid rgba(94, 242, 194, 0.5); border-radius: 50%; color: var(--mint); background: rgba(7, 20, 43, 0.5); transition: background 0.25s, transform 0.4s; }
+.primary:hover .arrow { background: rgba(94, 242, 194, 0.13); transform: translateX(4px); }
+
+.bottom-panel { position: absolute; left: var(--side); right: var(--side); bottom: 0; height: 104px; pointer-events: none; }
+.bottom-panel button { pointer-events: auto; }
+.ruler-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 4px; font-size: 10px; letter-spacing: 0.06em; color: var(--dim); }
+.ruler-head .mono { color: var(--amber); }
+#ruler { display: block; width: 100%; height: 34px; }
+.footline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.footline p { margin: 0; font-size: 10px; color: var(--dim); }
+.footline button { font-size: 11px; color: var(--dim); }
+.model-note { position: absolute; right: var(--side); bottom: 196px; margin: 0; font-size: 9px; letter-spacing: 0.04em; color: var(--dim); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+.journey.model-on .model-note { opacity: 0.75; } /* 探査機の模型が見えているあいだだけ */
+/* そばで観測中：ドラッグで周りから眺められることを知らせる（1回なぞったら出さない）。
+   PC の右下は、下のボタン（上の端が下から 186px）から上へ積む：注記 → この案内 → 英名の札。画面が低くても重ならない */
+.look-hint { position: absolute; left: 74%; bottom: 222px; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 11px; letter-spacing: 0.06em; color: var(--mint); opacity: 0; transition: opacity 0.5s; pointer-events: none; text-shadow: 0 1px 8px #050e1f; }
+.look-hint svg { width: 16px; height: 16px; }
+.journey.encounter:not(.looked) .look-hint { opacity: 0.9; }
+.story-en { display: none; }
+/* 先へ進むボタン：そばで観測中は、ゆっくり脈打って「ここから先へ」と知らせる */
+@keyframes nudge { 0% { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0.5); } 70% { box-shadow: 0 0 0 14px rgba(94, 242, 194, 0); } 100% { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0); } }
+.journey.encounter .primary .arrow { border-color: var(--mint); animation: nudge 2.2s ease-out infinite; }
+.nogl { position: absolute; inset: 30% 10% auto; margin: 0; text-align: center; color: var(--dim); }
+
+/* 次の行き先の照準（3D の位置に重ねる） */
+.reticle { position: absolute; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; transform: translate3d(-999px, -999px, 0); will-change: transform; }
+.reticle i { position: absolute; width: 8px; height: 8px; border: 1.5px solid var(--mint); }
+.reticle i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; }
+.reticle i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; }
+.reticle i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; }
+.reticle i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; }
+.reticle-label { position: absolute; left: 0; top: 0; display: grid; gap: 1px; transform: translate3d(-999px, -999px, 0); white-space: nowrap; font: 10px var(--mono); letter-spacing: 0.12em; color: var(--mint); text-shadow: 0 0 6px #050e1f, 0 0 2px #050e1f; will-change: transform; }
+.reticle-label b { font: 500 12px var(--body); letter-spacing: 0.04em; color: var(--text); }
+
+/* 火星の地面を見る望遠の窓 */
+.lens { position: absolute; left: 0; top: 0; border: 1px solid var(--mint-line); border-radius: 50%; box-shadow: 0 0 0 5px rgba(5, 14, 31, 0.35), 0 0 30px rgba(94, 242, 194, 0.16); opacity: 0; transition: opacity 0.4s; }
+.lens.on { opacity: 1; }
+.lens span { position: absolute; left: 50%; top: 100%; transform: translate(-50%, 8px); white-space: nowrap; font-size: 10px; letter-spacing: 0.06em; color: var(--dim); text-shadow: 0 1px 8px #050e1f; }
+.lens-line { position: absolute; left: 0; top: 0; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(94, 242, 194, 0.7), rgba(94, 242, 194, 0.15)); opacity: 0; transition: opacity 0.4s; }
+.lens-line.on { opacity: 1; }
+.lens-pin { position: absolute; left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border: 1.5px solid var(--mint); border-radius: 50%; opacity: 0; transition: opacity 0.4s; }
+.lens-pin.on { opacity: 1; }
+
+/* ---------- 距離のはしご ---------- */
+.atlas { max-width: 1200px; margin: 0 auto; padding: 96px 64px 32px; }
+.atlas-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 64px; }
+.atlas h2 { margin: 16px 0 0; font-size: 46px; font-weight: 500; line-height: 1.5; letter-spacing: 0.1em; text-wrap: balance; }
+.atlas-intro { font-size: 13px; line-height: 2.1; color: var(--dim); }
+.atlas-intro b { font-weight: 500; color: var(--text); }
+.atlas-intro p { margin: 0; }
+.step { position: relative; display: grid; grid-template-columns: 175px minmax(0, 1fr); min-height: 120px; }
+.step::before { content: ""; position: absolute; left: 155px; top: 8px; bottom: -8px; width: 1px; background: var(--line); }
+.step-label { position: relative; padding: 24px 30px 28px 0; }
+.step-label::after { content: ""; position: absolute; right: 16px; top: 31px; width: 7px; height: 7px; border: 1px solid var(--mint); border-radius: 50%; background: var(--navy-900); }
+.step-label h3 { margin: 0; font-size: 14px; font-weight: 500; }
+.step-label small { display: block; margin-top: 6px; font: 11px var(--mono); color: var(--dim); }
+.step-content { min-width: 0; padding: 4px 0 30px 33px; }
+.place { display: grid; grid-template-columns: 43px minmax(0, 1fr) auto 22px; align-items: center; gap: 20px; width: 100%; padding: 20px 0; text-align: left; border-bottom: 1px solid var(--line); transition: background 0.2s; }
+.place:hover { background: rgba(12, 33, 64, 0.6); }
+.place-num { font: 11px var(--mono); color: var(--dim); }
+.place-name { font-size: 16px; font-weight: 500; line-height: 1.6; }
+.place-how { margin-top: 3px; font-size: 11px; line-height: 1.8; color: var(--dim); }
+.place-ev { margin-top: 3px; font-size: 11px; line-height: 1.7; color: var(--amber); }
+.place-dist { font: 13px var(--mono); color: var(--amber); text-align: right; white-space: nowrap; }
+.place-dist small { display: block; margin-top: 6px; font: 11px var(--body); color: var(--dim); }
+.place-arrow { font-size: 22px; color: var(--mint); }
+.place.ground { cursor: default; }
+.place.ground:hover { background: none; }
+.empty-step { display: flex; align-items: center; gap: 24px; padding: 22px 0 0; font-size: 12px; color: var(--dim); }
+.empty-step::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.times-ten { margin-top: 12px; text-align: right; font: 10px var(--mono); letter-spacing: 0.1em; color: var(--dim); }
+.times-ten span { color: var(--mint); }
+.pending { margin-top: 56px; padding-top: 34px; border-top: 1px solid var(--line); }
+.pending h3 { margin: 14px 0 6px; font-size: 21px; font-weight: 500; letter-spacing: 0.06em; }
+.pending > p { margin: 0 0 18px; font-size: 12px; color: var(--dim); }
+.pending-row { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; padding: 20px 0; border-bottom: 1px solid rgba(143, 179, 168, 0.12); }
+.pending-row h4 { margin: 0; font-size: 13px; font-weight: 500; }
+.pending-row p { margin: 0; font-size: 12px; line-height: 1.9; color: var(--dim); }
+.closing { padding: 96px 0 84px; text-align: center; }
+.closing p { margin: 22px 0; font-size: 42px; font-weight: 500; line-height: 1.7; letter-spacing: 0.14em; }
+.closing button { font-size: 13px; letter-spacing: 0.1em; color: var(--mint); }
+footer { display: grid; gap: 8px; text-align: center; font-size: 11px; line-height: 1.9; color: var(--dim); }
+footer p { margin: 0; }
+.notes { max-width: 780px; margin: 18px auto 0; text-align: left; }
+.notes summary { display: flex; align-items: center; justify-content: center; min-height: 44px; cursor: pointer; color: var(--mint); }
+.notes ul { display: grid; gap: 6px; margin: 8px 0 0; padding-left: 1.2em; }
+
+dialog { width: min(580px, calc(100vw - 32px)); max-height: 82svh; padding: 44px 34px 24px; border: 1px solid var(--line); background: rgba(7, 20, 43, 0.97); color: var(--text); box-shadow: 0 30px 180px #050e1f; overflow: auto; }
+dialog::backdrop { background: rgba(5, 14, 31, 0.7); backdrop-filter: blur(8px); }
+dialog .close { position: absolute; right: 8px; top: 6px; font-size: 26px; color: var(--dim); }
+dialog h2 { margin: 12px 0 4px; font-size: 26px; font-weight: 500; line-height: 1.45; text-wrap: balance; }
+dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
+.facts { margin: 0; }
+.fact { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: 2px 14px; padding: 12px 0 2px; border-top: 1px solid var(--line); }
+.fact dt { padding-top: 2px; font-size: 12px; color: var(--mint); }
+.fact dd { margin: 0; font-size: 13px; line-height: 1.9; }
+.src { display: inline-block; padding: 12px 0; line-height: 20px; font-size: 11px; color: var(--mint); text-underline-offset: 3px; }
+.links { display: grid; gap: 0; margin: 10px 0 0; padding: 12px 0 0; border-top: 1px solid var(--line); list-style: none; }
+.links a { display: inline-block; padding: 12px 0; line-height: 20px; font-size: 12px; color: var(--mint); text-underline-offset: 3px; }
+.detail-note { margin: 12px 0 0; font-size: 10px; color: var(--dim); }
+
+@media (max-width: 900px) {
+  .vignette { background: linear-gradient(0deg, #050e1f 0%, rgba(5, 14, 31, 0.94) 17%, rgba(5, 14, 31, 0.62) 40%, transparent 60%, rgba(5, 14, 31, 0.25) 84%, rgba(5, 14, 31, 0.45)); }
+  .topbar { height: 72px; padding: 0 20px; }
+  .brand { gap: 9px; font-size: 15px; letter-spacing: 0.13em; }
+  .brand svg { width: 24px; height: 24px; }
+  .brand-room, .map-link span { display: none; }
+  .top-actions { gap: 8px; }
+  .map-link { width: 44px; justify-content: center; }
+  .telemetry { right: 20px; top: 88px; }
+  .metric-label { font-size: 10px; }
+  .distance { margin: 4px 0 6px; font-size: 25px; }
+  .distance small { margin-left: 5px; font-size: 10px; }
+  .submetrics { gap: 2px 10px; font-size: 9.5px; }
+  .speed { margin-top: 5px; font-size: 9.5px; }
+  .top-status { left: 20px; top: 90px; max-width: 42%; font-size: 10px; letter-spacing: 0.06em; }
+  .rear { left: 20px; top: 116px; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .rear canvas { width: 58px; height: 58px; }
+  .rear figcaption { font-size: 9px; }
+  .rear figcaption b { font-size: 9.5px; }
+  .chapter-rail { display: none; } /* 何番目かは、名前の上の「02 / 08」で分かる。名前と重ならないように出さない */
+  .journey.lens-on .chapter-rail { opacity: 0; }
+  .journey:not([data-mode="intro"]) .interaction-hint { display: none; }
+  .rail-line { height: 56px; }
+  .scene-tag { display: none; } /* 英名は、名前の上の1行に出す（.story-en） */
+  .journey.encounter .story-en { display: block; margin-top: 6px; font: 10px/1.4 var(--mono); letter-spacing: 0.16em; color: var(--dim); }
+  .look-hint { left: 0; right: 0; top: calc(var(--band-bottom, 46%) - 26px); bottom: auto; justify-content: center; font-size: 10.5px; }
+  .journey.lens-on .look-hint { opacity: 0 !important; } /* 火星の望遠の窓の文字と重ならないように */
+  .journey.gate-on .look-hint { top: calc(var(--band-bottom, 46%) + 6px); } /* 1光日：輪の目盛りにかからないよう、輪と名前のあいだに */
+  .lens span { left: auto; right: 0; transform: translate(0, 8px); } /* 窓は右はしにあるので、文字は窓の右にそろえる（画面からはみ出さない） */
+  .scene-tag small { display: none; }
+  .tag-line { width: 25px; margin-bottom: 9px; }
+  .story { left: 22px; right: 22px; width: auto; bottom: 194px; }
+  .story h2 { margin: 16px 0; font-size: 44px; line-height: 1.32; letter-spacing: 0.06em; }
+  .story .eyebrow { font-size: 9px; letter-spacing: 0.14em; }
+  .story p { max-width: none; font-size: 12.5px; line-height: 1.95; letter-spacing: 0.03em; }
+  .journey.encounter .story { bottom: 182px; }
+  .journey.encounter .story h2 { margin: 10px 0; font-size: 29px; line-height: 1.4; letter-spacing: 0.025em; }
+  .journey.encounter .story p { font-size: 12px; line-height: 1.9; }
+  .journey.encounter .story h2.fit { font-size: min(29px, calc((100vw - 44px) / 15.6)); white-space: nowrap; } /* ジェイムズ・ウェッブ宇宙望遠鏡（15文字）を1行に縮めて、説明が上へ伸びないように */
+  .story h2.fit .br-wide { display: none; }
+  .journey[data-mode="end"] .story h2 { font-size: 34px; }
+  .hero-meta { margin-top: 10px; font-size: 11px; line-height: 1.7; }
+  .hero-meta small { font-size: 10px; }
+  .hero-event { margin-top: 6px; font-size: 11px; }
+  .detail-link { gap: 18px; margin-top: 2px; font-size: 12px; }
+  .journey-controls { left: 22px; right: 20px; bottom: 104px; gap: 8px; }
+  .interaction-hint { max-width: 38%; gap: 6px; font-size: 10px; letter-spacing: 0; }
+  .interaction-hint svg { width: 12px; }
+  .interaction-hint small { margin-top: 3px; font-size: 9px; }
+  .primary { gap: 12px; min-height: 50px; font-size: 12.5px; letter-spacing: 0.02em; }
+  .primary .arrow { width: 50px; height: 50px; }
+  .primary-text small { font-size: 9px; }
+  .journey.moving .interaction-hint { visibility: hidden; }
+  .bottom-panel { left: 20px; right: 20px; height: 92px; }
+  .ruler-head { margin-bottom: 2px; font-size: 9px; }
+  .footline p { font-size: 9px; }
+  .footline button { font-size: 10px; }
+  .model-note { right: 20px; bottom: 166px; font-size: 8px; }
+  .travel-label { left: 22px; right: 22px; bottom: 222px; gap: 12px; }
+  .travel-label > span { font-size: 25px; letter-spacing: 0.07em; }
+  .travel-label small { font-size: 10px; }
+  .atlas { padding: 60px 22px 26px; }
+  .atlas-head { display: block; margin-bottom: 40px; }
+  .atlas h2 { margin-top: 14px; font-size: 32px; letter-spacing: 0.08em; }
+  .atlas-intro { margin-top: 22px; font-size: 12px; }
+  .step { grid-template-columns: minmax(0, 1fr); min-height: 96px; padding-left: 22px; }
+  .step::before { left: 2px; top: 0; bottom: 0; }
+  .step-label { padding: 12px 0 12px; }
+  .step-label::after { right: auto; left: -24px; top: 19px; }
+  .step-label h3 { font-size: 13px; }
+  .step-label small { position: absolute; right: 0; top: 13px; margin: 0; font-size: 10px; }
+  .step-content { padding: 0 0 24px; }
+  .place { grid-template-columns: minmax(0, 1fr) 20px; gap: 6px 8px; padding: 16px 0; }
+  .place-num { display: none; }
+  .place-name { font-size: 14px; }
+  .place-dist { grid-column: 1; grid-row: 2; text-align: left; font-size: 12px; }
+  .place-dist small { display: inline; margin-left: 10px; font-size: 10px; }
+  .place-arrow { grid-column: 2; grid-row: 1 / 3; font-size: 20px; }
+  .pending-row { grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 18px 0; }
+  .closing { padding: 64px 0 56px; }
+  .closing p { font-size: 28px; line-height: 1.8; }
+  dialog { padding: 42px 22px 20px; }
+  dialog h2 { font-size: 23px; }
+  .fact { grid-template-columns: minmax(0, 1fr); }
+}
+/* 低いスマホ（アプリの中・ブラウザのバーが出ているとき）：説明を詰めて、着いた場所を見る場所を広げる */
+@media (max-width: 900px) and (max-height: 780px) {
+  .journey.encounter .story { bottom: 172px; }
+  .journey.encounter .story h2 { margin: 4px 0 6px; font-size: 25px; line-height: 1.35; }
+  .journey.encounter .story p { font-size: 11.5px; line-height: 1.75; }
+  .hero-meta { margin-top: 6px; font-size: 10.5px; line-height: 1.6; }
+  .hero-meta small { font-size: 9.5px; }
+  .detail-link { margin-top: 0; }
+}
+@media (max-width: 360px) {
+  .story h2 { font-size: 38px; }
+  .journey.encounter .story h2 { font-size: 25px; }
+  .distance { font-size: 22px; }
+}
+@media (max-height: 760px) and (min-width: 901px) {
+  .story { bottom: 210px; }
+  .story h2 { font-size: 62px; }
+  .journey.encounter .story { bottom: 196px; }
+  .journey.encounter .story h2 { font-size: 38px; }
+  .story p { font-size: 12.5px; }
+  .telemetry, .top-status { top: 108px; }
+  .rear { top: 136px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+
+<a class="skip" href="#ladder">距離のはしごへ</a>
+<main>
+  <section id="journey" class="journey" data-mode="intro" aria-labelledby="page-title">
+    <h1 id="page-title" class="sr-only">遠くを見る部屋（合わせた試作）</h1>
+    <div id="viewport" class="viewport" tabindex="0" role="group" aria-label="宇宙を飛ぶ画面。下へスワイプか ↑ キーで遠くへ、上へスワイプか ↓ キーで地球の方へ。Home キーで地表へ戻る" aria-describedby="warp-note">
+      <canvas id="space" aria-hidden="true"></canvas>
+    </div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="warp-vignette" id="warp-vignette" aria-hidden="true"></div>
+    <div class="flash" id="flash" aria-hidden="true"></div>
+    <div class="overlay" aria-hidden="true">
+      <div class="lens-line" id="lens-line"></div>
+      <div class="lens-pin" id="lens-pin"></div>
+      <div class="lens" id="lens"><span>火星の地面（望遠・イメージ）</span></div>
+      <div class="reticle" id="reticle"><i></i><i></i><i></i><i></i></div>
+      <div class="reticle-label" id="reticle-label"><span>NEXT</span><b id="reticle-name"></b></div>
+    </div>
+
+    <header class="topbar">
+      <a class="brand" href="#journey" aria-label="VOYASCOPE 遠くを見る部屋">
+        <svg class="i" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="10"/><ellipse cx="16" cy="16" rx="16" ry="5" transform="rotate(-42 16 16)"/></svg>
+        <span>VOYASCOPE</span><span class="brand-room">遠くを見る部屋</span>
+      </a>
+      <div class="top-actions">
+        <button type="button" id="sound" class="round" aria-pressed="false" aria-label="音を出す">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4L6 8H3v8h3l5 4z"/><path class="off" d="m16 9 6 6m0-6-6 6"/><path class="on" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>
+        </button>
+        <a href="#ladder" class="map-link" aria-label="距離のはしごを見る"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4v16M19 4v16M5 5h14M5 12h14M5 19h14"/></svg><span>距離のはしご</span></a>
+      </div>
+    </header>
+
+    <div class="telemetry">
+      <div class="metric-label">地球からの距離<span class="approx" id="approx"></span></div>
+      <div class="distance"><span id="km">100</span><small>km</small></div>
+      <div class="submetrics"><span><b id="ly"></b> 光年</span><span>光で <b id="lt"></b></span></div>
+      <div class="speed" id="speed">いまの速さ 0 km/秒</div>
+    </div>
+    <div class="top-status"><span class="status-dot" aria-hidden="true"></span><span id="status">地球の、すぐそば。</span></div>
+    <figure class="rear" id="rear" data-off="true" aria-hidden="true">
+      <canvas id="rear-cv"></canvas>
+      <figcaption><span>うしろ：地球</span><span>見かけの大きさ</span><b id="rear-size"></b></figcaption>
+    </figure>
+    <div class="chapter-rail" aria-hidden="true"><span id="chapter-num">00</span><div class="rail-line"><i id="rail-fill"></i></div><span id="chapter-total">08</span></div>
+    <div class="scene-tag" id="scene-tag" aria-hidden="true"><span class="tag-line"></span><span id="scene-name">EARTH</span><small id="scene-caption">高さ 100 km から、出発</small></div>
+
+    <div class="story" id="story">
+      <div class="eyebrow" id="eyebrow">A JOURNEY BEYOND / 光の旅</div>
+      <div class="story-en" id="story-en" aria-hidden="true"></div>
+      <h2 id="hero-title">その先の、<br>まだ先へ。</h2>
+      <p id="hero-text">光になって、地球の輪の外へ。<br>遠くで旅をつづける探査機に、会いにいこう。</p>
+      <div class="hero-meta" id="hero-meta" hidden></div>
+      <div class="hero-event" id="hero-event" hidden></div>
+      <button type="button" class="detail-link" id="details" hidden>探査機をもっと知る <span aria-hidden="true">＋</span></button>
+    </div>
+    <div class="travel-label" id="travel-label" aria-hidden="true"><span id="travel-word">地球を、離れる。</span><small id="travel-sub">NEXT / 月</small></div>
+
+    <div class="journey-controls">
+      <p class="interaction-hint" id="hint"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path id="hint-arrow" d="M12 3v18m-4-4 4 4 4-4"/></svg><span id="hint-text">下へはじいて自由に飛ぶ<small>上へはじくと地球の方へ</small></span></p>
+      <button type="button" id="primary" class="primary">
+        <span class="primary-text"><span id="primary-label">旅をはじめる</span><small id="primary-sub">まずは月へ</small></span>
+        <span class="arrow" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></svg></span>
+      </button>
+    </div>
+
+    <div class="bottom-panel">
+      <div class="ruler-head"><span>地球から、いまいる場所まで</span><span class="mono" id="ruler-km">100 km</span></div>
+      <canvas id="ruler" aria-hidden="true"></canvas>
+      <div class="footline"><p id="warp-note">光より速く進むのはワープ（作り話）です</p><button type="button" id="home">地表へ戻る ↶</button></div>
+    </div>
+    <p class="model-note">公式を参考にしたイメージ</p>
+    <p class="look-hint" id="look-hint" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"/></svg><span id="look-hint-text">ドラッグで、まわりから眺める</span></p>
+  </section>
+
+  <section class="atlas" id="ladder" aria-labelledby="ladder-title">
+    <div class="atlas-head">
+      <div><div class="eyebrow">THE DISTANCE BETWEEN US</div><h2 id="ladder-title">遠さにも、<br>階段がある。</h2></div>
+      <div class="atlas-intro"><p><b>距離のはしご</b></p><p>ひとつ下へ行くと、10倍遠くへ。<br>名前を押すと、その場所まで飛べます。</p><p class="mono">2026-10-03 21:00（日本時間）の値で固定した試作</p></div>
+    </div>
+    <div id="ladder-steps"></div>
+    <div class="pending">
+      <div class="eyebrow">STILL ON A JOURNEY</div>
+      <h3>いまの距離は準備中</h3>
+      <p>探査機の位置のデータを使えるようになってから、距離を出します。</p>
+      <div id="pending-list"></div>
+    </div>
+    <div class="closing">
+      <div class="eyebrow">BEYOND THE ORBIT</div>
+      <p>地球の輪の外は、<br>桁が違う。</p>
+      <button type="button" id="again">もう一度、地球から <span aria-hidden="true">↗</span></button>
+    </div>
+    <footer>
+      <p>↑ ↓・PageUp／PageDown で飛ぶ ／ Home で地表へ</p>
+      <p>天体・機体の配置とスイングバイの航路は、距離を感じるための演出です。実際の航路・向き・大きさとは異なります。</p>
+      <p>※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません。距離と文は VOYASCOPE のカード（出典つき）から写した固定の値です（距離は 2026年10月3日 21時）。</p>
+      <details class="notes">
+        <summary>この試作の工夫（Claude 案 × Codex 案）</summary>
+        <ul>
+          <li>さわり心地は Claude 案：はじく強さで速さが変わり、約1秒で止まる。光より速いと視野が広がり、星が線になって流れる</li>
+          <li>表示は Codex 案：左に大きな名前と説明、右上に地球からの距離、下に物差し、右下に「その先へ →」、下へスクロールで「遠さにも、階段がある。」</li>
+          <li>航路は、天体のまわりで曲がる弧をつないだ道。どこもまっすぐ通り過ぎない。点線が、これから進む航路</li>
+          <li>月・水星・火星・木星では重力でスイングバイ：近づいて、まわりを回り、向きを変えて飛び出す（はじいて通っても、次の場所まで押し出される）</li>
+          <li>探査機と太陽のそばは「回りこむ」：探査機には向きを変えるほどの重力がないので、スイングバイとは呼ばない</li>
+          <li>地球は出発のときだけ前に見えて、すぐ後ろへ回る。そのあとは左上の「うしろ」の窓で、小さくなっていく地球を見る（見かけの大きさは本当の値）</li>
+          <li>パーサヴィアランスは火星の地面にいるので、宇宙に浮かべず、望遠の窓で見る</li>
+          <li>探査機の模型は、公式のページの写真と説明を参考に Codex が作ったもの（far-room-models.js、2026-10-04）。画面の注記は「公式を参考にしたイメージ」だけ（2026-10-04 オーナー）</li>
+          <li>光と質感：太陽の光らしい白い主光で、模型に影ができる。宇宙の暗さに合わせて、映り込みを少し控えた。火星の地面には、ローバーの影が落ちる</li>
+          <li>ジュノー：木星の重力でスイングバイ。機体は、本当の速さ（1分に2回）で回っている</li>
+          <li>1光日の輪の手前に、ボイジャー1号（11月18日にここへ届く予定。NASA の予告）。いまの距離の公式の値はまだないので、輪のそばに置いた（2026-10-04）。ボイジャー2号は、いまの距離が分かるまで置かない</li>
+          <li>「探査機をもっと知る」は VOYASCOPE のカード（出典つき）だけで書いた。Codex 案の詳しい説明は、出典をまだ確かめていないので使っていない</li>
+          <li>太陽・水星・火星は、地球からの距離の桁がほぼ同じ（1.5億〜2.5億 km）。スイングバイが重ならないように、そこだけ航路をゆっくり進む</li>
+          <li>動きを減らす設定：星を流さず、傾けず、押した場所へすぐ移る</li>
+          <li>調整できる値は、ファイルの先頭の TUNE にまとめた</li>
+        </ul>
+      </details>
+    </footer>
+  </section>
+</main>
+
+<dialog id="detail-dialog" aria-labelledby="detail-title">
+  <button type="button" class="close" id="detail-close" aria-label="閉じる">×</button>
+  <div class="eyebrow">MISSION / 探査機を知る</div>
+  <h2 id="detail-title"></h2>
+  <p class="sub" id="detail-sub"></p>
+  <dl class="facts" id="detail-facts"></dl>
+  <ul class="links" id="detail-links"></ul>
+  <p class="detail-note">事実はそれぞれの「出典」で確かめられます。</p>
+</dialog>
+<div class="sr-only" id="announcer" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+"use strict";
+// 遠くを見る部屋：合わせた試作。さわり心地＝Claude 案（far-room-visual-claude.html）、表示＝Codex 案（far-room-visual-codex.html）、
+// 航路＝スイングバイの弧をつないだ道。探査機の模型は Codex が作った far-room-models.js（公式を参考にしたイメージ）。
+// 依頼文：prompts/codex-far-room-visual.md・prompts/codex-far-room-models.md
+
+// ---------- 調整できる値 ----------
+const TUNE = {
+  UNITS_PER_DECADE: 50, // 航路の長さ：距離の1桁あたり（3D の単位）。1回はじくと、だいたい1桁進む
+  MIN_STRAIGHT: 22, // スイングバイの弧のあと、次の場所に着くまでの最低のまっすぐの長さ
+  FRICTION: 0.2, // 1秒で速さがこの倍になる（約1秒で止まる。Claude 案と同じ）
+  SWIPE_GAIN: 0.24, // 指を1px動かしたときに足す速さ（単位/秒）
+  WHEEL_GAIN: 0.08, // ホイール1単位あたり
+  KEY_PUSH: 18, // ↑↓キー1回
+  PAGE_PUSH: 50, // PageUp/PageDown 1回
+  MAX_V: 165, // 速さの上限（単位/秒）
+  SNAP_RANGE: 16, // ゆっくり近づいたとき、この長さ以内の場所に吸い寄せて止める
+  SNAP_SPEED: 34, // これより遅いと吸い寄せる
+  GRAVITY: 26, // スイングバイの天体に近づくとき、引き込まれる強さ（単位/秒²）
+  SLING: 0.9, // スイングバイで飛び出す強さ（次の場所までの何割まで、ひとりでに進むか）
+  FOV_PORTRAIT: 66, // 視野（縦長の画面、度）
+  FOV_LANDSCAPE: 54, // 視野（横長の画面、度）
+  FOV_WARP: 22, // いちばん速いワープのときに広げる視野（度）
+  FOV_SLING: 9, // スイングバイで飛び出す瞬間に広げる視野（度）
+  BANK: 0.2, // スイングバイで傾ける大きさ（ラジアン）
+  STAR_COUNT: 1400, // 流れる星
+  SKY_STARS: 2400, // 遠くの星
+  TRIP_MIN: 1.9, // 「その先へ」の飛行の長さ（秒）：最短
+  TRIP_MAX: 5.4, // 最長
+  TRIP_PER_UNIT: 0.017, // 航路の長さ1あたり
+  PIXEL_RATIO_MAX: 1.75,
+};
+
+// ---------- 固定データ（依頼文と同じ。ジュノーは VOYASCOPE のカード（2026-10-04 に追加）から写した。数字と文を足さない） ----------
+const C = 299792.458;
+const LY = C * 86400 * 365.25;
+const LIGHT_DAY = 25902068371;
+const EARTH_R = 6371; // 地球の半径（km）。うしろの窓の、地球の見かけの大きさに使う
+const P0 = 2; // 100 km
+const PMAX = Math.log10(LIGHT_DAY) + 0.2; // 1光日の少し先まで
+const PLACES = [
+  { id: "moon", kind: "landmark", name: "月", km: 370080, how: "いまの距離（計算）", text: "光なら 1.2 秒で着く。ここまでは、ほとんど一瞬" },
+  { id: "jwst", kind: "probe", name: "ジェイムズ・ウェッブ宇宙望遠鏡", km: 1500000, approx: true, how: "目安（その日の距離ではない）", text: "地球のまわりではなく、地球から約150万km離れた「L2」という場所で、太陽のまわりを回っている" },
+  { id: "sun", kind: "landmark", name: "太陽", km: 149692153, how: "いまの距離（計算）", text: "いま見ている太陽の光は、8 分 19 秒前に太陽を出た光" },
+  { id: "bepicolombo", kind: "probe", name: "ベピコロンボ（みお）", km: 170871161, how: "水星までの距離（計算）", text: "8年かけて太陽系の内側を旅し、いま水星に着こうとしている（最後の接近の途中）", event: "11月21日（土）　水星を回る軌道に入る（あと49日）" },
+  { id: "perseverance", kind: "probe", name: "パーサヴィアランス", km: 246566337, how: "火星までの距離（計算）", text: "火星の地面を走りながら調べている。2026年6月に、走った距離がフルマラソン分（42.195km）になった" },
+  { id: "juno", kind: "probe", name: "ジュノー", km: 881336902, how: "木星までの距離（計算）", text: "木星のまわりを回りながら、木星とその衛星を調べている。2016年7月4日に木星を回りはじめてから、10年になった" },
+  { id: "new-horizons", kind: "probe", name: "ニュー・ホライズンズ", km: 9500000000, approx: true, how: "2026年6月23日の値", text: "冥王星よりずっと遠い「カイパーベルト」を飛んでいる。2026年6月に、ほぼ1年の冬眠から目覚めた" },
+  { id: "light-day", kind: "light-day", name: "1光日", km: LIGHT_DAY, how: "光が24時間で進む距離", text: "ボイジャー1号は 11月18日（水）19:16、ここに届く予定（NASA）。人がつくったもので、はじめて" },
+];
+const GROUND = [{ id: "mmx", name: "火星衛星探査機（MMX）", text: "打ち上げ前", event: "10月20日（火）4:41　MMX の打ち上げ（あと16日7時間）" }];
+const PENDING = [
+  { id: "parker-solar-probe", name: "パーカー・ソーラー・プローブ", text: "太陽のまわりを回っている。2026年9月の最接近では、太陽から約610万kmまで近づき、時速約69万kmで飛んだ" },
+  { id: "hayabusa2", name: "はやぶさ２", text: "最後の目的地の小惑星 1998 KY26（2031年に着く予定）をめざして飛んでいる" },
+  { id: "voyager-1", name: "ボイジャー1号", text: "太陽圏の外の「恒星間空間」を飛んでいる。人がつくったもので、いちばん遠くにある" },
+  { id: "voyager-2", name: "ボイジャー2号", text: "太陽圏の外の「恒星間空間」を飛んでいる（2018年12月に入った）" },
+];
+for (const pl of PLACES) pl.p = Math.log10(pl.km);
+
+// 「探査機をもっと知る」：VOYASCOPE のカード（curation/probes、2026-10-03 に出典と照合済み）から写したものだけ
+const NASA_WEBB = "https://science.nasa.gov/mission/webb/";
+const ESA_BEPI = "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury";
+const JAXA_MIO = "https://mio.isas.jaxa.jp/mission/";
+const JPL_PERS = "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/";
+const NASA_PERS = "https://science.nasa.gov/mission/mars-2020-perseverance/";
+const NASA_JUNO = "https://science.nasa.gov/mission/juno/";
+const NASA_THEBE = "https://science.nasa.gov/photojournal/nasas-juno-misson-captures-jupiter-moon-thebe/";
+const NASA_V1 = "https://science.nasa.gov/mission/voyager/voyager-1/";
+const NASA_VWHERE = "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/";
+const NASA_NH = "https://science.nasa.gov/mission/new-horizons/";
+const NASA_NH_WAKE = "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/";
+const CARDS = {
+  jwst: {
+    en: "James Webb Space Telescope",
+    facts: [
+      ["いま", "地球のまわりではなく、地球から約150万km離れた「L2」という場所で、太陽のまわりを回っている", NASA_WEBB],
+      ["任務", "ビッグバンのあとの最初の光から太陽系の移り変わりまで、宇宙の歴史のすべての時代を調べる", NASA_WEBB],
+      ["状態", "運用中。2026年8月6日に撮った画像が公開されている（10月3日に確認）", NASA_WEBB],
+      ["運用", "NASA・ESA（欧州）・CSA（カナダ）の共同ミッション", NASA_WEBB],
+      ["打ち上げ", "2021年12月25日", NASA_WEBB],
+    ],
+    links: [["NASA「James Webb Space Telescope」", NASA_WEBB]],
+  },
+  bepicolombo: {
+    en: "BepiColombo",
+    facts: [
+      ["いま", "8年かけて太陽系の内側を旅し、いま水星に着こうとしている（最後の接近の途中）", ESA_BEPI],
+      ["予定", "2026年11月21日（土）　水星を回る軌道に入る", ESA_BEPI],
+      ["任務", "JAXA の「みお」と ESA の MPO、2機の探査機を水星のまわりに送り、水星を同時に観測する", JAXA_MIO],
+      ["状態", "運用中。ESA の最新情報（2026年9月28日の更新）（10月3日に確認）", ESA_BEPI],
+      ["運用", "ESA と JAXA。「みお」は JAXA、MPO は ESA が担当", JAXA_MIO],
+      ["打ち上げ", "2018年10月20日", "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet"],
+    ],
+    links: [["ESA「BepiColombo の水星到着」最新情報", ESA_BEPI], ["JAXA 水星磁気圏探査機「みお」", JAXA_MIO]],
+  },
+  perseverance: {
+    en: "Perseverance",
+    facts: [
+      ["いま", "火星の地面を走りながら調べている。2026年6月に、走った距離がフルマラソン分（42.195km）になった", JPL_PERS],
+      ["任務", "火星で、むかしの微生物の生命のしるしを探し、岩や土の試料を集める", NASA_PERS],
+      ["状態", "運用中。JPL の2026年6月23日の記事（10月3日に確認）", JPL_PERS],
+      ["運用", "NASA。NASA のジェット推進研究所（JPL）が運用している", JPL_PERS],
+      ["打ち上げ", "2020年7月30日（火星への着陸は2021年2月18日）", NASA_PERS],
+    ],
+    links: [["NASA「Mars 2020 Perseverance」", NASA_PERS], ["JPL の記事（2026年6月23日）", JPL_PERS]],
+  },
+  juno: {
+    en: "Juno",
+    facts: [
+      ["いま", "木星のまわりを回りながら、木星とその衛星を調べている。2016年7月4日に木星を回りはじめてから、10年になった", NASA_JUNO],
+      ["任務", "木星の厚い雲の下を調べて、木星がどうやってでき、どう変わってきたかを明らかにする。木星で働く、はじめての太陽電池の探査機", NASA_JUNO],
+      ["状態", "運用中。2026年5月1日に、木星の衛星テーベの近くを通って写真を撮った（NASA の5月5日の公開）（10月4日に確認）", NASA_THEBE],
+      ["運用", "NASA。NASA のジェット推進研究所（JPL）がミッションをまとめ、ロッキード・マーティンが探査機を動かしている", NASA_JUNO],
+      ["打ち上げ", "2011年8月5日（木星を回る軌道に入ったのは2016年7月4日）", NASA_JUNO],
+    ],
+    links: [["NASA「Juno」", NASA_JUNO], ["NASA の画像と説明（2026年5月5日）", NASA_THEBE]],
+  },
+  "light-day": {
+    title: "ボイジャー1号",
+    en: "Voyager 1",
+    sub: "Voyager 1　・　2026年11月18日（水）19:16（日本時間）に、地球から1光日に届く予定（NASA）",
+    facts: [
+      ["いま", "太陽圏の外の「恒星間空間」を飛んでいる。人がつくったもので、いちばん遠くにある", NASA_V1],
+      ["予定", "2026年11月18日（水）19:16（日本時間）、地球から1光日（約259億 km）に届く。人がつくったもので、ここまで届くのは初めて", NASA_VWHERE],
+      ["任務", "木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った。いまもデータを送っている", NASA_V1],
+      ["状態", "運用中。電力を節約するため、観測装置を少しずつ止めながら運用している（2026年4月17日に1台止めた）（10月3日に確認）", NASA_VWHERE],
+      ["運用", "NASA・JPL", NASA_V1],
+      ["打ち上げ", "1977年9月5日", NASA_V1],
+    ],
+    links: [["NASA「Voyager 1」", NASA_V1], ["NASA「Where Are Voyager 1 and Voyager 2 Now?」", NASA_VWHERE]],
+  },
+  "new-horizons": {
+    en: "New Horizons",
+    facts: [
+      ["いま", "冥王星よりずっと遠い「カイパーベルト」を飛んでいる。2026年6月に、ほぼ1年の冬眠から目覚めた", NASA_NH_WAKE],
+      ["任務", "2015年に冥王星を近くから調べた、はじめての探査機。2019年には、さらに遠くの天体も近くから調べた", NASA_NH],
+      ["状態", "運用中。2026年6月23日に、冬眠から目覚めて元気だと確かめられた（10月3日に確認）", NASA_NH_WAKE],
+      ["運用", "NASA。ジョンズ・ホプキンズ大学の応用物理研究所（APL）が運用している", NASA_NH],
+      ["打ち上げ", "2006年1月19日", NASA_NH],
+    ],
+    links: [["NASA「New Horizons」", NASA_NH], ["NASA の記事（2026年7月7日）", NASA_NH_WAKE]],
+  },
+};
+
+// 見せ方（演出）。kind: body=天体／model=探査機の模型／duo=天体＋模型／gate=1光日の輪。
+// swing: gravity=重力でスイングバイ（大きく曲がって飛び出す）／around=まわりを回りこむ（探査機と太陽）
+const LOOK = {
+  moon: { kind: "body", body: "moon", R: 2.6, kq: 3.0, turn: 78, tilt: -14, bank: 1, size: 1, swing: "gravity", by: "月", en: "THE MOON" },
+  jwst: { kind: "model", model: "jwst", R: 1.75, kq: 2.6, turn: 36, tilt: 12, bank: 0.5, size: 1, swing: "around", en: "JAMES WEBB SPACE TELESCOPE" },
+  sun: { kind: "body", body: "sun", R: 3.6, kq: 2.9, turn: 40, tilt: -8, bank: 0.5, size: 0.62, swing: "around", en: "THE SUN" },
+  bepicolombo: { kind: "duo", body: "mercury", model: "bepicolombo", R: 1.5, mR: 1.6, kq: 2.6, turn: 70, tilt: 14, bank: 1, size: 1, swing: "gravity", by: "水星", en: "BEPICOLOMBO" },
+  perseverance: { kind: "body", body: "mars", R: 2.4, kq: 3.0, turn: 76, tilt: -10, bank: 1, size: 1, swing: "gravity", by: "火星", lens: true, en: "PERSEVERANCE" },
+  juno: { kind: "duo", body: "jupiter", model: "juno", R: 3.0, mR: 1.75, kq: 2.6, turn: 66, tilt: 10, bank: 1, size: 1, swing: "gravity", by: "木星", rpm: 2, en: "JUNO" }, // rpm：1分に2回まわる（NASA のジュノーのページ）
+  "new-horizons": { kind: "model", model: "new-horizons", R: 1.5, kq: 2.7, turn: 32, tilt: 12, bank: 0.5, size: 0.72, swing: "around", en: "NEW HORIZONS" },
+  // 1光日の輪の手前にボイジャー1号（11月18日にここへ届く予定。NASA の予告）。アンテナを地球（こちら）に向け、回さない
+  "light-day": { kind: "gate", R: 7, size: 1, swing: "gate", model: "voyager", mR: 2.0, mOff: [1.3, 1.2, 5.0], mPose: [0.9, -0.6, -0.1], still: true, en: "ONE LIGHT-DAY" },
+};
+// その場所へ向かうときの言葉（Codex 案）
+const TRAVEL = {
+  moon: "地球を、離れる。",
+  jwst: "小さな光が、姿になる。",
+  sun: "光の生まれる方へ。",
+  bepicolombo: "その先に、旅する機体。",
+  perseverance: "もうひとつの地面へ。",
+  juno: "いちばん大きな惑星へ。",
+  "new-horizons": "遠さの、桁を越える。",
+  "light-day": "光の一日を、追い越す。",
+};
+
+// ---------- 数の書き方 ----------
+const DEG = Math.PI / 180;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const smooth01 = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const group = (n) => Math.round(n).toLocaleString("ja-JP");
+function roundSig(x, sig) { if (!x) return 0; const k = 10 ** (Math.floor(Math.log10(Math.abs(x))) - sig + 1); return Math.round(x / k) * k; }
+function kmJa(km, sig = 3) {
+  const r = roundSig(km, sig);
+  if (r >= 1e8) { const o = Math.floor(r / 1e8), m = Math.round((r - o * 1e8) / 1e4); return `${group(o)}億${m ? `${group(m)}万` : ""} km`; }
+  if (r >= 1e4) { const m = Math.floor(r / 1e4), rest = Math.round(r - m * 1e4); return `${group(m)}万${rest ? group(rest) : ""} km`; }
+  return `${group(r)} km`;
+}
+function kmShort(km, sig = 3) {
+  const r = roundSig(km, sig), f = (x) => String(+x.toPrecision(sig));
+  if (r >= 1e8) return `${f(r / 1e8)}億 km`;
+  if (r >= 1e4) return `${f(r / 1e4)}万 km`;
+  return `${group(r)} km`;
+}
+function lightTime(s, approx = false) {
+  s = Math.max(0, s);
+  if (approx) {
+    if (s < 60) return `約 ${Math.round(s)} 秒`;
+    if (s < 3600) return `約 ${Math.round(s / 60)} 分`;
+    const m10 = Math.round(s / 600) * 10, h = Math.floor(m10 / 60), m = m10 % 60;
+    return `約 ${h} 時間${m ? ` ${m} 分` : ""}`;
+  }
+  if (s < 1) return `${s.toFixed(4)} 秒`;
+  if (s < 60) return `${s.toFixed(1)} 秒`;
+  s = Math.round(s);
+  if (s < 3600) return `${Math.floor(s / 60)} 分 ${s % 60} 秒`;
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return `${h} 時間${m ? ` ${m} 分` : ""}`;
+}
+// 光年：0 がたくさん並ぶのを見せる（有効数字4桁）
+function lightYears(km) {
+  const ly = km / LY;
+  const d = clamp(3 - Math.floor(Math.log10(ly)), 4, 16);
+  return ly.toFixed(d);
+}
+const distText = (pl) => (pl.approx ? `約${kmShort(pl.km, 2)}` : `${group(pl.km)} km`);
+function niceStep(span) { const raw = span / 4, e = 10 ** Math.floor(Math.log10(raw)), m = raw / e; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * e; }
+const decadeName = (e) => (e >= 8 ? `${10 ** (e - 8)}億` : e >= 4 ? `${10 ** (e - 4)}万` : `${10 ** e}`);
+function angleText(deg) {
+  if (deg >= 10) return `${Math.round(deg)} 度`;
+  if (deg >= 1) return `${deg.toFixed(1)} 度`;
+  return `${Number(deg.toPrecision(2)).toFixed(Math.max(2, 1 - Math.floor(Math.log10(deg))))} 度`;
+}
+
+// ---------- ページの部品 ----------
+const $ = (id) => document.getElementById(id);
+const journey = $("journey"), viewport = $("viewport"), canvas = $("space");
+const reduceQuery = matchMedia("(prefers-reduced-motion: reduce)");
+let reduce = reduceQuery.matches;
+const coarse = matchMedia("(pointer: coarse)").matches;
+if (!coarse) { $("hint-text").innerHTML = "ホイールか ↑ キーで自由に飛ぶ<small>↓ キーで地球の方へ。Home で地表へ</small>"; $("hint-arrow").setAttribute("d", "M12 21V3m-4 4 4-4 4 4"); }
+$("look-hint-text").textContent = coarse ? "指でなぞって、まわりから眺める" : "ドラッグか ← → キーで、まわりから眺める";
+const say = (t) => { $("announcer").textContent = t; };
+
+// 距離のはしご（Codex 案の形）
+(function buildLadder() {
+  const g = GROUND[0];
+  let html = `<div class="step"><div class="step-label"><h3>地上</h3><small>ON EARTH</small></div><div class="step-content">
+    <div class="place ground" role="group" aria-label="${esc(g.name)}"><span class="place-num">00</span><div><div class="place-name">${esc(g.name)}</div><div class="place-ev">${esc(g.event)}</div></div><span class="place-dist">${esc(g.text)}</span><span></span></div></div></div>`;
+  for (let e = 5; e <= 10; e++) {
+    const here = PLACES.filter((pl) => Math.floor(pl.p) === e);
+    const items = here.map((pl) => `<button type="button" class="place" data-go="${pl.id}">
+        <span class="place-num">${String(PLACES.indexOf(pl) + 1).padStart(2, "0")}</span>
+        <div><div class="place-name">${esc(pl.name)}</div><div class="place-how">${esc(pl.how)}</div>${pl.event ? `<div class="place-ev">${esc(pl.event)}</div>` : ""}${pl.kind === "light-day" ? `<div class="place-ev">ボイジャー1号が 11月18日（水）19:16 にここへ（NASA の予告）</div>` : ""}</div>
+        <span class="place-dist">${esc(distText(pl))}<small>光で ${esc(lightTime(pl.km / C, pl.approx))}</small></span>
+        <span class="place-arrow" aria-hidden="true">↗</span></button>`).join("");
+    html += `<div class="step"><div class="step-label"><h3>${decadeName(e)} km〜</h3><small>10<sup>${e}</sup> km</small></div><div class="step-content">${items || `<div class="empty-step">この段に載せている場所は、ありません</div>`}${e < 10 ? `<div class="times-ten">↓ <span>×10</span> FARTHER</div>` : ""}</div></div>`;
+  }
+  $("ladder-steps").innerHTML = html;
+  $("pending-list").innerHTML = PENDING.map((pl) => `<div class="pending-row"><h4>${esc(pl.name)}</h4><p>${esc(pl.text)}</p></div>`).join("");
+})();
+
+// ---------- 3D の準備 ----------
+let renderer = null;
+try {
+  if (!window.THREE) throw new Error("three.js を読み込めません");
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+} catch (err) {
+  journey.insertAdjacentHTML("beforeend", `<p class="nogl">この端末では 3D で表示できません。下の「距離のはしご」で見られます。</p>`);
+}
+
+const NOISE = `
+float hash(vec3 p){ p = fract(p * 0.3183099 + vec3(0.11, 0.17, 0.13)); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float noise(vec3 x){ vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(hash(i), hash(i + vec3(1.,0.,0.)), f.x), mix(hash(i + vec3(0.,1.,0.)), hash(i + vec3(1.,1.,0.)), f.x), f.y),
+             mix(mix(hash(i + vec3(0.,0.,1.)), hash(i + vec3(1.,0.,1.)), f.x), mix(hash(i + vec3(0.,1.,1.)), hash(i + vec3(1.,1.,1.)), f.x), f.y), f.z); }
+float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * noise(p); p = p * 2.03 + 1.7; a *= 0.5; } return s; }
+`;
+
+// ---------- 航路：スイングバイの弧をつないだ道 ----------
+// 場所ごとに「着いた地点 E」→ まっすぐ → 天体（機体）のまわりの弧 → まっすぐ → 次の E。
+// 距離の桁（p）は、E と E のあいだで道の長さに比例して割り振る（1桁 ≒ UNITS_PER_DECADE。太陽・水星・火星のあたりは、弧が重ならないよう長めにとる）
+let FI = null; // 画面の形
+let ROUTE = null;
+function frameInfo() {
+  const W = Math.max(1, journey.clientWidth), H = Math.max(1, journey.clientHeight), aspect = W / H;
+  const t = smooth01((aspect - 0.62) / (1.25 - 0.62)); // 0 = 縦長（スマホ）、1 = 横長（PC）
+  const vfov = lerp(TUNE.FOV_PORTRAIT, TUNE.FOV_LANDSCAPE, t);
+  const tv = Math.tan((vfov * DEG) / 2), th = tv * aspect;
+  // 縦長の画面：着いた場所（天体・機体）を、上の数字（地球からの距離）の下から、下の説明（名前・文）の上までのあいだに収める。
+  // 画面が低いとき（アプリの中・ブラウザのバーが出ているとき）は、小さく・上に置いて、名前に重ならないようにする
+  const bandTop = 150, bandBottom = Math.max(bandTop + 90, H - (H < 781 ? 400 : 440));
+  const band = bandBottom - bandTop, cy = bandTop + band / 2, rPx = Math.min(0.58 * (W / 2), band * 0.5);
+  return {
+    W, H, aspect, t, vfov, tv, th, portrait: t < 0.5, bandTop, bandBottom,
+    // 着いたときに、見せたいもの（天体・機体）を置く画面の場所（中央が 0、右と上が +1）と見かけの半径
+    focus: { x: lerp(0.04, 0.4, t), y: lerp(1 - (2 * cy) / H, 0.03, t) },
+    orbit: { x: lerp(1.8, 0.85, t), y: lerp(0.12, 0.05, t) }, // スイングバイの弧の上：天体の中心は画面の右の外。縁だけが右に見える
+    around: { x: lerp(0.03, 0.3, t), y: lerp(0.3, 0.03, t) }, // 回りこむ弧の上：機体を見つづける
+    aR: lerp(Math.atan((rPx / (W / 2)) * th), Math.atan(0.5 * tv), t),
+    startPitch: lerp(14, 3, t) * DEG, // 出発のとき、地平線を見せるために下を向く
+  };
+}
+function encounterGeom(lk) {
+  const aR = Math.min(FI.aR * lk.size, 0.6);
+  if (lk.kind === "gate") return { e: lk.R / Math.tan(aR * 1.25), q: 0 };
+  const q = lk.kq * lk.R;
+  if (lk.kind === "duo") {
+    // 機体を手前に大きく、水星をその右上の奥に
+    const dist = lk.mR / Math.sin(aR), b = 0.15 * q, c = -0.12 * q;
+    const a = Math.sqrt(Math.max(dist * dist - b * b - c * c, (0.5 * dist) ** 2));
+    return { q, e: a + 0.8 * q, model: { a, b, c } };
+  }
+  const dist = lk.R / Math.sin(aR);
+  if (lk.swing === "around") return { q: 0.8 * dist, e: 0.6 * dist }; // 機体（太陽）から同じくらいの距離のまま、まわりを回る
+  return { q, e: Math.sqrt(Math.max(dist * dist - q * q, (0.55 * q) ** 2)) };
+}
+function buildRoute() {
+  const V = THREE.Vector3, STEP = 0.4;
+  const pos = new V(), dir = new V(0, 0, -1), worldUp = new V(0, 1, 0), rel = new V(), qs = new THREE.Quaternion();
+  const xs = [], ss = [];
+  let s = 0;
+  const add = () => { xs.push(pos.x, pos.y, pos.z); ss.push(s); };
+  const straight = (L) => {
+    const n = Math.max(1, Math.ceil(L / STEP));
+    for (let k = 0; k < n; k++) { pos.addScaledVector(dir, L / n); s += L / n; add(); }
+  };
+  const arc = (center, axis, angle) => { // 右へ曲がる（axis のまわりに -angle）
+    const r = center.distanceTo(pos), n = Math.max(2, Math.ceil((angle * r) / STEP));
+    qs.setFromAxisAngle(axis, -angle / n);
+    for (let k = 0; k < n; k++) { rel.subVectors(pos, center).applyQuaternion(qs); pos.addVectors(center, rel); dir.applyQuaternion(qs); s += (angle * r) / n; add(); }
+  };
+  add();
+  const stops = [], anchors = [{ s: 0, p: P0 }];
+  let tail = 0, prevP = P0;
+  PLACES.forEach((pl, i) => {
+    const lk = LOOK[pl.id], g = encounterGeom(lk);
+    straight(Math.max(TUNE.UNITS_PER_DECADE * (pl.p - prevP), tail + TUNE.MIN_STRAIGHT) - tail);
+    const axis = worldUp.clone().addScaledVector(dir, -worldUp.dot(dir)).normalize().applyAxisAngle(dir, (lk.tilt ?? 0) * DEG);
+    const right = new V().crossVectors(dir, axis).normalize();
+    const st = { i, pl, lk, g, sE: s, E: pos.clone(), dirIn: dir.clone(), axis, right };
+    anchors.push({ s, p: pl.p });
+    if (lk.kind === "gate") {
+      st.center = pos.clone().addScaledVector(dir, g.e);
+      st.normal = dir.clone();
+      st.sA = st.sX = s + g.e;
+      tail = 0;
+    } else {
+      straight(g.e);
+      st.sA = s;
+      st.center = pos.clone().addScaledVector(right, g.q);
+      arc(st.center, axis, lk.turn * DEG);
+      st.sX = s;
+      tail = st.sX - st.sE;
+    }
+    st.focus = g.model ? st.E.clone().addScaledVector(st.dirIn, g.model.a).addScaledVector(right, g.model.b).addScaledVector(axis, g.model.c) : st.center;
+    // 見る向きを変え始める長さ（着く前）と、前へ向き直る長さ（弧のあと）
+    const before = i ? st.sE - stops[i - 1].sX : st.sE;
+    st.win = Math.min(30, 0.5 * before);
+    stops.push(st);
+    prevP = pl.p;
+  });
+  stops.forEach((st, i) => {
+    const after = (stops[i + 1]?.sE ?? s + 40) - st.sX;
+    st.wout = st.lk.kind === "gate" ? 3 : Math.min(14, 0.4 * after);
+    st.sMid = st.sA + 0.5 * (st.sX - st.sA);
+  });
+  straight(Math.max(TUNE.UNITS_PER_DECADE * (PMAX - prevP), stops[stops.length - 1].g.e + 26));
+  anchors.push({ s, p: PMAX });
+  const n = ss.length, ps = new Float64Array(n);
+  for (let j = 0, k = 0; j < n; j++) {
+    while (k < anchors.length - 2 && ss[j] > anchors[k + 1].s) k++;
+    const a = anchors[k], b = anchors[k + 1];
+    ps[j] = a.p + (b.p - a.p) * clamp((ss[j] - a.s) / (b.s - a.s), 0, 1);
+  }
+  return { xs: Float32Array.from(xs), ss: Float64Array.from(ss), ps, len: s, stops, anchors };
+}
+function routeIndex(s) {
+  const ss = ROUTE.ss;
+  let lo = 0, hi = ss.length - 1;
+  if (s <= ss[0]) return 0;
+  if (s >= ss[hi]) return hi - 1;
+  while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (ss[mid] <= s) lo = mid; else hi = mid; }
+  return lo;
+}
+function routePos(s, out) {
+  const j = routeIndex(s), ss = ROUTE.ss, xs = ROUTE.xs, t = clamp((s - ss[j]) / (ss[j + 1] - ss[j] || 1), 0, 1);
+  return out.set(lerp(xs[3 * j], xs[3 * j + 3], t), lerp(xs[3 * j + 1], xs[3 * j + 4], t), lerp(xs[3 * j + 2], xs[3 * j + 5], t));
+}
+function routeP(s) { const j = routeIndex(s), ss = ROUTE.ss, t = clamp((s - ss[j]) / (ss[j + 1] - ss[j] || 1), 0, 1); return lerp(ROUTE.ps[j], ROUTE.ps[j + 1], t); }
+function routeS(p) {
+  const ps = ROUTE.ps;
+  let lo = 0, hi = ps.length - 1;
+  if (p <= ps[0]) return 0;
+  if (p >= ps[hi]) return ROUTE.len;
+  while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (ps[mid] <= p) lo = mid; else hi = mid; }
+  return lerp(ROUTE.ss[lo], ROUTE.ss[hi], (p - ps[lo]) / (ps[hi] - ps[lo] || 1));
+}
+function dpds(s) { const a = ROUTE.anchors; for (let k = 0; k < a.length - 1; k++) if (s <= a[k + 1].s) return (a[k + 1].p - a[k].p) / (a[k + 1].s - a[k].s); return 0; }
+
+// ---------- カメラの向き ----------
+let camera, qTarget, qTmp, qEnc, vA, vB, vDir, mLook, ZERO, UP, AX, AY, AZ;
+if (renderer) {
+  camera = new THREE.PerspectiveCamera(TUNE.FOV_LANDSCAPE, 1, 0.05, 2000);
+  qTarget = new THREE.Quaternion(); qTmp = new THREE.Quaternion(); qEnc = new THREE.Quaternion();
+  vA = new THREE.Vector3(); vB = new THREE.Vector3(); vDir = new THREE.Vector3();
+  mLook = new THREE.Matrix4(); ZERO = new THREE.Vector3(); UP = new THREE.Vector3(0, 1, 0);
+  AX = new THREE.Vector3(1, 0, 0); AY = new THREE.Vector3(0, 1, 0); AZ = new THREE.Vector3(0, 0, 1);
+}
+const lookQuat = (dir, out) => out.setFromRotationMatrix(mLook.lookAt(ZERO, dir, UP));
+function routeTangent(s, out) { routePos(Math.min(ROUTE.len, s + 0.6), vA); routePos(Math.max(0, s - 0.6), vB); return out.subVectors(vA, vB).normalize(); }
+// 着いた場所を見る向き：見せたいものを画面の決まった場所（FI.focus）に置く
+// 見せたいもの（target）を、画面の (x, y) に置く向き。中央が 0、右と上が +1（1 を超えると画面の外）
+function lookAtNdc(camPos, target, x, y, out) {
+  lookQuat(vDir.subVectors(target, camPos).normalize(), out);
+  out.multiply(qTmp.setFromAxisAngle(AY, Math.atan(x * FI.th)));
+  return out.multiply(qTmp.setFromAxisAngle(AX, -Math.atan(y * FI.tv)));
+}
+function encounterQuat(camPos, st, out) {
+  const f = st.lk.kind === "gate" ? { x: 0, y: FI.portrait ? FI.focus.y : 0.02 } : FI.focus; // 縦長：上の数字と下の説明のあいだ
+  return lookAtNdc(camPos, st.focus, f.x, f.y, out);
+}
+// 弧の上の向き。スイングバイは天体を画面の右はしに置いたまま回る（縁が流れ、空が回る）。回りこむときは機体を見つづける
+function orbitQuat(camPos, st, out) {
+  const o = st.lk.swing === "gravity" ? FI.orbit : FI.around;
+  return lookAtNdc(camPos, st.center, o.x, o.y, out);
+}
+// [wE, wO]：wE＝着いた場所を見る、wO＝弧の上で回りながら見る。着く前に向き始め、E→弧の入口で「回る向き」へ移り、弧のあとで前へ向き直る
+function lookWeights(st, s) {
+  if (s < st.sE - st.win) return [0, 0];
+  if (s <= st.sE) return [smooth01((s - (st.sE - st.win)) / st.win), 0];
+  if (st.lk.kind === "gate") {
+    const hold = st.sE + 0.4 * st.g.e, end = st.sE + st.g.e + 3;
+    return [s <= hold ? 1 : s >= end ? 0 : 1 - smooth01((s - hold) / (end - hold)), 0];
+  }
+  const toArc = smooth01((s - st.sE) / Math.max(0.1, st.sA - st.sE));
+  const hold = st.sA + 0.6 * (st.sX - st.sA), end = st.sX + st.wout;
+  const wO = s <= hold ? toArc : s >= end ? 0 : 1 - smooth01((s - hold) / (end - hold));
+  return [1 - toArc, wO];
+}
+// スイングバイの弧で、曲がる向きへ傾ける
+function bankAt(s) {
+  let r = 0;
+  for (const st of ROUTE.stops) {
+    const L = st.sX - st.sA;
+    if (!(L > 0)) continue;
+    const u = (s - (st.sA - 0.35 * L)) / (1.7 * L);
+    if (u > 0 && u < 1) r -= TUNE.BANK * st.lk.bank * Math.sin(Math.PI * u);
+  }
+  return r;
+}
+function cameraQuat(s, camPos, out) {
+  lookQuat(routeTangent(s, vDir), out);
+  const sp = FI.startPitch * (1 - smooth01((routeP(s) - P0) / 0.6));
+  if (sp > 1e-4) out.multiply(qTmp.setFromAxisAngle(AX, -sp));
+  for (const st of ROUTE.stops) {
+    const [wE, wO] = lookWeights(st, s);
+    if (wO > 0) out.slerp(orbitQuat(camPos, st, qEnc), wO);
+    if (wE > 0) out.slerp(encounterQuat(camPos, st, qEnc), wE);
+  }
+  if (!reduce) { const r = bankAt(s); if (r) out.multiply(qTmp.setFromAxisAngle(AZ, r)); }
+  return out;
+}
+
+// ---------- 景色 ----------
+let skyScene, mainScene, lensScene, lensCam, skyGroup, starMat, routeMat, routePts, earth, earthMat, atmo, dawn, bodies = {}, models = {}, gate, dust, sunGlows = [], keyLight, rover;
+let kit;
+function flatMat(hex, opacity = 1) {
+  return new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(hex) }, uAlpha: { value: opacity } },
+    vertexShader: `void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `uniform vec3 uColor; uniform float uAlpha; void main(){ gl_FragColor = vec4(uColor, uAlpha); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+}
+function glowMesh(hex, opacity) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShaderMaterial({
+    uniforms: { uColor: { value: new THREE.Color(hex) }, uAlpha: { value: opacity } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `uniform vec3 uColor; uniform float uAlpha; varying vec2 vUv;
+      void main(){ float r = length(vUv - 0.5) * 2.0; float a = r < 0.18 ? mix(1.0, 0.25, r / 0.18) : 0.25 * pow(max(0.0, 1.0 - (r - 0.18) / 0.82), 1.6);
+        gl_FragColor = vec4(uColor * a * uAlpha, 1.0); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  }));
+  m.userData.base = opacity;
+  return m;
+}
+
+// 背景の星雲：方向ごとの色を1回だけ GPU で描いて、空の球に貼る（スイングバイで向きが変わると空が回る）
+function nebulaTexture() {
+  const rt = new THREE.WebGLRenderTarget(2048, 1024, { depthBuffer: false });
+  const scene = new THREE.Scene(), cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    fragmentShader: `${NOISE}
+      varying vec2 vUv;
+      float fbm6(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 6; i++) { s += a * noise(p); p = p * 2.03 + 1.7; a *= 0.5; } return s; }
+      void main(){
+        float phi = vUv.x * 6.2831853, th = (1.0 - vUv.y) * 3.14159265;
+        vec3 d = vec3(-cos(phi) * sin(th), cos(th), sin(phi) * sin(th));
+        vec3 pole = normalize(vec3(0.52, 0.7, 0.48));
+        vec3 q = d * 2.4;
+        float dust = fbm6(q + fbm6(q * 1.8) * 0.9);
+        float small = fbm6(q * 5.0 + 7.0);
+        float along = dot(d, normalize(cross(pole, vec3(0.0, 0.0, 1.0))));
+        float band = exp(-pow((dot(d, pole) + 0.07 * sin(along * 5.0)) * 3.4, 2.0));
+        float lanes = smoothstep(0.32, 0.68, dust);
+        float veins = pow(abs(small - 0.45) * 2.0, 1.8);
+        vec3 col = vec3(0.009, 0.024, 0.052);
+        col += vec3(0.075, 0.19, 0.215) * band * lanes;
+        col += vec3(0.09, 0.13, 0.12) * band * band * small * 0.55;
+        col *= 1.0 - band * smoothstep(0.48, 0.67, dust) * 0.5;
+        col += vec3(0.11, 0.08, 0.035) * band * band * band * veins * 0.5;
+        col += vec3(0.015, 0.05, 0.055) * smoothstep(0.55, 0.8, fbm6(q * 0.9 + 11.0));
+        col += vec3(0.05, 0.035, 0.02) * smoothstep(0.6, 0.85, fbm6(q * 1.1 + 23.0));
+        float tiny = step(0.995, hash(floor(d * 300.0))) * (0.25 + 0.5 * hash(floor(d * 300.0) + 3.0));
+        col += vec3(0.6, 0.7, 0.75) * tiny * 0.35;
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+    depthTest: false, depthWrite: false,
+  })));
+  renderer.setRenderTarget(rt);
+  renderer.render(scene, cam);
+  renderer.setRenderTarget(null);
+  return rt.texture;
+}
+
+// 地球の陸地（経度・緯度の多角形。日本のまわりだけ少しくわしく。地図は演出用の大まかな形）
+function landTexture() {
+  const c = document.createElement("canvas"); c.width = 2048; c.height = 1024;
+  const x = c.getContext("2d");
+  x.fillStyle = "#000"; x.fillRect(0, 0, 2048, 1024); x.fillStyle = "#fff";
+  const land = [
+    [[-168, 65], [-150, 70], [-130, 70], [-116, 74], [-96, 80], [-78, 72], [-58, 53], [-64, 44], [-79, 26], [-88, 19], [-81, 9], [-97, 17], [-105, 23], [-116, 30], [-124, 47], [-138, 58], [-153, 59]],
+    [[-80, 11], [-65, 9], [-51, 3], [-35, -7], [-40, -21], [-52, -35], [-68, -55], [-76, -43], [-72, -18], [-81, -4]],
+    [[-53, 60], [-43, 61], [-20, 75], [-30, 82], [-48, 84], [-62, 76]],
+    [[-10, 36], [-9, 44], [-1, 49], [5, 54], [7, 61], [20, 70], [32, 69], [35, 60], [49, 57], [61, 63], [80, 72], [112, 73], [140, 69], [170, 60], [160, 58], [156, 51], [143, 53], [141, 47], [135, 43], [130, 42.5], [129.7, 40.5], [128.4, 38.6], [129.4, 35.5], [126.6, 34.5], [126.1, 37.7], [124.6, 40], [121.5, 39], [122.5, 37], [119.5, 35], [121.9, 31], [120, 26], [117, 23.5], [110, 21], [108, 9], [99, 5], [91, 20], [81, 8], [73, 18], [64, 24], [56, 17], [45, 13], [37, 26], [28, 37], [19, 40], [13, 43], [8, 39], [0, 36]],
+    [[-17, 15], [-16, 28], [-4, 36], [15, 32], [31, 31], [36, 20], [51, 12], [43, 0], [39, -16], [29, -34], [19, -35], [12, -17], [5, -5], [-9, 5]],
+    [[114, -22], [124, -14], [139, -12], [150, -23], [153, -35], [135, -39], [117, -34]],
+    [[46, -13], [50, -17], [47, -25], [44, -24]],
+    [[96, 5], [106, -6], [114, -8], [120, -5], [131, -4], [139, -8], [148, -8], [140, -3], [121, 3], [113, 7], [108, 1]],
+    [[-180, -74], [-130, -72], [-90, -70], [-60, -64], [-30, -76], [0, -70], [50, -69], [100, -66], [160, -72], [180, -74], [180, -90], [-180, -90]],
+    // 本州・北海道・九州・四国
+    [[130.9, 34.0], [131.3, 34.4], [132.4, 35.4], [133.6, 35.5], [135.2, 35.7], [136.0, 36.2], [136.8, 37.2], [137.3, 36.9], [138.2, 37.0], [138.6, 37.8], [139.4, 38.3], [139.9, 39.0], [140.0, 39.9], [139.9, 40.6], [140.3, 41.2], [141.2, 41.2], [141.5, 40.5], [142.0, 39.6], [141.6, 38.4], [141.0, 38.0], [141.0, 36.9], [140.6, 36.0], [140.9, 35.7], [140.4, 35.1], [139.8, 34.9], [139.2, 35.2], [138.8, 34.6], [138.2, 34.6], [137.2, 34.6], [136.8, 34.3], [136.0, 33.4], [135.2, 33.7], [135.1, 34.3], [134.2, 34.6], [133.0, 34.3], [132.0, 33.9], [131.0, 33.9]],
+    [[140.0, 41.5], [140.1, 42.3], [139.8, 42.6], [140.5, 43.3], [141.4, 43.2], [141.6, 44.4], [141.9, 45.4], [142.9, 44.6], [143.8, 44.2], [144.8, 43.9], [145.3, 44.3], [145.6, 43.3], [144.3, 42.9], [143.3, 42.0], [141.2, 42.6], [140.9, 41.6]],
+    [[129.8, 33.3], [130.4, 33.9], [131.0, 33.9], [131.6, 33.4], [131.9, 32.6], [131.4, 31.4], [130.7, 31.0], [130.2, 31.3], [130.1, 32.1], [129.6, 32.7]],
+    [[132.4, 33.0], [132.7, 33.8], [133.5, 34.2], [134.6, 34.2], [134.7, 33.8], [134.2, 33.3], [133.1, 32.7]],
+  ];
+  for (const pts of land) {
+    x.beginPath();
+    pts.forEach(([lon, lat], i) => { const px = ((lon + 180) / 360) * 2048, py = ((90 - lat) / 180) * 1024; if (i) x.lineTo(px, py); else x.moveTo(px, py); });
+    x.closePath(); x.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = THREE.RepeatWrapping; t.minFilter = THREE.LinearFilter;
+  return t;
+}
+
+// 探査機の模型：Codex が作った docs/design/far-room-models.js を、そのまま入れた（export を外し、1つの関数の中に閉じただけ）。
+// 公式のページの写真と説明を参考にしたイメージ。依頼文：prompts/codex-far-room-models.md
+const CRAFT = (() => {
+  /* VOYASCOPE — independently constructed, unofficial shape studies.
+   * three.js r128 core only. No external assets. +Y up; neutral bounds = 2.
+   * makeKit once per renderer/application; caller owns its materials/textures.
+   */
+  const PI = Math.PI, TAU = PI * 2;
+  const NASA = 'https://science.nasa.gov/';
+  const REF = {
+    jwst: [NASA+'mission/webb/', NASA+'3d-resources/james-webb-space-telescope-a/'],
+    parker: [NASA+'mission/parker-solar-probe/', NASA+'resource/parker-solar-probe-3d-model/'],
+    bepi: ['https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury','https://www.esa.int/ESA_Multimedia/Images/2018/10/BepiColombo_arrival_at_Mercury_timeline','https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet','https://mio.isas.jaxa.jp/mission/'],
+    rover: [NASA+'mission/mars-2020-perseverance/',NASA+'3d-resources/mars-2020-perseverance-rover/'],
+    mmx: ['https://www.mmx.jaxa.jp/','https://www.mmx.jaxa.jp/gallery/'],
+    haya: ['https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2','https://www.hayabusa2.jaxa.jp/'],
+    juno: [NASA+'mission/juno/',NASA+'resource/juno-3d-model/'],
+    nh: [NASA+'mission/new-horizons/',NASA+'resource/new-horizons-3d-model/'],
+    voyager: [NASA+'mission/voyager/voyager-1/',NASA+'resource/voyager-3d-model/']
+  };
+
+  function makeKit(T) {
+    let seed=319;
+    const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};
+    function texture(draw, color=false) {
+      const c=document.createElement('canvas'); c.width=c.height=128;
+      draw(c.getContext('2d'));
+      const t=new T.CanvasTexture(c); t.wrapS=t.wrapT=T.RepeatWrapping;
+      if(color)t.encoding=T.sRGBEncoding;
+      return t;
+    }
+    const foil=texture(c=>{
+      c.fillStyle='#888';c.fillRect(0,0,128,128);
+      for(let i=0;i<650;i++){
+        const x=random()*128,y=random()*128,v=45+random()*170;
+        c.strokeStyle=`rgb(${v},${v},${v})`;c.lineWidth=.35+random()*.65;
+        c.beginPath();c.moveTo(x,y);c.lineTo(x+(random()-.5)*22,y+(random()-.5)*22);c.stroke();
+      }
+    });
+    const cells=texture(c=>{
+      c.fillStyle='#10284d';c.fillRect(0,0,128,128);
+      for(let x=0;x<128;x+=16){
+        c.fillStyle=x%32?'#142d50':'#102443';c.fillRect(x+1,1,14,126);
+        c.fillStyle='#617e9d';c.fillRect(x,0,.6,128);
+        c.fillStyle='#a5a7a0';c.fillRect(x+7,0,.5,128);
+      }
+      c.fillStyle='#395472'; for(let y=0;y<128;y+=16)c.fillRect(0,y,128,.6);
+    },true);
+    // A tiny procedural reflection field, not an image asset or another light.
+    const faces=Array.from({length:6},(_,i)=>{
+      const c=document.createElement('canvas');c.width=c.height=64;
+      const g=c.getContext('2d'),a=g.createLinearGradient(0,0,64,64);
+      a.addColorStop(0,i===2?'#e4dfd3':'#73716b');a.addColorStop(.42,'#a6a098');
+      a.addColorStop(.5,'#eee7d9');a.addColorStop(.58,'#85827b');a.addColorStop(1,'#464540');
+      g.fillStyle=a;g.fillRect(0,0,64,64);return c;
+    });
+    const env=new T.CubeTexture(faces);env.encoding=T.sRGBEncoding;env.needsUpdate=true;
+    const mat=(name,color,metalness,roughness,extra={})=>{
+      const m=new T.MeshStandardMaterial({color,metalness,roughness,envMap:env,envMapIntensity:.45,...extra});m.color.convertSRGBToLinear();m.name=name;return m;
+    };
+    return {
+      gold:mat('foil-gold',0xbd882c,.78,.4,{bumpMap:foil,bumpScale:.006}),
+      silver:mat('silver',0xb5c1c6,.8,.34),
+      white:mat('ceramic-white',0xd7dedb,.18,.54),
+      black:mat('carbon-black',0x10141c,.3,.65),
+      navy:mat('deep-navy',0x143057,.42,.45),
+      solar:mat('solar-cells',0xffffff,.62,.3,{map:cells}),
+      mirror:mat('gold-mirror',0xe7b94f,1,.12,{envMapIntensity:1.25}),
+      textures:{foil,cells,env}
+    };
+  }
+
+  // Per-model geometry cache and per-parent instance batches. No geometry crosses
+  // model ownership boundaries; independent parts remain actual THREE.Groups.
+  function builder(T,K) {
+    const root=new T.Group(),content=new T.Group();root.add(content);
+    const geometries=new Map(),batches=new Map(),dummy=new T.Object3D();
+    const v=new T.Vector3(),a=new T.Vector3(),up=new T.Vector3(0,1,0);
+    function geo(key,fn){if(!geometries.has(key))geometries.set(key,fn());return geometries.get(key);}
+    const box=()=>geo('box',()=>new T.BoxGeometry(1,1,1));
+    const cyl=(n=24,top=1)=>geo('c'+n+':'+top,()=>new T.CylinderGeometry(top,1,1,n,1,false));
+    function put(g,m,p=[0,0,0],s=[1,1,1],r=[0,0,0],parent=content){
+      dummy.position.set(...p);dummy.scale.set(...s);dummy.rotation.set(...r);dummy.updateMatrix();
+      let by=batches.get(parent);if(!by){by=new Map();batches.set(parent,by);}
+      const key=g.uuid+':'+m;let b=by.get(key);
+      if(!b){b={g,mat:K[m],matrices:[]};by.set(key,b);}b.matrices.push(dummy.matrix.clone());
+    }
+    function group(name,p=[0,0,0],r=[0,0,0],parent=content){const g=new T.Group();g.name=name;g.position.set(...p);g.rotation.set(...r);parent.add(g);return g;}
+    function B(m,p,s,r=[0,0,0],par=content){put(box(),m,p,s,r,par);}
+    function C(m,p,radius,height,r=[0,0,0],par=content,n=24,top=1){put(cyl(n,top),m,p,[radius,height,radius],r,par);}
+    function rod(m,start,end,r=.02,par=content,n=8){
+      a.set(...start);v.set(...end).sub(a);const len=v.length();
+      dummy.quaternion.setFromUnitVectors(up,v.normalize());const e=new T.Euler().setFromQuaternion(dummy.quaternion);
+      C(m,[(start[0]+end[0])/2,(start[1]+end[1])/2,(start[2]+end[2])/2],r,len,[e.x,e.y,e.z],par,n);
+    }
+    function ring(m,p,r,t=.015,rot=[0,0,0],par=content){
+      put(geo('torus',()=>new T.TorusGeometry(1,.025,6,40)),m,p,[r,r,t/.025],rot,par);
+    }
+    function ball(m,p,s,par=content){put(geo('sphere',()=>new T.SphereGeometry(1,16,10)),m,p,s,[0,0,0],par);}
+    function panel(w,h,p,rot=[0,0,0],par=content,nx=8,ny=6){
+      const g=group('solar-array',p,rot,par);
+      B('silver',[0,0,0],[w+.06,.045,h+.06],[0,0,0],g);
+      B('black',[0,-.03,0],[w,.035,h],[0,0,0],g);
+      // Distinct cell tiles, instanced in a single draw per panel.
+      for(let x=0;x<nx;x++)for(let y=0;y<ny;y++)
+        B('solar',[(x+.5-nx/2)*w/nx,.03,(y+.5-ny/2)*h/ny],[w/nx*.955,.008,h/ny*.96],[0,0,0],g);
+      for(const x of [-w/2,w/2])B('silver',[x,.045,0],[.018,.018,h],[0,0,0],g);
+      for(const z of [-h/2,h/2])B('silver',[0,.045,z],[w,.018,.018],[0,0,0],g);
+      return g;
+    }
+    function dish(radius,p,rot=[0,0,0],par=content,material='white'){
+      const g=group('high-gain-antenna',p,rot,par);
+      const d=geo('dish',()=>{
+        const pts=[];for(let i=0;i<=12;i++){let x=i/12;pts.push(new T.Vector2(Math.max(.001,x),.28*x*x));}
+        for(let i=12;i>=0;i--){let x=i/12;pts.push(new T.Vector2(Math.max(.001,x),.28*x*x-.025));}
+        return new T.LatheGeometry(pts,48);
+      });
+      put(d,material,[0,0,0],[radius,radius,radius],[0,0,0],g);
+      ring('silver',[0,.28*radius,0],radius,.013*radius,[PI/2,0,0],g);
+      for(let i=0;i<3;i++){const t=i*TAU/3;rod('silver',[Math.cos(t)*radius*.86,radius*.21,Math.sin(t)*radius*.86],[0,radius*.72,0],radius*.012,g);}
+      C('gold',[0,radius*.72,0],radius*.09,radius*.12,[0,0,0],g);
+      C('silver',[0,-radius*.1,0],radius*.22,radius*.18,[0,0,0],g);
+      return g;
+    }
+    function rtg(p,rot,par=content,scale=1){
+      const g=group('RTG',p,rot,par),s=scale;
+      C('black',[0,0,0],.2*s,.8*s,[0,0,0],g,32);
+      for(const y of [-.39,-.28,.28,.39])C('silver',[0,y*s,0],.208*s,.028*s,[0,0,0],g,32);
+      for(let i=0;i<8;i++){let t=i*PI/4;B('black',[Math.cos(t)*.24*s,0,Math.sin(t)*.24*s],[.2*s,.75*s,.018*s],[0,-t,0],g);}
+      C('silver',[0,.44*s,0],.08*s,.12*s,[0,0,0],g);
+      return g;
+    }
+    function bolts(p,w,h,par=content,rot=[0,0,0]){
+      const g=group('fasteners',p,rot,par);
+      for(let x of [-w/2,0,w/2])for(let z of [-h/2,h/2])C('silver',[x,0,z],.018,.016,[0,0,0],g,8);
+    }
+    function truss(start,end,width=.15,par=content){
+      const g=group('truss',start,[0,0,0],par),delta=new T.Vector3(...end).sub(new T.Vector3(...start)),len=delta.length();
+      g.quaternion.setFromUnitVectors(up,delta.normalize());
+      const corners=[[-width,0,-width],[width,0,-width],[0,0,width]];
+      for(let i=0;i<3;i++)rod('silver',corners[i],[corners[i][0],len,corners[i][2]],width*.08,g);
+      const n=Math.ceil(len/(width*3));
+      for(let j=0;j<n;j++)for(let i=0;i<3;i++){
+        let c=corners[i],d=corners[(i+1)%3];
+        rod('silver',[c[0],j*len/n,c[2]],[d[0],(j+1)*len/n,d[2]],width*.045,g,6);
+      }
+      return g;
+    }
+    function finish(refs,guessed,pose,extra={}){
+      let triangles=0,meshes=0,instances=0;
+      for(const [parent,by] of batches)for(const b of by.values()){
+        const mesh=new T.InstancedMesh(b.g,b.mat,b.matrices.length);mesh.frustumCulled=false;
+        b.matrices.forEach((m,i)=>mesh.setMatrixAt(i,m));mesh.instanceMatrix.needsUpdate=true;parent.add(mesh);
+        triangles+=(b.g.index?b.g.index.count:b.g.attributes.position.count)/3*b.matrices.length;meshes++;instances+=b.matrices.length;
+      }
+      // r128 Box3.setFromObject ignores instance transforms: compute exact bounds.
+      content.updateMatrixWorld(true);const bounds=new T.Box3(),m=new T.Matrix4();
+      for(const [parent,by] of batches)for(const b of by.values())for(const local of b.matrices){
+        m.multiplyMatrices(parent.matrixWorld,local);const pos=b.g.attributes.position;
+        for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i).applyMatrix4(m);bounds.expandByPoint(v);}
+      }
+      const center=bounds.getCenter(new T.Vector3()),size=bounds.getSize(new T.Vector3()),scale=2/Math.max(size.x,size.y,size.z);
+      content.scale.setScalar(scale);content.position.copy(center).multiplyScalar(-scale);
+      root.name='VOYASCOPE shape study';
+      root.userData={pose,refs:[...refs],guessed,triangles,meshes,instances,normalizedSize:size.multiplyScalar(scale).toArray(),...extra};
+      root.updateMatrixWorld(true);return root;
+    }
+    return {T,K,root,content,geo,put,B,C,rod,ring,ball,group,panel,dish,rtg,bolts,truss,finish};
+  }
+
+  function jwst(T,K){
+    const b=builder(T,K),{B,C,rod,group,put,geo,panel}=b;
+    // Original kite surfaces, five separate layers; meter-like internal units.
+    for(let l=0;l<5;l++){
+      const s=1-l*.018,y=l*.19;
+      const coords=[[0,y,-10.5*s],[-6.9*s,y+.12,-2.4*s],[-6.5*s,y+.04,3*s],[0,y-.13,10.5*s],[6.5*s,y+.04,3*s],[6.9*s,y+.12,-2.4*s]];
+      const membrane=geo('membrane',()=>{
+      const g=new T.BufferGeometry(),p=[],idx=[],segments=36,rings=8;
+      for(let j=0;j<=rings;j++)for(let k=0;k<segments;k++){
+        const r=j/rings,edge=k/6,n=Math.floor(edge),t=edge-n,a=coords[n],c=coords[(n+1)%6];
+        p.push((a[0]*(1-t)+c[0]*t)*r,y+.11*(1-r)+(a[1]*(1-t)+c[1]*t-y)*r+.022*Math.sin(r*39+k*.8)*r,(a[2]*(1-t)+c[2]*t)*r);
+      }
+      for(let j=0;j<rings;j++)for(let k=0;k<segments;k++){
+        const a=j*segments+k,c=j*segments+(k+1)%segments,d=c+segments,e=a+segments;
+        idx.push(a,c,e,c,d,e,a,e,c,c,e,d);
+      }
+      g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setIndex(idx);
+      // Back-to-back thin faces use explicit normals instead of transparent foil.
+      const ng=g.toNonIndexed();ng.computeVertexNormals();g.dispose();return ng;
+      });
+      put(membrane,l===4?'silver':'white',[0,y,0],[s,1,s]);
+      for(let i=0;i<6;i++)rod('silver',coords[i],coords[(i+1)%6],.024);
+      for(let i of [0,1,3,5])rod('silver',[0,y+.12,0],coords[i],.013);
+    }
+    B('gold',[0,-.5,0],[2.4,1,2.9]);B('black',[0,-1.06,0],[2.15,.12,2.6]);
+    for(let x of [-1,1])for(let z of [-1.1,1.1])rod('silver',[x,-.8,z],[x*4,.25,z*6],.065);
+    C('silver',[0,1.65,-1.55],.24,2.6);B('black',[0,3.4,-2.3],[2.2,3.1,.7]);
+    const mirror=group('18-primary-mirror-segments',[0,4.6,-1.8]);
+    const hex=geo('hex',()=>new T.CylinderGeometry(.745,.745,.085,6));
+    // Axial hex ring of radius two, central segment omitted = 18 segments.
+    const centers=[];
+    for(let q=-2;q<=2;q++)for(let r=-2;r<=2;r++)if(Math.abs(q+r)<=2&&(q||r))centers.push([Math.sqrt(3)*.76*(q+r/2),1.5*.76*r]);
+    centers.forEach(([x,y])=>{
+      put(hex,'black',[x,y,-.12],[1.04,1.4,1.04],[PI/2,0,0],mirror);
+      put(hex,'mirror',[x,y,0],[1,1,1],[PI/2,0,0],mirror);
+      rod('black',[x,y,-.18],[x*.65,y*.65,-.65],.042,mirror);
+    });
+    B('black',[0,3.85,-1.32],[.8,.65,.75]);
+    for(const p of [[-2.8,3,-1.75],[2.8,3,-1.75],[0,7.6,-1.75]])rod('black',p,[0,4.2,3.6],.07);
+    C('mirror',[0,4.2,3.6],.36,.13,[PI/2,0,0]);
+    C('black',[0,4.2,3.73],.42,.13,[PI/2,0,0]);
+    b.dish(.65,[.4,-1.5,1],[PI,0,0]);panel(2.1,3.4,[0,-1.05,-3.5],[0,0,.2],b.content,8,10);
+    return b.finish(REF.jwst,['遮熱膜のたわみ、裏面の補強と配線位置は見た目から補完。膜の間隔を強調。'],[.57,-.57,-.08]);
+  }
+
+  function parker(T,K){
+    const b=builder(T,K),{B,C,rod,panel,group}=b;
+    C('gold',[0,-.18,0],.52,1.5,[0,0,0],b.content,8);
+    B('black',[0,-.7,.48],[.65,.4,.08]);B('silver',[0,.35,0],[.94,.14,.8]);
+    // 11.43 cm shield on a 2.3 m diameter reference envelope.
+    C('black',[0,.98,0],1.15,.1143,[0,PI/8,0],b.content,8);
+    C('white',[0,1.042,0],1.143,.009,[0,PI/8,0],b.content,8);
+    for(let i=0;i<6;i++){let t=i*TAU/6;rod('black',[Math.cos(t)*.4,.44,Math.sin(t)*.4],[Math.cos(t)*.85,.92,Math.sin(t)*.85],.036);}
+    for(const s of [-1,1]){
+      rod('silver',[s*.4,-.15,0],[s*.9,-.43,0],.04);
+      panel(.95,.55,[s*1.13,-.53,0],[0,0,-s*.4],b.content,8,4);
+      for(const z of [-.46,.46])rod('silver',[s*.5,-.6,z],[s*1.8,-1.2,z*1.7],.013);
+      for(let y of [-.45,-.05,.3])B('black',[s*.51,y,.18],[.06,.22,.25]);
+    }
+    C('silver',[0,-1.02,0],.44,.12);b.dish(.37,[0,-1.14,0],[PI,0,0]);
+    rod('silver',[0,-.65,-.3],[0,-2.2,-.62],.018);B('black',[0,-2.15,-.62],[.12,.12,.16]);
+    for(let i=0;i<5;i++){let t=i*TAU/5;C('black',[Math.cos(t)*.44,-.83,Math.sin(t)*.44],.07,.17,[PI,0,0],b.content,12,.4);}
+    for(const x of [-.23,.23])C('navy',[x,-.15,.53],.09,.07,[PI/2,0,0]);
+    b.bolts([0,.43,0],.7,.65);
+    return b.finish(REF.parker,['盾の支持骨格、裏側の計器、配線は簡略化。翼の角度は鑑賞用の近似。'],[.3,-.55,-.28]);
+  }
+
+  function bepicolombo(T,K){
+    const b=builder(T,K),{B,C,rod,group,panel}=b;
+    const mpo=group('MPO'),mosif=group('MOSIF',[0,1.3,0]),mio=group('Mio',[0,1.3,0]);
+    B('gold',[0,0,0],[2.4,1.7,2.2],[0,0,0],mpo);
+    B('white',[0,.05,-1.14],[3.7,1.5,.08],[0,0,0],mpo);
+    for(let x=-1.72;x<1.8;x+=.18)B('silver',[x,.05,-1.197],[.025,1.37,.018],[0,0,0],mpo);
+    for(const x of [-1.23,1.23])B('white',[x,0,0],[.055,1.6,1.85],[0,0,0],mpo);
+    for(let x of [-.8,0,.8])B('black',[x,-.08,1.112],[.45,.55,.025],[0,0,0],mpo);
+    b.dish(.57,[-.72,.83,.72],[.75,0,.32],mpo);
+    rod('silver',[1.2,.05,0],[1.65,.05,0],.065,mpo);
+    // The single MPO wing extends 7.5 m from the bus. No MTM or MTM wings.
+    for(let i=0;i<3;i++)panel(2.26,1.55,[2.31+i*2.36,.05,0],[0,0,.08],mpo,12,8);
+    B('silver',[4.95,-.005,0],[7.5,.065,.12],[0,0,0],mpo);
+    for(let x of [-.7,.7])for(let z of [-.7,.7])C('black',[x,-.95,z],.13,.24,[PI,0,0],mpo,12,.45);
+    // Mio is fully housed within an independently movable, open-topped MOSIF.
+    C('black',[0,.24,0],.9,1.1,[0,PI/8,0],mio,8);
+    C('silver',[0,-.28,0],.91,.08,[0,PI/8,0],mio,8);
+    C('silver',[0,.8,0],.91,.06,[0,PI/8,0],mio,8);
+    for(let i=0;i<8;i++){
+      const a=i*TAU/8,x=Math.sin(a),z=Math.cos(a);
+      B('solar',[x*.836,.32,z*.836],[.65,.8,.015],[0,a,0],mio);
+      B('gold',[x*1.065,.2,z*1.065],[.91,1.5,.085],[0,a,0],mosif);
+      B('black',[x*1.014,.2,z*1.014],[.84,1.44,.018],[0,a,0],mosif);
+      rod('silver',[x*1.11,-.55,z*1.11],[x*1.11,.96,z*1.11],.022,mosif);
+    }
+    C('silver',[0,-.59,0],1.12,.08,[0,PI/8,0],mosif,8);
+    C('white',[0,.95,0],.2,.15,[0,0,0],mio);
+    return b.finish(REF.bepi,['MOSIF内側、MPO背面の計器・配線と固定具は近似。2026年10月4日の構成を表現。'],[.37,-.62,.07],{parts:{mpo,mosif,mio},configurationDate:'2026-10-04'});
+  }
+
+  function perseverance(T,K){
+    const b=builder(T,K),{B,C,rod,ring,group}=b;
+    B('white',[0,.6,0],[1.55,.5,2.08]);B('silver',[0,.89,0],[1.66,.09,2.15]);
+    B('black',[0,.31,0],[1.18,.16,1.65]);
+    for(const s of [-1,1]){
+      B('white',[s*.81,.59,0],[.07,.34,1.65]);
+      for(let j=0;j<9;j++)B('silver',[s*.86,.58,-.73+j*.18],[.015,.28,.022]);
+      // Two connected rocker/bogie arms, three wheels per side.
+      const h=[s*.88,.56,0],joint=[s*1.02,.32,.35];
+      rod('black',h,[s*1.1,.02,-1.04],.071);rod('black',h,joint,.071);
+      rod('silver',joint,[s*1.1,.02,.09],.062);rod('silver',joint,[s*1.1,.02,1.08],.062);
+      C('silver',h,.13,.14,[0,0,PI/2]);
+      for(let z of [-1.04,.09,1.08]){
+        const wheel=group('wheel',[s*1.11,0,z],[0,0,PI/2]);
+        C('black',[0,0,0],.32,.28,[0,0,0],wheel,40);
+        for(let yy of [-.146,.146]){
+          ring('silver',[0,yy,0],.245,.019,[PI/2,0,0],wheel);
+          C('silver',[0,yy,0],.071,.026,[0,0,0],wheel,16);
+          for(let j=0;j<6;j++){const a=j*TAU/6;rod('silver',[0,yy,0],[Math.sin(a)*.24,yy,Math.cos(a)*.24],.017,wheel);}
+        }
+        // Independent raised grousers instead of a smooth toy tire.
+        for(let j=0;j<32;j++){let a=j*TAU/32;B('silver',[Math.sin(a)*.321,0,Math.cos(a)*.321],[.012,.265,.014],[0,a,0],wheel);}
+      }
+    }
+    // Remote sensing mast and two camera eyes.
+    C('white',[-.48,1.41,-.62],.085,1.0);
+    B('white',[-.48,1.97,-.62],[.62,.31,.32]);B('black',[-.48,2.01,-.81],[.57,.14,.03]);
+    for(const x of [-.64,-.32]){C('black',[x,1.97,-.84],.081,.09,[PI/2,0,0]);C('navy',[x,1.97,-.897],.061,.012,[PI/2,0,0]);}
+    C('black',[-.48,2.21,-.65],.091,.15);C('silver',[-.48,1.72,-.61],.14,.1);
+    // Folded front arm and instrument turret, not a flag panel.
+    rod('white',[.5,.65,-1.03],[.7,.37,-1.44],.09);
+    rod('silver',[.7,.37,-1.44],[-.47,.37,-1.42],.07);
+    for(let x of [-.47,.7])C('silver',[x,.38,-1.43],.13,.15,[PI/2,0,0]);
+    C('white',[-.62,.42,-1.45],.22,.25,[0,0,0],b.content,12);
+    for(let i=0;i<4;i++){let a=i*PI/2;C('black',[-.62+Math.cos(a)*.17,.29,-1.45+Math.sin(a)*.17],.044,.11);}
+    const power=group('rear-power',[0,1.02,1.08],[.5,0,0]);b.rtg([0,0,0],[0,0,0],power,.78);
+    for(const s of [-1,1])rod('white',[s*.42,.85,.64],[s*.28,1.47,1.32],.055);
+    b.dish(.23,[.5,1.04,.05],[.2,0,.25]);
+    C('white',[.55,1.06,-.72],.12,.28);rod('black',[.68,.93,.72],[.68,1.9,.72],.011);
+    B('white',[-.48,1.02,.48],[.48,.2,.38]);B('gold',[.1,.956,-.4],[.25,.018,.28]);
+    for(let x of [-.52,0,.52])for(let z of [-.76,0,.76])b.bolts([x,.95,z],.34,.3);
+    for(let i=0;i<4;i++)C('silver',[-.45+i*.3,.96,.77],.055,.06);
+    for(const [x,z,w,h] of [[.22,-.65,.31,.17],[-.28,.12,.32,.12],[.48,.52,.24,.2]]){
+      B('white',[x,1+h/2,z],[w,h,.25]);B('black',[x,1+h+.005,z],[w*.8,.015,.18]);
+      for(let n=0;n<4;n++)B('silver',[x-w*.32+n*w*.21,1+h+.019,z],[.012,.012,.15]);
+    }
+    for(const s of [-1,1]){
+      rod('gold',[s*.65,.97,-.9],[s*.65,.97,.73],.015);
+      rod('gold',[s*.65,.97,-.9],[s*.32,1.01,-.91],.015);
+      for(let z of [-.62,-.07,.46])B('silver',[s*.65,.98,z],[.055,.025,.035]);
+    }
+    B('silver',[-.49,2.035,-.63],[.63,.035,.34]);
+    for(const x of [-.7,-.26])C('black',[x,2.065,-.815],.024,.035,[PI/2,0,0]);
+    return b.finish(REF.rover,['車輪の溝数、腹面の機器、アームの関節・配線は簡略化。旗とヘリコプターは省略。'],[.27,-2.45,0]);
+  }
+
+  function mmx(T,K){
+    const b=builder(T,K),{B,C,rod,group,panel}=b;
+    const outbound=group('outbound',[0,-1.32,0]),explore=group('explore'),ret=group('return',[0,1.03,0]);
+    C('silver',[0,0,0],.8,1.15,[0,0,0],outbound,24);
+    C('gold',[0,.43,0],.88,.2,[0,0,0],outbound,12);
+    for(let i=0;i<8;i++){const a=i*TAU/8;rod('silver',[Math.sin(a)*.85,-.5,Math.cos(a)*.85],[Math.sin(a)*.85,.5,Math.cos(a)*.85],.025,outbound);}
+    C('black',[0,-.7,0],.24,.38,[0,0,0],outbound,24,.4);
+    B('gold',[0,0,0],[2.1,1.3,1.7],[0,0,0],explore);
+    for(let x of [-1.07,1.07])B('white',[x,0,0],[.04,1.16,1.5],[0,0,0],explore);
+    for(const s of [-1,1]){
+      rod('silver',[s*1.05,.24,0],[s*1.8,.24,0],.055,explore);
+      for(let i=0;i<3;i++)panel(1.12,2.1,[s*(2.15+i*1.22),.24,0],[0,0,s*.06],explore,8,12);
+      for(let z of [-.68,.68]){
+        rod('silver',[s*.85,-.3,z],[s*1.52,-1.05,z*1.9],.047,explore);
+        rod('silver',[s*.83,.1,z],[s*1.52,-1.05,z*1.9],.025,explore);
+        C('black',[s*1.52,-1.08,z*1.9],.18,.06,[0,0,0],explore,16);
+      }
+    }
+    B('gold',[0,.03,0],[1.55,.78,1.35],[0,0,0],ret);
+    b.dish(.73,[0,.12,.71],[PI/2,0,0],ret,'black');
+    b.dish(.35,[.35,-.24,.97],[PI/2,0,0],outbound,'black');
+    C('gold',[.4,.62,-.18],.28,.36,[0,0,0],ret,24,.6);
+    B('white',[-.57,.52,-.18],[.2,.3,.38],[0,0,0],ret);
+    rod('silver',[-.46,.5,-.38],[-.46,1.2,-.5],.025,ret);
+    C('black',[-.46,1.19,-.5],.09,.12,[0,0,0],ret);
+    for(let x of [-.72,.72])for(let z of [-.53,.53])B('black',[x,.45,z],[.15,.12,.18],[0,0,0],ret);
+    C('silver',[.65,-.85,.43],.12,.5,[0,0,0],explore);
+    return b.finish(REF.mmx,['写真の三段構成を基本形で再構成。翼の展開角、脚・裏面の計器、固定具は近似。6面図は使用していない。'],[.38,-.5,.05],{parts:{outbound,explore,return:ret}});
+  }
+
+  function hayabusa2(T,K){
+    const b=builder(T,K),{B,C,rod,panel}=b;
+    B('gold',[0,0,0],[1.05,1.16,.95]);
+    for(const x of [-.48,.48]){B('silver',[x,0,.488],[.035,1.1,.025]);B('silver',[x,0,-.488],[.035,1.1,.025]);}
+    for(const s of [-1,1]){
+      b.truss([s*.5,.12,0],[s*.94,.12,0],.08);
+      for(let i=0;i<2;i++)panel(.85,1.35,[s*(1.34+i*.9),.12,0],[0,0,.04*s],b.content,8,10);
+    }
+    // Flat high- and medium-gain antennas, rather than parabolic dishes.
+    for(const [x,r] of [[-.27,.29],[.3,.24]]){
+      C('silver',[x,.7,0],.07,.2);C('white',[x,.82,0],r,.035);
+      b.ring('silver',[x,.84,0],r,.012,[PI/2,0,0]);
+    }
+    C('black',[0,-.95,.2],.085,.7);C('silver',[0,-1.36,.2],.18,.16,[0,0,0],b.content,24,.45);
+    for(let y=-1.2;y<-.62;y+=.075)C('silver',[0,y,.2],.091,.009);
+    B('black',[0,0,-.5],[.67,.63,.07]);
+    for(let x of [-.18,.18])for(let y of [-.18,.18]){
+      C('silver',[x,y,-.565],.139,.11,[PI/2,0,0]);C('black',[x,y,-.629],.112,.014,[PI/2,0,0]);
+      b.ring('silver',[x,y,-.645],.08,.009);
+    }
+    for(const [x,y,r] of [[-.3,.2,.09],[.13,.32,.07],[.3,-.18,.1]]){
+      C('black',[x,y,.535],r,.09,[PI/2,0,0]);C('navy',[x,y,.589],r*.7,.014,[PI/2,0,0]);
+    }
+    for(let x of [-.3,.28])B('black',[x,-.38,.5],[.22,.18,.03]);
+    rod('silver',[.4,.4,-.3],[.57,1.25,-.5],.012);
+    for(let x of [-.42,.42])for(let z of [-.35,.35])C('silver',[x,-.64,z],.045,.14,[0,0,0],b.content,12,.5);
+    b.bolts([0,.586,0],.83,.7);
+    return b.finish(REF.haya,['裏面のイオンエンジン細部、配線・小型計器は近似。帰還カプセルは付けていない。'],[.42,-.6,-.08]);
+  }
+
+  function juno(T,K){
+    const b=builder(T,K),{B,C,rod,group,panel}=b;
+    C('gold',[0,0,0],1.75,3.5,[0,PI/6,0],b.content,6);
+    C('black',[0,1.73,0],1.78,.1,[0,PI/6,0],b.content,6);
+    b.dish(1.25,[0,1.77,0],[0,0,0],b.content,'silver');
+    C('silver',[0,-1.89,0],.55,.27);C('black',[0,-2.12,0],.43,.3,[0,0,0],b.content,24,.4);
+    for(let i=0;i<3;i++){
+      const wing=group('radial-wing',[0,0,0],[0,i*TAU/3,0]);
+      rod('silver',[0,0,1.45],[0,0,2.2],.12,wing);
+      // Three articulated bays per 9 m radial wing.
+      for(let j=0;j<3;j++)panel(2.65,2.85,[0,0,2.965+j*2.96],[0,0,0],wing,10,14);
+      for(const x of [-1.26,1.26])rod('silver',[x,-.07,1.75],[x,-.07,10.25],.035,wing);
+      if(i===0){b.truss([0,0,10.25],[0,0,11.15],.2,wing);B('white',[0,.05,11.2],[.7,.24,.55],[0,0,0],wing);}
+    }
+    for(let i=0;i<6;i++){let a=i*TAU/6;B('black',[Math.sin(a)*1.54,.1,Math.cos(a)*1.54],[.6,1.5,.06],[0,a,0]);}
+    rod('silver',[1.2,-.6,0],[3,-2.3,-1],.025);rod('silver',[-1.2,-.6,0],[-3,-2.3,-1],.025);
+    B('white',[.9,.9,1.4],[.5,.4,.2]);
+    return b.finish(REF.juno,['翼のセル分割、背面機器・配線を簡略化。翼端の磁力計架台は写真から近似。'],[.82,-.22,.12],{spinAxis:[0,1,0]});
+  }
+
+  function newHorizons(T,K){
+    const b=builder(T,K),{B,C,rod}=b;
+    const shape=new T.Shape();shape.moveTo(-.85,-.65);shape.lineTo(.95,-.48);shape.lineTo(-.35,.83);shape.closePath();
+    const g=new T.ExtrudeGeometry(shape,{depth:.65,bevelEnabled:false});g.rotateX(-PI/2);g.translate(0,-.325,0);
+    b.put(g,'gold');B('silver',[0,-.36,0],[1.1,.04,.8]);
+    b.dish(.74,[-.2,.47,.02],[.02,0,.02]);
+    C('gold',[-.2,.32,.02],.35,.2);
+    rod('silver',[-.5,.02,-.42],[-1.04,.02,-.54],.1);
+    b.rtg([-1.3,.02,-.54],[0,0,PI/2],b.content,1.1);
+    B('black',[.59,.19,-.25],[.3,.38,.32]);C('black',[.57,.43,-.27],.16,.31);C('navy',[.57,.595,-.27],.13,.019);
+    B('white',[.37,.34,.34],[.34,.022,.28]);B('navy',[.32,.02,.69],[.28,.24,.027]);
+    for(let p of [[-.42,-.37,.45],[.55,-.37,-.4],[-.67,-.37,-.41]])C('black',p,.067,.18,[0,0,0],b.content,12,.4);
+    C('white',[.24,.38,-.38],.21,.04);
+    rod('gold',[.72,-.08,-.23],[.82,.63,-.23],.022);
+    b.bolts([-.45,.333,-.4],.5,.25);
+    return b.finish(REF.nh,['三角形バスの裏面、観測機器の奥行き、配線・固定具は近似。RTGは1基。'],[.43,-.55,-.15]);
+  }
+
+  function voyager(T,K){
+    const b=builder(T,K),{B,C,rod,group}=b;
+    C('black',[0,0,0],.8,.55,[0,PI/10,0],b.content,10);
+    C('silver',[0,-.27,0],.83,.06,[0,PI/10,0],b.content,10);
+    for(let i=0;i<10;i++){
+      const a=i*TAU/10;B(i%3?'black':'gold',[Math.sin(a)*.77,0,Math.cos(a)*.77],[.38,.43,.018],[0,a,0]);
+      rod('silver',[Math.sin(a)*.8,-.23,Math.cos(a)*.8],[Math.sin(a)*.8,.22,Math.cos(a)*.8],.018);
+    }
+    b.dish(1.8,[0,.55,0]);C('silver',[0,.38,0],.55,.28);
+    // The instrument platform and RTG boom extend on opposite sides.
+    b.truss([.55,0,0],[2.72,.18,.1],.17);
+    const platform=group('scan-platform',[2.78,.2,.1],[0,.1,.15]);
+    B('silver',[0,0,0],[.7,.1,.65],[0,0,0],platform);
+    for(let x of [-.22,.22]){
+      C('black',[x,.23,0],.15,.4,[PI/2,0,0],platform);
+      C('navy',[x,.23,.215],.124,.012,[PI/2,0,0],platform);
+    }
+    B('white',[0,.3,-.32],[.23,.34,.2],[0,0,0],platform);
+    b.truss([-.6,-.1,0],[-1.45,-.33,0],.13);
+    const rtgs=group('three-RTGs',[-1.45,-.33,0],[0,0,PI/2]);
+    for(let i=0;i<3;i++)b.rtg([0,.43+i*.88,0],[0,0,0],rtgs,.9);
+    b.truss([-.3,-.12,-.5],[-1.25,-.7,-5.7],.12);
+    B('black',[-1.25,-.7,-5.74],[.2,.2,.15]);
+    for(const s of [-1,1])rod('silver',[s*.32,-.2,0],[s*2.5,-2.4,1.1],.012);
+    // Plain gold record: no etching, inscription, badge, flag or organization mark.
+    C('mirror',[0,-.025,.79],.26,.025,[PI/2,0,0]);
+    for(let x of [-.45,.45])C('black',[x,-.4,.24],.065,.18,[PI,0,0],b.content,12,.5);
+    return b.finish(REF.voyager,['観測台の小型機器、ブームの格子・配線を簡略化。レコードは無地。1号と2号で共有。'],[.6,-.7,-.19]);
+  }
+
+  const MODELS={jwst,'parker-solar-probe':parker,bepicolombo,perseverance,mmx,hayabusa2,juno,'new-horizons':newHorizons,voyager};
+
+  function disposeModel(group){
+    const seen=new Set();group.traverse(o=>{if(o.geometry&&!seen.has(o.geometry)){seen.add(o.geometry);o.geometry.dispose();}});
+  }
+  return { makeKit, MODELS, disposeModel };
+})();
+// 模型は、いちばん長い辺が 2 になるように作ってある（userData.normalizedSize）。部品を InstancedMesh でまとめているので、
+// r128 の Box3.setFromObject では大きさを測れない。いちばん長い辺 = 2R になるように、R 倍するだけにする
+// 光に合わせた質感（2026-10-04）：宇宙の暗さに合わせて映り込みを少し控え、金の断熱材のしわを少し強く、白い面は少し粗くする
+function naturalKit(K) {
+  for (const m of Object.values(K)) if (m.isMaterial && m !== K.mirror) m.envMapIntensity *= 0.7;
+  K.gold.bumpScale = 0.009; K.gold.roughness = 0.36;
+  K.white.roughness = 0.62;
+  K.solar.roughness = 0.26;
+}
+function holdModel(g, R) {
+  const holder = new THREE.Group();
+  holder.add(g); holder.scale.setScalar(R);
+  holder.userData.inner = g;
+  g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  return holder;
+}
+
+if (renderer) {
+  renderer.setClearColor(0x050e1f, 1);
+  renderer.autoClear = false;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.shadowMap.enabled = true; // 模型の影（主光の1つだけ。見ている模型のまわりだけを測る）
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  skyScene = new THREE.Scene();
+  mainScene = new THREE.Scene();
+  mainScene.add(camera);
+
+  // 空：星雲（方向で決まる色）と遠くの星。カメラの位置について回り、向きは世界に固定
+  skyGroup = new THREE.Group(); skyScene.add(skyGroup);
+  const nebTex = nebulaTexture();
+  const neb = new THREE.Mesh(new THREE.SphereGeometry(900, 64, 32), new THREE.ShaderMaterial({
+    uniforms: { map: { value: nebTex } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `uniform sampler2D map; varying vec2 vUv; void main(){ gl_FragColor = vec4(texture2D(map, vUv).rgb, 1.0); }`,
+    side: THREE.BackSide, depthWrite: false,
+  }));
+  neb.renderOrder = 0;
+  skyGroup.add(neb);
+  {
+    const n = TUNE.SKY_STARS, pos = new Float32Array(n * 3), col = new Float32Array(n * 3), size = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const u = Math.random() * 2 - 1, a = Math.random() * Math.PI * 2, r = Math.sqrt(1 - u * u);
+      pos.set([Math.cos(a) * r * 700, u * 700, Math.sin(a) * r * 700], i * 3);
+      const t = Math.random();
+      col.set(t < 0.12 ? [1, 0.82, 0.55] : t < 0.3 ? [0.62, 0.95, 0.85] : [0.85, 0.9, 1], i * 3);
+      size[i] = Math.random() < 0.06 ? 2.4 + Math.random() * 1.2 : 0.9 + Math.random() * 1.1;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("aColor", new THREE.BufferAttribute(col, 3)); g.setAttribute("aSize", new THREE.BufferAttribute(size, 1));
+    const pts = new THREE.Points(g, new THREE.ShaderMaterial({
+      uniforms: { uScale: { value: 1 }, uTime: { value: 0 } },
+      vertexShader: `uniform float uScale, uTime; attribute vec3 aColor; attribute float aSize; varying vec3 vC; varying float vA;
+        void main(){ vC = aColor; vA = 0.55 + 0.45 * sin(uTime * 1.3 + position.x * 0.05 + position.y * 0.03); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_PointSize = aSize * uScale; }`,
+      fragmentShader: `varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord - 0.5); gl_FragColor = vec4(vC, smoothstep(0.5, 0.0, d) * vA); }`,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    }));
+    pts.userData.u = pts.material.uniforms;
+    pts.renderOrder = 1;
+    skyGroup.add(pts); skyGroup.userData.stars = pts;
+  }
+
+  // 地球：出発のときだけ前の下に見える。本当の見かけの大きさで、うしろへ遠ざかる（空の一部として描く）
+  earthMat = new THREE.ShaderMaterial({
+    uniforms: { uLand: { value: landTexture() }, uSun: { value: new THREE.Vector3(0, -0.2, -1).normalize() }, uTime: { value: 0 } },
+    vertexShader: `varying vec3 vObj, vN, vV; varying vec2 vUv;
+      void main(){ vUv = uv; vObj = position; vN = normalize(mat3(modelMatrix) * normal); vec4 wp = modelMatrix * vec4(position, 1.0); vV = normalize(cameraPosition - wp.xyz); gl_Position = projectionMatrix * viewMatrix * wp; }`,
+    fragmentShader: `${NOISE}
+      uniform sampler2D uLand; uniform vec3 uSun; uniform float uTime; varying vec3 vObj, vN, vV; varying vec2 vUv;
+      void main(){
+        vec3 n = normalize(vN), v = normalize(vV);
+        float d = dot(n, uSun);
+        float lit = smoothstep(-0.1, 0.4, d);
+        float terrain = fbm(vObj * 9.0);
+        vec2 wob = (vec2(fbm(vObj * 40.0), fbm(vObj * 37.0 + 3.0)) - 0.5) * 0.006;
+        float land = smoothstep(0.42, 0.58, texture2D(uLand, vUv + wob).r + (fbm(vObj * 90.0) - 0.5) * 0.45);
+        vec3 sea = mix(vec3(0.010, 0.035, 0.080), vec3(0.040, 0.110, 0.180), terrain);
+        vec3 ground = mix(vec3(0.060, 0.120, 0.090), vec3(0.230, 0.280, 0.180), terrain);
+        vec3 col = mix(sea, ground, land);
+        float cloud = smoothstep(0.52, 0.72, fbm(vObj * 6.0 + vec3(uTime * 0.003, 0.0, 0.0) + fbm(vObj * 3.5) * 1.6));
+        col = mix(col, vec3(0.78, 0.86, 0.88), cloud * 0.85);
+        col *= 0.02 + 1.1 * lit;
+        float night = 1.0 - smoothstep(-0.12, 0.08, d);
+        float city = step(0.86, noise(vObj * 300.0)) * smoothstep(0.42, 0.68, noise(vObj * 52.0)) * land * night * (1.0 - cloud * 0.8);
+        col += vec3(1.0, 0.58, 0.2) * city * 0.95;
+        col += vec3(0.6, 0.75, 0.7) * pow(max(dot(reflect(-uSun, n), v), 0.0), 40.0) * (1.0 - land) * (1.0 - cloud) * lit * 0.4;
+        float fres = pow(1.0 - max(dot(n, v), 0.0), 7.0);
+        col += vec3(0.18, 0.5, 0.72) * fres * (0.25 + 0.75 * smoothstep(-0.3, 0.3, d));
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+    transparent: true, depthWrite: false,
+  });
+  earth = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 96), earthMat);
+  earth.renderOrder = 2;
+  atmo = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.ShaderMaterial({
+    uniforms: { uSun: earthMat.uniforms.uSun },
+    vertexShader: `varying vec3 vN, vV; void main(){ vN = normalize(mat3(modelMatrix) * normal); vec4 wp = modelMatrix * vec4(position, 1.0); vV = normalize(cameraPosition - wp.xyz); gl_Position = projectionMatrix * viewMatrix * wp; }`,
+    fragmentShader: `uniform vec3 uSun; varying vec3 vN, vV;
+      void main(){ vec3 n = normalize(vN); float edge = pow(max(0.0, 1.0 + dot(n, normalize(vV))), 4.0); float day = 0.3 + 0.7 * smoothstep(-0.35, 0.25, dot(n, uSun));
+        gl_FragColor = vec4(vec3(0.33, 0.78, 0.95) * edge * day * 0.9, 1.0); }`,
+    side: THREE.BackSide, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  }));
+  atmo.renderOrder = 3;
+  skyScene.add(earth, atmo);
+  // 地平線の向こうの夜明けの光
+  dawn = glowMesh(0xffc88a, 0.9); dawn.renderOrder = 4; skyScene.add(dawn);
+  // 日本が足もとに来るように地球を回しておく（東へ向かって出発する）
+  {
+    const lon = 138.5, lat = 36.5, phi = ((lon + 180) / 360) * Math.PI * 2, th = (90 - lat) * DEG;
+    const local = new THREE.Vector3(-Math.cos(phi) * Math.sin(th), Math.cos(th), Math.sin(phi) * Math.sin(th));
+    const q = new THREE.Quaternion().setFromUnitVectors(local, new THREE.Vector3(0, 1, 0));
+    const north = new THREE.Vector3(0, 1, 0).addScaledVector(local, -local.y).normalize().applyQuaternion(q);
+    const yaw = Math.atan2(north.z, north.x) - Math.PI; // 北を左（-x）へ。東が前（-z）になる
+    earth.userData.q0 = new THREE.Quaternion().setFromAxisAngle(AY, yaw).multiply(q);
+  }
+
+  // 流れる星：カメラのまわりの箱にくり返し置く（どの向きに飛んでも流れる）。速いほど長い線
+  {
+    const N = TUNE.STAR_COUNT, BOX = 180;
+    const seg = new Float32Array(N * 6), tail = new Float32Array(N * 2), scol = new Float32Array(N * 6), head = new Float32Array(N * 3), hcol = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const x = Math.random() * BOX, y = Math.random() * BOX, z = Math.random() * BOX, t = Math.random();
+      const c3 = t < 0.12 ? [1, 0.82, 0.55] : t < 0.3 ? [0.62, 0.95, 0.85] : [0.85, 0.9, 1];
+      seg.set([x, y, z, x, y, z], i * 6); tail.set([0, 1], i * 2); scol.set([...c3, ...c3], i * 6); head.set([x, y, z], i * 3); hcol.set(c3, i * 3);
+    }
+    starMat = new THREE.ShaderMaterial({
+      uniforms: { uCam: { value: new THREE.Vector3() }, uVel: { value: new THREE.Vector3() }, uBox: { value: BOX }, uScale: { value: 1 }, uTime: { value: 0 } },
+      vertexShader: `uniform vec3 uCam, uVel; uniform float uBox, uScale, uTime; attribute vec3 aColor; attribute float aTail; varying vec3 vC; varying float vA;
+        void main(){
+          vec3 rel = mod(position - uCam, uBox) - 0.5 * uBox;
+          float d = length(rel);
+          vec4 mv = viewMatrix * vec4(uCam + rel - uVel * aTail, 1.0);
+          gl_Position = projectionMatrix * mv;
+          float tw = 0.75 + 0.25 * sin(uTime * 1.7 + position.x * 3.1 + position.y * 1.3);
+          vA = smoothstep(0.5 * uBox, 0.3 * uBox, d) * smoothstep(1.5, 4.5, d) * (1.0 - aTail * 0.92) * tw;
+          vC = aColor;
+          gl_PointSize = clamp(uScale * 22.0 / max(-mv.z, 0.1), 1.0, 4.0);
+        }`,
+      fragmentShader: `varying vec3 vC; varying float vA; void main(){ gl_FragColor = vec4(vC, vA * 0.9); }`,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    });
+    const lg = new THREE.BufferGeometry();
+    lg.setAttribute("position", new THREE.BufferAttribute(seg, 3)); lg.setAttribute("aTail", new THREE.BufferAttribute(tail, 1)); lg.setAttribute("aColor", new THREE.BufferAttribute(scol, 3));
+    const lines = new THREE.LineSegments(lg, starMat); lines.frustumCulled = false; mainScene.add(lines);
+    const pg = new THREE.BufferGeometry();
+    pg.setAttribute("position", new THREE.BufferAttribute(head, 3)); pg.setAttribute("aTail", new THREE.BufferAttribute(new Float32Array(N), 1)); pg.setAttribute("aColor", new THREE.BufferAttribute(hcol, 3));
+    const pointMat = starMat.clone(); pointMat.uniforms = starMat.uniforms;
+    pointMat.fragmentShader = `varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord - 0.5); gl_FragColor = vec4(vC, vA * smoothstep(0.5, 0.0, d)); }`;
+    const pts = new THREE.Points(pg, pointMat); pts.frustumCulled = false; mainScene.add(pts);
+  }
+
+  // 天体（月・水星・火星は1つの式で描き分ける。太陽は光る式）
+  const bodyVS = `varying vec3 vO, vN, vV; void main(){ vO = position; vN = normalize(mat3(modelMatrix) * normal); vec4 wp = modelMatrix * vec4(position, 1.0); vV = normalize(cameraPosition - wp.xyz); gl_Position = projectionMatrix * viewMatrix * wp; }`;
+  const bodyMat = (kind) => new THREE.ShaderMaterial({
+    uniforms: { uKind: { value: kind }, uLight: { value: new THREE.Vector3(0, 0, 1) }, uAlpha: { value: 1 } },
+    vertexShader: bodyVS,
+    fragmentShader: `${NOISE}
+      uniform float uKind, uAlpha; uniform vec3 uLight; varying vec3 vO, vN, vV;
+      void main(){
+        vec3 N = normalize(vN), V = normalize(vV);
+        float nl = dot(N, uLight), lit = smoothstep(-0.06, 0.55, nl);
+        vec3 col;
+        if (uKind < 1.5) {
+          float maria = smoothstep(0.35, 0.59, fbm(vO * 4.0));
+          float pits = 1.0 - smoothstep(0.1, 0.27, noise(vO * 54.0));
+          col = mix(vec3(0.23, 0.28, 0.30), vec3(0.55, 0.58, 0.55), maria);
+          col *= 0.68 + fbm(vO * 23.0) * 0.5 + noise(vO * 180.0) * 0.08 - pits * 0.2;
+        } else if (uKind < 2.5) {
+          float craters = 1.0 - smoothstep(0.08, 0.24, noise(vO * 40.0));
+          col = mix(vec3(0.30, 0.28, 0.26), vec3(0.62, 0.58, 0.53), fbm(vO * 6.0));
+          col *= 0.75 + fbm(vO * 30.0) * 0.4 - craters * 0.22;
+        } else if (uKind < 3.5) {
+          float dark = smoothstep(0.5, 0.7, fbm(vO * 2.2 + 4.0));
+          col = mix(vec3(0.46, 0.17, 0.07), vec3(0.80, 0.42, 0.20), fbm(vO * 3.2));
+          col = mix(col, vec3(0.28, 0.12, 0.07), dark * 0.6);
+          float cap = smoothstep(0.86, 0.93, abs(normalize(vO).y) + fbm(vO * 8.0) * 0.05);
+          col = mix(col, vec3(0.92, 0.90, 0.86), cap);
+          col *= 0.85 + fbm(vO * 24.0) * 0.3;
+        } else {
+          // 木星：緯度にそった縞（明るい帯と暗い帯）。太さの違う縞を重ね、境目を少し乱す（演出の絵）
+          vec3 u = normalize(vO);
+          float f = u.y * 17.0 + (fbm(vec3(u.x * 3.0, u.y * 10.0, u.z * 3.0)) - 0.5) * 1.8;
+          float band = 0.55 * sin(f) + 0.3 * sin(f * 2.3 + 1.7) + 0.15 * sin(f * 5.1 + 0.4);
+          col = mix(vec3(0.46, 0.35, 0.26), vec3(0.72, 0.66, 0.57), smoothstep(-0.45, 0.55, band));
+          col = mix(col, vec3(0.56, 0.48, 0.40), smoothstep(0.55, 0.95, abs(u.y)) * 0.8);
+          col *= 0.86 + fbm(vO * 14.0 + vec3(0.0, u.y * 6.0, 0.0)) * 0.26;
+        }
+        col *= 0.035 + 1.15 * lit;
+        float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+        vec3 rimC = uKind > 3.5 ? vec3(0.95, 0.82, 0.66) : uKind > 2.5 ? vec3(1.0, 0.55, 0.35) : vec3(0.55, 0.7, 0.9);
+        col += rimC * rim * (0.06 + 0.5 * max(nl, 0.0)) * (uKind > 3.5 ? 0.6 : uKind > 2.5 ? 0.9 : 0.35);
+        gl_FragColor = vec4(col, uAlpha);
+      }`,
+    transparent: true,
+  });
+  const sphere = new THREE.SphereGeometry(1, 64, 40);
+  bodies.moon = new THREE.Mesh(sphere, bodyMat(1));
+  bodies.mercury = new THREE.Mesh(sphere, bodyMat(2));
+  bodies.mars = new THREE.Mesh(sphere, bodyMat(3));
+  bodies.jupiter = new THREE.Mesh(sphere, bodyMat(4));
+  bodies.sun = new THREE.Mesh(sphere, new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 0 }, uAlpha: { value: 1 } },
+    vertexShader: bodyVS,
+    fragmentShader: `${NOISE}
+      uniform float uTime, uAlpha; varying vec3 vO, vN, vV;
+      void main(){
+        float n = fbm(vO * 5.0 + vec3(uTime * 0.12, uTime * 0.07, 0.0));
+        float mu = max(dot(normalize(vN), normalize(vV)), 0.0);
+        vec3 c = mix(vec3(1.0, 0.48, 0.12), vec3(1.0, 0.93, 0.74), pow(mu, 0.6));
+        c *= 0.88 + 0.3 * (n - 0.5);
+        gl_FragColor = vec4(c * 1.15, uAlpha);
+      }`,
+    transparent: true,
+  }));
+  for (const [hex, k, o] of [[0xfff0c8, 3.0, 1.6], [0xffb547, 6.2, 0.9], [0xff7a2e, 13, 0.4]]) { const gm = glowMesh(hex, o); gm.userData.k = k; sunGlows.push(gm); mainScene.add(gm); }
+  for (const b of Object.values(bodies)) mainScene.add(b);
+
+  // 探査機の模型（Codex が作った9つのうち、航路にいる4機。公式を参考にしたイメージ）
+  kit = CRAFT.makeKit(THREE);
+  naturalKit(kit);
+  for (const id of ["jwst", "bepicolombo", "juno", "new-horizons", "voyager"]) models[id] = CRAFT.MODELS[id](THREE, kit);
+  // 光：太陽の光らしい白い主光（影をつくる）と、弱い補助光。補助光はカメラについて回り、主光も「カメラから見て左上の前」の向きを保つ。
+  // 主光の影は、見ている模型のまわりだけを測る（render で毎回置き直す）
+  camera.add(new THREE.AmbientLight(0xc9d6e6, 0.12));
+  for (const [hex, inten, from] of [[0xffcf9a, 0.55, [5, 2, -4]], [0x5ef2c2, 0.12, [-6, -2, 1]]]) {
+    const L = new THREE.DirectionalLight(hex, inten); L.position.set(...from); camera.add(L); L.target.position.set(0, 0, 0); camera.add(L.target);
+  }
+  keyLight = new THREE.DirectionalLight(0xfff2e2, 2.6);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(1024, 1024);
+  keyLight.shadow.bias = -0.0005;
+  mainScene.add(keyLight, keyLight.target);
+
+  // 1光日の輪（アンバー）
+  gate = new THREE.Group();
+  {
+    const ringMat = flatMat(0xffb547, 0.95);
+    gate.add(new THREE.Mesh(new THREE.TorusGeometry(1, 0.0075, 8, 220), ringMat));
+    gate.add(new THREE.Mesh(new THREE.TorusGeometry(1.08, 0.003, 6, 220), ringMat));
+    const ticks = [];
+    for (let i = 0; i < 72; i++) { const a = (i / 72) * Math.PI * 2, r0 = i % 6 ? 1.02 : 0.95, r1 = 1.06; ticks.push(Math.cos(a) * r0, Math.sin(a) * r0, 0, Math.cos(a) * r1, Math.sin(a) * r1, 0); }
+    const tg = new THREE.BufferGeometry(); tg.setAttribute("position", new THREE.Float32BufferAttribute(ticks, 3));
+    gate.add(new THREE.LineSegments(tg, flatMat(0xffb547, 0.8)));
+    const halo = glowMesh(0xffb547, 0.1); halo.scale.setScalar(3.2); gate.add(halo); gate.userData.halo = halo;
+    gate.userData.mats = [ringMat];
+  }
+  mainScene.add(gate);
+
+  // ニュー・ホライズンズのあたりに、うすい氷のちり（カイパーベルトの雰囲気。演出）
+  {
+    const n = 600, pos = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { const u = Math.random() * 2 - 1, a = Math.random() * Math.PI * 2, r = 3 + 34 * Math.cbrt(Math.random()); pos.set([Math.cos(a) * Math.sqrt(1 - u * u) * r, u * r * 0.45, Math.sin(a) * Math.sqrt(1 - u * u) * r], i * 3); }
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    dust = new THREE.Points(g, new THREE.ShaderMaterial({
+      uniforms: { uAlpha: { value: 0 }, uScale: { value: 1 } },
+      vertexShader: `uniform float uScale; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = clamp(uScale * 16.0 / -mv.z, 1.0, 3.5); }`,
+      fragmentShader: `uniform float uAlpha; void main(){ float d = length(gl_PointCoord - 0.5); gl_FragColor = vec4(vec3(0.75, 0.84, 0.92), uAlpha * smoothstep(0.5, 0.0, d)); }`,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    }));
+    mainScene.add(dust);
+  }
+
+  // 航路の点線（これから進む道。足もとの少し下に描く）
+  routeMat = new THREE.ShaderMaterial({
+    uniforms: { uS: { value: 0 }, uAlpha: { value: 0.5 }, uScale: { value: 1 } },
+    vertexShader: `uniform float uS, uScale; attribute float aS; varying float vA;
+      void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv;
+        vA = smoothstep(uS + 1.5, uS + 6.0, aS) * (1.0 - smoothstep(uS + 48.0, uS + 80.0, aS));
+        gl_PointSize = clamp(uScale * 7.0 / max(-mv.z, 0.1), 1.0, 5.0); }`,
+    fragmentShader: `uniform float uAlpha; varying float vA; void main(){ float d = length(gl_PointCoord - 0.5); gl_FragColor = vec4(0.37, 0.95, 0.76, vA * uAlpha * smoothstep(0.5, 0.15, d)); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  });
+
+  // 火星の地面を見る望遠の窓（別の小さな景色。四角い範囲に描き、丸い枠を重ねる）
+  lensScene = new THREE.Scene();
+  lensCam = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+  lensCam.position.set(5.6, 3.5, 8.4); lensCam.lookAt(0, -0.25, 0);
+  lensScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.999, 1.0); }`,
+    fragmentShader: `varying vec2 vUv; void main(){ float r = length(vUv - 0.5) * 2.0; if (r > 1.0) discard;
+      vec3 sky = mix(vec3(0.20, 0.10, 0.07), vec3(0.03, 0.05, 0.10), smoothstep(-0.2, 0.9, vUv.y));
+      gl_FragColor = vec4(sky, 1.0); }`,
+    depthWrite: false, depthTest: false,
+  })));
+  lensScene.children[0].renderOrder = -1;
+  // 火星の地面と、パーサヴィアランス（公式を参考にしたイメージ）。太陽の光が、地面に影を落とす
+  rover = holdModel(CRAFT.MODELS.perseverance(THREE, kit), 1.45);
+  const roverInner = rover.userData.inner, half = (roverInner.userData.normalizedSize[1] * rover.scale.y) / 2;
+  rover.rotation.y = rover.userData.spin = roverInner.userData.pose[1];
+  lensScene.add(rover);
+  const soil = new THREE.MeshStandardMaterial({ color: 0x7c4128, roughness: 1, metalness: 0 });
+  soil.color.convertSRGBToLinear();
+  const ground = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.75, 0.12, 64), soil);
+  ground.position.y = -half - 0.06; ground.receiveShadow = true; lensScene.add(ground);
+  for (let i = 0; i < 18; i++) {
+    const a = i * 2.399, r = 1.25 + (i % 3) * 0.32;
+    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.03 + (i % 4) * 0.02, 0), soil);
+    rock.position.set(Math.cos(a) * r, -half + 0.01, Math.sin(a) * r); rock.castShadow = rock.receiveShadow = true; lensScene.add(rock);
+  }
+  lensScene.add(new THREE.HemisphereLight(0xe2b68c, 0x5a2814, 0.42));
+  const lensKey = new THREE.DirectionalLight(0xfff0dc, 2.3);
+  lensKey.position.set(-3, 6, 3); lensKey.castShadow = true; lensKey.shadow.mapSize.set(1024, 1024);
+  Object.assign(lensKey.shadow.camera, { left: -3, right: 3, top: 3, bottom: -3, near: 0.5, far: 20 });
+  lensKey.shadow.bias = -0.0005; lensKey.shadow.normalBias = 0.02;
+  lensScene.add(lensKey);
+}
+
+// 航路と景色の置き場所を、画面の形に合わせて作り直す
+function placeScene() {
+  FI = frameInfo();
+  journey.style.setProperty("--band-bottom", `${FI.bandBottom}px`);
+  ROUTE = buildRoute();
+  if (!renderer) return;
+  // 航路の点
+  if (routePts) { mainScene.remove(routePts); routePts.geometry.dispose(); }
+  {
+    const pos = [], as = [], v = new THREE.Vector3();
+    for (let s = 0; s <= ROUTE.len; s += 1.25) { routePos(s, v); pos.push(v.x, v.y - 0.85, v.z); as.push(s); }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute("aS", new THREE.Float32BufferAttribute(as, 1));
+    routePts = new THREE.Points(g, routeMat); routePts.frustumCulled = false; mainScene.add(routePts);
+  }
+  const q = new THREE.Quaternion(), e = new THREE.Euler();
+  for (const st of ROUTE.stops) {
+    const lk = st.lk;
+    encounterQuat(st.E, st, q); // 着いたときのカメラの向き
+    st.qE = q.clone();
+    st.objects = [];
+    if (lk.body) {
+      const b = bodies[lk.body];
+      b.position.copy(st.center); b.scale.setScalar(lk.R);
+      if (b.material.uniforms.uLight) b.material.uniforms.uLight.value.set(-0.8, 0.5, 0.45).applyQuaternion(q).normalize(); // 左上の前から照らす
+      st.objects.push(b);
+      if (lk.body === "sun") for (const gm of sunGlows) { gm.position.copy(st.center); gm.scale.setScalar(lk.R * gm.userData.k); st.objects.push(gm); }
+    }
+    if (lk.model) {
+      const holder = models[lk.model].userData.holder ?? (models[lk.model].userData.holder = (() => { const h = holdModel(models[lk.model], lk.mR ?? lk.R); mainScene.add(h); return h; })());
+      holder.position.copy(st.focus);
+      if (lk.mOff) holder.position.addScaledVector(st.right, lk.mOff[0]).addScaledVector(st.axis, lk.mOff[1]).addScaledVector(st.dirIn, -lk.mOff[2]); // 右・上・手前へずらす
+      const inner = holder.userData.inner;
+      inner.userData.spin = inner.userData.spin ?? 0;
+      holder.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(e.set(...(lk.mPose ?? inner.userData.pose))));
+      st.model = holder; st.objects.push(holder);
+      // 回りこんで見るときの中心（模型）と、引く量（どの向きから見ても、模型の全体が着いたときの円に収まるように）
+      st.pivot = holder.position;
+      const [sx, sy, sz] = inner.userData.normalizedSize;
+      st.lookOut = Math.max(1, 0.5 * Math.hypot(sx, sy, sz));
+    } else {
+      st.pivot = st.focus; st.lookOut = 1; // 天体だけ：球なので、どの向きでも同じ大きさ
+    }
+    if (lk.kind === "gate") {
+      gate.position.copy(st.center); gate.scale.setScalar(lk.R * (FI.portrait ? 0.72 : 1)); // 縦長：輪を小さくして、上の数字と下の名前にかからないようにする
+      gate.quaternion.setFromUnitVectors(AZ, st.normal);
+      st.objects.push(gate);
+    }
+    if (st.pl.id === "new-horizons") { dust.position.copy(st.focus); st.objects.push(dust); }
+  }
+}
+
+// ---------- 状態 ----------
+let s = 0; // 航路の上の位置（3D の単位）
+let v = 0; // 速さ（単位/秒。+ が遠くへ）
+let trip = null; // 案内つきの飛行 { from, to, t0, dur, target }
+let pointer = null;
+const look = { yaw: 0, pitch: 0, yawTo: 0, st: null }; // そばで観測中：ドラッグで回りこんで見る角度（ラジアン。yawTo はキーで回すときの行き先）と、その場所
+let snap = null; // 吸い寄せている場所
+let kickFov = 0;
+let lastT = performance.now(), raf = 0, visible = true, started = false;
+let announced = "";
+
+function cancelTrip() {
+  if (!trip) return;
+  trip = null;
+}
+function push(dv) { cancelTrip(); snap = null; v = clamp(v + dv, -TUNE.MAX_V, TUNE.MAX_V); audio.wake(); wake(); }
+function nextStop(from = s) { return ROUTE.stops.find((st) => st.sE > from + 0.5) ?? null; }
+function prevStop(from = s) { return [...ROUTE.stops].reverse().find((st) => st.sE < from - 0.5) ?? null; }
+function startTrip(to, target) {
+  if ($("detail-dialog").open) $("detail-dialog").close();
+  snap = null; pointer = null;
+  const dist = Math.abs(to - s);
+  if (reduce || !renderer || dist < 0.01) { s = to; v = 0; trip = null; arrive(target); wake(); return; }
+  const dur = target === "home" ? TUNE.TRIP_MAX : clamp(TUNE.TRIP_MIN + dist * TUNE.TRIP_PER_UNIT, TUNE.TRIP_MIN, TUNE.TRIP_MAX);
+  trip = { from: s, to, t0: null, dur: dur * 1000, target };
+  audio.sweep();
+  wake();
+}
+function finishTrip() { if (!trip) return; const t = trip; trip = null; s = t.to; v = 0; arrive(t.target); }
+function arrive(target) {
+  v = 0;
+  if (target === "home") { say("地表の近く（高さ100km）に戻りました。"); return; }
+  if (target === "end") { say("1光日の先に着きました。地球の輪の外は、桁が違う。"); audio.ping(true); return; }
+}
+// 場所に着いたら知らせる（自由に飛んで止まったときも）
+function announce(st) {
+  if (!st || announced === st.pl.id) return;
+  announced = st.pl.id;
+  const pl = st.pl;
+  say(`${pl.name}。地球から${pl.approx ? "約" : ""}${kmJa(pl.km, pl.approx ? 2 : 3)}。光で${lightTime(pl.km / C, pl.approx)}。${pl.text}${pl.event ? `。${pl.event}` : ""}`);
+  audio.ping(pl.kind === "light-day");
+}
+
+// いまの様子：intro（地表の近く）／encounter（場所のそば）／swing（弧の上）／travel（案内つきで飛行中）／free（自由に飛行中）／rest（途中で止まっている）／end
+function modeNow() {
+  const sw = ROUTE.stops.find((st) => st.lk.kind !== "gate" && s > st.sE + 0.6 && s < st.sX + 1);
+  if (trip || (pointer && !pointer.look) || Math.abs(v) > 0.5) return { mode: sw ? "swing" : trip ? "travel" : "free", st: sw };
+  if (s < 0.3) return { mode: "intro" };
+  if (s > ROUTE.len - 0.3) return { mode: "end" };
+  const st = ROUTE.stops.find((x) => Math.abs(s - x.sE) < 0.6);
+  if (st) return { mode: "encounter", st };
+  return { mode: "rest", st: sw };
+}
+
+// ---------- 操作：指・マウス・ホイール・キー（Claude 案と同じ） ----------
+viewport.addEventListener("pointerdown", (e) => {
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  const m = modeNow();
+  if (m.mode === "encounter" && renderer) {
+    // そばで観測中：なぞると、見せたもののまわりを回りこんで見る（ここでは飛ばない。先へは「その先へ」のボタンで）
+    pointer = { id: e.pointerId, x: e.clientX, y: e.clientY, look: true };
+    look.st = m.st;
+    journey.classList.add("looked");
+  } else {
+    cancelTrip(); snap = null;
+    pointer = { id: e.pointerId, y: e.clientY };
+  }
+  viewport.setPointerCapture(e.pointerId);
+  wake();
+});
+viewport.addEventListener("pointermove", (e) => {
+  if (!pointer || pointer.id !== e.pointerId) return;
+  if (pointer.look) {
+    const dx = e.clientX - pointer.x, dy = e.clientY - pointer.y;
+    pointer.x = e.clientX; pointer.y = e.clientY;
+    look.yaw = look.yawTo = look.yaw - dx * 0.008; // 右へなぞると、右へ回って見える
+    look.pitch = clamp(look.pitch - dy * 0.006, -1.0, 1.0); // 下へなぞると、上から見下ろす
+    wake();
+    return;
+  }
+  // 下へなぞると遠くへ（宇宙を手前へ引き寄せる向き。2026-10-04 オーナー）。上へなぞると地球の方へ
+  const dy = e.clientY - pointer.y; pointer.y = e.clientY;
+  push(dy * TUNE.SWIPE_GAIN);
+});
+const endDrag = (e) => { if (pointer && pointer.id === e.pointerId) { pointer = null; wake(); } };
+viewport.addEventListener("pointerup", endDrag);
+viewport.addEventListener("pointercancel", endDrag);
+viewport.addEventListener("lostpointercapture", endDrag);
+viewport.addEventListener("wheel", (e) => {
+  if (e.ctrlKey) return;
+  if (s <= 0.01 && e.deltaY > 0 && v <= 0) return; // 地表で下へ回したら、ページを下へ（距離のはしごへ）
+  e.preventDefault();
+  const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? viewport.clientHeight : 1;
+  push(-e.deltaY * unit * TUNE.WHEEL_GAIN);
+}, { passive: false });
+document.addEventListener("keydown", (e) => {
+  if ($("detail-dialog").open || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  const r = journey.getBoundingClientRect();
+  if (r.bottom < innerHeight * 0.5 || r.top > innerHeight * 0.5) return;
+  const k = { ArrowUp: TUNE.KEY_PUSH, ArrowDown: -TUNE.KEY_PUSH, PageUp: TUNE.PAGE_PUSH, PageDown: -TUNE.PAGE_PUSH }[e.key];
+  const turn = { ArrowLeft: 0.26, ArrowRight: -0.26 }[e.key];
+  if (turn) { const m = modeNow(); if (m.mode === "encounter" && renderer) { e.preventDefault(); look.st = m.st; look.yawTo += turn; journey.classList.add("looked"); wake(); } return; }
+  if (k) { e.preventDefault(); if (reduce) keyStep(Math.sign(k)); else push(k); }
+  else if (e.key === "Home") { e.preventDefault(); startTrip(0, "home"); }
+});
+// 動きを減らす設定では、キー1回で隣の場所へすぐ移る
+function keyStep(dir) {
+  if (dir > 0) { const st = nextStop(); startTrip(st ? st.sE : ROUTE.len, st ? st.i : "end"); }
+  else { const st = prevStop(); startTrip(st ? st.sE : 0, st ? st.i : "home"); }
+}
+$("primary").addEventListener("click", () => {
+  if (trip) { finishTrip(); wake(); return; }
+  const m = modeNow();
+  if (m.mode === "end") { startTrip(0, "home"); return; }
+  const st = nextStop();
+  if (st) startTrip(st.sE, st.i); else startTrip(ROUTE.len, "end");
+});
+$("home").addEventListener("click", () => startTrip(0, "home"));
+$("again").addEventListener("click", () => { journey.scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); startTrip(0, "home"); });
+$("ladder-steps").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-go]");
+  if (!b) return;
+  const st = ROUTE.stops.find((x) => x.pl.id === b.dataset.go);
+  journey.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  viewport.focus({ preventScroll: true });
+  startTrip(st.sE, st.i);
+});
+$("details").addEventListener("click", () => {
+  const m = modeNow(), id = m.st?.pl.id, card = CARDS[id];
+  if (!card) return;
+  const pl = m.st.pl;
+  $("detail-title").textContent = card.title ?? pl.name;
+  $("detail-sub").textContent = card.sub ?? `${card.en}　・　地球から${pl.approx ? "約" : ""}${kmJa(pl.km, pl.approx ? 2 : 3)}（${pl.how}）`;
+  $("detail-facts").innerHTML = card.facts.map(([k, val, src]) => `<div class="fact"><dt>${esc(k)}</dt><dd>${esc(val)}<br><a class="src" href="${esc(src)}" target="_blank" rel="noopener noreferrer">出典 ↗</a></dd></div>`).join("");
+  $("detail-links").innerHTML = card.links.map(([label, url]) => `<li><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a></li>`).join("");
+  $("detail-dialog").showModal();
+});
+$("detail-close").addEventListener("click", () => $("detail-dialog").close());
+$("detail-dialog").addEventListener("click", (e) => { if (e.target === $("detail-dialog")) $("detail-dialog").close(); });
+
+// ---------- 音（ブラウザの中で作る音だけ。最初は消しておく） ----------
+const audio = (() => {
+  let ctx = null, master, hum, filt, noiseGain, noiseBuf, on = false;
+  function start() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    hum = ctx.createOscillator(); hum.type = "sawtooth"; hum.frequency.value = 42;
+    filt = ctx.createBiquadFilter(); filt.type = "lowpass"; filt.frequency.value = 220;
+    const hg = ctx.createGain(); hg.gain.value = 0.05;
+    hum.connect(filt); filt.connect(hg); hg.connect(master); hum.start();
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 900; bp.Q.value = 0.7;
+    noiseGain = ctx.createGain(); noiseGain.gain.value = 0;
+    src.connect(bp); bp.connect(noiseGain); noiseGain.connect(master); src.start();
+  }
+  return {
+    toggle() { on = !on; if (on && !ctx) start(); if (ctx) { ctx.resume(); master.gain.setTargetAtTime(on ? 0.22 : 0, ctx.currentTime, 0.08); } return on; },
+    wake() { if (ctx && on) ctx.resume(); },
+    update(speedNorm, warp) {
+      if (!ctx || !on) return;
+      const t = ctx.currentTime;
+      hum.frequency.setTargetAtTime(42 + speedNorm * 70, t, 0.1);
+      filt.frequency.setTargetAtTime(220 + speedNorm * 900, t, 0.1);
+      noiseGain.gain.setTargetAtTime(warp * 0.06, t, 0.15);
+    },
+    ping(gateHit = false) {
+      if (!ctx || !on) return;
+      const t = ctx.currentTime;
+      for (const [f, dl] of gateHit ? [[392, 0], [587, 0.05], [784, 0.1]] : [[1046, 0], [1568, 0.06]]) {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = gateHit ? "triangle" : "sine"; o.frequency.value = f;
+        g.gain.setValueAtTime(0, t + dl); g.gain.linearRampToValueAtTime(gateHit ? 0.18 : 0.12, t + dl + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dl + (gateHit ? 1.2 : 0.5));
+        o.connect(g); g.connect(master); o.start(t + dl); o.stop(t + dl + 1.3);
+      }
+    },
+    // スイングバイで飛び出すときの「ひゅうっ」
+    whoosh() {
+      if (!ctx || !on) return;
+      const t = ctx.currentTime, src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+      src.buffer = noiseBuf; bp.type = "bandpass"; bp.Q.value = 1.4;
+      bp.frequency.setValueAtTime(260, t); bp.frequency.exponentialRampToValueAtTime(1900, t + 0.35); bp.frequency.exponentialRampToValueAtTime(240, t + 1.1);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.2, t + 0.22); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+      src.connect(bp); bp.connect(g); g.connect(master); src.start(t); src.stop(t + 1.25);
+    },
+    sweep() {
+      if (!ctx || !on) return;
+      const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(180, t + 1.4); o.frequency.exponentialRampToValueAtTime(50, t + 2.8);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.08, t + 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.8);
+      o.connect(g); g.connect(master); o.start(t); o.stop(t + 2.9);
+    },
+  };
+})();
+$("sound").addEventListener("click", (e) => {
+  let on = false;
+  try { on = audio.toggle(); } catch { say("このブラウザでは音を出せません。"); }
+  e.currentTarget.setAttribute("aria-pressed", String(on));
+  e.currentTarget.setAttribute("aria-label", on ? "音を消す" : "音を出す");
+});
+
+// ---------- 大きさ ----------
+const rulerCv = $("ruler"), rctx = rulerCv.getContext("2d"), rearCv = $("rear-cv"), rearCtx = rearCv.getContext("2d");
+let pixelRatio = Math.min(window.devicePixelRatio || 1, TUNE.PIXEL_RATIO_MAX), dpr = window.devicePixelRatio || 1;
+let rulerW = 1, rearS = 76;
+function size() {
+  dpr = window.devicePixelRatio || 1;
+  const keepP = ROUTE ? routeP(s) : P0;
+  const keepStop = ROUTE ? ROUTE.stops.find((x) => Math.abs(s - x.sE) < 0.6)?.i : undefined;
+  const keepTrip = trip && ROUTE ? { p0: routeP(trip.from), p1: routeP(trip.to) } : null;
+  placeScene();
+  s = keepStop !== undefined ? ROUTE.stops[keepStop].sE : routeS(keepP);
+  if (keepTrip) { trip.from = routeS(keepTrip.p0); trip.to = typeof trip.target === "number" ? ROUTE.stops[trip.target].sE : trip.target === "end" ? ROUTE.len : 0; }
+  if (renderer) {
+    renderer.setPixelRatio(pixelRatio); renderer.setSize(FI.W, FI.H, false);
+    camera.aspect = FI.aspect; camera.fov = FI.vfov; camera.updateProjectionMatrix();
+    started = false;
+  }
+  rulerW = rulerCv.clientWidth || 1;
+  rulerCv.width = rulerW * dpr; rulerCv.height = 34 * dpr; rctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  rearS = rearCv.clientWidth || 76;
+  rearCv.width = rearS * dpr; rearCv.height = rearS * dpr; rearCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  uiKey = ""; lastUi = 0;
+  wake();
+}
+
+// ---------- 計器・物差し・うしろの窓 ----------
+function speedInfo(km, vv) {
+  const kmps = Math.abs(km * Math.LN10 * dpds(s) * vv);
+  if (Math.abs(vv) < 0.3) return { text: "いまの速さ 0 km/秒", warp: 0 };
+  if (kmps < C) return { text: `いまの速さ 秒速 ${group(kmps)} km`, warp: 0 };
+  const ratio = kmps / C;
+  return { text: `ワープ中：光の ${group(ratio)} 倍`, warp: Math.min(1, Math.log10(ratio + 1) / 3.2), fiction: true };
+}
+function drawRuler(km) {
+  const w = rulerW, c = rctx, y = 10, x0 = 1, x1 = w - 5, len = x1 - x0;
+  c.clearRect(0, 0, w, 34);
+  c.strokeStyle = "rgba(94,242,194,0.35)"; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(x0, y + 0.5); c.lineTo(x1, y + 0.5); c.stroke();
+  const step = niceStep(km), minor = step / 5;
+  c.strokeStyle = "rgba(94,242,194,0.28)";
+  for (let k = 0; k * minor <= km * 1.0001 && k < 400; k++) {
+    const x = Math.round(x0 + ((k * minor) / km) * len) + 0.5, major = k % 5 === 0;
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x, y + (major ? 7 : 4)); c.stroke();
+  }
+  for (const pl of PLACES) {
+    if (pl.km > km * 1.0001) continue;
+    const x = x0 + (pl.km / km) * len;
+    c.fillStyle = pl.kind === "light-day" ? "#ffb547" : "#5ef2c2";
+    c.shadowColor = c.fillStyle; c.shadowBlur = 6;
+    c.fillRect(Math.round(x) - 1, y - 5, 2, 10);
+    c.shadowBlur = 0;
+  }
+  c.fillStyle = "#ffb547"; c.shadowColor = "rgba(255,181,71,0.6)"; c.shadowBlur = 8;
+  c.beginPath(); c.arc(x1, y + 0.5, 3.5, 0, Math.PI * 2); c.fill(); c.shadowBlur = 0;
+  c.font = "9px 'Zen Kaku Gothic New', sans-serif"; c.fillStyle = "rgba(143,179,168,0.95)"; c.textBaseline = "top";
+  c.textAlign = "left"; c.fillText("地球", x0, y + 12);
+  c.textAlign = "right"; c.fillText("現在地", x1 + 4, y + 12);
+  c.textAlign = "center"; c.fillStyle = "rgba(94,242,194,0.85)"; c.fillText(`1目盛り＝${kmShort(minor, 2)}`, w / 2, y + 12);
+}
+function drawRear(km, alpha) {
+  const S = rearS, c = rearCtx, cx = S / 2, cy = S / 2, R = S / 2 - 1.5;
+  c.clearRect(0, 0, S, S);
+  if (alpha <= 0) return;
+  c.save(); c.globalAlpha = alpha;
+  c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2);
+  const bg = c.createRadialGradient(cx, cy, 0, cx, cy, R); bg.addColorStop(0, "rgba(12,33,64,0.9)"); bg.addColorStop(1, "rgba(5,14,31,0.92)");
+  c.fillStyle = bg; c.fill();
+  c.strokeStyle = "rgba(94,242,194,0.45)"; c.lineWidth = 1; c.stroke();
+  c.strokeStyle = "rgba(94,242,194,0.18)";
+  for (const [a, b, d, e] of [[cx, cy - R + 4, cx, cy - R + 10], [cx, cy + R - 4, cx, cy + R - 10], [cx - R + 4, cy, cx - R + 10, cy], [cx + R - 4, cy, cx + R - 10, cy]]) { c.beginPath(); c.moveTo(a, b); c.lineTo(d, e); c.stroke(); }
+  // 見かけの大きさ（窓の視野は 60 度）。本当の角度で描く
+  const half = Math.asin(EARTH_R / (EARTH_R + km)), r = (R * Math.tan(half)) / Math.tan(30 * DEG);
+  c.beginPath(); c.arc(cx, cy, R - 1, 0, Math.PI * 2); c.clip();
+  if (r >= 1.4) {
+    const g = c.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.1, cx, cy, r);
+    g.addColorStop(0, "#9fe6ff"); g.addColorStop(0.5, "#2f7fb8"); g.addColorStop(0.85, "#0f3a66"); g.addColorStop(1, "#06213f");
+    c.fillStyle = g; c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = "rgba(120,220,255,0.5)"; c.lineWidth = 1; c.stroke();
+  } else {
+    const halo = c.createRadialGradient(cx, cy, 0, cx, cy, 7);
+    halo.addColorStop(0, "rgba(140,220,255,0.9)"); halo.addColorStop(0.25, "rgba(94,180,242,0.35)"); halo.addColorStop(1, "rgba(94,180,242,0)");
+    c.fillStyle = halo; c.fillRect(cx - 8, cy - 8, 16, 16);
+    c.fillStyle = "#cfefff"; c.beginPath(); c.arc(cx, cy, 1.1, 0, Math.PI * 2); c.fill();
+  }
+  c.restore();
+}
+
+// ---------- 表示（Codex 案の形） ----------
+let uiKey = "", lastUi = 0, travelKey = "";
+function setStory(mode, st) {
+  journey.classList.toggle("moving", mode === "travel" || mode === "free" || mode === "swing");
+  journey.classList.toggle("encounter", mode === "encounter");
+  journey.classList.toggle("rest", mode === "rest");
+  if (journey.dataset.mode !== mode) journey.dataset.mode = mode;
+  const key = `${mode}:${st?.i ?? -1}`;
+  if (key === uiKey) return;
+  uiKey = key;
+  const meta = $("hero-meta"), ev = $("hero-event"), det = $("details");
+  if (mode === "moving" || mode === "travel" || mode === "free" || mode === "swing" || mode === "rest") return;
+  meta.hidden = ev.hidden = det.hidden = true;
+  $("hero-title").classList.toggle("fit", mode === "encounter" && st.pl.id === "jwst"); // スマホでは1行に縮めて収める（PC は2行のまま）
+  if (mode === "intro") {
+    $("eyebrow").textContent = "A JOURNEY BEYOND / 光の旅";
+    $("hero-title").innerHTML = "その先の、<br>まだ先へ。";
+    $("hero-text").innerHTML = "光になって、地球の輪の外へ。<br>遠くで旅をつづける探査機に、会いにいこう。";
+    $("scene-name").textContent = "EARTH"; $("scene-caption").textContent = "高さ 100 km から、出発";
+  } else if (mode === "end") {
+    $("eyebrow").textContent = "BEYOND THE ORBIT";
+    $("hero-title").innerHTML = "地球の輪の外は、<br>桁が違う。";
+    $("hero-text").textContent = "うしろの窓の、あの小さな点が地球。もう一度、違う速さで旅をしてみよう。";
+    $("scene-name").textContent = "THE JOURNEY CONTINUES"; $("scene-caption").textContent = "まだ、先がある。";
+  } else if (mode === "encounter") {
+    const pl = st.pl, n = String(st.i + 1).padStart(2, "0");
+    $("eyebrow").textContent = `${n} / ${String(PLACES.length).padStart(2, "0")} · ${pl.kind === "probe" ? "探査機のとなりで" : pl.kind === "light-day" ? "光の1日" : "くらべる目安"}`;
+    $("hero-title").innerHTML = pl.id === "jwst" ? 'ジェイムズ・ウェッブ<br class="br-wide">宇宙望遠鏡' : esc(pl.name);
+    $("hero-text").textContent = pl.text;
+    meta.hidden = false;
+    meta.innerHTML = `${esc(distText(pl))} ／ 光で ${esc(lightTime(pl.km / C, pl.approx))}<small>${esc(pl.how)}</small>`;
+    if (pl.event) { ev.hidden = false; ev.textContent = pl.event; }
+    det.hidden = !CARDS[pl.id];
+    $("scene-name").textContent = st.lk.en;
+    $("story-en").textContent = st.lk.en;
+    $("scene-caption").textContent = pl.kind === "probe" ? "いま、あなたのすぐそばに。" : "光の旅の、ひとつの目印。";
+  }
+}
+function setPrimary(mode, st) {
+  let label, sub = "";
+  if (trip) { label = "到着まで進む"; }
+  else if (mode === "intro") { label = "旅をはじめる"; sub = "まずは月へ"; }
+  else if (mode === "end") { label = "もう一度、地球から"; }
+  else if (mode === "encounter") {
+    const lk = st.lk, nx = ROUTE.stops[st.i + 1];
+    if (lk.swing === "gravity") { label = "スイングバイで、その先へ"; sub = `${lk.by}の重力で、向きと速さを変える`; }
+    else if (lk.swing === "around") { label = "回りこんで、その先へ"; sub = nx ? `次は ${nx.pl.name}` : ""; }
+    else { label = "1光日の、その先へ"; }
+  } else { const nx = nextStop(); label = nx ? "次の場所へ" : "1光日の、その先へ"; sub = nx ? `次は ${nx.pl.name}` : ""; }
+  if ($("primary-label").textContent !== label) $("primary-label").textContent = label;
+  if ($("primary-sub").textContent !== sub) $("primary-sub").textContent = sub;
+}
+function setTravel(mode, st) {
+  let word = "", sub = "";
+  if (mode === "swing" && st) {
+    if (st.lk.swing === "gravity") { word = `${st.lk.by}の重力で、曲がる。`; sub = "SWING-BY / 向きと速さが変わる"; }
+    else { word = st.pl.kind === "probe" ? "となりを、回りこむ。" : "太陽を、回りこむ。"; sub = "FLY-AROUND / 向きを変える"; }
+  } else if (v < -0.5 || (trip && trip.to < trip.from)) {
+    const pv = prevStop(); word = "地球の方へ、もどる。"; sub = `BACK / ${pv ? pv.pl.name : "地表の近く"}`;
+  } else {
+    const nx = nextStop();
+    word = mode === "rest" ? "ここで、ひと息。" : mode === "free" ? "桁を越えて、進む。" : nx ? TRAVEL[nx.pl.id] : "光の一日、その先へ。";
+    sub = nx ? `NEXT / ${nx.pl.name}` : "BEYOND / 1光日の先";
+  }
+  const key = word + sub;
+  if (key === travelKey) return;
+  travelKey = key;
+  $("travel-word").textContent = word; $("travel-sub").textContent = sub;
+}
+const STATUS = { intro: "地球の、すぐそば。", encounter: "そばで、観測中", travel: "光になって、進む", free: "自由に飛行中", rest: "ここで、ひと息", end: "光の一日、その先" };
+function drawUi(now, km, sp, m) {
+  if (now - lastUi < 66 && (trip || Math.abs(v) > 0.5)) return;
+  lastUi = now;
+  const st = m.mode === "encounter" ? m.st : null, approx = !!st?.pl.approx;
+  const shownKm = st ? st.pl.km : km;
+  $("km").textContent = group(shownKm);
+  $("approx").textContent = approx ? "目安" : "";
+  $("ly").textContent = (approx ? "約 " : "") + lightYears(shownKm);
+  $("lt").textContent = lightTime(shownKm / C, approx);
+  const spd = $("speed");
+  spd.innerHTML = sp.fiction ? `${esc(sp.text)}<span class="fiction">作り話</span>` : esc(sp.text);
+  spd.classList.toggle("warp", !!sp.fiction);
+  $("ruler-km").textContent = `${group(shownKm)} km`;
+  drawRuler(shownKm);
+  const passed = ROUTE.stops.filter((x) => x.sE <= s + 0.5).length;
+  $("chapter-num").textContent = String(passed).padStart(2, "0");
+  $("rail-fill").style.height = `${(100 * s) / ROUTE.len}%`;
+  let status = STATUS[m.mode] ?? "";
+  if (m.mode === "swing") status = m.st?.lk.swing === "gravity" ? "スイングバイ中" : "回りこみ中";
+  if (m.mode === "travel" && trip && Math.abs(trip.to - s) < 12) status = "まもなく、となりへ";
+  if ($("status").textContent !== status) $("status").textContent = status;
+  setStory(m.mode, m.st);
+  setPrimary(m.mode, m.st);
+  setTravel(m.mode, m.st);
+  if (m.mode === "encounter") announce(m.st); else announced = "";
+}
+
+// ---------- 毎フレーム ----------
+const camPos = renderer ? new THREE.Vector3() : null, prevPos = renderer ? new THREE.Vector3() : null, velV = renderer ? new THREE.Vector3() : null, tmpV = renderer ? new THREE.Vector3() : null;
+let frameMs = 16, frames = 0, qualityAt = 0, idleFrames = 0;
+function step(dt, now) {
+  const before = s;
+  if (trip) {
+    trip.t0 ??= now;
+    const u = clamp((now - trip.t0) / trip.dur, 0, 1);
+    const e = u < 0.5 ? 4 * u * u * u : 1 - (-2 * u + 2) ** 3 / 2;
+    s = trip.from + (trip.to - trip.from) * e;
+    v = dt > 0 ? (s - before) / dt : 0;
+    if (u >= 1) { const t = trip; trip = null; s = t.to; v = 0; arrive(t.target); }
+  } else {
+    s = clamp(s + v * dt, 0, ROUTE.len);
+    if (s === 0 || s === ROUTE.len) v = 0;
+    if (!pointer) {
+      // スイングバイの天体に近づくと、引き込まれて速くなる
+      const well = ROUTE.stops.find((st) => st.lk.swing === "gravity" && s > st.sE + 0.4 && s < st.sMid);
+      if (well && v > 0.5) v = Math.min(TUNE.MAX_V, v + TUNE.GRAVITY * dt);
+      // ゆっくりになったら、進む先の場所へ吸い寄せて止める
+      if (!snap && Math.abs(v) < TUNE.SNAP_SPEED) {
+        let best = null, bd = TUNE.SNAP_RANGE;
+        for (const st of ROUTE.stops) {
+          const d = st.sE - s;
+          if (v > 0.5 ? d > 0.2 : v < -0.5 ? d < -0.2 : Math.abs(d) < 2) if (Math.abs(d) < bd) { bd = Math.abs(d); best = st; }
+        }
+        snap = best;
+      }
+      if (snap) {
+        const d = snap.sE - s;
+        v += (9 * d - 5.2 * v) * dt;
+        if (Math.abs(d) < 0.03 && Math.abs(v) < 0.4) { s = snap.sE; v = 0; snap = null; }
+      } else {
+        v *= TUNE.FRICTION ** dt;
+        if (Math.abs(v) < 0.3) v = 0;
+      }
+    }
+  }
+  // 弧を抜けた瞬間：飛び出す（スイングバイ）・1光日の輪をくぐる
+  if (s > before) for (const st of ROUTE.stops) {
+    if (st.lk.kind === "gate") { if (before < st.sA && s >= st.sA) { pulse(true); audio.ping(true); } continue; }
+    if (st.lk.swing === "gravity" && before < st.sMid && s >= st.sMid) {
+      kickFov = 1;
+      pulse(false);
+      audio.whoosh();
+      if (!trip && !pointer) {
+        const nx = ROUTE.stops[st.i + 1], remain = (nx ? nx.sE : ROUTE.len) - s;
+        v = Math.max(v, Math.min(TUNE.MAX_V, remain * TUNE.SLING * Math.log(1 / TUNE.FRICTION)));
+        snap = null;
+      }
+    }
+  }
+  return before;
+}
+function pulse(gateHit) {
+  if (reduce) return;
+  const f = $("flash");
+  f.classList.toggle("gate", gateHit);
+  f.animate([{ opacity: 0 }, { opacity: 1 }, { opacity: 0 }], { duration: gateHit ? 900 : 650, easing: "ease-out" });
+}
+function frame(now) {
+  raf = 0;
+  if (!visible || document.hidden) return;
+  const dt = Math.min(0.05, (now - lastT) / 1000 || 0);
+  frameMs = frameMs * 0.95 + (now - lastT) * 0.05;
+  lastT = now;
+  const before = step(dt, now);
+  const p = routeP(s), km = 10 ** p;
+  const sp = speedInfo(km, v);
+  const m = modeNow();
+  drawUi(now, km, sp, m);
+  audio.update(Math.min(1, Math.abs(v) / TUNE.MAX_V), sp.warp);
+  const warp = reduce ? 0 : sp.warp;
+  $("warp-vignette").style.opacity = String(warp * 0.9);
+  // うしろの窓（地球が前から消えたら出す）
+  const rearA = smooth01((p - P0 - 0.35) / 0.25);
+  $("rear").dataset.off = String(rearA <= 0);
+  if (rearA > 0) { drawRear(km, rearA); $("rear-size").textContent = angleText((2 * Math.asin(EARTH_R / (EARTH_R + km))) / DEG); }
+
+  const moving = s !== before || v !== 0 || !!trip || !!pointer || kickFov > 0.01 || look.yawTo !== look.yaw;
+  if (moving) idleFrames = 0; else idleFrames++;
+  // 止まっているあいだは、ゆっくり回る模型や星のまたたきのために1コマおきに描く（動きを減らす設定では描くのをやめる）
+  if (renderer && (moving || idleFrames < 3 || (!reduce && idleFrames % 2 === 0))) render(now, dt, p, km, warp, m);
+  if (moving || idleFrames < 3 || !reduce) raf = requestAnimationFrame(frame);
+}
+function render(now, dt, p, km, warp, m) {
+  routePos(s, camPos);
+  if (!started) { prevPos.copy(camPos); }
+  velV.subVectors(camPos, prevPos).divideScalar(Math.max(dt, 1e-3));
+  prevPos.copy(camPos);
+  // カメラ：航路の上。向きは「進む向き」と「着いた場所を見る向き」を混ぜ、弧では傾ける。ワープでは視野が広がる
+  cameraQuat(s, camPos, qTarget);
+  // そばで観測中の「回りこんで見る」：見せたもの（模型。なければ天体）を中心に、カメラごと回す（見せたものは画面の同じ場所のまま）。
+  // 離れるとき（その先へ・はじいたとき）は、角度を 0 に戻しながら航路に乗る
+  qBase.copy(qTarget);
+  const here = m.mode === "encounter" ? m.st : null;
+  if (look.st && look.st !== here) {
+    const k = reduce ? 0 : Math.exp(-dt / 0.22);
+    look.yaw = look.yawTo = look.yaw * k; look.pitch *= k;
+    if (Math.abs(look.yaw) + Math.abs(look.pitch) < 1e-3) { look.yaw = look.yawTo = look.pitch = 0; look.st = null; }
+  } else if (look.st && look.yawTo !== look.yaw) {
+    look.yaw += (look.yawTo - look.yaw) * (reduce ? 1 : 1 - Math.exp(-dt / 0.12)); // キーで回すときは、なめらかに
+    if (Math.abs(look.yawTo - look.yaw) < 1e-4) look.yaw = look.yawTo;
+  }
+  if (look.st && (look.yaw || look.pitch)) {
+    const F = look.st.pivot;
+    qLookY.setFromAxisAngle(look.st.axis, look.yaw);
+    vRight.set(1, 0, 0).applyQuaternion(qTarget).applyQuaternion(qLookY);
+    qLookP.setFromAxisAngle(vRight, look.pitch).multiply(qLookY);
+    // 回すほど少し引く（模型の対角線が見えても、名前の上に出ない）
+    const out = 1 + (look.st.lookOut - 1) * smooth01((Math.abs(look.yaw) + Math.abs(look.pitch)) / 0.5);
+    camPos.sub(F).multiplyScalar(out).applyQuaternion(qLookP).add(F);
+    qTarget.premultiply(qLookP);
+  }
+  if (!started || reduce || (look.st && look.st === here)) camera.quaternion.copy(qTarget); // 回りこんで見ているあいだは、位置と向きを一緒に動かす（見せたものが画面の同じ場所のまま）
+  else camera.quaternion.slerp(qTarget, 1 - Math.exp(-dt / 0.07));
+  started = true;
+  kickFov = Math.max(0, kickFov - dt * 1.6);
+  camera.fov = FI.vfov + (reduce ? 0 : TUNE.FOV_WARP * warp + TUNE.FOV_SLING * Math.sin(Math.PI * Math.min(1, kickFov)) * 1);
+  camera.updateProjectionMatrix();
+  const shake = reduce ? 0 : warp * 0.05;
+  camera.position.copy(camPos);
+  if (shake) camera.position.add(tmpV.set((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake));
+  camera.updateMatrixWorld();
+  const t = now / 1000;
+
+  // 空
+  skyGroup.position.copy(camera.position);
+  skyGroup.userData.stars.userData.u.uScale.value = Math.min(pixelRatio, 2);
+  skyGroup.userData.stars.userData.u.uTime.value = reduce ? 0 : t;
+  // 地球（出発のときだけ）
+  const showEarth = p < P0 + 1.0;
+  earth.visible = atmo.visible = dawn.visible = showEarth;
+  if (showEarth) {
+    const alpha = Math.asin(EARTH_R / (EARTH_R + km)), beta = clamp(p - P0, 0, 1) * 0.6, D = 60;
+    tmpV.set(0, -Math.cos(beta), Math.sin(beta));
+    earth.position.copy(camera.position).addScaledVector(tmpV, D);
+    earth.scale.setScalar(D * Math.sin(alpha));
+    atmo.position.copy(earth.position); atmo.scale.setScalar(earth.scale.x + 0.12);
+    earth.quaternion.setFromAxisAngle(AX, beta + 0.32 * (p - P0)).multiply(earth.userData.q0);
+    earthMat.uniforms.uTime.value = reduce ? 0 : t;
+    dawn.position.copy(camera.position).addScaledVector(earthMat.uniforms.uSun.value, 50);
+    dawn.quaternion.copy(camera.quaternion);
+    dawn.scale.setScalar(26);
+    dawn.material.uniforms.uAlpha.value = 0.75 * (1 - smooth01((p - P0) / 0.8));
+  }
+  // 流れる星：速いほど長い線
+  starMat.uniforms.uCam.value.copy(camera.position);
+  const spd = velV.length();
+  starMat.uniforms.uVel.value.copy(velV).multiplyScalar(reduce ? 0 : Math.min(0.075, 26 / Math.max(spd, 1)));
+  if (reduce || spd < 0.5) starMat.uniforms.uVel.value.set(0, 0, 0);
+  starMat.uniforms.uScale.value = Math.min(pixelRatio, 2) * (FI.H / 800);
+  starMat.uniforms.uTime.value = reduce ? 0 : t;
+  // 航路の点線：着いているときは明るく、動いているときはうすく
+  routeMat.uniforms.uS.value = s;
+  routeMat.uniforms.uAlpha.value = m.mode === "encounter" || m.mode === "intro" ? 0.85 : 0.4;
+  routeMat.uniforms.uScale.value = Math.min(pixelRatio, 2) * (FI.H / 800);
+  // 天体・模型：近い場所だけ出す
+  for (const b of Object.values(bodies)) b.visible = false;
+  for (const g of sunGlows) g.visible = false;
+  for (const g of Object.values(models)) if (g.userData.holder) g.userData.holder.visible = false;
+  gate.visible = false; dust.visible = false;
+  for (const st of ROUTE.stops) {
+    const dist = camera.position.distanceTo(st.focus);
+    const prev = ROUTE.stops[st.i - 1];
+    if (s > st.sX + 70 || st.sE - s > 240 || (prev && s < prev.sA - 1)) continue;
+    const a = smooth01((240 - (st.sE - s)) / 70);
+    for (const o of st.objects) {
+      o.visible = true;
+      if (o.material?.uniforms?.uAlpha && o !== dust) o.material.uniforms.uAlpha.value = (o.userData.base ?? 1) * a;
+      if (sunGlows.includes(o)) o.quaternion.copy(camera.quaternion);
+    }
+    if (st.lk.body === "sun") bodies.sun.material.uniforms.uTime.value = reduce ? 0 : t;
+    if (st.model && !reduce) {
+      // ジュノーは本体の軸のまわりを、本当の速さ（1分に2回）で回る。ほかの機体は、ゆっくり向きを変えるだけ
+      const inner = st.model.userData.inner;
+      if (st.lk.rpm) inner.children[0].rotation.y += (dt * st.lk.rpm * Math.PI * 2) / 60;
+      else if (!st.lk.still) inner.rotation.y += dt * 0.05;
+    }
+    if (st.lk.kind === "gate") { gate.userData.halo.quaternion.copy(camera.quaternion).premultiply(tmpQ.copy(gate.quaternion).invert()); }
+    if (st.pl.id === "new-horizons") dust.material.uniforms.uAlpha.value = 0.55 * smooth01((60 - dist) / 30);
+    dust.material.uniforms.uScale.value = Math.min(pixelRatio, 2) * (FI.H / 800);
+  }
+
+  // 主光の影：いちばん近くに見えている模型のまわりだけを測る
+  let nearM = null, nearD = Infinity;
+  for (const st of ROUTE.stops) if (st.model?.visible) { const d = camera.position.distanceTo(st.model.position); if (d < nearD) { nearD = d; nearM = st.model; } }
+  keyLight.castShadow = !!nearM;
+  if (nearM) {
+    const R = nearM.scale.x, sc = keyLight.shadow.camera;
+    tmpV.copy(KEY_DIR).applyQuaternion(qBase); // 回りこんで見ても、光（太陽）の向きは変えない
+    keyLight.target.position.copy(nearM.position); keyLight.target.updateMatrixWorld();
+    keyLight.position.copy(nearM.position).addScaledVector(tmpV, 6 * R);
+    sc.left = sc.bottom = -1.5 * R; sc.right = sc.top = 1.5 * R; sc.near = 0.5 * R; sc.far = 9 * R; sc.updateProjectionMatrix();
+    keyLight.shadow.normalBias = 0.012 * R;
+  }
+
+  // 次の行き先の照準（遠くに小さく見えているあいだ）
+  const nx = trip || Math.abs(v) > 0.5 || m.mode === "rest" ? nextStop() : null;
+  const ret = $("reticle"), retL = $("reticle-label");
+  let shown = false;
+  if (nx && v >= -0.5 && nx.sE - s > 22 && camera.position.distanceTo(nx.focus) > 34) {
+    tmpV.copy(nx.focus).project(camera);
+    if (tmpV.z < 1 && Math.abs(tmpV.x) < 0.92 && Math.abs(tmpV.y) < 0.86) {
+      const x = (tmpV.x * 0.5 + 0.5) * FI.W, y = (-tmpV.y * 0.5 + 0.5) * FI.H;
+      ret.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      $("reticle-name").textContent = nx.pl.name;
+      const lx = clamp(x + 22, 8, FI.W - 200);
+      retL.style.transform = `translate3d(${lx}px, ${y - 14}px, 0)`;
+      shown = true;
+    }
+  }
+  if (!shown) { ret.style.transform = retL.style.transform = "translate3d(-999px,-999px,0)"; }
+
+  // 望遠の窓：火星のそば
+  const per = ROUTE.stops.find((x) => x.pl.id === "perseverance");
+  const lensW = lookWeights(per, s)[0], lensOn = lensW > 0.85 && Math.abs(v) < 8;
+  const lens = $("lens"), line = $("lens-line"), pin = $("lens-pin");
+  lens.classList.toggle("on", lensOn); line.classList.toggle("on", lensOn); pin.classList.toggle("on", lensOn);
+  journey.classList.toggle("lens-on", lensOn);
+  journey.classList.toggle("gate-on", m.mode === "encounter" && m.st?.lk.kind === "gate");
+  // 「公式を参考にしたイメージ」：探査機の模型が見えているあいだだけ出す
+  const mst = m.st;
+  journey.classList.toggle("model-on", lensOn || (!!mst?.lk.model && (m.mode === "encounter" || m.mode === "swing" || m.mode === "rest")));
+  let lensRect = null;
+  if (lensW > 0.5) {
+    tmpV.copy(per.center).project(camera);
+    const mx = (tmpV.x * 0.5 + 0.5) * FI.W, my = (-tmpV.y * 0.5 + 0.5) * FI.H;
+    const mr = (per.lk.R / camera.position.distanceTo(per.center)) / Math.tan((camera.fov * DEG) / 2) * (FI.H / 2);
+    const lr = FI.portrait ? clamp((FI.bandBottom - FI.bandTop) * 0.36, 44, 58) : 92;
+    // 縦長：右がわ、上の数字（約175px まで）の下から、説明より上（窓の下の文字の分もあける）。横長：火星の左下
+    const lx = FI.portrait ? FI.W - lr - 14 : clamp(mx - mr * 1.35, lr + 12, FI.W - lr - 12);
+    const ly = FI.portrait ? clamp(my + mr * 0.42, 176 + lr, Math.max(176 + lr, FI.bandBottom - lr - 24)) : clamp(my + mr * 0.45, lr + 90, FI.H - lr - 230);
+    lens.style.width = lens.style.height = `${2 * lr}px`;
+    lens.style.transform = `translate3d(${lx - lr}px, ${ly - lr}px, 0)`;
+    const px = mx - mr * 0.3, py = my + mr * 0.25;
+    pin.style.transform = `translate3d(${px}px, ${py}px, 0)`;
+    const ang = Math.atan2(py - ly, px - lx), dd = Math.hypot(px - lx, py - ly);
+    line.style.width = `${Math.max(0, dd - lr - 6)}px`;
+    line.style.transform = `translate3d(${lx + Math.cos(ang) * lr}px, ${ly + Math.sin(ang) * lr}px, 0) rotate(${ang}rad)`;
+    lensRect = { x: lx - lr, y: ly - lr, w: 2 * lr };
+    // 窓の中のローバーは、ゆっくり回る。なぞると、その分だけ回して見られる
+    if (!reduce) rover.userData.spin += dt * 0.12;
+    rover.rotation.y = rover.userData.spin + (look.st === per ? look.yaw : 0);
+  }
+
+  // 描く
+  renderer.clear();
+  renderer.render(skyScene, camera);
+  renderer.clearDepth();
+  renderer.render(mainScene, camera);
+  if (lensRect && lensOn) {
+    const y = FI.H - lensRect.y - lensRect.w;
+    renderer.setScissorTest(true);
+    renderer.setScissor(lensRect.x, y, lensRect.w, lensRect.w);
+    renderer.setViewport(lensRect.x, y, lensRect.w, lensRect.w);
+    renderer.clearDepth();
+    renderer.render(lensScene, lensCam);
+    renderer.setScissorTest(false);
+    renderer.setViewport(0, 0, FI.W, FI.H);
+  }
+  // 重いときは、描く細かさを自動で下げる
+  frames++;
+  if (now - qualityAt > 2500 && frames > 90) {
+    qualityAt = now; frames = 0;
+    if (frameMs > 24 && pixelRatio > 1) { pixelRatio = Math.max(1, pixelRatio - 0.25); renderer.setPixelRatio(pixelRatio); renderer.setSize(FI.W, FI.H, false); }
+  }
+}
+const tmpQ = renderer ? new THREE.Quaternion() : null;
+const KEY_DIR = renderer ? new THREE.Vector3(-3, 5, 7).normalize() : null; // 主光の向き（カメラから見て左上の前）
+const qBase = renderer ? new THREE.Quaternion() : null, qLookY = renderer ? new THREE.Quaternion() : null, qLookP = renderer ? new THREE.Quaternion() : null, vRight = renderer ? new THREE.Vector3() : null;
+function wake() { idleFrames = 0; if (!raf && visible && !document.hidden) { lastT = performance.now(); raf = requestAnimationFrame(frame); } }
+
+new ResizeObserver(() => size()).observe(journey);
+new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) wake(); else { pointer = null; } }, { threshold: 0.02 }).observe(journey);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) wake(); });
+reduceQuery.addEventListener("change", () => { reduce = reduceQuery.matches; if (reduce && trip) finishTrip(); wake(); });
+size();
+</script>

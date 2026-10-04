@@ -1,0 +1,35 @@
+{
+  "id": "hayabusa2-earth-swingby",
+  "kind": "flyby",
+  "regions": [
+    "japan"
+  ],
+  "title": {
+    "ja": "はやぶさ2 の地球スイングバイ",
+    "en": "Hayabusa2 Earth swing-by"
+  },
+  "summary": {
+    "value": "拡張ミッション（はやぶさ2♯）の次の目標。探査の対象は、小惑星トリフネ（2026年7月5日にフライバイ成功）と 1998 KY26",
+    "source": "https://www.hayabusa2.jaxa.jp/enjoy/material/press/Hayabusa2_Press_20260730.pdf",
+    "as_of": "2026-10-01"
+  },
+  "when": {
+    "value": {
+      "month": "2027-12"
+    },
+    "source": "https://www.hayabusa2.jaxa.jp/enjoy/material/press/Hayabusa2_Press_20260730.pdf",
+    "as_of": "2026-10-01",
+    "note": "記者説明会資料（2026-07-30）の「次の目標（2027年12月の地球スイングバイ）」"
+  },
+  "links": [
+    {
+      "label": "JAXA はやぶさ2 プロジェクト",
+      "url": "https://www.hayabusa2.jaxa.jp/"
+    },
+    {
+      "label": "記者説明会資料（2026-07-30、PDF）",
+      "url": "https://www.hayabusa2.jaxa.jp/enjoy/material/press/Hayabusa2_Press_20260730.pdf"
+    }
+  ],
+  "updated_at": "2026-10-01"
+}

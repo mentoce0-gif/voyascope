@@ -55,7 +55,7 @@ npm run validate:examples   # 見本を検証（エラーが出るのが正常�
 | チャッピー（ChatGPT） | 一次ソース調査。API規約・画像利用条件・カード用の数値と出典 |
 | Grok | 速報。クルー交代・打ち上げ延期などの「動き」の検知 |
 | Claude（chat） | 設計・方針の相談 |
-| Claude Code | 実装・検証・コミット。research/ の内容を curation/ のJSONに変換する |
+| Claude Code | 実装・検証・コミット。research/ の内容を curation/ のJSONに変換する。すでに載せた事実の差分確認（日付・値が変わっていないか）は、公式ページを直接開いて確かめてよい（2026-10-01 オーナー）。新しい調査はチャッピーに頼む |
 
 research/ の内容をカード化するときの手順：
 

@@ -1,0 +1,50 @@
+{
+  "id": "juno",
+  "name": {
+    "ja": "ジュノー",
+    "en": "Juno"
+  },
+  "operator": {
+    "value": ["NASA", "JPL"],
+    "source": "https://science.nasa.gov/mission/juno/",
+    "as_of": "2026-10-04",
+    "note": "NASA のジェット推進研究所（JPL）がミッションをまとめ、ロッキード・マーティンが探査機を動かしている"
+  },
+  "launch_date": {
+    "value": "2011-08-05",
+    "source": "https://science.nasa.gov/mission/juno/",
+    "as_of": "2026-10-04",
+    "note": "木星を回る軌道に入ったのは2016年7月4日"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://science.nasa.gov/photojournal/nasas-juno-misson-captures-jupiter-moon-thebe/",
+    "as_of": "2026-10-04",
+    "note": "2026年5月1日に、木星の衛星テーベの近くを通って写真を撮った（NASA の5月5日の公開）"
+  },
+  "location": {
+    "value": "木星のまわりを回りながら、木星とその衛星を調べている。2016年7月4日に木星を回りはじめてから、10年になった",
+    "source": "https://science.nasa.gov/mission/juno/",
+    "as_of": "2026-10-04"
+  },
+  "mission": {
+    "value": "木星の厚い雲の下を調べて、木星がどうやってでき、どう変わってきたかを明らかにする。木星で働く、はじめての太陽電池の探査機",
+    "source": "https://science.nasa.gov/mission/juno/",
+    "as_of": "2026-10-04"
+  },
+  "distance": {
+    "method": "planet",
+    "body": "Jupiter",
+    "source": "https://science.nasa.gov/mission/juno/",
+    "as_of": "2026-10-04",
+    "note": "木星のまわりを回っているので、木星までの距離"
+  },
+  "official_links": [
+    { "label": "NASA「Juno」", "url": "https://science.nasa.gov/mission/juno/" },
+    {
+      "label": "NASA の画像と説明（2026年5月5日）",
+      "url": "https://science.nasa.gov/photojournal/nasas-juno-misson-captures-jupiter-moon-thebe/"
+    }
+  ],
+  "updated_at": "2026-10-04"
+}

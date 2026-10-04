@@ -2,15 +2,31 @@
 import { satrecFromOrbit, positionAt, periodMinutes, groundTrack, SimClock } from "./orbit.js";
 import { renderPanel, updatePanelLive, imageCredit } from "./card.js";
 import { summarizeStatus } from "./status.js";
-import { landPath, renderMinimap } from "./minimap.js";
+import { renderMinimap } from "./minimap.js";
 import { setupEarth } from "./earth.js";
 import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
 import { starfieldDataUrl } from "./stars.js";
 import { placeAt } from "./places.js";
 import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
-import { findVisiblePasses, observerOf } from "./passes.js";
+import { findVisiblePasses, observerOf, dir8 } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
+import { upcomingEvents, eventsListHtml, eventPanelHtml, nextChipHtml, bigCountdown, whenShort, hmJst, eventSpan } from "./events.js";
+import {
+  worldLaunches,
+  dataState,
+  siteClusters,
+  launchesListHtml,
+  launchPanelHtml,
+  bigLaunchCountdown,
+  launchWhenShort,
+  missionName,
+  placeName,
+  placeShort,
+  jstShort,
+  REF_NOTE,
+} from "./launches.js";
+import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
 
 const COLORS = {
   navy: "#07142b",
@@ -26,6 +42,8 @@ const shortName = (c) => (c.card.name.ja.length <= 7 ? c.card.name.ja : c.card.n
 
 // 画面が狭いときは、一覧と詳細を下から出るシートにする（style.css と合わせる）
 const isNarrow = () => matchMedia("(max-width: 900px)").matches;
+// 予定の始まりの時刻（射場のピンを日付の順に並べるため）
+const eventSpanStart = (ev) => eventSpan(ev)?.start ?? NaN;
 
 // ---------- 起動画面のノイズ ----------
 function startNoise(canvas) {
@@ -53,8 +71,9 @@ function startNoise(canvas) {
   return () => (running = false);
 }
 
-async function loadJson(path) {
-  const res = await fetch(path, { cache: "no-cache" });
+// options：fetch に足す指定（あとから読む重いデータは priority: "low"。対応していないブラウザは無視する）
+async function loadJson(path, options = {}) {
+  const res = await fetch(path, { cache: "no-cache", ...options });
   if (!res.ok) {
     const err = new Error(`${path} を読み込めません（HTTP ${res.status}）`);
     err.status = res.status;
@@ -64,31 +83,64 @@ async function loadJson(path) {
   return res.json();
 }
 
+// 3D 表示のライブラリ（globe.gl、約500KB）を実行する。index.html の <link rel="preload"> で最初に読み始めているので、
+// ここでは届いたものを実行するだけ。<script> をページに直接書くと、届くまでほかの部品とデータの読み込みが止まる
+function loadGlobeLib() {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "vendor/globe.gl.min.js";
+    s.onload = () => (typeof Globe === "function" ? resolve() : reject(new Error("3D表示のライブラリを読み込めません")));
+    s.onerror = () => reject(new Error("3D表示のライブラリを読み込めません"));
+    document.head.append(s);
+  });
+}
+
+// 「観測を開始」を押せるまでに要るデータ
 async function loadAll() {
-  const [index, land, prefs] = await Promise.all([
-    loadJson("data/craft-index.json"),
-    loadJson("data/land-110m.geojson"),
-    loadJson("data/prefectures.json"),
-  ]);
-  const craft = await Promise.all(
-    index.craft.map(async (c) => {
-      const [card, orbit, crewData, status] = await Promise.all([
-        loadJson(c.card),
-        // 軌道データがまだない機体（自動取得の前など）は、表示しないだけにする
-        c.orbit ? loadJson(c.orbit).catch((e) => (e.status === 404 ? null : Promise.reject(e))) : null,
-        c.crew ? loadJson(c.crew).catch(() => null) : null,
-        // 運用状況（自動取得）は、なければカードの「状態」だけを出す
-        c.status ? loadJson(c.status).catch(() => null) : null,
-      ]);
-      return { id: c.id, card, orbit, crewData, status, sample: !!c.sample };
-    }),
+  // 機体の一覧が届いたら、すぐに各機体のカードと軌道を読み始める（ほかのデータを待たない）
+  const craftLoading = loadJson("data/craft-index.json").then((index) =>
+    Promise.all(
+      index.craft.map(async (c) => {
+        const [card, orbit, crewData, status] = await Promise.all([
+          loadJson(c.card),
+          // 軌道データがまだない機体（自動取得の前など）は、表示しないだけにする
+          c.orbit ? loadJson(c.orbit).catch((e) => (e.status === 404 ? null : Promise.reject(e))) : null,
+          c.crew ? loadJson(c.crew).catch(() => null) : null,
+          // 運用状況（自動取得）は、なければカードの「状態」だけを出す
+          c.status ? loadJson(c.status).catch(() => null) : null,
+        ]);
+        return { id: c.id, card, orbit, crewData, status, sample: !!c.sample };
+      }),
+    ),
   );
-  return { craft: craft.filter((c) => c.orbit), land, prefectures: prefs.prefectures };
+  const [craft, prefs, eventsData, launchesData] = await Promise.all([
+    craftLoading,
+    loadJson("data/prefectures.json"),
+    // 予定は、読めなくても地球と機体は出す
+    loadJson("data/events.json").catch(() => ({ events: [] })),
+    // 世界の打ち上げ（参考）も同じ。読めなければ「読み込めませんでした」と出す
+    loadJson("data/launches.json").catch(() => null),
+  ]);
+  return { craft: craft.filter((c) => c.orbit), prefectures: prefs.prefectures, events: eventsData.events ?? [], launchesData };
+}
+
+// あとから読む重いデータ。「観測を開始」を押せるようになってから、裏で読み始める（起動を遅らせない）
+// 読めなくても動く：地名がなければ座標だけ、陸地がなければ海と軌跡だけを出す
+function loadLater() {
+  return {
+    // 「いま、どこの上？」の地名
+    places: loadJson("data/places.json", { priority: "low" }).catch(() => null),
+    // ミニ地図の陸地（計算済みの path）
+    land: loadJson("data/land-minimap.json", { priority: "low" })
+      .then((d) => d.d)
+      .catch(() => null),
+  };
 }
 
 // ---------- 観測画面 ----------
-function startApp({ craft, land, prefectures }) {
+function startApp({ craft, prefectures, events, launchesData, later }) {
   const clock = new SimClock();
+  let roomOpen = false; // 遠くを見る部屋を開いているか
 
   // 機体ごとの準備（軌道・家族・地球の上の印）
   for (const c of craft) {
@@ -111,6 +163,41 @@ function startApp({ craft, land, prefectures }) {
     });
     c.el = el;
   }
+
+  // ---------- 予定：射場のピン（打ち上げの予定。打ち上がるまで軌道は描かない） ----------
+  const plannedFamily = FAMILIES.find((f) => f.id === "planned");
+  const sites = events
+    .filter((ev) => ev.kind === "launch" && ev.site?.position?.value)
+    .map((ev) => {
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = "site-marker";
+      el.style.setProperty("--c", plannedFamily.color);
+      el.setAttribute("aria-label", `${ev.title.ja}（${ev.site.label}）の予定を開く`);
+      el.innerHTML = `<span class="diamond"></span><span class="tag"></span>`;
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectEvent(ev);
+      });
+      const { lat, lng } = ev.site.position.value;
+      return { ev, el, lat, lng, alt: 0.012, shown: false };
+    });
+
+  // ---------- 世界の打ち上げ（参考）：射場のピン。点線のひし形と「参考」の印。「予定」タブを開いたときだけ出す ----------
+  // 近い射場（ケネディとケープカナベラルなど）は1本にまとめ、いちばん近い打ち上げの名前と日付を出す
+  const worldPins = siteClusters(launchesData?.launches ?? []).map((cl) => {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "site-marker is-ref";
+    el.setAttribute("aria-describedby", "ref-note");
+    el.innerHTML = `<span class="diamond"></span><span class="tag"><span class="tag-text"></span> <span class="ref-mark">参考</span></span><span class="ref-tip" aria-hidden="true">${esc(REF_NOTE)}</span>`;
+    const pin = { el, lat: cl.position.lat, lng: cl.position.lng, alt: 0.012, launches: cl.launches, first: null, shown: false };
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (pin.first) selectLaunch(pin.first);
+    });
+    return pin;
+  });
 
   // 軌道データの取得日（いちばん古いもの）
   const oldest = craft.reduce((a, c) => (!a || c.orbit.fetched_at < a.orbit.fetched_at ? c : a), null);
@@ -158,8 +245,17 @@ function startApp({ craft, land, prefectures }) {
   // ---------- 地球 ----------
   const app = $("#app");
   const globeEl = $("#globe");
-  const hidden = new Set(); // 表示しない家族
-  const markerData = () => craft.filter((c) => c.pos && !hidden.has(c.family.id));
+  const hidden = new Set(); // 表示しない家族（凡例・スマホの一覧のタブ）
+  let viewMode = loadView(); // 表示切替：すべて／日本のみ／衛星のみ／打ち上げ予定のみ（view.js）
+  const markerData = () => craft.filter((c) => c.pos && !hidden.has(c.family.id) && showsCraft(viewMode, c.card));
+  // 射場のピン：公式の予定と、世界の打ち上げ（参考）。表示切替で絞る。選んでいる打ち上げのピンはいつも出す
+  const siteData = () =>
+    hidden.has("planned")
+      ? []
+      : [
+          ...sites.filter((s) => s.shown && showsEvent(viewMode, s.ev)),
+          ...worldPins.filter((p) => p.shown && (showsLaunch(viewMode, p.first) || p.launches.includes(selectedLaunch))),
+        ];
   const globe = Globe({ animateIn: true })(globeEl)
     .backgroundColor(COLORS.navy)
     .showAtmosphere(true)
@@ -183,11 +279,9 @@ function startApp({ craft, land, prefectures }) {
     .htmlElement((d) => d.el)
     .htmlTransitionDuration(0);
 
-  // 「いま、どこの上？」の地名（重いので、観測を始めてから読む。読めなくても座標は出る）
+  // 「いま、どこの上？」の地名（重いので、起動のあとに裏で読んでいる。届くまでは座標だけを出す）
   let places = null;
-  loadJson("data/places.json")
-    .then((d) => (places = d))
-    .catch(() => {});
+  later.places.then((d) => (places = d));
 
   // 地球のまわりの星空（飾り。地球を回すと一緒に動く）
   globe.backgroundImageUrl(starfieldDataUrl());
@@ -214,11 +308,14 @@ function startApp({ craft, land, prefectures }) {
         .map((el) => el.getBoundingClientRect())
         .filter((r) => r.height > 0)
         .map((r) => r.top);
-      const top = $(".top-bar").offsetHeight;
+      const top = $(".top-bar").offsetHeight + ($("#view-switch")?.offsetHeight ?? 0);
       const dy = sheetTops.length ? Math.round((top + Math.min(...sheetTops)) / 2 - globeEl.clientHeight / 2) : -40;
       setOffset(0, dy);
-    } else setOffset(detailPanel.hidden ? 150 : -20, -30);
+    } else setOffset(!detailPanel.hidden ? -20 : nextPanelShown() ? 0 : 150, -30);
   };
+  // 右の「次の出来事」の列（PC の広い画面）が出ているか。出し分けは style.css（詳細・一覧の「予定」のあいだは出さない）
+  const nextPanel = $("#next-panel");
+  const nextPanelShown = () => getComputedStyle(nextPanel).display !== "none";
   let lastOffset = "";
   const setOffset = (x, y) => {
     if (`${x},${y}` === lastOffset) return;
@@ -251,16 +348,36 @@ function startApp({ craft, land, prefectures }) {
   let listFilter = "all";
   let query = "";
   let selected = null;
+  let selectedEvent = null; // 詳細に出している予定（機体を選んでいるときは null）
+  let selectedLaunch = null; // 詳細に出している世界の打ち上げ（参考）
   const famTabs = $("#fam-tabs");
   const listEl = $("#craft-list");
   const renderFamTabs = () => {
-    // 最後の「観測」は、今夜の空（ISS の見える通過）
-    famTabs.innerHTML = [{ id: "all", label: "すべて" }, ...present, { id: "tonight", label: "観測" }]
-      .map(
-        (f) =>
-          `<button type="button" class="fam-tab" data-fam="${f.id}" aria-pressed="${f.id === listFilter}">${esc(f.label)}</button>`,
-      )
-      .join("");
+    const tab = (f) =>
+      `<button type="button" class="fam-tab" data-fam="${f.id}" aria-pressed="${f.id === listFilter}"><span class="fam-label">${esc(f.label)}</span><span class="fam-bold" aria-hidden="true">${esc(f.label)}</span></button>`;
+    // 太字の見えない文字を重ねて、選んだとき（太字）でもタブの幅が変わらない（ほかのタブがずれない）ようにする
+    // 左は家族で絞るタブ。右の2つは見る画面の切り替え：「予定」は次の出来事（公式の日付）、「観測」は今夜の空（ISS の見える通過）
+    famTabs.innerHTML =
+      `<span class="fam-group">${[{ id: "all", label: "すべて" }, ...present].map(tab).join("")}</span>` +
+      `<span class="fam-group fam-views">${[{ id: "planned", label: "予定" }, { id: "tonight", label: "観測" }].map(tab).join("")}</span>`;
+    fitFamTabs();
+  };
+  // PC：タブが1行に入らないとき（ブラウザの文字を大きくしているときなど）は、入る大きさまで文字だけを小さくする
+  // すき間と余白は px なので、文字の幅だけが割合で縮む。10px より小さくはしない（それでも入らなければ横に送る）
+  const fitFamTabs = () => {
+    famTabs.style.removeProperty("--fam-fit");
+    if (isNarrow() || !famTabs.clientWidth) return;
+    const over = famTabs.scrollWidth - famTabs.clientWidth;
+    if (over <= 0) return;
+    const tabs = [...famTabs.querySelectorAll(".fam-tab")];
+    const textWidth = tabs.reduce((sum, t) => {
+      const cs = getComputedStyle(t);
+      const edges = ["paddingLeft", "paddingRight", "borderLeftWidth", "borderRightWidth"].reduce((a, k) => a + parseFloat(cs[k]), 0);
+      return sum + t.getBoundingClientRect().width - edges;
+    }, 0);
+    const fontPx = parseFloat(getComputedStyle(tabs[0]).fontSize);
+    const fit = Math.max(10 / fontPx, (textWidth - over - 2) / textWidth); // 2px は丸めの分の余裕
+    famTabs.style.setProperty("--fam-fit", fit.toFixed(3));
   };
   // 名前（日本語・英語・id）で探す。全角・半角や大文字・小文字の違いは無視する
   const fold = (t) => String(t ?? "").normalize("NFKC").toLowerCase().replace(/\s+/g, "");
@@ -282,9 +399,12 @@ function startApp({ craft, land, prefectures }) {
   const renderList = () => {
     const shown = craft
       .filter((c) => listFilter === "all" || listFilter === "tonight" || c.family.id === listFilter)
+      .filter((c) => showsCraft(viewMode, c.card))
       .filter((c) => matchesQuery(c, query));
     if (!shown.length) {
-      listEl.innerHTML = `<li class="list-empty k">「${esc(query)}」に当たる機体はありません。</li>`;
+      listEl.innerHTML = query
+        ? `<li class="list-empty k">「${esc(query)}」に当たる機体はありません。</li>`
+        : `<li class="list-empty k">この表示に当たる機体はありません。</li>`;
       return;
     }
     listEl.innerHTML = shown
@@ -302,16 +422,30 @@ function startApp({ craft, land, prefectures }) {
       )
       .join("");
   };
-  // 「観測」タブのときは一覧の代わりに今夜の空を出す
+  // 「観測」タブは今夜の空、「予定」タブは次の出来事を、機体の一覧の代わりに出す
   const tonightSection = $("#tonight-section");
-  const showListFilter = (id) => {
+  const eventsSection = $("#events-section");
+  const worldSection = $("#world-section");
+  // fromView：表示切替から呼ばれたとき（表示切替を呼び返さない）
+  const showListFilter = (id, { fromView = false } = {}) => {
     listFilter = id;
     const tonight = id === "tonight";
+    const planned = id === "planned";
     tonightSection.hidden = !tonight;
-    listEl.hidden = tonight;
-    $("#list-title").hidden = tonight;
+    eventsSection.hidden = !planned;
+    worldSection.hidden = !planned;
+    listEl.hidden = tonight || planned;
+    $("#list-title").hidden = tonight || planned;
+    app.classList.toggle("list-planned", planned);
+    placeGlobe();
+    // 一覧と地球をそろえる：「予定」タブは「打ち上げ予定のみ」。予定から離れたら「すべて」に戻す
+    if (!fromView) {
+      if (planned && viewMode !== "launches") setView("launches", { fromList: true });
+      else if (!planned && viewMode === "launches") setView("all", { fromList: true });
+    }
     renderFamTabs();
     renderList();
+    if (planned) renderEvents();
   };
   famTabs.addEventListener("click", (e) => {
     const b = e.target.closest("[data-fam]");
@@ -322,7 +456,7 @@ function startApp({ craft, land, prefectures }) {
   const searchEl = $("#craft-search");
   searchEl.addEventListener("input", () => {
     query = searchEl.value;
-    if (listFilter === "tonight") showListFilter("all");
+    if (listFilter === "tonight" || listFilter === "planned") showListFilter("all");
     else renderList();
   });
   listEl.addEventListener("click", (e) => {
@@ -334,7 +468,7 @@ function startApp({ craft, land, prefectures }) {
   legend.innerHTML = FAMILIES.filter((f) => f.id !== "other")
     .map(
       (f) =>
-        `<label class="toggle"><input type="checkbox" data-fam="${f.id}" checked><span class="fam-dot" style="--c:${f.color}"></span>${esc(f.label)}</label>`,
+        `<label class="toggle"><input type="checkbox" data-fam="${f.id}" checked><span class="fam-dot fam-${f.id}" style="--c:${f.color}"></span>${esc(f.label)}</label>`,
     )
     .join("");
   legend.addEventListener("change", (e) => {
@@ -343,12 +477,76 @@ function startApp({ craft, land, prefectures }) {
     if (e.target.checked) hidden.delete(id);
     else hidden.add(id);
   });
-  // スマホ：一覧のタブで選んだ家族だけを地球にも出す（「すべて」「観測」は全部）
+  // スマホ：一覧のタブで選んだ家族だけを地球にも出す（「予定」は射場のピンだけ。「すべて」「観測」は全部）
   function showOnlyFamily(id) {
     hidden.clear();
-    if (present.some((f) => f.id === id)) for (const f of FAMILIES) if (f.id !== id) hidden.add(f.id);
+    if (id === "planned" || present.some((f) => f.id === id)) for (const f of FAMILIES) if (f.id !== id) hidden.add(f.id);
     for (const input of legend.querySelectorAll("input")) input.checked = !hidden.has(input.dataset.fam);
   }
+  // ---------- 表示切替（地球の上）：すべて／日本のみ／衛星のみ／打ち上げ予定のみ。一覧も合わせる ----------
+  const viewSwitch = $("#view-switch");
+  // fromList：一覧のタブから呼ばれたとき（家族ごとの表示と一覧のタブはそのまま）
+  function setView(mode, { fromList = false } = {}) {
+    if (!isViewMode(mode)) return;
+    viewMode = mode;
+    saveView(mode);
+    for (const b of viewSwitch.querySelectorAll("[data-view]")) b.setAttribute("aria-pressed", String(b.dataset.view === mode));
+    if (!fromList) {
+      // 表示切替は表示の組み合わせのひな形なので、凡例（スマホは一覧のタブ）で消したものも全部に戻す。
+      // 一覧も合わせる：打ち上げ予定のみ → 予定タブ。ほかは家族のタブ・予定タブから「すべて」へ（観測タブはそのまま）
+      hidden.clear();
+      for (const input of legend.querySelectorAll("input")) input.checked = true;
+      if (mode === "launches") {
+        if (listFilter !== "planned") showListFilter("planned", { fromView: true });
+      } else if (listFilter !== "all" && listFilter !== "tonight") showListFilter("all", { fromView: true });
+    }
+    $("#list-title").textContent = mode === "japan" ? "注目・日本のみ" : "注目";
+    $("#events-sub").textContent = $("#next-panel-sub").textContent = mode === "japan" ? "日本のものだけ・公式の日付だけ" : "日本と世界・公式の日付だけ";
+    updateRoomNav();
+    renderList();
+    renderEvents();
+  }
+  // 押したときは、見どころへ地球を向ける：日本のみ → 日本、打ち上げ予定のみ → 次の打ち上げの射場
+  // （一覧の先頭と同じく、公式の予定を先に。なければ世界の打ち上げ（参考）のいちばん近いもの）
+  const JAPAN_VIEW = { lat: 36, lng: 138 };
+  function lookForView(mode) {
+    if (follow) return;
+    if (mode === "japan") return globe.pointOfView(JAPAN_VIEW, 900);
+    if (mode !== "launches") return;
+    const next = siteData()
+      .map((p) => ({ p, official: !!p.ev, t: p.ev ? eventSpanStart(p.ev) : Date.parse(p.first?.net ?? "") }))
+      .filter((x) => Number.isFinite(x.t))
+      .sort((a, b) => b.official - a.official || a.t - b.t)[0];
+    if (next) globe.pointOfView({ lat: next.p.lat, lng: next.p.lng }, 900);
+  }
+  viewSwitch.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-view]");
+    if (!b) return;
+    setView(b.dataset.view);
+    lookForView(b.dataset.view);
+  });
+  // ---------- 部屋の帯（PC）：地球のまわり・遠くを見る・これから行く（2026-10-04 オーナー：イメージ図の A 案） ----------
+  // 「これから行く」＝打ち上げ予定のみの表示（射場のピン）と一覧の「予定」。「地球のまわり」に戻ると「すべて」。
+  // 「遠くを見る」は、下の「遠くを見る部屋」のところで開く。PC では、地球の上の「遠くを見る」と「打ち上げ予定のみ」は帯と同じなので出さない（style.css）
+  const roomNav = $("#room-nav");
+  function updateRoomNav() {
+    const room = viewMode === "launches" ? "launch" : "earth";
+    for (const b of roomNav.querySelectorAll('[data-room]:not([data-room="far"])')) {
+      if (b.dataset.room === room) b.setAttribute("aria-current", "true");
+      else b.removeAttribute("aria-current");
+    }
+  }
+  roomNav.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-room]");
+    if (!b || b.dataset.room === "far") return;
+    if (b.dataset.room === "earth") {
+      if (viewMode === "launches") setView("all"); // 日本のみ・衛星のみの表示のときは、そのまま
+      return;
+    }
+    if (viewMode !== "launches") setView("launches");
+    lookForView("launches");
+  });
+
   // 環：PC は下のバー、スマホは一覧の下。どちらで切り替えても両方そろえる
   const ringInputs = [$("#rings-toggle"), $("#rings-toggle-list")];
   for (const input of ringInputs) {
@@ -372,19 +570,50 @@ function startApp({ craft, land, prefectures }) {
   const detailBody = $("#detail-body");
   let tab = "overview";
   let lastMapAt = 0;
-  let landD = null;
+  // ミニ地図の陸地（起動のあとに裏で読んでいる。届いたら、開いている詳細のミニ地図を描き直す）
+  let landD = "";
+  later.land.then((d) => {
+    if (!d) return;
+    landD = d;
+    updateDetailLive(true);
+  });
   const updateDetailLive = (force = false) => {
+    if (selectedLaunch && !detailPanel.hidden) {
+      // 世界の打ち上げ（参考）：予定の時刻までの残り時間。時刻を過ぎたら描き直す
+      const n = detailBody.querySelector('[data-live="countdown"]');
+      if (!n) return;
+      const text = bigLaunchCountdown(selectedLaunch, clock.now());
+      if (!text) renderDetail();
+      else if (n.textContent !== text) n.textContent = text;
+      return;
+    }
+    if (selectedEvent && !detailPanel.hidden) {
+      // 予定：打ち上げまでの残り時間を毎秒書き換える。時刻を過ぎたら描き直して残り時間を消す
+      const n = detailBody.querySelector('[data-live="countdown"]');
+      if (!n) return;
+      const text = bigCountdown(selectedEvent, clock.now());
+      if (!text) renderDetail();
+      else if (n.textContent !== text) n.textContent = text;
+      return;
+    }
     if (!selected || detailPanel.hidden) return;
     updatePanelLive(detailBody, { pos: selected.pos, periodMin: selected.period, place: selected.pos && placeAt(places, selected.pos.lat, selected.pos.lng) });
     const svg = detailBody.querySelector('[data-live="map"]');
     const t = clock.now().getTime();
     if (svg && (force || Math.abs(t - lastMapAt) > 20000)) {
       lastMapAt = t;
-      landD ??= landPath(land);
       renderMinimap(svg, { land: landD, segments: groundTrack(selected.satrec, new Date(t)), pos: selected.pos });
     }
   };
   const renderDetail = () => {
+    if (selectedLaunch) {
+      detailBody.innerHTML = launchPanelHtml(selectedLaunch, clock.now(), { fetchedAt: launchesData?.fetched_at });
+      return;
+    }
+    if (selectedEvent) {
+      detailBody.innerHTML = eventPanelHtml(selectedEvent, clock.now());
+      return;
+    }
     if (!selected) return;
     const c = selected;
     tab = renderPanel(detailBody, {
@@ -398,11 +627,16 @@ function startApp({ craft, land, prefectures }) {
       orbitMeta: `取得 ${dateTimeShortJa(new Date(c.orbit.fetched_at))}・基準時刻 ${dateTimeShortJa(new Date(c.orbit.epoch))}（CelesTrak）`,
     });
     detailBody.querySelector("[data-follow]")?.setAttribute("aria-pressed", String(follow));
+    // ひまわりの最新画像が読めないときは、画像の枠ごと隠す（イラストは残る）
+    const sat = detailBody.querySelector("[data-live-sat]");
+    sat?.addEventListener("error", () => sat.closest("figure").classList.add("failed"), { once: true });
     updateDetailLive(true);
   };
 
   function select(c) {
     selected = c;
+    selectedEvent = null;
+    selectedLaunch = null;
     detailPanel.hidden = false;
     app.classList.add("has-selected");
     if (isNarrow()) listPanel.classList.remove("open");
@@ -411,9 +645,43 @@ function startApp({ craft, land, prefectures }) {
     layoutGlobe();
     if (c.pos) globe.pointOfView({ lat: c.pos.lat, lng: c.pos.lng }, 900);
   }
+  // 予定を詳細に出す。射場があれば地球をそこへ向ける
+  function selectEvent(ev) {
+    if (!ev) return;
+    selected = null;
+    selectedEvent = ev;
+    selectedLaunch = null;
+    setFollow(false);
+    detailPanel.hidden = false;
+    app.classList.add("has-selected");
+    if (isNarrow()) listPanel.classList.remove("open");
+    renderDetail();
+    renderList();
+    layoutGlobe();
+    const p = ev.site?.position?.value;
+    if (p) globe.pointOfView({ lat: p.lat, lng: p.lng }, 900);
+  }
+  // 世界の打ち上げ（参考）を詳細に出す。射場があれば地球をそこへ向ける
+  function selectLaunch(l) {
+    if (!l) return;
+    selected = null;
+    selectedEvent = null;
+    selectedLaunch = l;
+    setFollow(false);
+    detailPanel.hidden = false;
+    app.classList.add("has-selected");
+    if (isNarrow()) listPanel.classList.remove("open");
+    renderDetail();
+    renderList();
+    layoutGlobe();
+    const p = l.site?.position;
+    if (p) globe.pointOfView({ lat: p.lat, lng: p.lng }, 900);
+  }
   function closeDetail() {
     setExpanded(detailPanel, false);
     selected = null;
+    selectedEvent = null;
+    selectedLaunch = null;
     detailPanel.hidden = true;
     app.classList.remove("has-selected");
     setFollow(false);
@@ -579,6 +847,7 @@ function startApp({ craft, land, prefectures }) {
           passes.length ? `ISS ${whenWord(passes[0].start, now)} ${clockWord(passes[0].start)}` : "ISS 見える通過なし（5日間）"
         }`;
     tonightChip.innerHTML = `<span class="pin" aria-hidden="true">⌖</span><span class="chip-full">${chipText}</span><span class="chip-short" aria-hidden="true">今夜</span>`;
+    renderEvents(); // 「予定」の先頭に出す今夜の通過も作り直す
   };
   prefSelect.addEventListener("change", () => {
     pref = prefectures.find((p) => p.code === prefSelect.value) ?? null;
@@ -595,15 +864,181 @@ function startApp({ craft, land, prefectures }) {
     select(iss);
     setFollow(true);
   });
-  tonightChip.addEventListener("click", () => {
-    showListFilter("tonight");
-    if (isNarrow()) showOnlyFamily("tonight");
+  // 上のバーのボタンから、一覧のタブを開く（スマホでは全部の高さで）
+  const openListTab = (id) => {
+    showListFilter(id);
+    if (isNarrow()) showOnlyFamily(id);
     listPanel.classList.add("open");
     setExpanded(listPanel, true);
     if (isNarrow()) closeDetail();
     listPanel.scrollTop = 0;
+  };
+  tonightChip.addEventListener("click", () => openListTab("tonight"));
+
+  // ---------- 予定：次の出来事（公式の日付）と、上のバーの「次の出来事」 ----------
+  const eventsBody = $("#events-body");
+  const nextChip = $("#next-chip");
+  const worldBody = $("#world-body");
+  let upcoming = [];
+  let world = [];
+  let eventsAt = -Infinity;
+  let eventsHtml = "";
+  let worldHtml = "";
+  let nextHtml = "";
+  const nextPanelBody = $("#next-panel-body");
+  let nextPanelHtml = "";
+  $("#world-fetched").textContent = launchesData?.fetched_at ? `取得：${jstShort(launchesData.fetched_at)}（日本時間）` : "";
+  // 今夜〜明日の ISS の見える通過（計算）を、予定の先頭に出す
+  const tonightRow = () => {
+    const p = passes[0];
+    const now = new Date();
+    if (!pref || !p || p.start - now > 24 * 3600e3) return null;
+    return {
+      day: whenWord(p.start, now),
+      time: hmJst(p.start),
+      title: `ISS が${pref.name}の空を通る`,
+      sub: `${dir8(p.startAz)}から${dir8(p.endAz)}へ・計算：公開の軌道データから`,
+    };
+  };
+  function renderEvents() {
+    const now = clock.now();
+    eventsAt = now.getTime();
+    upcoming = upcomingEvents(events, now);
+    // 一覧と「次の出来事」：日本のみの表示なら日本の予定だけ
+    const listed = viewMode === "japan" ? upcoming.filter((ev) => showsEvent("japan", ev)) : upcoming;
+    if (!eventsSection.hidden) {
+      const html = eventsListHtml(listed, now, { tonight: tonightRow() });
+      // 書き換えると押しかけのボタンが消えるので、変わったときだけ
+      if (html !== eventsHtml) eventsBody.innerHTML = eventsHtml = html;
+    }
+    // 右の列（PC の広い画面）。画面の幅を変えたときにすぐ出せるよう、隠れているあいだも作っておく（変わったときだけ書き換える）
+    const nextPanelNew = eventsListHtml(listed, now, { tonight: tonightRow(), summary: true });
+    if (nextPanelNew !== nextPanelHtml) nextPanelBody.innerHTML = nextPanelHtml = nextPanelNew;
+    // 上のバー：いちばん近い予定（延期なら「延期」と出る）
+    const next = listed[0];
+    const chip = next ? nextChipHtml(next, now) : "";
+    if (chip !== nextHtml) {
+      nextChip.innerHTML = nextHtml = chip;
+      nextChip.setAttribute("aria-label", next ? `次の出来事：${next.title.ja}。予定の一覧を開く` : "");
+    }
+    nextChip.hidden = !next;
+    // 射場のピン：これからの打ち上げだけ。名前は「種子島 10/20」
+    const ids = new Set(upcoming.map((ev) => ev.id));
+    for (const s of sites) {
+      s.shown = ids.has(s.ev.id);
+      s.el.querySelector(".tag").textContent = `${s.ev.site.label} ${whenShort(s.ev, now)[0]}`;
+    }
+
+    // 世界の打ち上げ（参考）：公式の予定と同じものは除く。データの古さは実際の今で判断する
+    const state = dataState(launchesData, new Date());
+    world = worldLaunches(launchesData, events, now, new Date());
+    if (!worldSection.hidden) {
+      const japan = viewMode === "japan";
+      const html = launchesListHtml(japan ? world.filter((l) => showsLaunch("japan", l)) : world, now, {
+        state,
+        fetchedAt: launchesData?.fetched_at,
+        noteId: "ref-note",
+        empty: japan ? "いま載せている、日本の射場からの打ち上げはありません。" : undefined,
+      });
+      if (html !== worldHtml) worldBody.innerHTML = worldHtml = html;
+    }
+    // ピン：まとめた射場のうち、いちばん近い打ち上げ。公式の射場のピンと重なるところには立てない
+    const shownSites = sites.filter((s) => s.shown);
+    const worldIds = new Set(world.map((l) => l.id));
+    for (const p of worldPins) {
+      const visible = p.launches.filter((l) => worldIds.has(l.id)).sort((a, b) => a.net.localeCompare(b.net));
+      p.first = visible[0] ?? null;
+      p.shown = !!p.first && !shownSites.some((s) => Math.hypot(s.lat - p.lat, s.lng - p.lng) < 0.5);
+      if (!p.first) continue;
+      const label = `${placeShort(p.first, { country: false })} ${launchWhenShort(p.first, now)[0]}`;
+      const text = p.el.querySelector(".tag-text");
+      if (text.textContent !== label) text.textContent = label;
+      p.el.setAttribute("aria-label", `${missionName(p.first)}（${placeName(p.first)}）の打ち上げ予定を開く。参考`);
+    }
+  }
+  nextChip.addEventListener("click", () => openListTab("planned"));
+  for (const body of [eventsBody, nextPanelBody]) {
+    body.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-event]");
+      if (b) return selectEvent(events.find((ev) => ev.id === b.dataset.event));
+      if (e.target.closest('[data-go="tonight"]')) showListFilter("tonight");
+    });
+  }
+  worldBody.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-launch]");
+    if (b) selectLaunch(world.find((l) => l.id === b.dataset.launch));
   });
+  // 一覧の行にマウスを乗せる（キーボードで選ぶ）と、地球の上の同じ射場のピンを光らせる。どこの打ち上げかを目で追えるように
+  const peekPins = (e) => {
+    const ev = e.type === "mouseover" || e.type === "focusin" ? e.target.closest("[data-event]") : null;
+    const lb = e.type === "mouseover" || e.type === "focusin" ? e.target.closest("[data-launch]") : null;
+    const l = lb && world.find((x) => x.id === lb.dataset.launch);
+    for (const s of sites) s.el.classList.toggle("peek", !!ev && s.ev.id === ev.dataset.event);
+    for (const p of worldPins) p.el.classList.toggle("peek", !!l && p.launches.includes(l));
+  };
+  for (const body of [eventsBody, worldBody]) {
+    for (const type of ["mouseover", "mouseleave", "focusin", "focusout"]) body.addEventListener(type, peekPins);
+  }
   updateTonight();
+
+  // ---------- 遠くを見る部屋（M7 v0）：探査機までの距離と、光で届く時間 ----------
+  // 部屋の部品（js/far/・天体の位置の計算）は、はじめて開くときに読む（起動の読み込み量に入れない）。
+  // 開いているあいだは地球の描画を止める。ブラウザの「戻る」で閉じられるように、履歴に #far を足す
+  const farBtn = $("#far-open");
+  const farLabel = farBtn.querySelector(".far-open-label");
+  const farNav = roomNav.querySelector('[data-room="far"]');
+  const farOpeners = [farBtn, farNav];
+  let farOpener = farBtn; // 閉じたら、押したボタンにフォーカスを戻す
+  let far = null;
+  let farLoading = null;
+  let farEntry = null; // 履歴の #far をどう作ったか：pushed（押した）／history（進む）／initial（#far つきで開いた）
+  // 入口にマウスを乗せた・指で触れた・フォーカスしたときから読み始める（押してから開くまでを短くする）
+  const loadFar = () =>
+    (farLoading ??= import("./far/room.js")
+      .then(({ createFarRoom }) => createFarRoom({ events, onClose: onFarClosed }))
+      .catch((e) => {
+        farLoading = null; // もう一度押したら読み直す
+        throw e;
+      }));
+  for (const el of farOpeners) for (const type of ["pointerenter", "focus", "touchstart"]) el.addEventListener(type, () => loadFar().catch(() => {}), { passive: true, once: true });
+  async function openFar(entry, opener = isNarrow() ? farBtn : farNav) {
+    if (roomOpen || farOpeners.some((el) => el.getAttribute("aria-busy") === "true")) return;
+    farOpener = opener;
+    opener.setAttribute("aria-busy", "true");
+    try {
+      far = await loadFar();
+    } catch (e) {
+      console.error(e);
+      const label = opener === farBtn ? farLabel : farNav;
+      label.textContent = "読み込めませんでした";
+      setTimeout(() => (label.textContent = "遠くを見る"), 4000);
+      return;
+    } finally {
+      opener.removeAttribute("aria-busy");
+    }
+    roomOpen = true;
+    farEntry = entry;
+    globe.pauseAnimation();
+    far.open();
+    if (entry === "pushed") history.pushState({ far: true }, "", "#far");
+  }
+  function onFarClosed() {
+    roomOpen = false;
+    globe.resumeAnimation();
+    if (location.hash === "#far") {
+      if (farEntry === "initial") history.replaceState(null, "", location.pathname + location.search);
+      else history.back();
+    }
+    farEntry = null;
+    farOpener.focus();
+  }
+  farBtn.addEventListener("click", () => openFar("pushed", farBtn));
+  farNav.addEventListener("click", () => openFar("pushed", farNav));
+  addEventListener("popstate", () => {
+    if (location.hash === "#far") openFar("history");
+    else if (roomOpen) far.close();
+  });
+  if (location.hash === "#far") openFar("initial");
 
   // ---------- このアプリについて ----------
   const about = $("#about");
@@ -618,6 +1053,33 @@ function startApp({ craft, land, prefectures }) {
     .map((c) => `<li>${esc(c.card.name.ja)}：${imageCredit(c.card.image)}</li>`)
     .join("");
 
+  // 射場の名前が重なったら、日付の遅いほうの名前を隠す（ひし形は残り、マウスを乗せると名前が出る）。
+  // 機体の名前と、選んでいる・一覧で指しているピンの名前を優先する
+  const overlaps = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+  function declutterPins() {
+    const kept = [];
+    for (const c of craft) {
+      const r = c.el.isConnected && c.el.querySelector(".tag")?.getBoundingClientRect();
+      if (r?.width) kept.push(r);
+    }
+    // 先に全部の位置を読み、あとでまとめて書き換える（読み書きを交互にすると、そのたびに配置の計算が走る）
+    const pins = siteData()
+      .filter((p) => p.el.isConnected)
+      .map((p) => ({
+        p,
+        r: p.el.querySelector(".tag").getBoundingClientRect(),
+        first: p.el.classList.contains("selected") || p.el.classList.contains("peek"),
+        t: p.ev ? eventSpanStart(p.ev) : Date.parse(p.first?.net ?? ""),
+      }))
+      .sort((a, b) => b.first - a.first || a.t - b.t);
+    const hides = pins.map(({ r, first }) => {
+      const hide = !first && kept.some((k) => overlaps(k, r));
+      if (!hide) kept.push(r);
+      return hide;
+    });
+    pins.forEach(({ p }, i) => p.el.classList.toggle("tag-hidden", hides[i]));
+  }
+
   // ---------- 毎フレームの更新 ----------
   const els = { time: $("#sim-time"), badge: $("#live-badge"), warning: $("#tle-warning") };
   const eiTime = $("#ei-time");
@@ -627,10 +1089,18 @@ function startApp({ craft, land, prefectures }) {
   let lastWarning = "";
 
   renderFamTabs();
-  renderList();
+  // 一覧のパネルの大きさが変わったとき（画面の大きさ・PC とスマホの切り替え）と、フォントを読み終わったときに、タブを入れ直す
+  new ResizeObserver(fitFamTabs).observe(listPanel);
+  document.fonts?.ready.then(fitFamTabs);
+  setView(viewMode); // 覚えている表示（なければ「すべて」）。一覧も描く
   syncControls();
 
   const tick = (t) => {
+    // 遠くを見る部屋を開いているあいだは、地球の計算と描画を止める（部屋の動きを軽くするため）
+    if (roomOpen) {
+      requestAnimationFrame(tick);
+      return;
+    }
     if (clock.clampToTimeline()) syncControls();
     const now = clock.now();
     // 選んだ機体の軌道の線：選び直したとき、または観測時刻で20秒ごと
@@ -649,8 +1119,10 @@ function startApp({ craft, land, prefectures }) {
       }
       c.el.classList.toggle("selected", c === selected);
     }
+    for (const s of sites) s.el.classList.toggle("selected", s.ev === selectedEvent);
+    for (const p of worldPins) p.el.classList.toggle("selected", !!selectedLaunch && p.launches.includes(selectedLaunch));
     const pov = globe.pointOfView();
-    globe.htmlElementsData(markerData());
+    globe.htmlElementsData([...markerData(), ...siteData()]);
     if (follow && selected?.pos) globe.pointOfView({ lat: selected.pos.lat, lng: selected.pos.lng, altitude: pov.altitude }, 0);
 
     // 文字の更新は間引く
@@ -661,8 +1133,10 @@ function startApp({ craft, land, prefectures }) {
       eiTime.textContent = dateTimeJa(now);
       const pov = globe.pointOfView();
       eiView.textContent = `${latJa(pov.lat)} ${lngJa(((pov.lng + 540) % 360) - 180)}`;
-      const n = markerData().length;
-      eiCount.textContent = `${n}機（${[...new Set(markerData().map((c) => c.family.label))].join("・")}）`;
+      const shownCraft = markerData();
+      const pins = siteData().length;
+      const fams = [...new Set(shownCraft.map((c) => c.family.label))].join("・");
+      eiCount.textContent = [shownCraft.length ? `${shownCraft.length}機（${fams}）` : "", pins ? `射場 ${pins}か所` : ""].filter(Boolean).join("・") || "なし";
       const live = clock.isLive();
       els.badge.dataset.live = String(live);
       app.dataset.live = String(live);
@@ -678,6 +1152,9 @@ function startApp({ craft, land, prefectures }) {
         if (r.width) c.el.classList.toggle("tag-left", r.left + 34 + (c.el.querySelector(".tag")?.offsetWidth ?? 0) > innerWidth - 8);
       }
       updateDetailLive();
+      declutterPins();
+      // 予定と「次の出来事」：観測時刻で30秒ごと（早送りや時刻の移動にもついていく）
+      if (Math.abs(now - eventsAt) > 30000) renderEvents();
       // 通過の予報は10分ごと、または次の通過が終わったら作り直す
       if (pref && (Date.now() - passesAt > 600e3 || (passes[0] && passes[0].end.getTime() < Date.now()))) updateTonight();
 
@@ -706,8 +1183,8 @@ async function boot() {
   const startBtn = $("#start");
   let data;
   try {
-    if (typeof Globe !== "function") throw new Error("3D表示のライブラリを読み込めません");
-    data = await loadAll();
+    // データと 3D 表示のライブラリを並べて読む（どちらかを待ってからもう一方、にしない）
+    [data] = await Promise.all([loadAll(), loadGlobeLib()]);
     // 読み込めた機体数と、軌道データのいちばん古い取得時刻（UTC）
     const fetched = data.craft.map((c) => c.orbit.fetched_at).sort()[0];
     status.textContent = [
@@ -724,6 +1201,8 @@ async function boot() {
     $("#start-label").textContent = "読み込めませんでした";
     return;
   }
+  // 重いデータ（地名・ミニ地図の陸地）は、ここから裏で読む。ボタンを押すまでの時間を使う
+  data.later = loadLater();
   $("#start-label").textContent = "観測を開始";
   startBtn.disabled = false;
   startBtn.focus();

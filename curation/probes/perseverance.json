@@ -1,0 +1,50 @@
+{
+  "id": "perseverance",
+  "name": {
+    "ja": "パーサヴィアランス",
+    "en": "Perseverance"
+  },
+  "operator": {
+    "value": ["NASA", "JPL"],
+    "source": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/",
+    "as_of": "2026-10-03",
+    "note": "NASA のジェット推進研究所（JPL）が運用している"
+  },
+  "launch_date": {
+    "value": "2020-07-30",
+    "source": "https://science.nasa.gov/mission/mars-2020-perseverance/",
+    "as_of": "2026-10-03",
+    "note": "火星への着陸は2021年2月18日"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/",
+    "as_of": "2026-10-03",
+    "note": "JPL の2026年6月23日の記事"
+  },
+  "location": {
+    "value": "火星の地面を走りながら調べている。2026年6月に、走った距離がフルマラソン分（42.195km）になった",
+    "source": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/",
+    "as_of": "2026-10-03"
+  },
+  "mission": {
+    "value": "火星で、むかしの微生物の生命のしるしを探し、岩や土の試料を集める",
+    "source": "https://science.nasa.gov/mission/mars-2020-perseverance/",
+    "as_of": "2026-10-03"
+  },
+  "distance": {
+    "method": "planet",
+    "body": "Mars",
+    "source": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/",
+    "as_of": "2026-10-03",
+    "note": "火星の地面にいるので、火星までの距離"
+  },
+  "official_links": [
+    { "label": "NASA「Mars 2020 Perseverance」", "url": "https://science.nasa.gov/mission/mars-2020-perseverance/" },
+    {
+      "label": "JPL の記事（2026年6月23日）",
+      "url": "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures-perseverance-marking-a-milestone-on-mars/"
+    }
+  ],
+  "updated_at": "2026-10-03"
+}

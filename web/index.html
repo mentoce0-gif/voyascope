@@ -12,9 +12,13 @@
   <meta property="og:image" content="https://mentoce0-gif.github.io/voyascope/assets/earth/hero-1600.webp">
   <meta property="og:url" content="https://mentoce0-gif.github.io/voyascope/">
   <meta name="twitter:card" content="summary_large_image">
+  <!-- 3D 表示のライブラリ（約500KB）は最初に読み始める。実行は js/main.js がする（ほかの読み込みを止めないため） -->
+  <link rel="preload" href="vendor/globe.gl.min.js" as="script">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+  <!-- フォントは画面の表示を止めずに読む。届くまでは端末の文字で出し、届いたら入れ替わる -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"></noscript>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -49,12 +53,33 @@
         <div class="brand-sub">今、宇宙を旅する者たち。</div>
       </div>
       <button type="button" id="tonight-chip" class="tonight-chip" hidden></button>
+      <button type="button" id="next-chip" class="next-chip" hidden></button>
       <div class="clock-block">
         <span id="sim-time" class="mono">--</span>
         <button type="button" id="live-badge" class="live-badge mono" data-live="true" aria-label="いまの時刻を表示中">LIVE</button>
         <button type="button" id="menu-open" class="menu-btn" aria-label="メニュー（このアプリについて）"><span></span><span></span><span></span></button>
       </div>
     </header>
+
+    <!-- 部屋の切り替え（PC）。いまある部屋だけを出す（2026-10-04 オーナー：イメージ図の A 案）。
+         「これから行く」は、打ち上げ予定のみの表示（射場のピン）と一覧の「予定」 -->
+    <nav id="room-nav" class="room-nav" aria-label="部屋">
+      <button type="button" data-room="earth" aria-current="true">地球のまわり</button>
+      <button type="button" data-room="far">遠くを見る</button>
+      <button type="button" data-room="launch">これから行く</button>
+    </nav>
+
+    <div class="globe-top">
+      <!-- 地球の上：表示切替（地球と一覧に出すもの）。押したものが光る -->
+      <div class="view-switch" id="view-switch" role="group" aria-label="地球と一覧に出すもの">
+        <button type="button" data-view="all" aria-pressed="true"><span class="vs-long">すべて</span><span class="vs-short" aria-hidden="true">すべて</span></button>
+        <button type="button" data-view="japan" aria-pressed="false"><span class="vs-long">日本のみ</span><span class="vs-short" aria-hidden="true">日本</span></button>
+        <button type="button" data-view="craft" aria-pressed="false"><span class="vs-long">衛星のみ</span><span class="vs-short" aria-hidden="true">衛星</span></button>
+        <button type="button" data-view="launches" aria-pressed="false"><span class="vs-long">打ち上げ予定のみ</span><span class="vs-short" aria-hidden="true">打ち上げ</span></button>
+      </div>
+      <!-- 遠くを見る部屋（M7 v0）への入口。部屋の部品（js/far/）は、押したときに読む -->
+      <button type="button" id="far-open" class="far-open" aria-label="遠くを見る部屋へ（探査機までの距離と、光で届く時間）"><span class="far-open-label">遠くを見る</span><span class="chev" aria-hidden="true">›</span></button>
+    </div>
 
     <!-- 地球の左上：いま表示しているもの -->
     <section class="earth-info" aria-label="現在の地球">
@@ -81,6 +106,26 @@
         </div>
         <div id="tonight-body" class="tonight-body"></div>
       </section>
+      <section class="events" id="events-section" aria-labelledby="events-title" hidden>
+        <div class="events-head">
+          <h2 id="events-title" class="events-title">次の出来事</h2>
+          <span class="k" id="events-sub">日本と世界・公式の日付だけ</span>
+        </div>
+        <div id="events-body" class="events-body"></div>
+        <p class="events-note k small">日付は運用している機関（JAXA・NASA・ESA など）の公式発表どおりで、日本時間で書いています。遅れたら「延期」とだけ書きます。</p>
+      </section>
+      <!-- 世界の打ち上げ（参考）：The Space Devs のデータ。公式の予定とは箱を分け、点線の「参考」の印を付ける -->
+      <section class="events world" id="world-section" aria-labelledby="world-title" hidden>
+        <div class="events-head ref-anchor">
+          <h2 id="world-title" class="events-title world-title">世界の打ち上げ</h2>
+          <span class="ref-mark">参考<span class="ref-tip" aria-hidden="true">The Space Devs 参照（正確な情報は公式サイトを確認ください）</span></span>
+          <span class="k">The Space Devs のデータ・6時間ごとに更新</span>
+        </div>
+        <div id="world-body" class="events-body"></div>
+        <p class="events-note k small">「参考」の印は、宇宙機関の公式の発表ではない情報です。世界の打ち上げ予定をまとめている有志の団体 The Space Devs のデータ（Launch Library 2）を、日本時間にして載せています。遅れや変更がまだ入っていないことがあります。正確な情報は、各社・各機関の公式サイトで確かめてください。<span id="world-fetched"></span></p>
+        <!-- 「参考」の印の説明（一覧の行と地球のピンの aria-describedby が指す） -->
+        <span id="ref-note" hidden>The Space Devs 参照（正確な情報は公式サイトを確認ください）</span>
+      </section>
       <h2 class="list-title" id="list-title">注目</h2>
       <ul id="craft-list" class="craft-list"></ul>
       <p class="list-note k small">名前で呼べる機体だけを、少しずつ置いていきます。</p>
@@ -91,6 +136,16 @@
     <aside id="detail-panel" class="side-panel detail-panel" aria-label="機体の詳細" hidden>
       <button type="button" class="sheet-handle" aria-label="広げる" aria-expanded="false"></button>
       <div id="detail-body"></div>
+    </aside>
+
+    <!-- 右：次の出来事（PC の広い画面。詳細を開いているあいだと、一覧で「予定」を見ているあいだは出さない） -->
+    <aside id="next-panel" class="side-panel next-panel" aria-labelledby="next-panel-title">
+      <div class="events-head">
+        <h2 id="next-panel-title" class="next-panel-title">次の出来事</h2>
+        <span class="k" id="next-panel-sub">日本と世界・公式の日付だけ</span>
+      </div>
+      <div id="next-panel-body" class="next-panel-body"></div>
+      <p class="events-note k small">日付は運用している機関（JAXA・NASA・ESA など）の公式発表どおりで、日本時間で書いています。遅れたら「延期」とだけ書きます。出典は予定ごとに出しています。</p>
     </aside>
 
     <!-- 環のスケール注記 -->
@@ -144,16 +199,30 @@
       <p>軌道の形を表す数字のセット（<b>軌道要素</b>）は、米国宇宙軍（USSPACECOM）が Space-Track.org で公開しているものです。これを CelesTrak から取得し、<b>SGP4</b>（人工衛星の位置を計算する方法）で、あなたのブラウザの中で計算しています。</p>
       <p>軌道データは時間がたつと少しずつずれていくので、6時間ごとに自動で取り直しています。それでも、実際の位置と少し差が出ることがあります。</p>
       <p id="about-tle" class="mono small"></p>
+      <h3>表示の切り替え</h3>
+      <p>地球の上のボタンで、地球と一覧に出すものを切り替えられます（すべて・日本のみ・衛星のみ・打ち上げ予定のみ）。PC では、上の帯で部屋を切り替えます（地球のまわり・遠くを見る・これから行く）。「これから行く」が、打ち上げ予定のみの表示です。<b>日本のみ</b>は、運用している機関に日本の機関（JAXA・気象庁・内閣府など）が入っている機体（ISS も入ります）と、日本の予定・日本の射場からの打ち上げです。選んだ表示は、このブラウザにだけ覚えておきます。</p>
       <h3>環（わ）について</h3>
       <p>地球のまわりの3本の環は、低軌道・中軌道・静止軌道の目安です。違いが見えるように<b>半径を比較用に描いていて、実際の距離とは違います</b>。低軌道の機体は約90分で地球を一周して「流れ」、静止軌道の機体は地球と同じ速さで回るので「止まって」見えます。早送りで確かめてみてください。</p>
       <h3>「状態」について</h3>
       <p>カードの「状態」は、運用している機関の公式ページで確かめた内容です。みちびきは、サービスを止める予定や、止まっているというお知らせ（公式の運用状況ページ）を自動で読み取って表示します。</p>
+      <h3>「予定」について</h3>
+      <p>一覧の「予定」と上の「次の出来事」には、打ち上げや探査機の到着など、運用している機関（JAXA・NASA・ESA など）が公式に発表した日付だけを載せています。日本時間で書き、遅れたら「延期」とだけ書きます。出典は予定ごとに出しています。</p>
+      <p>地球の上のひし形（◇）は射場の場所です。位置は打上げ計画書の座標で、打ち上がるまで軌道は描きません。</p>
+      <p>「予定」の下の段の<b>世界の打ち上げ</b>には、点線の<b>「参考」の印</b>を付けています。世界の打ち上げ予定をまとめている有志の非営利団体 The Space Devs（宇宙機関・ロケット会社とは関係ありません）のデータで、公式の発表ではありません。6時間ごとに取り直していますが、遅れや変更がまだ入っていないことがあります。正確な情報は、各社・各機関の公式サイトで確かめてください。公式の予定と同じ打ち上げは、公式の方だけを出します。</p>
+      <h3>遠くを見る部屋</h3>
+      <p>地球の上の「遠くを見る」から入れます。地球のまわりの環の外にいる探査機までの距離と、光で届く時間を、桁ごとに見られます。月・太陽・水星・火星・木星の位置は、部屋を開いた時刻からあなたのブラウザで計算しています。探査機の距離は、惑星にいるものは惑星までの距離、ほかは NASA ジェット推進研究所（JPL）の Horizons で軌道から計算した値（週に1回取得。出典：Solar System Dynamics, Horizons System, https://ssd.jpl.nasa.gov）や、NASA が発表した日付つきの値です。いまの距離を出せないものは「準備中」と書いています。<b>光より速く飛ぶ演出は作り話（ワープ）</b>です。天体・機体の配置とスイングバイの航路は、距離を感じるための演出で、探査機の模型は公式を参考にしたイメージです。</p>
       <h3>使っているもの</h3>
       <ul class="small">
         <li>軌道データ：USSPACECOM／Space-Track.org（公開の軌道要素。CelesTrak から取得）</li>
         <li>みちびきの運用状況：みちびきウェブサイト「衛星運用状況」（内閣府）をもとに作成。6時間ごとに自動で取得</li>
+        <li>ひまわり9号の最新の画像：気象衛星センターホームページ「ひまわりリアルタイム画像」（日本付近・赤外）。加工せずに表示しています</li>
+        <li>予定の日付と射場の位置：JAXA・NASA・ESA など、運用している機関の公式発表（予定ごとに出典を表示）</li>
+        <li>世界の打ち上げ（参考）：<a href="https://thespacedevs.com/llapi" target="_blank" rel="noopener noreferrer">Launch Library 2（The Space Devs）</a>。6時間ごとに自動で取得し、日本時間と日本語の名前にして表示しています</li>
         <li>位置計算：satellite.js（MIT License）</li>
+        <li>月・太陽・惑星の位置（遠くを見る部屋）：Astronomy Engine（MIT License。<a href="vendor/astronomy-engine.LICENSE.txt" target="_blank" rel="noopener">ライセンス</a>）</li>
+        <li>探査機の情報（遠くを見る部屋）：NASA・ESA・JAXA など、運用している機関の公式ページ（カードごとに出典を表示）</li>
         <li>3D表示：globe.gl／three.js（MIT License）。中に入っているライブラリも含めた全文は <a href="vendor/THIRD_PARTY_NOTICES.txt" target="_blank" rel="noopener">ライセンス一覧</a></li>
+        <li>遠くを見る部屋の3D表示：three.js r128（MIT License。<a href="vendor/three-r128.LICENSE" target="_blank" rel="noopener">ライセンス</a>）</li>
         <li>地球の画像：NASA Blue Marble（昼）・Black Marble（夜の明かり）。昼と夜の境目は、観測時刻の太陽の位置から計算しています</li>
         <li>陸地の形：Natural Earth（パブリックドメイン）／world-atlas（ISC License）</li>
         <li>「いま、どこの上」の国と海の名前：Natural Earth（パブリックドメイン）。国境は日本の立場の版。線を約11kmの精度に間引いているので、海岸や国境の近くでは隣の名前になることがあります</li>
@@ -163,11 +232,10 @@
       <ul class="small" id="about-images"></ul>
       <p class="small">軌道データや画像などの権利は、それぞれの提供元にあります。</p>
       <h3>ライセンスとお願い</h3>
-      <p class="small">このアプリのプログラムは MIT License、VOYASCOPE が書いた文章は CC BY 4.0 です（ロゴを除く）。<b>軍事目的や、誰かを傷つけたり虐げたりすることには使わないでください。</b>これはライセンスの条件ではなく、作者からのお願いです。</p>
+      <p class="small">このアプリのプログラムは <a href="https://github.com/mentoce0-gif/voyascope/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>、VOYASCOPE が書いた文章は <a href="https://github.com/mentoce0-gif/voyascope/blob/main/CONTENT_LICENSE.md" target="_blank" rel="noopener">CC BY 4.0</a> です（ロゴを除く）。<b>軍事目的や、誰かを傷つけたり虐げたりすることには使わないでください。</b>これはライセンスの条件ではなく、作者からのお願いです。</p>
     </div>
   </dialog>
 
-  <script src="vendor/globe.gl.min.js"></script>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

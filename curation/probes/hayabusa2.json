@@ -1,0 +1,47 @@
+{
+  "id": "hayabusa2",
+  "name": {
+    "ja": "はやぶさ２",
+    "en": "Hayabusa2"
+  },
+  "operator": {
+    "value": ["JAXA"],
+    "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2",
+    "as_of": "2026-10-03"
+  },
+  "launch_date": {
+    "value": "2014-12-03",
+    "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2",
+    "as_of": "2026-10-03"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://www.hayabusa2.jaxa.jp/topics/20260928_IES/",
+    "as_of": "2026-10-03",
+    "note": "2026年8月にイオンエンジンの電源の一部が故障。別の組み合わせ（クロス運転）で運用を続ける"
+  },
+  "location": {
+    "value": "最後の目的地の小惑星 1998 KY26（2031年に着く予定）をめざして飛んでいる",
+    "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2",
+    "as_of": "2026-10-03"
+  },
+  "mission": {
+    "value": "小惑星リュウグウの表面の物質（サンプル）を地球に届けたあと、「拡張ミッション」で別の小惑星をめざす",
+    "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2",
+    "as_of": "2026-10-03"
+  },
+  "distance": {
+    "method": "horizons",
+    "horizons_id": "-37",
+    "supplier": "JAXA",
+    "datasheet_quotes": ["Trajectory data from JAXA navigation."],
+    "source": "https://ssd.jpl.nasa.gov/horizons/",
+    "as_of": "2026-10-04"
+  },
+  "events": ["hayabusa2-earth-swingby"],
+  "official_links": [
+    { "label": "ISAS 小惑星探査機「はやぶさ２」", "url": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2" },
+    { "label": "はやぶさ２ トピックス（2026年9月28日）", "url": "https://www.hayabusa2.jaxa.jp/topics/20260928_IES/" }
+  ],
+  "updated_at": "2026-10-04"
+}
