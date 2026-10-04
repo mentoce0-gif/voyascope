@@ -2,7 +2,7 @@
 // 書くのは curation/probes の出典つきの事実だけ。距離は distance.js の計算か、カードに書かれた公式の値
 import { esc, plainDateJa } from "../format.js";
 import { whenText, countdownText } from "../events.js";
-import { BODY_JA, kmJa, kmShortJa, lightSeconds, lightTimeJa, decadeLabel } from "./distance.js";
+import { BODY_JA, kmJa, kmShortJa, kmFullJa, lightSeconds, lightTimeJa, decadeLabel } from "./distance.js";
 
 const STATUS_JA = { operating: "運用中", ended: "運用終了", not_launched: "打ち上げ前" };
 const ext = `target="_blank" rel="noopener noreferrer"`;
@@ -44,10 +44,22 @@ export function distanceParts(item) {
 // その探査機のこれからの予定（いちばん近いもの1つ）
 export const nextEvent = (item, upcoming) => upcoming.find((ev) => item.card?.events?.includes(ev.id)) ?? null;
 
-function eventLine(ev, now, { full = false } = {}) {
+// title：予定の名前を書きかえるとき（3D の旅では、機体の名前のすぐ下なので、名前を省いた短い形にする）
+export function eventLine(ev, now, { full = false, title = ev?.title?.ja } = {}) {
   if (!ev) return "";
   const left = countdownText(ev, now);
-  return `<span class="ev-when">${esc(whenText(ev, now, { full }))}</span>　${esc(ev.title.ja)}${left ? `<span class="ev-left">（${esc(left)}）</span>` : ""}`;
+  return `<span class="ev-when">${esc(whenText(ev, now, { full }))}</span>　${esc(title)}${left ? `<span class="ev-left">（${esc(left)}）</span>` : ""}`;
+}
+
+// 予定の名前から、はじめの機体の名前を省く（「ベピコロンボが水星を回る軌道に入る」→「水星を回る軌道に入る」）。
+// 名前の（ ）の中と、全角・半角の数字のちがいは見ない。名前で始まらなければ、そのまま
+export function eventTitleWithout(title, name) {
+  const norm = (t) => t.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+  const base = norm(name.replace(/（.*?）/g, "")).trim();
+  if (!base || !norm(title).startsWith(base)) return title;
+  const after = title.slice(base.length); // 数字の置きかえは1文字ずつなので、もとの文字列をそのまま切れる
+  const rest = after.replace(/^\s*[がの]\s*/, "");
+  return rest && rest !== after ? rest : title;
 }
 
 // ---------- 飛んでいるときのカード（通り過ぎた場所） ----------
@@ -105,7 +117,7 @@ export function fullCardHtml(item, { now, upcoming }) {
   return `
     <div class="card-inner far-card-inner">
       <button type="button" class="close mono" data-close aria-label="閉じる">×</button>
-      <p class="pc-kicker mono">PROBE</p>
+      <p class="pc-kicker mono">MISSION / 探査機を知る</p>
       <h2 class="pc-title" id="far-card-title">${esc(c.name.ja)}</h2>
       <p class="pc-en">${esc(c.name.en)}</p>
       <dl class="pc-facts">
@@ -123,42 +135,63 @@ export function fullCardHtml(item, { now, upcoming }) {
     </div>`;
 }
 
-// ---------- 距離のはしご（桁ごとの段。下へ行くほど10倍遠い） ----------
+// ---------- 距離のはしご（Codex 案の形。桁ごとの段。下へ行くほど10倍遠い） ----------
 export const LADDER_DECADES = [5, 6, 7, 8, 9, 10];
 
-export function ladderHtml(items, { now, upcoming, v1Event }) {
+// numbers：旅の停留所の番号（はしごの左の「01」）。旅に出てこないものは空
+export function ladderHtml(items, { now, upcoming, v1Event, numbers = {} }) {
   const placed = items.filter((it) => it.dist && it.dist.method !== "on_earth");
   const onEarth = items.filter((it) => it.dist?.method === "on_earth");
   const pending = items.filter((it) => it.kind === "probe" && !it.dist);
-  const itemButton = (it) => {
+  const num = (id) => (numbers[id] ? String(numbers[id]).padStart(2, "0") : "");
+  const place = (it) => {
     const dp = distanceParts(it);
     const ev = it.kind === "probe" ? nextEvent(it, upcoming) : null;
     const cls = it.kind === "probe" ? "probe" : it.kind;
-    const v1 = it.kind === "light-day" && v1Event ? `<span class="li-ev">ボイジャー1号が ${eventWhenJa(v1Event, now)} にここへ（NASA の予告）</span>` : "";
-    return `<li><button type="button" class="lad-item ${cls}" data-go="${esc(it.id)}">
-      <span class="li-name">${esc(it.name)}${it.kind === "landmark" ? `<span class="li-tag">くらべる目安</span>` : ""}</span>
-      <span class="li-meta"><span class="mono">${esc(dp.short)}</span>${it.kind === "probe" ? `<span class="li-how">${esc(dp.how)}</span>` : ""}<span class="li-lt">光で <span class="mono">${esc(dp.lt)}</span></span></span>
-      ${ev ? `<span class="li-ev">${eventLine(ev, now)}</span>` : ""}${v1}
+    const v1 = it.kind === "light-day" && v1Event ? `<span class="lad-ev">ボイジャー1号が ${eventWhenJa(v1Event, now)} にここへ（NASA の予告）</span>` : "";
+    // 計算した値はぜんぶの桁、目安・日付つき・Horizons の値は丸めて「約」
+    const dist = it.dist.approx ? dp.short : kmFullJa(it.dist.km);
+    return `<li><button type="button" class="lad-place ${cls}" data-go="${esc(it.id)}">
+      <span class="lad-num mono">${num(it.id)}</span>
+      <span class="lad-main"><span class="lad-name">${esc(it.name)}${it.kind === "landmark" ? `<span class="li-tag">くらべる目安</span>` : ""}</span><span class="lad-how">${esc(dp.how)}</span>${ev ? `<span class="lad-ev">${eventLine(ev, now)}</span>` : ""}${v1}</span>
+      <span class="lad-dist mono">${esc(dist)}<small>光で ${esc(dp.lt)}</small></span>
+      <span class="lad-arrow" aria-hidden="true">↗</span>
     </button></li>`;
   };
-  const rungs = LADDER_DECADES.map((e) => {
+  const rungs = LADDER_DECADES.map((e, n) => {
     const inRung = placed.filter((it) => Math.floor(Math.log10(it.dist.km)) === e).sort((a, b) => a.dist.km - b.dist.km);
-    return `<li class="rung"><span class="rung-scale mono">${esc(decadeLabel(e))}</span><ul class="rung-items">${inRung.map(itemButton).join("") || `<li class="rung-empty" aria-hidden="true">—</li>`}</ul></li>`;
+    return `<li class="lad-step">
+      <div class="lad-label"><h4 class="lad-scale">${esc(decadeLabel(e))}</h4><small class="mono">10<sup>${e}</sup> km</small></div>
+      <div class="lad-content"><ul class="lad-places">${inRung.map(place).join("") || `<li class="lad-empty">この段に載せている場所は、ありません</li>`}</ul>${
+        n < LADDER_DECADES.length - 1 ? `<p class="lad-ten mono" aria-hidden="true">↓ <span>×10</span> FARTHER</p>` : ""
+      }</div>
+    </li>`;
   }).join("");
   const ground = onEarth.length
-    ? `<li class="rung ground"><span class="rung-scale">地上</span><ul class="rung-items">${onEarth
+    ? `<li class="lad-step ground">
+      <div class="lad-label"><h4 class="lad-scale">地上</h4><small class="mono">ON EARTH</small></div>
+      <div class="lad-content"><ul class="lad-places">${onEarth
         .map((it) => {
           const ev = nextEvent(it, upcoming);
-          return `<li><button type="button" class="lad-item probe" data-card="${esc(it.id)}"><span class="li-name">${esc(it.name)}</span><span class="li-meta"><span class="li-how">打ち上げ前</span></span>${ev ? `<span class="li-ev">${eventLine(ev, now)}</span>` : ""}</button></li>`;
+          return `<li><button type="button" class="lad-place probe" data-card="${esc(it.id)}">
+            <span class="lad-num mono"></span>
+            <span class="lad-main"><span class="lad-name">${esc(it.name)}</span>${ev ? `<span class="lad-ev">${eventLine(ev, now)}</span>` : ""}</span>
+            <span class="lad-dist">打ち上げ前</span>
+            <span class="lad-arrow" aria-hidden="true">＋</span>
+          </button></li>`;
         })
-        .join("")}</ul></li>`
+        .join("")}</ul></div>
+    </li>`
     : "";
   const pend = pending.length
-    ? `<h3 class="far-h3">いまの距離は準備中</h3>
+    ? `<div class="lad-pending">
+       <p class="eyebrow">STILL ON A JOURNEY</p>
+       <h4 class="lad-pending-title">いまの距離は準備中</h4>
        <p class="far-note">探査機の位置のデータを使えるようになってから、距離を出します。カードは見られます。</p>
-       <ul class="pending-list">${pending
-         .map((it) => `<li><button type="button" class="lad-item probe" data-card="${esc(it.id)}"><span class="li-name">${esc(it.name)}</span><span class="li-meta"><span class="li-how">${esc(it.card.location.value)}</span></span></button></li>`)
-         .join("")}</ul>`
+       <ul class="lad-places">${pending
+         .map((it) => `<li><button type="button" class="lad-place probe pending" data-card="${esc(it.id)}"><span class="lad-num mono"></span><span class="lad-main"><span class="lad-name">${esc(it.name)}</span><span class="lad-how">${esc(it.card.location.value)}</span></span><span class="lad-dist">準備中</span><span class="lad-arrow" aria-hidden="true">＋</span></button></li>`)
+         .join("")}</ul>
+     </div>`
     : "";
   return `<ol class="ladder">${ground}${rungs}</ol>${pend}`;
 }

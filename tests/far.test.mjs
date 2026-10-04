@@ -158,10 +158,10 @@ test("はしご：段に入る場所・地上（打ち上げ前）・準備中�
   const at = order.map((w) => text.indexOf(w));
   assert.ok(at.every((i, n) => i >= 0 && (n === 0 || i > at[n - 1])), JSON.stringify(at));
   // 段ごとに切り分ける（段の名前から次の段の名前まで）
-  const rung = (label) => html.split('class="rung-scale').find((seg) => seg.includes(`>${label}</span>`)) ?? "";
+  const rung = (label) => html.split('class="lad-scale').find((seg) => seg.includes(`>${label}</h4>`)) ?? "";
   assert.match(rung("10万 km〜"), /data-go="moon"/);
   assert.match(rung("100万 km〜"), /data-go="jwst"/);
-  assert.match(rung("1000万 km〜"), /rung-empty/);
+  assert.match(rung("1000万 km〜"), /lad-empty/);
   assert.match(rung("1億 km〜"), /data-go="sun"[\s\S]*data-go="bepicolombo"[\s\S]*data-go="perseverance"/);
   assert.match(rung("10億 km〜"), /data-go="new-horizons"/);
   assert.match(rung("100億 km〜"), /data-go="light-day"/);
@@ -170,10 +170,14 @@ test("はしご：段に入る場所・地上（打ち上げ前）・準備中�
   assert.match(text, /10月20日（火）4:41 MMX の打ち上げ/);
   const pending = html.slice(html.indexOf("いまの距離は準備中"));
   for (const id of ["parker-solar-probe", "hayabusa2", "voyager-1", "voyager-2"]) assert.match(pending, new RegExp(`data-card="${id}"`));
-  // 目安・日付つきの値は「約」と、どうやって出した値かを書く
-  assert.match(text, /ジェイムズ・ウェッブ宇宙望遠鏡 約150万 km 目安（その日の距離ではない）/);
-  assert.match(text, /ニュー・ホライズンズ 約95億 km 2026年6月23日の値/);
-  assert.match(text, /パーサヴィアランス 2\.47億 km 火星までの距離（計算）/);
+  // 目安・日付つきの値は丸めて「約」。計算した値はぜんぶの桁（Codex 案の形）。どうやって出した値かを書く
+  assert.match(text, /ジェイムズ・ウェッブ宇宙望遠鏡 目安（その日の距離ではない） 約150万 km 光で 約 5 秒/);
+  assert.match(text, /ニュー・ホライズンズ 2026年6月23日の値 約95億 km/);
+  assert.match(text, /パーサヴィアランス 火星までの距離（計算） 246,566,337 km 光で 13 分 42 秒/);
+  assert.match(text, /1光日 光が24時間で進む距離 ボイジャー1号が .* 25,902,068,371 km 光で 24 時間/);
+  // 番号（旅の停留所の番号）は、渡したものだけ
+  assert.doesNotMatch(html, /class="lad-num mono">\d/);
+  assert.match(ladderHtml(items, { now: NOW, upcoming, v1Event, numbers: { moon: 1 } }), /class="lad-num mono">01<\/span>/);
   // 予告の日が過ぎたら、1光日の段にボイジャー1号の予告を出さない
   const after = new Date("2026-11-20T00:00:00Z");
   const up2 = upcomingEvents(events, after);
