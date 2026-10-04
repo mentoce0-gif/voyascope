@@ -1,0 +1,41 @@
+name: deploy-cloudflare
+
+# web/ を Cloudflare（Workers の静的アセット、https://voyascope.org）に公開する（M9 ②・docs/m9-plan.md）。
+# - main に web/ の変更が入ったとき
+# - 軌道データなどの自動更新（update-orbits）と、探査機の距離の自動更新（update-horizons）が終わったとき
+#   （Actions がコミットしたプッシュでは、ほかのワークフローが動かないため）
+# - 手動（Actions の画面から）
+# 設定は wrangler.jsonc。鍵は GitHub の Secrets（CLOUDFLARE_API_TOKEN・CLOUDFLARE_ACCOUNT_ID）。リポジトリには書かない。
+# 切り替えるまでは、GitHub Pages（pages.yml）と並べて公開する。
+
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", "wrangler.jsonc", ".github/workflows/deploy.yml"]
+  workflow_run:
+    workflows: [update-orbits, update-horizons]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-cloudflare
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # pages.yml と同じ：自動更新が「失敗」で終わっても公開し直す（軌道データのコミットのあとで、ほかの取得の失敗を知らせるため）
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy

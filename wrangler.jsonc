@@ -1,0 +1,14 @@
+{
+  // VOYASCOPE を Cloudflare Workers の「静的アセット」として公開する（M9 ②・docs/m9-plan.md）。
+  // サーバのコードはない。web/ のファイルをそのまま配る（静的なファイルの配信は無料・無制限）。
+  // 公開は .github/workflows/deploy.yml（GitHub Actions から wrangler で）。キャッシュは web/_headers。
+  "name": "voyascope",
+  "compatibility_date": "2026-10-04",
+  "assets": {
+    "directory": "./web"
+  },
+  // 独自ドメイン（2026-10-04 オーナー決定）。Cloudflare が DNS と証明書を自動で用意する
+  "routes": [
+    { "pattern": "voyascope.org", "custom_domain": true }
+  ]
+}
