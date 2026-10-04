@@ -113,6 +113,7 @@ v0 は試作どおり（Canvas の簡単な図形・軽さ優先）で作った�
   | 見たページ・想像で足したところ | `refs`・`guessed` | 9つとも入っている（依頼文の公式ページだけ） |
   | 確認ページ | PC・スマホで崩れない、44px、動きを減らす設定、← → キー | そのとおり。エラーなし。小さい点の切り替え（幅 20〜34px）は「前へ」「次へ」の補助 |
 
+  - 写真（9つ、PC 1440×900）：[`docs/screenshots/far-room-models/pc-9-models.webp`](../screenshots/far-room-models/pc-9-models.webp)
   - 確認ページのうち、出典を確かめていない説明2つ（ウェッブの鏡の枚数・パーサヴィアランスの車輪の数）は、確かめた言葉に替えた（「GOLD MIRROR / 5-LAYER SUNSHIELD」「ROVER ON MARS」）。模型の形はそのまま
   - 合わせた試作へ入れるときの注意：模型は、`InstancedMesh` で部品をまとめているため、r128 の `Box3.setFromObject` では大きさを正しく測れない。合わせた試作の `fitModel` は使わず、`userData.normalizedSize`（いちばん長い辺が 2）を使って大きさをそろえる。確認ページは影を付けている（合わせた試作は影なし）ので、見え方が少し変わる
 
