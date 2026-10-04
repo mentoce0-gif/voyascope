@@ -35,11 +35,11 @@
 
 | 項目 | 状態 | 備考 |
 |---|---|---|
-| 公開の方法 | オーナーの判断 | GitHub Pages は、無料プランでは **public リポジトリだけ**。private のまま公開するには GitHub Pro などの有料プランが要る（[GitHub Docs](https://docs.github.com/ja/pages/getting-started-with-github-pages/what-is-github-pages)、2026-09-30 確認） |
+| 公開の方法 | ✅ public（2026-09-30 オーナー決定） | GitHub Pages は、無料プランでは **public リポジトリだけ**。private のまま公開するには GitHub Pro などの有料プランが要る（[GitHub Docs](https://docs.github.com/ja/pages/getting-started-with-github-pages/what-is-github-pages)、2026-09-30 確認） |
 | ライセンス | C5 未依頼 | `LICENSE` はライセンス確定まで作らない（CLAUDE.md） |
-| CelesTrak のデータを自分のサイトで配ってよいか | C9 未依頼 | 公開前に必須 |
-| 名前の確認 | C6 未依頼 | 公開前に必須 |
-| ISS の数値・公式リンク・乗員 | C3・C4・C10 | そろわなければ「見本」の帯が出たままになる |
+| CelesTrak のデータを自分のサイトで配ってよいか | ✅ C9 確認済み（2026-10-01） | 出典表示を条件に再配布できる |
+| 名前の確認 | ⏳ C6 | 米国の登録商標は該当なし。日本（J-PlatPat）は 10/5 にオーナーが確かめる。よほどのことがない限り VOYASCOPE のまま（2026-10-04 オーナー） |
+| ISS の数値・公式リンク・乗員 | ✅ C3・C4（2026-09-30）・C10（2026-10-03） | |
 | スマホでの重さ・表示 | 済（2026-10-03） | 読み込みの順番を直した。遅い4G＋CPU 4倍で「観測を開始」まで 7.9〜8.1秒 → 6.2〜6.5秒（手元の同じ条件）。読み込み量の上限を CI で守る → [タスク012](../tasks/012-mobile-weight.md)。実機での確認はオーナー |
 
 ## 決まったこと（2026-09-30）
