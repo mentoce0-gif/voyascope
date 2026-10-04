@@ -2,7 +2,8 @@
 
 > 2026-10-04 Claude Code 案。2026-10-04 オーナー「OK」。
 > **2026-10-04：① 済み**（公開のリポジトリを作り直した。前のリポジトリは `voyascope-archive`、調査の記録は `voyascope-research`。どちらも非公開）。
-> **独自ドメインは `voyascope.org`**（2026-10-04 オーナー。Cloudflare で買う）。② は Workers の静的アセットで準備した（`wrangler.jsonc`・`web/_headers`・`.github/workflows/deploy.yml`）。
+> **2026-10-04：② の公開を始めた → https://voyascope.org**（GitHub Pages と並べて確かめ中）。
+> **独自ドメインは `voyascope.org`**（2026-10-04 オーナー。Cloudflare で買った）。② は Workers の静的アセットで準備した（`wrangler.jsonc`・`web/_headers`・`.github/workflows/deploy.yml`）。
 > きっかけ：M7 v0 が終わった（2026-10-04）。ロードマップの M9 に「ページの構成が固まった目安を M7 v0 の完了とし、そのときに Claude Code が移行の段取りを提案する」とある。
 > あわせて、公開前の画像と調査の記録を「完全に削除できるなら GitHub から消そう」→ リポジトリの作り直しを M9 と一緒にやる（2026-10-04 オーナー「M9かな」）。
 > 名前は VOYASCOPE で続ける（2026-10-04 オーナー：商標の有無にかかわらず続ける）。
@@ -79,6 +80,8 @@
   - 公開し直すのは、データの更新で1日4回と、人の変更のたび（月に150〜250回ほど）。Pages の上限（月500ビルド）と同じ数え方でも、その中
   - リポジトリの履歴は、人が直したものだけになる（自動更新のコミット、1日2〜4回がなくなる）
 - **キャッシュ**：`web/_headers` で決める。ライブラリは1日・画像は7日・データは5分。HTML・JS・CSS は既定（毎回、変わっていないかだけ確かめる）
+- **2026-10-04 に確かめたこと**：公開は約21秒（73ファイル）。`https://voyascope.org` で、ページ・データ・ライブラリ・画像が 200 で返る。キャッシュの時間は上のとおり。`_headers` そのものは配られない。JS・CSS・画像・JSON の種類（Content-Type）も正しい
+- **残っている設定（オーナー）**：`http://` で開いても `https://` に切り替わらない → Cloudflare の voyascope.org → SSL/TLS → Edge Certificates →「Always Use HTTPS」をオン。`www.voyascope.org` は、要るなら後で（`voyascope.org` へ転送する）
 - **切り替え**：Cloudflare と GitHub Pages を1週間ほど並べて確かめる。そのあと GitHub Pages には「新しい場所」へ移る案内だけを置き、README・`CLAUDE.md`・`og:url` を新しい URL にする
 - **オーナーの作業**（15〜30分。Cloudflare のアカウントはもともとある）
   1. `voyascope.org` を買う：Cloudflare の Register domains で検索 → Purchase（自動更新は最初からオン）。連絡先は正しく入れる（WHOIS では伏せられる）。届いた確認のメールのリンクを押す（押さないと ICANN の決まりでドメインが止まる）
