@@ -81,7 +81,7 @@
   - リポジトリの履歴は、人が直したものだけになる（自動更新のコミット、1日2〜4回がなくなる）
 - **キャッシュ**：`web/_headers` で決める。ライブラリは1日・画像は7日・データは5分。HTML・JS・CSS は既定（毎回、変わっていないかだけ確かめる）
 - **2026-10-04 に確かめたこと**：公開は約21秒（73ファイル）。`https://voyascope.org` で、ページ・データ・ライブラリ・画像が 200 で返る。キャッシュの時間は上のとおり。`_headers` そのものは配られない。JS・CSS・画像・JSON の種類（Content-Type）も正しい
-- **残っている設定（オーナー）**：`http://` で開いても `https://` に切り替わらない → Cloudflare の voyascope.org → SSL/TLS → Edge Certificates →「Always Use HTTPS」をオン。`www.voyascope.org` は、要るなら後で（`voyascope.org` へ転送する）
+- ✅ **Always Use HTTPS**（2026-10-04 オーナーがオン）：`http://voyascope.org/…` は 301 で `https://` の同じ場所へ移る（確かめた）。`www.voyascope.org` は、要るなら後で（`voyascope.org` へ転送する）
 - **切り替え**：Cloudflare と GitHub Pages を1週間ほど並べて確かめる。そのあと GitHub Pages には「新しい場所」へ移る案内だけを置き、README・`CLAUDE.md`・`og:url` を新しい URL にする
 - **オーナーの作業**（15〜30分。Cloudflare のアカウントはもともとある）
   1. `voyascope.org` を買う：Cloudflare の Register domains で検索 → Purchase（自動更新は最初からオン）。連絡先は正しく入れる（WHOIS では伏せられる）。届いた確認のメールのリンクを押す（押さないと ICANN の決まりでドメインが止まる）
