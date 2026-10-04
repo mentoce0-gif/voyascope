@@ -45,11 +45,13 @@
 
 ## ディレクトリ
 
+2026-10-04 に公開のリポジトリを作り直した（履歴から、個人のメールアドレスと、公開前の画像・調査の記録を外すため）。前のリポジトリは `voyascope-archive`（非公開。PR #1〜#36 のやりとり）、調査の記録（`research/`）は `voyascope-research`（非公開）。
+
 | パス | 中身 |
 |---|---|
 | `CLAUDE.md` | Claude Code への作業指示書 |
 | `docs/tasks/` | Claude Code へのタスク（番号順） |
-| `research/` | 各AIの調査結果・速報（カード化前） |
+| （`research/`） | 各AIの調査結果・速報と、出典の照合の記録。非公開のリポジトリ `voyascope-research` に置いている |
 | `schema/` | カードの形式（出典必須） |
 | `curation/` | 手書きのカードデータ（CIで検証） |
 | `examples/` | 書き方の見本（出典未確認のため検証では落ちる） |

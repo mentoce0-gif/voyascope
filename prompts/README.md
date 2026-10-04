@@ -14,7 +14,7 @@
 1. GitHub でファイルを開き、Raw 表示にして全文をコピーする
 2. 新しいチャットに貼り、最後に「今回のタスク：C2」のように**1つだけ**書いて送る（1チャット1タスク）
 3. 返ってきた `=== VOYASCOPE REPORT ===` 〜 `=== END ===` を、そのまま Claude Code に貼る
-4. Claude Code が `research/chappy/` か `research/grok/` に保存し、出典を確認してからカードに反映する
+4. Claude Code が `research/chappy/` か `research/grok/`（非公開の `voyascope-research`）に保存し、出典を確認してからカードに反映する
 
 ## 編集するとき
 

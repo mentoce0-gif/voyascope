@@ -7,8 +7,8 @@
 PC版は満足度が高い。スマホで触ると、操作の帯が地球を上下から挟んで野暮ったい（2026-10-01 オーナー）。
 同じ依頼文で Grok とチャッピーに調べてもらった。
 
-- Grok（実画面を計測）：[`research/grok/2026-10-01-ui-m1-mobile.md`](../../research/grok/2026-10-01-ui-m1-mobile.md)
-- チャッピー（実画面は未確認。注意点が詳しい）：[`research/chappy/2026-10-01-ui-m1-mobile.md`](../../research/chappy/2026-10-01-ui-m1-mobile.md)
+- Grok（実画面を計測）：`research/grok/2026-10-01-ui-m1-mobile.md`（非公開）
+- チャッピー（実画面は未確認。注意点が詳しい）：`research/chappy/2026-10-01-ui-m1-mobile.md`（非公開）
 
 ## Claude Code の実測（幅390×高さ844、変更前）
 

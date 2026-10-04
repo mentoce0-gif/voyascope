@@ -22,7 +22,7 @@
 - `curation/events/*.json`（新しいスキーマ `schema/event.schema.json`）。日時は `at`（時刻まで・UTC）／`date`／`from`・`to`／`month` の4通りで、発表の細かさのとおりに書く。事実の項目はすべて出典と確認日つき
 - `npm run validate` が予定も検証する（出典・日付の書き方・ありえない日付・逆向きの期間・打ち上げの射場）
 - `npm run sync:web` で `web/data/events.json` にまとめる。アプリは読めなくても地球と機体を出す
-- 入れた予定（出典の確認：[`research/verification/2026-10-01-events.md`](../../research/verification/2026-10-01-events.md)）
+- 入れた予定（出典の確認：`research/verification/2026-10-01-events.md`（非公開））
 
 | 予定 | 日時（日本時間） | 出典 |
 |---|---|---|

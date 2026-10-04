@@ -9,6 +9,7 @@ VOYASCOPE は、地球のまわりを飛ぶ衛星・宇宙船・宇宙飛行士�
 
 - 作者（オーナー）：151Me。個人・本業あり・稼働は週数時間
 - 方針：サーバを持たない。GitHub Pages ＋ GitHub Actions ＋ ブラウザ内計算で完結させる
+- 2026-10-04 に公開のリポジトリを作り直した（履歴から、個人のメールアドレスと、公開前の画像・調査の記録を外すため）。前のリポジトリは `voyascope-archive`（非公開。PR #1〜#36 のやりとり）、調査の記録（`research/`）は `voyascope-research`（非公開）
 - リポジトリは public（2026-09-30 オーナーが公開）。いまは GitHub Pages で仮公開（https://mentoce0-gif.github.io/voyascope/）。のちに Cloudflare Pages に移す
 
 ## 最優先ルール
@@ -32,8 +33,8 @@ VOYASCOPE は、地球のまわりを飛ぶ衛星・宇宙船・宇宙飛行士�
 | `curation/` | 本番のカードデータ | 出典確認済みのものだけ入れる |
 | `examples/` | 見本（出典は TODO） | 検証で落ちるのが正常 |
 | `config/` | 実績バッジ・ランク閾値など | |
-| `research/chappy/` | チャッピー（ChatGPT）の調査結果 | カード化の元ネタ。出典を必ず確認してから使う |
-| `research/grok/` | Grok の速報 | 更新のきっかけにだけ使う。直接 `curation/` に入れない |
+| `research/chappy/`（非公開の `voyascope-research`） | チャッピー（ChatGPT）の調査結果 | カード化の元ネタ。出典を必ず確認してから使う |
+| `research/grok/`（非公開の `voyascope-research`） | Grok の速報 | 更新のきっかけにだけ使う。直接 `curation/` に入れない |
 | `prompts/` | 各AIへの依頼テンプレート | |
 | `docs/tasks/` | Claude Code へのタスク指示 | 番号順に進める |
 | `web/` | アプリ本体（Phase 0 で作成） | |
