@@ -1,0 +1,15 @@
+# Cloudflare（Workers の静的アセット）で配るときのキャッシュ（M9 ②・wrangler.jsonc）。
+# 既定は「毎回、変わっていないかだけ確かめる」（max-age=0, must-revalidate と ETag）。HTML・JS・CSS は既定のまま（公開し直したらすぐ届く）。
+# GitHub Pages はこのファイルを読まない。
+
+# ライブラリ（めったに変わらない。中身を変えるときは、ファイル名に版を入れて名前を変える）
+/vendor/*
+  Cache-Control: public, max-age=86400
+
+# 画像（地球・ロゴなど）
+/assets/*
+  Cache-Control: public, max-age=604800
+
+# 自動で取り直すデータ（6時間ごと・週1回）。5分は覚えておいてよい
+/data/*
+  Cache-Control: public, max-age=300

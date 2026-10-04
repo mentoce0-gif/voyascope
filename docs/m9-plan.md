@@ -1,7 +1,8 @@
 # M9 の段取り（案）：リポジトリの作り直し・Cloudflare での公開・公式ページの見張り
 
 > 2026-10-04 Claude Code 案。2026-10-04 オーナー「OK」。
-> **2026-10-04：① 済み**（公開のリポジトリを作り直した。前のリポジトリは `voyascope-archive`、調査の記録は `voyascope-research`。どちらも非公開）。② の前に、独自ドメインを取るかを決める。
+> **2026-10-04：① 済み**（公開のリポジトリを作り直した。前のリポジトリは `voyascope-archive`、調査の記録は `voyascope-research`。どちらも非公開）。
+> **独自ドメインは `voyascope.org`**（2026-10-04 オーナー。Cloudflare で買う）。② は Workers の静的アセットで準備した（`wrangler.jsonc`・`web/_headers`・`.github/workflows/deploy.yml`）。
 > きっかけ：M7 v0 が終わった（2026-10-04）。ロードマップの M9 に「ページの構成が固まった目安を M7 v0 の完了とし、そのときに Claude Code が移行の段取りを提案する」とある。
 > あわせて、公開前の画像と調査の記録を「完全に削除できるなら GitHub から消そう」→ リポジトリの作り直しを M9 と一緒にやる（2026-10-04 オーナー「M9かな」）。
 > 名前は VOYASCOPE で続ける（2026-10-04 オーナー：商標の有無にかかわらず続ける）。
@@ -67,20 +68,22 @@
 
 ### ② Cloudflare で公開（10/8〜10/15）
 
-- **形**
-  - 独自ドメインを取らないなら **Cloudflare Pages**：無料の URL は `voyascope.pages.dev`（10/4 時点で使われていない様子）
-  - 独自ドメインを取るなら **Workers**（静的アセット）：Cloudflare がこれから勧めている形
+- **形**：**Workers の静的アセット**で `https://voyascope.org` に公開する（独自ドメインを取るので。Cloudflare がこれから勧めている形）
+  - 設定は `wrangler.jsonc`（`web/` をそのまま配る。独自ドメインは `custom_domain`。DNS と証明書は Cloudflare が自動で用意する）
+  - 公開は `.github/workflows/deploy.yml`（GitHub Actions から `cloudflare/wrangler-action`。動くときは `pages.yml` と同じ）。2026-10-04 に `wrangler deploy --dry-run` で、`web/` の86ファイルを読めることを確かめた
+  - （独自ドメインを取らない場合は Cloudflare Pages で `voyascope.pages.dev` の案だった）
 - **データはコミットしない**
   - 取得のスクリプトと時刻は、いまのまま（GitHub Actions で6時間ごと・週1回）
   - 取ったデータは、コミットせずにそのまま公開に使う。前回のデータ（週1回の Horizons の表など）は公開中のサイトから読み、取れたものだけ新しくする
   - 公開の前に、いまと同じ検証（`validate`・読み込み量）を通す。通らなければ前の版のまま
   - 公開し直すのは、データの更新で1日4回と、人の変更のたび（月に150〜250回ほど）。Pages の上限（月500ビルド）と同じ数え方でも、その中
   - リポジトリの履歴は、人が直したものだけになる（自動更新のコミット、1日2〜4回がなくなる）
-- **キャッシュ**：`_headers` で決める。ライブラリ・画像は長く、データは短く
+- **キャッシュ**：`web/_headers` で決める。ライブラリは1日・画像は7日・データは5分。HTML・JS・CSS は既定（毎回、変わっていないかだけ確かめる）
 - **切り替え**：Cloudflare と GitHub Pages を1週間ほど並べて確かめる。そのあと GitHub Pages には「新しい場所」へ移る案内だけを置き、README・`CLAUDE.md`・`og:url` を新しい URL にする
-- **オーナーの作業**（15〜30分。手順は私が書く）
-  - Cloudflare のアカウントを作る（無料）
-  - API の鍵（Pages の編集だけができるもの）を作り、GitHub の Secrets に入れる
+- **オーナーの作業**（15〜30分。Cloudflare のアカウントはもともとある）
+  1. `voyascope.org` を買う：Cloudflare の Register domains で検索 → Purchase（自動更新は最初からオン）。連絡先は正しく入れる（WHOIS では伏せられる）。届いた確認のメールのリンクを押す（押さないと ICANN の決まりでドメインが止まる）
+  2. API の鍵を作る：My Profile → API Tokens → Create Token → テンプレート「Edit Cloudflare Workers」。対象は自分のアカウントと `voyascope.org` だけ
+  3. 新しい `voyascope` の Settings → Secrets and variables → Actions に、`CLOUDFLARE_API_TOKEN`（2. の鍵）と `CLOUDFLARE_ACCOUNT_ID`（ダッシュボードの URL の `dash.cloudflare.com/` のあとの英数字）を入れる。鍵はチャットにもリポジトリにも書かない
 - **方針の書き直し**：`CLAUDE.md` の「サーバを持たない。GitHub Pages ＋ GitHub Actions ＋ ブラウザ内計算で完結させる」を、「管理するサーバは持たない。GitHub（コードと定期の取得）＋ Cloudflare（公開）＋ ブラウザ内計算」にする（ロードマップの M9 のとおり）
 
 ### ③ 公式ページの見張り（10/22 から）
@@ -93,8 +96,10 @@
 - 前回の試作（PR #24（旧リポジトリ）、マージせずに閉じた）の「見張り表」の考え方を使う。品質の土台（Q）のリンク切れの確認も兼ねる
 - 前回の値を覚えておく場所は、Actions のキャッシュ（コミットしない）
 
-### ④ 独自ドメイン（任意）
+### ④ 独自ドメイン → `voyascope.org` に決定（2026-10-04 オーナー）
 
+- 比べたもの：`voyascope.org`（Cloudflare で買える。ドメイン・DNS・公開が1か所にまとまる。年に2,000円前後が目安）と `voyascope.jp`（日本のサイトだと一目で分かる。Cloudflare では買えない可能性が高い。年に3,000〜4,000円ほど）。いまのブログなどのドメインの下に置く案は、個人のサイトと結びつくので外した
+- `voyascope.org` は 2026-10-04 に .org の登録所（PIR）の RDAP で未登録を確かめた
 - 例：`voyascope.jp`（10/3 の C6 で空き。10/4 も使われていない）。年に数千円（買う場所で違う）
 - よいところ：覚えやすく、授業で黒板にも書ける。あとで公開先を変えても URL が変わらない
 - 取るなら ② の前に（URL の切り替えが1回で済む）。買う前に J-PlatPat を一度見ておくと安心（5分）
