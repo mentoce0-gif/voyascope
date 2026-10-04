@@ -33,7 +33,10 @@
     "as_of": "2026-10-03"
   },
   "distance": {
-    "method": "pending"
+    "method": "horizons",
+    "horizons_id": "-96",
+    "source": "https://ssd.jpl.nasa.gov/horizons/",
+    "as_of": "2026-10-04"
   },
   "official_links": [
     { "label": "NASA「Parker Solar Probe」", "url": "https://science.nasa.gov/mission/parker-solar-probe/" },
@@ -42,5 +45,5 @@
       "url": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/"
     }
   ],
-  "updated_at": "2026-10-03"
+  "updated_at": "2026-10-04"
 }

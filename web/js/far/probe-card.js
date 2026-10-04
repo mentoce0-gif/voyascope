@@ -10,6 +10,22 @@ const src = (url) => (url ? ` <a class="src" href="${esc(url)}" ${ext}>出典</a
 const asOfJa = (d) => (d ? `${Number(d.slice(5, 7))}月${Number(d.slice(8, 10))}日` : "");
 const factValue = (f) => (Array.isArray(f?.value) ? f.value.join("・") : (f?.value ?? ""));
 
+// ---------- Horizons の計算値の出典（JPL SSD の希望の形。2026-10-04 の返事） ----------
+// Solar System Dynamics. (Downloaded 2026, October 4). Horizons System. https://ssd.jpl.nasa.gov
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const ymd = (iso) => /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? "");
+// 「Horizons System」はページ（カードの source）へ、URL は SSD のサイトへつなぐ
+export function horizonsCredit(downloaded, page = "https://ssd.jpl.nasa.gov/horizons/") {
+  const m = ymd(downloaded);
+  const when = m ? `${m[1]}, ${MONTHS[Number(m[2]) - 1]} ${Number(m[3])}` : "";
+  return `Solar System Dynamics. (Downloaded ${when}). <a href="${esc(page)}" ${ext}>Horizons System</a>. <a href="https://ssd.jpl.nasa.gov" ${ext}>https://ssd.jpl.nasa.gov</a>`;
+}
+// 「10月4日に取得」（取得した日。世界時の日付）
+const downloadedJa = (iso) => {
+  const m = ymd(iso);
+  return m ? `${Number(m[2])}月${Number(m[3])}日` : "";
+};
+
 // 距離の1行：数字と、どうやって出した値か
 export function distanceParts(item) {
   const d = item.dist;
@@ -19,6 +35,8 @@ export function distanceParts(item) {
   if (d.method === "planet") return { km: kmJa(d.km), short: kmShortJa(d.km), how: `${BODY_JA[d.body]}までの距離（計算）`, lt };
   if (d.method === "typical") return { km: `約 ${kmJa(d.km, 2)}`, short: `約${kmShortJa(d.km, 2)}`, how: "目安（その日の距離ではない）", lt };
   if (d.method === "dated") return { km: `約 ${kmJa(d.km, 2)}`, short: `約${kmShortJa(d.km, 2)}`, how: `${plainDateJa(d.at)}の値`, lt };
+  // Horizons の計算値：3桁に丸めて「約」。取得した日を書く（通信で測った値ではない）
+  if (d.method === "horizons") return { km: `約 ${kmJa(d.km, 3)}`, short: `約${kmShortJa(d.km, 3)}`, how: `Horizons の計算値（${downloadedJa(d.downloaded)}に取得）`, lt };
   // くらべる目安（月・太陽）と 1光日
   return { km: kmJa(d.km), short: kmShortJa(d.km), how: item.kind === "light-day" ? "光が24時間で進む距離" : "いまの距離（計算）", lt };
 }
@@ -71,9 +89,15 @@ export function fullCardHtml(item, { now, upcoming }) {
     ? `<span class="k">いまの距離は、探査機の位置のデータを使えるようになってから出します（準備中）。</span>`
     : d.method === "on_earth"
       ? `<span class="k">打ち上げ前なので、まだ地上にいます。</span>`
-      : `<span class="mono">${esc(dp.km)}</span>　<span class="k">${esc(dp.how)}</span><br>光で <span class="mono">${esc(dp.lt)}</span>${
-          d.note ? `<br><span class="k small">${esc(d.note)}</span>` : ""
-        }${src(d.source)}`;
+      : d.method === "horizons"
+        ? `<span class="mono">${esc(dp.km)}</span>　<span class="k">${esc(dp.how)}</span><br>光で <span class="mono">${esc(dp.lt)}</span>
+           <br><span class="k small">NASA ジェット推進研究所（JPL）の Horizons で、軌道から計算した値です。通信で測った値ではありません。${
+             d.supplier ? `軌道のもとのデータ：${esc(d.supplier)}（Horizons の説明による）。` : ""
+           }${d.note ? esc(d.note) : ""}</span>
+           <br><span class="k small credit">出典：${horizonsCredit(item.dist.downloaded, d.source)}</span>`
+        : `<span class="mono">${esc(dp.km)}</span>　<span class="k">${esc(dp.how)}</span><br>光で <span class="mono">${esc(dp.lt)}</span>${
+            d.note ? `<br><span class="k small">${esc(d.note)}</span>` : ""
+          }${src(d.source)}`;
   const status = c.status;
   const evs = upcoming.filter((ev) => c.events?.includes(ev.id));
   const row = (label, body) => `<div class="pc-row"><dt>${label}</dt><dd>${body}</dd></div>`;

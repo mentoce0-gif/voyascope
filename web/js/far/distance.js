@@ -1,7 +1,8 @@
 // 遠くを見る部屋：地球からの距離と、光で届く時間
 // 月・太陽・惑星の位置はブラウザで計算する（Astronomy Engine、MIT License）。
 // 探査機は、カードの distance の書き方どおりに出す。推測の値は使わない：
-//   planet=いる惑星までの距離（計算）／typical=公式の目安の値／dated=日付つきの公式の値／pending=準備中／on_earth=打ち上げ前
+//   planet=いる惑星までの距離（計算）／typical=公式の目安の値／dated=日付つきの公式の値／
+//   horizons=NASA JPL の Horizons の計算値（週に1回取った表 web/data/horizons.json）／pending=準備中／on_earth=打ち上げ前
 import { GeoVector, Body, MakeTime, KM_PER_AU } from "../../vendor/astronomy.min.js";
 
 export const C_KM_S = 299792.458; // 光の速さ（km/秒。定義の値）
@@ -27,8 +28,23 @@ export function landmarks(date) {
   ];
 }
 
-// 探査機の距離。{ km, method, body?, at?, approx }。距離を出せないとき（準備中）は null
-export function probeDistance(card, date) {
+// Horizons の表（1日ごと）から、date の距離を出す（となりの2日を線でつなぐ）。
+// 表がない・date が表の外（取得が止まって古くなった）ときは null（準備中に戻す。古い値を「いま」と見せない）
+export function horizonsKm(table, id, date) {
+  const t = table?.probes?.[id];
+  const start = Date.parse(t?.start ?? "");
+  const step = (table?.step_hours ?? 0) * 3600000;
+  if (!t || Number.isNaN(start) || !(step > 0) || !Array.isArray(t.km) || t.km.length < 2) return null;
+  const x = (date.getTime() - start) / step;
+  if (!(x >= 0 && x <= t.km.length - 1)) return null;
+  const i = Math.min(Math.floor(x), t.km.length - 2);
+  const km = t.km[i] + (t.km[i + 1] - t.km[i]) * (x - i);
+  return Number.isFinite(km) && km > 0 ? km : null;
+}
+
+// 探査機の距離。{ km, method, body?, at?, approx, downloaded?, supplier? }。距離を出せないとき（準備中）は null。
+// horizons は web/data/horizons.json の中身（なければ Horizons の探査機は準備中）
+export function probeDistance(card, date, horizons = null) {
   const d = card.distance ?? {};
   switch (d.method) {
     case "planet":
@@ -37,6 +53,13 @@ export function probeDistance(card, date) {
       return { km: d.value, method: "typical", approx: true };
     case "dated":
       return { km: d.value, method: "dated", at: d.at, approx: true };
+    case "horizons": {
+      // 丸めた値で持つ（JPL SSD に伝えた出し方。画面ではさらに3桁に丸めて「約」を付ける）。
+      // 有効数字5桁は、1光日（約259億km）より手前か先かを、半日ほどの細かさで分けるため
+      const km = horizonsKm(horizons, card.id, date);
+      if (km === null) return null;
+      return { km: roundSig(km, 5), method: "horizons", approx: true, downloaded: horizons.probes[card.id].downloaded, supplier: d.supplier ?? null };
+    }
     case "on_earth":
       return { km: 0, method: "on_earth", approx: false };
     default:

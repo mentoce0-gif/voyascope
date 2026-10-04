@@ -31,12 +31,17 @@
     "as_of": "2026-10-03"
   },
   "distance": {
-    "method": "pending"
+    "method": "horizons",
+    "horizons_id": "-37",
+    "supplier": "JAXA",
+    "datasheet_quotes": ["Trajectory data from JAXA navigation."],
+    "source": "https://ssd.jpl.nasa.gov/horizons/",
+    "as_of": "2026-10-04"
   },
   "events": ["hayabusa2-earth-swingby"],
   "official_links": [
     { "label": "ISAS 小惑星探査機「はやぶさ２」", "url": "https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2" },
     { "label": "はやぶさ２ トピックス（2026年9月28日）", "url": "https://www.hayabusa2.jaxa.jp/topics/20260928_IES/" }
   ],
-  "updated_at": "2026-10-03"
+  "updated_at": "2026-10-04"
 }

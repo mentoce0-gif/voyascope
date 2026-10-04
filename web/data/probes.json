@@ -38,11 +38,14 @@
         "as_of": "2026-10-03"
       },
       "distance": {
-        "method": "planet",
-        "body": "Mercury",
-        "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
-        "as_of": "2026-10-03",
-        "note": "水星に着く途中なので、水星までの距離を目安として出す"
+        "method": "horizons",
+        "horizons_id": "-121",
+        "supplier": "ESA",
+        "datasheet_quotes": [
+          "Trajectory from ESA."
+        ],
+        "source": "https://ssd.jpl.nasa.gov/horizons/",
+        "as_of": "2026-10-04"
       },
       "events": [
         "bepicolombo-mercury-orbit",
@@ -58,7 +61,7 @@
           "url": "https://mio.isas.jaxa.jp/mission/"
         }
       ],
-      "updated_at": "2026-10-03"
+      "updated_at": "2026-10-04"
     },
     {
       "id": "hayabusa2",
@@ -95,7 +98,14 @@
         "as_of": "2026-10-03"
       },
       "distance": {
-        "method": "pending"
+        "method": "horizons",
+        "horizons_id": "-37",
+        "supplier": "JAXA",
+        "datasheet_quotes": [
+          "Trajectory data from JAXA navigation."
+        ],
+        "source": "https://ssd.jpl.nasa.gov/horizons/",
+        "as_of": "2026-10-04"
       },
       "events": [
         "hayabusa2-earth-swingby"
@@ -110,7 +120,7 @@
           "url": "https://www.hayabusa2.jaxa.jp/topics/20260928_IES/"
         }
       ],
-      "updated_at": "2026-10-03"
+      "updated_at": "2026-10-04"
     },
     {
       "id": "juno",
@@ -206,12 +216,14 @@
         "as_of": "2026-10-03"
       },
       "distance": {
-        "method": "typical",
-        "value": 1500000,
-        "unit": "km",
-        "source": "https://science.nasa.gov/mission/webb/",
-        "as_of": "2026-10-03",
-        "note": "L2 までの目安（NASA の説明の値）。その日の距離ではない"
+        "method": "horizons",
+        "horizons_id": "-170",
+        "supplier": "NASA ゴダード飛行力学施設（FDF）",
+        "datasheet_quotes": [
+          "reconstructed trajectory solutions (as-flown) from Goddard Flight Dynamics Facility (FDF)"
+        ],
+        "source": "https://ssd.jpl.nasa.gov/horizons/",
+        "as_of": "2026-10-04"
       },
       "official_links": [
         {
@@ -219,7 +231,7 @@
           "url": "https://science.nasa.gov/mission/webb/"
         }
       ],
-      "updated_at": "2026-10-03"
+      "updated_at": "2026-10-04"
     },
     {
       "id": "mmx",
@@ -369,7 +381,10 @@
         "as_of": "2026-10-03"
       },
       "distance": {
-        "method": "pending"
+        "method": "horizons",
+        "horizons_id": "-96",
+        "source": "https://ssd.jpl.nasa.gov/horizons/",
+        "as_of": "2026-10-04"
       },
       "official_links": [
         {
@@ -381,7 +396,7 @@
           "url": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/"
         }
       ],
-      "updated_at": "2026-10-03"
+      "updated_at": "2026-10-04"
     },
     {
       "id": "perseverance",
@@ -475,7 +490,15 @@
         "as_of": "2026-10-03"
       },
       "distance": {
-        "method": "pending"
+        "method": "horizons",
+        "horizons_id": "-31",
+        "datasheet_quotes": [
+          "Refit of tracking data spanning 1981-1992",
+          "Note there has been no new tracking data possible since 1992."
+        ],
+        "source": "https://ssd.jpl.nasa.gov/horizons/",
+        "as_of": "2026-10-04",
+        "note": "Horizons の軌道は、1981〜1992年の追跡データから求めたもの。それより後は予測（Horizons の説明）"
       },
       "events": [
         "voyager-1-one-light-day"
@@ -490,7 +513,7 @@
           "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
         }
       ],
-      "updated_at": "2026-10-03"
+      "updated_at": "2026-10-04"
     },
     {
       "id": "voyager-2",
@@ -528,7 +551,15 @@
         "as_of": "2026-10-03"
       },
       "distance": {
-        "method": "pending"
+        "method": "horizons",
+        "horizons_id": "-32",
+        "datasheet_quotes": [
+          "Refit of tracking data spanning 1989-1992",
+          "Note there has been no new tracking data possible since 1992."
+        ],
+        "source": "https://ssd.jpl.nasa.gov/horizons/",
+        "as_of": "2026-10-04",
+        "note": "Horizons の軌道は、1989〜1992年の追跡データから求めたもの。それより後は予測（Horizons の説明）"
       },
       "official_links": [
         {
@@ -540,7 +571,7 @@
           "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
         }
       ],
-      "updated_at": "2026-10-03"
+      "updated_at": "2026-10-04"
     }
   ]
 }

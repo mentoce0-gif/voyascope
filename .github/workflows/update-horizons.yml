@@ -1,0 +1,52 @@
+name: update-horizons
+
+# 探査機の地球からの距離（NASA JPL の Horizons の計算値）を、週に1回取り直す。
+# 使い方は JPL SSD に問い合わせて了承を得た形（research/verification/2026-10-03-c14.md「JPL SSD とのやりとり」）：
+# - 1件ずつ、間をあけて呼ぶ。1回で先の6週間ぶん（1日ごと）をもらう（Fair Use：https://ssd-api.jpl.nasa.gov/）
+# - 見る人のブラウザは Horizons を呼ばない（web/data/horizons.json だけを読む）
+# - 取れなかった機体・説明（datasheet）が変わった機体があれば、表を書いたうえで失敗で終わる（GitHub がメールで知らせる）
+# - 出力の version が変わったら、何も書かずに失敗で終わる
+# - 変化があったときだけ main にコミットする
+
+on:
+  schedule:
+    - cron: "41 0 * * 1" # 毎週月曜 UTC 0:41（日本時間 9:41）。update-orbits（UTC 0:17）と重ならないように
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-horizons
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 探査機の距離を取得（JPL Horizons）
+        id: fetch
+        continue-on-error: true
+        run: node scripts/fetch-horizons.mjs
+      - name: 変化があればコミット
+        run: |
+          if [ -z "$(git status --porcelain -- web/data/horizons.json)" ]; then
+            echo "変化なし"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data/horizons.json
+          git commit -m "探査機の距離を自動更新（JPL Horizons）"
+          git pull --rebase origin main
+          git push
+      - name: 取得に失敗した・説明が変わったら知らせる
+        if: steps.fetch.outcome == 'failure'
+        run: |
+          echo "探査機の距離の取得で、知らせることがあります。上の「探査機の距離を取得（JPL Horizons）」のログを見てください。"
+          exit 1

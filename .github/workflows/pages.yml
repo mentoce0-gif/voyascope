@@ -2,7 +2,7 @@ name: pages
 
 # web/ を GitHub Pages に公開する。
 # - main に web/ の変更が入ったとき
-# - 軌道データ・運用状況・打ち上げ予定の自動更新（update-orbits）が終わったとき
+# - 軌道データ・運用状況・打ち上げ予定の自動更新（update-orbits）と、探査機の距離の自動更新（update-horizons）が終わったとき
 #   （Actions がコミットしたプッシュでは、ほかのワークフローが動かないため）
 # - 手動（Actions の画面から）
 #
@@ -13,7 +13,7 @@ on:
     branches: [main]
     paths: ["web/**", ".github/workflows/pages.yml"]
   workflow_run:
-    workflows: [update-orbits]
+    workflows: [update-orbits, update-horizons]
     types: [completed]
   workflow_dispatch:
 
