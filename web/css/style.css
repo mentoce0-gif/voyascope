@@ -1055,12 +1055,18 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 #about-tle { white-space: pre-line; }
 
 /* 地球の左上：現在の地球 */
-/* 地球の上の表示切替（すべて／日本のみ／衛星のみ／打ち上げ予定のみ）。押しているものはミント色 */
-.view-switch {
+/* 地球の上：表示切替と、遠くを見る部屋への入口（PC は横に並べる） */
+.globe-top {
   position: absolute;
   z-index: 6;
   top: calc(var(--top-h) + 4px);
   left: 362px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* 地球の上の表示切替（すべて／日本のみ／衛星のみ／打ち上げ予定のみ）。押しているものはミント色 */
+.view-switch {
   display: flex;
   gap: 2px;
   padding: 3px;
@@ -1087,8 +1093,31 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 .view-switch button[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); font-weight: 700; }
 .view-switch button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .view-switch .vs-short { display: none; }
+/* 遠くを見る部屋への入口：ほかの部屋へ行くボタンなので、表示切替（ミント）と分けてアンバーにする */
+.far-open {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border: 1px solid var(--amber-dim);
+  border-radius: 999px;
+  background: rgba(255, 181, 71, 0.1);
+  color: var(--amber);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+.far-open:hover { background: rgba(255, 181, 71, 0.2); }
+.far-open:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.far-open[aria-busy="true"] { cursor: progress; opacity: 0.75; }
+.far-open .chev { font-size: 1rem; line-height: 1; }
 /* 幅の狭い PC で詳細を開いているあいだは隠す（詳細のパネルと重なるため。閉じると戻る） */
-@media (min-width: 901px) and (max-width: 1180px) { #app.has-selected .view-switch { display: none; } }
+@media (min-width: 901px) and (max-width: 1180px) { #app.has-selected .globe-top { display: none; } }
 
 .earth-info {
   position: absolute;
@@ -1182,7 +1211,10 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
   #app:has(.side-panel.expanded) #globe .tag { visibility: hidden; }
   /* 表示切替：上のバーのすぐ下に左寄せ。押せる範囲を44pxに */
   /* シートを全部に広げても隠れないように、シートより上に置き、シートはその下から */
-  .view-switch { z-index: 21; left: 12px; top: calc(var(--top-h) + 2px); max-width: calc(100vw - 24px); }
+  .globe-top { display: contents; }
+  .view-switch { position: absolute; z-index: 21; left: 12px; top: calc(var(--top-h) + 2px); max-width: calc(100vw - 24px); }
+  /* 入口は表示切替の下の右。一覧・詳細のシートを広げたときは、シートの下に隠れる */
+  .far-open { position: absolute; z-index: 19; right: 12px; top: calc(var(--top-h) + var(--switch-h) + 8px); min-height: 40px; }
   .view-switch button { padding: 6px 10px; font-size: 0.8rem; }
   .view-switch button::after { content: ""; position: absolute; inset: -7px -1px; }
   /* つまみ：スクロールしても上に残る。押すと広げる／縮める、下へ引くと閉じる */

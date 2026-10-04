@@ -1,0 +1,164 @@
+// 遠くを見る部屋：探査機のカード（飛んでいるときの小さなカード・くわしいカード）と、距離のはしご
+// 書くのは curation/probes の出典つきの事実だけ。距離は distance.js の計算か、カードに書かれた公式の値
+import { esc, plainDateJa } from "../format.js";
+import { whenText, countdownText } from "../events.js";
+import { BODY_JA, kmJa, kmShortJa, lightSeconds, lightTimeJa, decadeLabel } from "./distance.js";
+
+const STATUS_JA = { operating: "運用中", ended: "運用終了", not_launched: "打ち上げ前" };
+const ext = `target="_blank" rel="noopener noreferrer"`;
+const src = (url) => (url ? ` <a class="src" href="${esc(url)}" ${ext}>出典</a>` : "");
+const asOfJa = (d) => (d ? `${Number(d.slice(5, 7))}月${Number(d.slice(8, 10))}日` : "");
+const factValue = (f) => (Array.isArray(f?.value) ? f.value.join("・") : (f?.value ?? ""));
+
+// ---------- Horizons の計算値の出典（JPL SSD の希望の形。2026-10-04 の返事） ----------
+// Solar System Dynamics. (Downloaded 2026, October 4). Horizons System. https://ssd.jpl.nasa.gov
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const ymd = (iso) => /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? "");
+// 「Horizons System」はページ（カードの source）へ、URL は SSD のサイトへつなぐ
+export function horizonsCredit(downloaded, page = "https://ssd.jpl.nasa.gov/horizons/") {
+  const m = ymd(downloaded);
+  const when = m ? `${m[1]}, ${MONTHS[Number(m[2]) - 1]} ${Number(m[3])}` : "";
+  return `Solar System Dynamics. (Downloaded ${when}). <a href="${esc(page)}" ${ext}>Horizons System</a>. <a href="https://ssd.jpl.nasa.gov" ${ext}>https://ssd.jpl.nasa.gov</a>`;
+}
+// 「10月4日に取得」（取得した日。世界時の日付）
+const downloadedJa = (iso) => {
+  const m = ymd(iso);
+  return m ? `${Number(m[2])}月${Number(m[3])}日` : "";
+};
+
+// 距離の1行：数字と、どうやって出した値か
+export function distanceParts(item) {
+  const d = item.dist;
+  if (!d) return { km: null, how: "準備中", lt: null };
+  if (d.method === "on_earth") return { km: null, how: "打ち上げ前（地上）", lt: null };
+  const lt = lightTimeJa(lightSeconds(d.km), { approx: d.approx });
+  if (d.method === "planet") return { km: kmJa(d.km), short: kmShortJa(d.km), how: `${BODY_JA[d.body]}までの距離（計算）`, lt };
+  if (d.method === "typical") return { km: `約 ${kmJa(d.km, 2)}`, short: `約${kmShortJa(d.km, 2)}`, how: "目安（その日の距離ではない）", lt };
+  if (d.method === "dated") return { km: `約 ${kmJa(d.km, 2)}`, short: `約${kmShortJa(d.km, 2)}`, how: `${plainDateJa(d.at)}の値`, lt };
+  // Horizons の計算値：3桁に丸めて「約」。取得した日を書く（通信で測った値ではない）
+  if (d.method === "horizons") return { km: `約 ${kmJa(d.km, 3)}`, short: `約${kmShortJa(d.km, 3)}`, how: `Horizons の計算値（${downloadedJa(d.downloaded)}に取得）`, lt };
+  // くらべる目安（月・太陽）と 1光日
+  return { km: kmJa(d.km), short: kmShortJa(d.km), how: item.kind === "light-day" ? "光が24時間で進む距離" : "いまの距離（計算）", lt };
+}
+
+// その探査機のこれからの予定（いちばん近いもの1つ）
+export const nextEvent = (item, upcoming) => upcoming.find((ev) => item.card?.events?.includes(ev.id)) ?? null;
+
+function eventLine(ev, now, { full = false } = {}) {
+  if (!ev) return "";
+  const left = countdownText(ev, now);
+  return `<span class="ev-when">${esc(whenText(ev, now, { full }))}</span>　${esc(ev.title.ja)}${left ? `<span class="ev-left">（${esc(left)}）</span>` : ""}`;
+}
+
+// ---------- 飛んでいるときのカード（通り過ぎた場所） ----------
+export function compactCardHtml(item, { now, upcoming, v1Event }) {
+  if (!item || item.kind === "earth") return "";
+  const dp = distanceParts(item);
+  const head = `<div class="fc-name">${esc(item.name)}${item.kind === "landmark" ? `<span class="fc-tag">くらべる目安</span>` : ""}</div>`;
+  const dist = `<div class="fc-dist"><span class="mono">${esc(dp.km)}</span> <span class="fc-how">${esc(dp.how)}</span></div>`;
+  const lt = dp.lt ? `<div class="fc-lt">光で <span class="mono">${esc(dp.lt)}</span></div>` : "";
+  if (item.kind === "landmark") {
+    const extra =
+      item.id === "sun"
+        ? `いま見ている太陽の光は、${esc(dp.lt)}前に太陽を出た光`
+        : `光なら ${esc(dp.lt)}で着く。ここまでは、ほとんど一瞬`;
+    return `${head}${dist}${lt}<p class="fc-line">${extra}</p>`;
+  }
+  if (item.kind === "light-day") {
+    const ev = v1Event
+      ? `<p class="fc-line">ボイジャー1号は ${eventWhenJa(v1Event, now)}、ここに届く予定（NASA）。人がつくったもので、はじめて</p>
+         <button type="button" class="fc-more" data-card="voyager-1">ボイジャー1号のカード</button>`
+      : "";
+    return `${head}${dist}${lt}${ev}`;
+  }
+  const ev = nextEvent(item, upcoming);
+  return `${head}${dist}${lt}
+    <p class="fc-line">${esc(item.card.location.value)}</p>
+    ${ev ? `<p class="fc-ev">${eventLine(ev, now)}</p>` : ""}
+    <button type="button" class="fc-more" data-card="${esc(item.id)}">カードを見る</button>`;
+}
+
+const eventWhenJa = (ev, now) => esc(whenText(ev, now));
+
+// ---------- くわしいカード（ダイアログの中身） ----------
+export function fullCardHtml(item, { now, upcoming }) {
+  const c = item.card;
+  const dp = distanceParts(item);
+  const d = c.distance;
+  const distBody = !item.dist
+    ? `<span class="k">いまの距離は、探査機の位置のデータを使えるようになってから出します（準備中）。</span>`
+    : d.method === "on_earth"
+      ? `<span class="k">打ち上げ前なので、まだ地上にいます。</span>`
+      : d.method === "horizons"
+        ? `<span class="mono">${esc(dp.km)}</span>　<span class="k">${esc(dp.how)}</span><br>光で <span class="mono">${esc(dp.lt)}</span>
+           <br><span class="k small">NASA ジェット推進研究所（JPL）の Horizons で、軌道から計算した値です。通信で測った値ではありません。${
+             d.supplier ? `軌道のもとのデータ：${esc(d.supplier)}（Horizons の説明による）。` : ""
+           }${d.note ? esc(d.note) : ""}</span>
+           <br><span class="k small credit">出典：${horizonsCredit(item.dist.downloaded, d.source)}</span>`
+        : `<span class="mono">${esc(dp.km)}</span>　<span class="k">${esc(dp.how)}</span><br>光で <span class="mono">${esc(dp.lt)}</span>${
+            d.note ? `<br><span class="k small">${esc(d.note)}</span>` : ""
+          }${src(d.source)}`;
+  const status = c.status;
+  const evs = upcoming.filter((ev) => c.events?.includes(ev.id));
+  const row = (label, body) => `<div class="pc-row"><dt>${label}</dt><dd>${body}</dd></div>`;
+  const note = (f) => (f?.note ? `<br><span class="k small">${esc(f.note)}</span>` : "");
+  return `
+    <div class="card-inner far-card-inner">
+      <button type="button" class="close mono" data-close aria-label="閉じる">×</button>
+      <p class="pc-kicker mono">PROBE</p>
+      <h2 class="pc-title" id="far-card-title">${esc(c.name.ja)}</h2>
+      <p class="pc-en">${esc(c.name.en)}</p>
+      <dl class="pc-facts">
+        ${row("いま", `${esc(c.location.value)}${src(c.location.source)}`)}
+        ${row("状態", `<strong>${esc(STATUS_JA[status.value] ?? status.value)}</strong><span class="k">（${asOfJa(status.as_of)}に確認）</span>${note(status)}${src(status.source)}`)}
+        ${row("距離", distBody)}
+        ${evs.length ? row("予定", evs.map((ev) => `<div class="pc-ev">${eventLine(ev, now, { full: true })}${src(ev.when.source)}</div>`).join("")) : ""}
+        ${row("任務", `${esc(c.mission.value)}${src(c.mission.source)}`)}
+        ${row("運用", `${esc(factValue(c.operator))}${note(c.operator)}${src(c.operator.source)}`)}
+        ${row("打ち上げ", `${plainDateJa(c.launch_date.value)}${note(c.launch_date)}${src(c.launch_date.source)}`)}
+      </dl>
+      <h3>公式のページ</h3>
+      <ul class="link-list">${c.official_links.map((l) => `<li><a href="${esc(l.url)}" ${ext}>${esc(l.label)}</a></li>`).join("")}</ul>
+      <p class="k small">内容は ${plainDateJa(c.updated_at)} に公式のページで確かめたものです。※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
+    </div>`;
+}
+
+// ---------- 距離のはしご（桁ごとの段。下へ行くほど10倍遠い） ----------
+export const LADDER_DECADES = [5, 6, 7, 8, 9, 10];
+
+export function ladderHtml(items, { now, upcoming, v1Event }) {
+  const placed = items.filter((it) => it.dist && it.dist.method !== "on_earth");
+  const onEarth = items.filter((it) => it.dist?.method === "on_earth");
+  const pending = items.filter((it) => it.kind === "probe" && !it.dist);
+  const itemButton = (it) => {
+    const dp = distanceParts(it);
+    const ev = it.kind === "probe" ? nextEvent(it, upcoming) : null;
+    const cls = it.kind === "probe" ? "probe" : it.kind;
+    const v1 = it.kind === "light-day" && v1Event ? `<span class="li-ev">ボイジャー1号が ${eventWhenJa(v1Event, now)} にここへ（NASA の予告）</span>` : "";
+    return `<li><button type="button" class="lad-item ${cls}" data-go="${esc(it.id)}">
+      <span class="li-name">${esc(it.name)}${it.kind === "landmark" ? `<span class="li-tag">くらべる目安</span>` : ""}</span>
+      <span class="li-meta"><span class="mono">${esc(dp.short)}</span>${it.kind === "probe" ? `<span class="li-how">${esc(dp.how)}</span>` : ""}<span class="li-lt">光で <span class="mono">${esc(dp.lt)}</span></span></span>
+      ${ev ? `<span class="li-ev">${eventLine(ev, now)}</span>` : ""}${v1}
+    </button></li>`;
+  };
+  const rungs = LADDER_DECADES.map((e) => {
+    const inRung = placed.filter((it) => Math.floor(Math.log10(it.dist.km)) === e).sort((a, b) => a.dist.km - b.dist.km);
+    return `<li class="rung"><span class="rung-scale mono">${esc(decadeLabel(e))}</span><ul class="rung-items">${inRung.map(itemButton).join("") || `<li class="rung-empty" aria-hidden="true">—</li>`}</ul></li>`;
+  }).join("");
+  const ground = onEarth.length
+    ? `<li class="rung ground"><span class="rung-scale">地上</span><ul class="rung-items">${onEarth
+        .map((it) => {
+          const ev = nextEvent(it, upcoming);
+          return `<li><button type="button" class="lad-item probe" data-card="${esc(it.id)}"><span class="li-name">${esc(it.name)}</span><span class="li-meta"><span class="li-how">打ち上げ前</span></span>${ev ? `<span class="li-ev">${eventLine(ev, now)}</span>` : ""}</button></li>`;
+        })
+        .join("")}</ul></li>`
+    : "";
+  const pend = pending.length
+    ? `<h3 class="far-h3">いまの距離は準備中</h3>
+       <p class="far-note">探査機の位置のデータを使えるようになってから、距離を出します。カードは見られます。</p>
+       <ul class="pending-list">${pending
+         .map((it) => `<li><button type="button" class="lad-item probe" data-card="${esc(it.id)}"><span class="li-name">${esc(it.name)}</span><span class="li-meta"><span class="li-how">${esc(it.card.location.value)}</span></span></button></li>`)
+         .join("")}</ul>`
+    : "";
+  return `<ol class="ladder">${ground}${rungs}</ol>${pend}`;
+}

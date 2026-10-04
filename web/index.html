@@ -61,12 +61,16 @@
       </div>
     </header>
 
-    <!-- 地球の上：表示切替（地球と一覧に出すもの）。押したものが光る -->
-    <div class="view-switch" id="view-switch" role="group" aria-label="地球と一覧に出すもの">
-      <button type="button" data-view="all" aria-pressed="true"><span class="vs-long">すべて</span><span class="vs-short" aria-hidden="true">すべて</span></button>
-      <button type="button" data-view="japan" aria-pressed="false"><span class="vs-long">日本のみ</span><span class="vs-short" aria-hidden="true">日本</span></button>
-      <button type="button" data-view="craft" aria-pressed="false"><span class="vs-long">衛星のみ</span><span class="vs-short" aria-hidden="true">衛星</span></button>
-      <button type="button" data-view="launches" aria-pressed="false"><span class="vs-long">打ち上げ予定のみ</span><span class="vs-short" aria-hidden="true">打ち上げ</span></button>
+    <div class="globe-top">
+      <!-- 地球の上：表示切替（地球と一覧に出すもの）。押したものが光る -->
+      <div class="view-switch" id="view-switch" role="group" aria-label="地球と一覧に出すもの">
+        <button type="button" data-view="all" aria-pressed="true"><span class="vs-long">すべて</span><span class="vs-short" aria-hidden="true">すべて</span></button>
+        <button type="button" data-view="japan" aria-pressed="false"><span class="vs-long">日本のみ</span><span class="vs-short" aria-hidden="true">日本</span></button>
+        <button type="button" data-view="craft" aria-pressed="false"><span class="vs-long">衛星のみ</span><span class="vs-short" aria-hidden="true">衛星</span></button>
+        <button type="button" data-view="launches" aria-pressed="false"><span class="vs-long">打ち上げ予定のみ</span><span class="vs-short" aria-hidden="true">打ち上げ</span></button>
+      </div>
+      <!-- 遠くを見る部屋（M7 v0）への入口。部屋の部品（js/far/）は、押したときに読む -->
+      <button type="button" id="far-open" class="far-open" aria-label="遠くを見る部屋へ（探査機までの距離と、光で届く時間）"><span class="far-open-label">遠くを見る</span><span class="chev" aria-hidden="true">›</span></button>
     </div>
 
     <!-- 地球の左上：いま表示しているもの -->
@@ -187,6 +191,8 @@
       <p>一覧の「予定」と上の「次の出来事」には、打ち上げや探査機の到着など、運用している機関（JAXA・NASA・ESA など）が公式に発表した日付だけを載せています。日本時間で書き、遅れたら「延期」とだけ書きます。出典は予定ごとに出しています。</p>
       <p>地球の上のひし形（◇）は射場の場所です。位置は打上げ計画書の座標で、打ち上がるまで軌道は描きません。</p>
       <p>「予定」の下の段の<b>世界の打ち上げ</b>には、点線の<b>「参考」の印</b>を付けています。世界の打ち上げ予定をまとめている有志の非営利団体 The Space Devs（宇宙機関・ロケット会社とは関係ありません）のデータで、公式の発表ではありません。6時間ごとに取り直していますが、遅れや変更がまだ入っていないことがあります。正確な情報は、各社・各機関の公式サイトで確かめてください。公式の予定と同じ打ち上げは、公式の方だけを出します。</p>
+      <h3>遠くを見る部屋</h3>
+      <p>地球の上の「遠くを見る」から入れます。地球のまわりの環の外にいる探査機までの距離と、光で届く時間を、桁ごとに見られます。月・太陽・水星・火星の位置は、部屋を開いた時刻からあなたのブラウザで計算しています。探査機の距離は、惑星にいるものは惑星までの距離、ほかは NASA ジェット推進研究所（JPL）の Horizons で軌道から計算した値（週に1回取得。出典：Solar System Dynamics, Horizons System, https://ssd.jpl.nasa.gov）や、NASA が発表した日付つきの値です。いまの距離を出せないものは「準備中」と書いています。<b>光より速く飛ぶ演出は作り話（ワープ）</b>です。</p>
       <h3>使っているもの</h3>
       <ul class="small">
         <li>軌道データ：USSPACECOM／Space-Track.org（公開の軌道要素。CelesTrak から取得）</li>
@@ -195,6 +201,8 @@
         <li>予定の日付と射場の位置：JAXA・NASA・ESA など、運用している機関の公式発表（予定ごとに出典を表示）</li>
         <li>世界の打ち上げ（参考）：<a href="https://thespacedevs.com/llapi" target="_blank" rel="noopener noreferrer">Launch Library 2（The Space Devs）</a>。6時間ごとに自動で取得し、日本時間と日本語の名前にして表示しています</li>
         <li>位置計算：satellite.js（MIT License）</li>
+        <li>月・太陽・惑星の位置（遠くを見る部屋）：Astronomy Engine（MIT License。<a href="vendor/astronomy-engine.LICENSE.txt" target="_blank" rel="noopener">ライセンス</a>）</li>
+        <li>探査機の情報（遠くを見る部屋）：NASA・ESA・JAXA など、運用している機関の公式ページ（カードごとに出典を表示）</li>
         <li>3D表示：globe.gl／three.js（MIT License）。中に入っているライブラリも含めた全文は <a href="vendor/THIRD_PARTY_NOTICES.txt" target="_blank" rel="noopener">ライセンス一覧</a></li>
         <li>地球の画像：NASA Blue Marble（昼）・Black Marble（夜の明かり）。昼と夜の境目は、観測時刻の太陽の位置から計算しています</li>
         <li>陸地の形：Natural Earth（パブリックドメイン）／world-atlas（ISC License）</li>
