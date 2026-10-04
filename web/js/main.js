@@ -991,7 +991,6 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   let farOpener = farBtn; // 閉じたら、押したボタンにフォーカスを戻す
   let far = null;
   let farLoading = null;
-  let farEntry = null; // 履歴の #far をどう作ったか：pushed（押した）／history（進む）／initial（#far つきで開いた）
   // 入口にマウスを乗せた・指で触れた・フォーカスしたときから読み始める（押してから開くまでを短くする）
   const loadFar = () =>
     (farLoading ??= import("./far/room.js")
@@ -1017,7 +1016,6 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       opener.removeAttribute("aria-busy");
     }
     roomOpen = true;
-    farEntry = entry;
     globe.pauseAnimation();
     far.open();
     if (entry === "pushed") history.pushState({ far: true }, "", "#far");
@@ -1025,11 +1023,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   function onFarClosed() {
     roomOpen = false;
     globe.resumeAnimation();
-    if (location.hash === "#far") {
-      if (farEntry === "initial") history.replaceState(null, "", location.pathname + location.search);
-      else history.back();
-    }
-    farEntry = null;
+    if (location.hash === "#far") history.back();
     farOpener.focus();
   }
   farBtn.addEventListener("click", () => openFar("pushed", farBtn));
@@ -1038,7 +1032,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     if (location.hash === "#far") openFar("history");
     else if (roomOpen) far.close();
   });
-  if (location.hash === "#far") openFar("initial");
+  // 最初に開いたときは、いつも地球の画面から（2026-10-05 オーナー）。部屋の中で再読み込みしたときや、
+  // #far つきのリンク・ブックマーク・ホーム画面から開いたときも、部屋へは飛ばずに #far を消す
+  if (location.hash === "#far") history.replaceState(null, "", location.pathname + location.search);
 
   // ---------- このアプリについて ----------
   const about = $("#about");
