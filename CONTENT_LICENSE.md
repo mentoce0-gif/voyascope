@@ -1,0 +1,30 @@
+# 文章のライセンス
+
+VOYASCOPE のプログラム（コード）は [MIT License](LICENSE) です。
+このファイルは、コード以外の**文章**の扱いを決めます。
+
+## CC BY 4.0 で使えるもの
+
+VOYASCOPE が自分で書いた文章は、[クリエイティブ・コモンズ 表示 4.0 国際（CC BY 4.0）](https://creativecommons.org/licenses/by/4.0/deed.ja) で使えます。
+使うときは「VOYASCOPE（151Me）」と、このリポジトリかページへのリンクを書いてください。
+
+- カードの説明文（`curation/` の、VOYASCOPE が書いた文）
+- 画面の説明文や、`docs/` の文章
+
+## CC BY 4.0 の対象ではないもの
+
+次のものは VOYASCOPE のものではないか、上のライセンスでは配りません。それぞれの出典・提供元の条件に従ってください。
+
+- **出典からの引用**（`research/` の原文の引用など）と、**事実そのもの**（数値・日付など。事実には著作権がない）
+- **画像**：地球（NASA）、機体の写真（NASA・気象庁・内閣府など。カードと「このアプリについて」に出典を記載）、ひまわり9号が撮った雲の画像（気象庁 気象衛星センター）
+- **データ**：軌道要素（USSPACECOM／Space-Track.org、CelesTrak から取得）、地名・陸地の形（Natural Earth）、みちびきの運用状況（内閣府）、探査機の距離（JPL Horizons の計算値。Solar System Dynamics）、世界の打ち上げ予定（Launch Library 2。The Space Devs）
+- **ライブラリ**：`web/vendor/` の各ライブラリ（一覧とライセンス文は [web/vendor/README.md](web/vendor/README.md)・[THIRD_PARTY_NOTICES.txt](web/vendor/THIRD_PARTY_NOTICES.txt)）
+- **ロゴ・ブランド画像と完成図**（`web/assets/brand/`、`docs/design/` の画像）：作者が権利を持ち、自由に使ってよいものとしては配りません
+- **AI の報告**（`research/`）：調べた記録として置いているもので、ライセンスの対象にしません
+
+## お願い
+
+VOYASCOPE は、宇宙に興味を持つきっかけになってほしいと思って作っています。
+**軍事目的や、誰かを傷つけたり虐げたりすることには使わないでください。**
+これは法的な禁止ではなく、作者からのお願いです（ライセンスの条件ではありません）。
+悪用が確認された場合は、このサイトの公開を停止します（[RULES.md](RULES.md) のルール5）。

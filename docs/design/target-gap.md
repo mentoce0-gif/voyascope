@@ -36,7 +36,7 @@
 | 項目 | 状態 | 備考 |
 |---|---|---|
 | 公開の方法 | ✅ public（2026-09-30 オーナー決定） | GitHub Pages は、無料プランでは **public リポジトリだけ**。private のまま公開するには GitHub Pro などの有料プランが要る（[GitHub Docs](https://docs.github.com/ja/pages/getting-started-with-github-pages/what-is-github-pages)、2026-09-30 確認） |
-| ライセンス | C5 未依頼 | `LICENSE` はライセンス確定まで作らない（CLAUDE.md） |
+| ライセンス | ✅ 確定（2026-10-04） | コードは MIT（`LICENSE`）、VOYASCOPE が書いた文章は CC BY 4.0（`CONTENT_LICENSE.md`）。軍事・加害に使わないことは作者のお願い |
 | CelesTrak のデータを自分のサイトで配ってよいか | ✅ C9 確認済み（2026-10-01） | 出典表示を条件に再配布できる |
 | 名前の確認 | ⏳ C6 | 米国の登録商標は該当なし。日本（J-PlatPat）は 10/5 にオーナーが確かめる。よほどのことがない限り VOYASCOPE のまま（2026-10-04 オーナー） |
 | ISS の数値・公式リンク・乗員 | ✅ C3・C4（2026-09-30）・C10（2026-10-03） | |
