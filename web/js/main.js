@@ -140,6 +140,7 @@ function loadLater() {
 // ---------- 観測画面 ----------
 function startApp({ craft, prefectures, events, launchesData, later }) {
   const clock = new SimClock();
+  let roomOpen = false; // 遠くを見る部屋を開いているか
 
   // 機体ごとの準備（軌道・家族・地球の上の印）
   for (const c of craft) {
@@ -946,6 +947,59 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   }
   updateTonight();
 
+  // ---------- 遠くを見る部屋（M7 v0）：探査機までの距離と、光で届く時間 ----------
+  // 部屋の部品（js/far/・天体の位置の計算）は、はじめて開くときに読む（起動の読み込み量に入れない）。
+  // 開いているあいだは地球の描画を止める。ブラウザの「戻る」で閉じられるように、履歴に #far を足す
+  const farBtn = $("#far-open");
+  const farLabel = farBtn.querySelector(".far-open-label");
+  let far = null;
+  let farLoading = null;
+  let farEntry = null; // 履歴の #far をどう作ったか：pushed（押した）／history（進む）／initial（#far つきで開いた）
+  // 入口にマウスを乗せた・指で触れた・フォーカスしたときから読み始める（押してから開くまでを短くする）
+  const loadFar = () =>
+    (farLoading ??= import("./far/room.js")
+      .then(({ createFarRoom }) => createFarRoom({ events, onClose: onFarClosed }))
+      .catch((e) => {
+        farLoading = null; // もう一度押したら読み直す
+        throw e;
+      }));
+  for (const type of ["pointerenter", "focus", "touchstart"]) farBtn.addEventListener(type, () => loadFar().catch(() => {}), { passive: true, once: true });
+  async function openFar(entry) {
+    if (roomOpen || farBtn.getAttribute("aria-busy") === "true") return;
+    farBtn.setAttribute("aria-busy", "true");
+    try {
+      far = await loadFar();
+    } catch (e) {
+      console.error(e);
+      farLabel.textContent = "読み込めませんでした";
+      setTimeout(() => (farLabel.textContent = "遠くを見る"), 4000);
+      return;
+    } finally {
+      farBtn.removeAttribute("aria-busy");
+    }
+    roomOpen = true;
+    farEntry = entry;
+    globe.pauseAnimation();
+    far.open();
+    if (entry === "pushed") history.pushState({ far: true }, "", "#far");
+  }
+  function onFarClosed() {
+    roomOpen = false;
+    globe.resumeAnimation();
+    if (location.hash === "#far") {
+      if (farEntry === "initial") history.replaceState(null, "", location.pathname + location.search);
+      else history.back();
+    }
+    farEntry = null;
+    farBtn.focus();
+  }
+  farBtn.addEventListener("click", () => openFar("pushed"));
+  addEventListener("popstate", () => {
+    if (location.hash === "#far") openFar("history");
+    else if (roomOpen) far.close();
+  });
+  if (location.hash === "#far") openFar("initial");
+
   // ---------- このアプリについて ----------
   const about = $("#about");
   about.addEventListener("click", (e) => {
@@ -1002,6 +1056,11 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   syncControls();
 
   const tick = (t) => {
+    // 遠くを見る部屋を開いているあいだは、地球の計算と描画を止める（部屋の動きを軽くするため）
+    if (roomOpen) {
+      requestAnimationFrame(tick);
+      return;
+    }
     if (clock.clampToTimeline()) syncControls();
     const now = clock.now();
     // 選んだ機体の軌道の線：選び直したとき、または観測時刻で20秒ごと

@@ -7,6 +7,7 @@
 // - 乗員：その機体に向かったチーム（teams/ の destination）と、その飛行士（astronauts/）を1つのファイルにまとめる
 //   いま乗っているかどうか（打ち上げ済み・未帰還）はアプリ側で判断する
 // - 予定：curation/events を1つのファイルにまとめる。過ぎたかどうか・並べ替えはアプリ側でする
+// - 探査機（遠くを見る部屋）：curation/probes を1つのファイルにまとめる。距離の計算と並べ替えはアプリ側でする
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -80,6 +81,16 @@ const events = existsSync(eventsDir)
   : [];
 const eventsData = { $comment: "scripts/sync-web-data.mjs が curation/events から作る。手で編集しない。", events };
 outputs.push(["web/data/events.json", JSON.stringify(eventsData, null, 2) + "\n"]);
+// 遠くを見る部屋の探査機。出典を確認した curation/probes だけを使う（部屋を開いたときに読む）
+const probesDir = "curation/probes";
+const probes = existsSync(probesDir)
+  ? readdirSync(probesDir)
+      .filter((f) => f.endsWith(".json"))
+      .sort()
+      .map((f) => readJson(join(probesDir, f)))
+  : [];
+const probesData = { $comment: "scripts/sync-web-data.mjs が curation/probes から作る。手で編集しない。", probes };
+outputs.push(["web/data/probes.json", JSON.stringify(probesData, null, 2) + "\n"]);
 // 今夜の通過（県単位）に使う代表地点
 outputs.push(["web/data/prefectures.json", readFileSync("config/prefectures.json", "utf8")]);
 

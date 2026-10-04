@@ -31,6 +31,12 @@
         "data/land-minimap.json",
         "assets/craft/*"
       ]
+    },
+    {
+      "id": "far",
+      "label": "遠くを見る部屋を開いたときに読むもの（部屋の部品・天体の位置の計算・探査機のカード・Horizons の距離の表）",
+      "max_kb": 60,
+      "files": ["js/far/*.js", "css/far.css", "vendor/astronomy.min.js", "data/probes.json", "data/horizons.json"]
     }
   ],
   "max_file_kb": 600,
