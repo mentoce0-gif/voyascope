@@ -1,11 +1,12 @@
 // 遠くを見る部屋（M7 v0）：光になって飛ぶ（D）＋その下に距離のはしご（A）。docs/design/far-room-feel.md
 // 地球の画面の「遠くを見る」を押したときに main.js が読み込む（起動の読み込み量に入れない）。
-// 距離：月・太陽・惑星は開いた時刻の位置からブラウザで計算。探査機はカードの書き方どおり（distance.js）
+// 距離：月・太陽・惑星は開いた時刻の位置からブラウザで計算。探査機はカードの書き方どおり（distance.js）。
+// Horizons の計算値は、週に1回取った表（data/horizons.json）を読む。読めなければ、その探査機は「準備中」のまま
 import { dateTimeShortJa } from "../format.js";
 import { upcomingEvents } from "../events.js";
 import { landmarks, probeDistance } from "./distance.js";
 import { createFly } from "./fly.js";
-import { compactCardHtml, fullCardHtml, ladderHtml } from "./probe-card.js";
+import { compactCardHtml, fullCardHtml, ladderHtml, horizonsCredit } from "./probe-card.js";
 
 const COLORS = { moon: "#c9d3e0", sun: "#ffd27a" };
 const REFRESH_MS = 60000; // 開いているあいだ、1分ごとに距離を計算し直す
@@ -29,8 +30,18 @@ async function loadProbes() {
   return (await res.json()).probes ?? [];
 }
 
+// Horizons の表。なくても部屋は開く（Horizons の探査機が準備中になるだけ）
+async function loadHorizons() {
+  try {
+    const res = await fetch("data/horizons.json", { cache: "no-cache" });
+    return res.ok ? await res.json() : null;
+  } catch {
+    return null;
+  }
+}
+
 // 部屋に並べるもの：くらべる目安（月・太陽・1光日）と探査機。距離のないもの（準備中）は dist: null
-export function roomItems(probes, now) {
+export function roomItems(probes, now, horizons = null) {
   const marks = landmarks(now).map((m) => ({
     id: m.id,
     kind: m.kind,
@@ -38,7 +49,7 @@ export function roomItems(probes, now) {
     color: COLORS[m.id],
     dist: { km: m.km, method: m.kind, approx: false },
   }));
-  const craft = probes.map((card) => ({ id: card.id, kind: "probe", name: card.name.ja, card, dist: probeDistance(card, now) }));
+  const craft = probes.map((card) => ({ id: card.id, kind: "probe", name: card.name.ja, card, dist: probeDistance(card, now, horizons) }));
   return [...marks, ...craft];
 }
 
@@ -49,7 +60,7 @@ export const flyStops = (items) => [
 ];
 
 export async function createFarRoom({ events = [], onClose = () => {} } = {}) {
-  const [probes] = await Promise.all([loadProbes(), loadCss("css/far.css")]);
+  const [probes, horizons] = await Promise.all([loadProbes(), loadHorizons(), loadCss("css/far.css")]);
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const coarse = matchMedia("(pointer: coarse)").matches;
 
@@ -83,8 +94,9 @@ export async function createFarRoom({ events = [], onClose = () => {} } = {}) {
         <h3 id="far-about-title" class="far-h3">距離の出し方</h3>
         <ul class="far-about-list">
           <li><b>月・太陽・水星・火星</b>：この部屋を開いた時刻の位置から、あなたのブラウザで計算しています（Astronomy Engine）。1分ごとに計算し直します。</li>
-          <li><b>惑星にいる探査機</b>は、その惑星までの距離です（ベピコロンボは水星に着く途中なので目安）。</li>
-          <li><b>ジェイムズ・ウェッブ宇宙望遠鏡</b>は NASA の説明の目安（約150万km）、<b>ニュー・ホライズンズ</b>は NASA が発表した日付つきの値です。いまの距離ではありません。</li>
+          <li><b>火星・木星にいる探査機</b>は、その惑星までの距離です。</li>
+          <li><b>ボイジャー1号・2号、パーカー・ソーラー・プローブ、はやぶさ２、ジェイムズ・ウェッブ宇宙望遠鏡、ベピコロンボ</b>は、NASA ジェット推進研究所（JPL）の Horizons で、軌道から計算した値です。週に1回、6週間ぶんの表を取って、この部屋を開いた時刻の値にしています。通信で測った値ではありません。軌道のもとのデータを出した機関（ESA・JAXA など）は、カードに書いています。<br><span class="far-credit">出典：<span data-far-credit>Solar System Dynamics. Horizons System. https://ssd.jpl.nasa.gov</span></span></li>
+          <li><b>ニュー・ホライズンズ</b>は、NASA が発表した日付つきの値です。いまの距離ではありません。</li>
           <li><b>1光日</b>は、光が24時間で進む距離です（秒速 299,792.458 km × 86,400 秒）。</li>
           <li>探査機の「いま」「状態」「任務」は、運用している機関の公式ページで確かめたものです。カードの「出典」から元のページを開けます。</li>
         </ul>
@@ -95,6 +107,9 @@ export async function createFarRoom({ events = [], onClose = () => {} } = {}) {
   document.body.append(room);
 
   const $ = (sel) => room.querySelector(sel);
+  // 「距離の出し方」の出典に、取得した日を入れる（いちばん新しい取得）
+  const downloaded = Object.values(horizons?.probes ?? {}).map((p) => p.downloaded).filter(Boolean).sort().pop();
+  if (downloaded) $("[data-far-credit]").innerHTML = horizonsCredit(downloaded);
   const flyEl = $(".far-fly");
   const ladderEl = $(".far-ladder");
   const cardDialog = $(".far-card-dialog");
@@ -139,7 +154,7 @@ export async function createFarRoom({ events = [], onClose = () => {} } = {}) {
 
   function refresh() {
     now = new Date();
-    items = roomItems(probes, now);
+    items = roomItems(probes, now, horizons);
     upcoming = upcomingEvents(events, now);
     v1Event = upcoming.find((ev) => ev.id === "voyager-1-one-light-day") ?? null;
     if (current) current = items.find((it) => it.id === current.id) ?? null;

@@ -226,3 +226,8 @@ dialog.far-room::backdrop { background: var(--navy-900); }
 @media (prefers-reduced-motion: reduce) {
   .fly-card, .fly-hint { transition: none; }
 }
+
+/* Horizons の出典（JPL SSD の希望の形）：長い URL が画面からはみ出さないように折り返す */
+.far-credit, .far-card-inner .credit { overflow-wrap: anywhere; }
+.far-credit { display: inline-block; margin-top: 4px; font-size: 0.85em; color: var(--text-dim); }
+.far-credit a, .far-card-inner .credit a { color: var(--mint); }

@@ -31,7 +31,12 @@
     "as_of": "2026-10-03"
   },
   "distance": {
-    "method": "pending"
+    "method": "horizons",
+    "horizons_id": "-31",
+    "datasheet_quotes": ["Refit of tracking data spanning 1981-1992", "Note there has been no new tracking data possible since 1992."],
+    "source": "https://ssd.jpl.nasa.gov/horizons/",
+    "as_of": "2026-10-04",
+    "note": "Horizons の軌道は、1981〜1992年の追跡データから求めたもの。それより後は予測（Horizons の説明）"
   },
   "events": ["voyager-1-one-light-day"],
   "official_links": [
@@ -41,5 +46,5 @@
       "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
     }
   ],
-  "updated_at": "2026-10-03"
+  "updated_at": "2026-10-04"
 }

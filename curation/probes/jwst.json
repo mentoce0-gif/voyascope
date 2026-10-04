@@ -32,15 +32,15 @@
     "as_of": "2026-10-03"
   },
   "distance": {
-    "method": "typical",
-    "value": 1500000,
-    "unit": "km",
-    "source": "https://science.nasa.gov/mission/webb/",
-    "as_of": "2026-10-03",
-    "note": "L2 までの目安（NASA の説明の値）。その日の距離ではない"
+    "method": "horizons",
+    "horizons_id": "-170",
+    "supplier": "NASA ゴダード飛行力学施設（FDF）",
+    "datasheet_quotes": ["reconstructed trajectory solutions (as-flown) from Goddard Flight Dynamics Facility (FDF)"],
+    "source": "https://ssd.jpl.nasa.gov/horizons/",
+    "as_of": "2026-10-04"
   },
   "official_links": [
     { "label": "NASA「James Webb Space Telescope」", "url": "https://science.nasa.gov/mission/webb/" }
   ],
-  "updated_at": "2026-10-03"
+  "updated_at": "2026-10-04"
 }

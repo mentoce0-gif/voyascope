@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://voyascope.local/schema/probe.schema.json",
   "title": "探査機カード（遠くを見る部屋）",
-  "$comment": "地球の輪の外にいる探査機。創作の項目（キャッチコピーなど）は持たない。距離は推測で書かない：惑星の位置からブラウザで計算するもの・公式の目安の値・日付つきの公式の値のどれか。どれもなければ pending（準備中）。",
+  "$comment": "地球の輪の外にいる探査機。創作の項目（キャッチコピーなど）は持たない。距離は推測で書かない：惑星の位置からブラウザで計算するもの・公式の目安の値・日付つきの公式の値・NASA JPL の Horizons の計算値のどれか。どれもなければ pending（準備中）。",
   "type": "object",
   "required": ["id", "name", "operator", "launch_date", "status", "location", "mission", "distance", "official_links", "updated_at"],
   "additionalProperties": false,
@@ -46,15 +46,16 @@
     },
     "distance": {
       "type": "object",
-      "description": "地球からの距離の出し方。planet=いる惑星までの距離をブラウザで計算 / typical=公式の目安の値（その日の距離ではない） / dated=日付つきの公式の値 / pending=準備中 / on_earth=打ち上げ前で地上にいる",
+      "description": "地球からの距離の出し方。planet=いる惑星までの距離をブラウザで計算 / typical=公式の目安の値（その日の距離ではない） / dated=日付つきの公式の値 / horizons=NASA JPL の Horizons の計算値（週に1回取得して web/data/horizons.json に置く） / pending=準備中 / on_earth=打ち上げ前で地上にいる",
       "required": ["method"],
       "properties": {
-        "method": { "enum": ["planet", "typical", "dated", "pending", "on_earth"] }
+        "method": { "enum": ["planet", "typical", "dated", "horizons", "pending", "on_earth"] }
       },
       "allOf": [
         { "if": { "properties": { "method": { "const": "planet" } } }, "then": { "$ref": "#/$defs/planetDistance" } },
         { "if": { "properties": { "method": { "const": "typical" } } }, "then": { "$ref": "#/$defs/typicalDistance" } },
         { "if": { "properties": { "method": { "const": "dated" } } }, "then": { "$ref": "#/$defs/datedDistance" } },
+        { "if": { "properties": { "method": { "const": "horizons" } } }, "then": { "$ref": "#/$defs/horizonsDistance" } },
         { "if": { "properties": { "method": { "enum": ["pending", "on_earth"] } } }, "then": { "$ref": "#/$defs/noDistance" } }
       ]
     },
@@ -109,6 +110,22 @@
         "value": { "type": "number", "exclusiveMinimum": 0 },
         "unit": { "const": "km" },
         "at": { "$ref": "common.schema.json#/$defs/date" },
+        "source": { "$ref": "common.schema.json#/$defs/source" },
+        "as_of": { "$ref": "common.schema.json#/$defs/date" },
+        "note": { "type": "string", "maxLength": 80 }
+      }
+    },
+    "horizonsDistance": {
+      "type": "object",
+      "required": ["method", "horizons_id", "source", "as_of"],
+      "additionalProperties": false,
+      "dependentRequired": { "supplier": ["datasheet_quotes"] },
+      "description": "NASA JPL の Horizons（Solar System Dynamics）で計算した地球からの距離。JPL SSD の了承（2026-10-04。research/verification/2026-10-03-c14.md）の形で出す：丸めた値・「Horizons の計算値」・取得日・出典。horizons_id は Horizons の番号。supplier は、Horizons の説明（datasheet）に書かれた、軌道のもとのデータを出した機関（書かれているときだけ）。datasheet_quotes は、supplier や note のもとにした説明の原文（取るたびに、まだ説明にあるかを scripts/fetch-horizons.mjs が確かめる）",
+      "properties": {
+        "method": { "const": "horizons" },
+        "horizons_id": { "type": "string", "pattern": "^-?[0-9]+$" },
+        "supplier": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "datasheet_quotes": { "type": "array", "minItems": 1, "maxItems": 5, "items": { "type": "string", "minLength": 8, "maxLength": 200 } },
         "source": { "$ref": "common.schema.json#/$defs/source" },
         "as_of": { "$ref": "common.schema.json#/$defs/date" },
         "note": { "type": "string", "maxLength": 80 }

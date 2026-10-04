@@ -32,11 +32,12 @@
     "as_of": "2026-10-03"
   },
   "distance": {
-    "method": "planet",
-    "body": "Mercury",
-    "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
-    "as_of": "2026-10-03",
-    "note": "水星に着く途中なので、水星までの距離を目安として出す"
+    "method": "horizons",
+    "horizons_id": "-121",
+    "supplier": "ESA",
+    "datasheet_quotes": ["Trajectory from ESA."],
+    "source": "https://ssd.jpl.nasa.gov/horizons/",
+    "as_of": "2026-10-04"
   },
   "events": ["bepicolombo-mercury-orbit", "bepicolombo-mio-separation"],
   "official_links": [
@@ -46,5 +47,5 @@
     },
     { "label": "JAXA 水星磁気圏探査機「みお」", "url": "https://mio.isas.jaxa.jp/mission/" }
   ],
-  "updated_at": "2026-10-03"
+  "updated_at": "2026-10-04"
 }
