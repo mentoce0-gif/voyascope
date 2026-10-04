@@ -1,0 +1,49 @@
+{
+  "id": "parker-solar-probe",
+  "name": {
+    "ja": "パーカー・ソーラー・プローブ",
+    "en": "Parker Solar Probe"
+  },
+  "operator": {
+    "value": ["NASA", "Johns Hopkins APL"],
+    "source": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/",
+    "as_of": "2026-10-03",
+    "note": "ジョンズ・ホプキンズ大学の応用物理研究所（APL）が、NASA のために運用している"
+  },
+  "launch_date": {
+    "value": "2018-08-12",
+    "source": "https://science.nasa.gov/mission/parker-solar-probe/",
+    "as_of": "2026-10-03"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/",
+    "as_of": "2026-10-03",
+    "note": "2026年9月7日に「正常に動いている」という信号が届いた"
+  },
+  "location": {
+    "value": "太陽のまわりを回っている。2026年9月の最接近では、太陽から約610万kmまで近づき、時速約69万kmで飛んだ",
+    "source": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/",
+    "as_of": "2026-10-03",
+    "note": "NASA の値は 3.8 million miles・時速 430,000 miles"
+  },
+  "mission": {
+    "value": "「太陽にさわる」ための探査機。2021年に、はじめてコロナ（太陽の上の方の大気）の中を飛んだ",
+    "source": "https://science.nasa.gov/mission/parker-solar-probe/",
+    "as_of": "2026-10-03"
+  },
+  "distance": {
+    "method": "horizons",
+    "horizons_id": "-96",
+    "source": "https://ssd.jpl.nasa.gov/horizons/",
+    "as_of": "2026-10-04"
+  },
+  "official_links": [
+    { "label": "NASA「Parker Solar Probe」", "url": "https://science.nasa.gov/mission/parker-solar-probe/" },
+    {
+      "label": "NASA のブログ（2026年9月10日）",
+      "url": "https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/"
+    }
+  ],
+  "updated_at": "2026-10-04"
+}

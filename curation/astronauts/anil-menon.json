@@ -1,0 +1,17 @@
+{
+  "id": "anil-menon",
+  "name": {
+    "ja": "アニル・メノン",
+    "en": "Anil Menon"
+  },
+  "agency": {
+    "value": "NASA",
+    "source": "https://www.nasa.gov/humans-in-space/astronauts/nasa-astronaut-anil-menon/",
+    "as_of": "2026-10-03"
+  },
+  "official_profile_url": "https://www.nasa.gov/humans-in-space/astronauts/nasa-astronaut-anil-menon/",
+  "teams": [
+    "soyuz-ms-29"
+  ],
+  "updated_at": "2026-10-03"
+}

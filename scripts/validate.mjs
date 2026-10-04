@@ -11,6 +11,8 @@ const kinds = [
   { dir: "spacecraft", schema: "spacecraft.schema.json" },
   { dir: "teams", schema: "team.schema.json" },
   { dir: "astronauts", schema: "astronaut.schema.json" },
+  { dir: "events", schema: "event.schema.json" },
+  { dir: "probes", schema: "probe.schema.json" },
 ];
 
 const loadJson = (path) => JSON.parse(readFileSync(path, "utf8"));
@@ -18,7 +20,7 @@ const ajv = new Ajv2020({ allErrors: true, strict: false });
 ajv.addSchema(loadJson("schema/common.schema.json"), "common.schema.json");
 
 const errors = [];
-const ids = { spacecraft: new Set(), teams: new Set(), astronauts: new Set() };
+const ids = { spacecraft: new Set(), teams: new Set(), astronauts: new Set(), events: new Set(), probes: new Set() };
 const cards = [];
 
 for (const kind of kinds) {
@@ -40,6 +42,11 @@ for (const kind of kinds) {
         // 「非公開」側の分岐のエラーは出典エラーと重複するので出さない
         if (err.schemaPath.includes("/oneOf/1/")) continue;
         const where = err.instancePath || "(ルート)";
+        // 予定の日時は4つの書き方のどれか。どの書き方とも合わないときは1行にまとめる
+        if (kind.dir === "events" && where.startsWith("/when/value")) {
+          errors.push(`${path} /when/value: 日時の書き方が違います（at：時刻まで（UTC、末尾 Z）／date／from と to／month のどれか1つ）`);
+          continue;
+        }
         let hint = err.message;
         if (err.keyword === "pattern" && err.params.pattern === "^https://") {
           hint = "出典URLがありません（推測で書かない）";
@@ -81,6 +88,32 @@ for (const { kind, path, card } of cards) {
       if (!ids.teams.has(team)) {
         errors.push(`${path}: teams "${team}" が teams/ にありません`);
       }
+    }
+  }
+  if (kind === "events") {
+    // 形は合っていても、ありえない日付（2月30日など）や逆向きの幅を落とす
+    const v = card.when?.value ?? {};
+    const realDay = (s) => {
+      const d = new Date(`${s}T00:00:00Z`);
+      return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+    };
+    const days = [v.date, v.from, v.to, v.month && `${v.month}-01`, card.window_end?.value].filter(Boolean);
+    for (const d of days) if (!realDay(d)) errors.push(`${path}: "${d}" は日付として読めません`);
+    if (v.at && Number.isNaN(Date.parse(v.at))) errors.push(`${path}: when "${v.at}" は日時として読めません`);
+    if (v.from && v.to && v.from > v.to) errors.push(`${path}: when の from が to より後になっています`);
+    if (card.kind === "launch" && !card.site) errors.push(`${path}: 打ち上げ（launch）には射場（site）が要ります`);
+  }
+  if (kind === "probes") {
+    for (const ev of card.events ?? []) {
+      if (!ids.events.has(ev)) errors.push(`${path}: events "${ev}" が events/ にありません`);
+    }
+    const realDay = (s) => !Number.isNaN(Date.parse(`${s}T00:00:00Z`)) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s;
+    for (const d of [card.launch_date?.value, card.distance?.at].filter(Boolean)) {
+      if (!realDay(d)) errors.push(`${path}: "${d}" は日付として読めません`);
+    }
+    // 打ち上げ前（not_launched）なのに、地上にいる以外の距離を出していないか
+    if (card.status?.value === "not_launched" && card.distance?.method !== "on_earth") {
+      errors.push(`${path}: 打ち上げ前（not_launched）の距離は on_earth にします`);
     }
   }
 }

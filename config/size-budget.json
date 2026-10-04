@@ -1,0 +1,44 @@
+{
+  "$comment": "読み込み量の上限（KB）。スマホで重くならないように scripts/check-size.mjs が CI で確かめる。文字のファイル（html・css・js・json）は gzip 後、画像はそのままの大きさで数える。パスは web/ から。* は1階層だけ。@craft-index は data/craft-index.json が指すファイル（カード・軌道・乗員・運用状況）。Google Fonts（外のサイト）は数えていない。上限を上げるときは、理由を PR に書く（docs/tasks/012-mobile-weight.md）",
+  "groups": [
+    {
+      "id": "boot",
+      "label": "「観測を開始」を押せるまでに読むもの",
+      "max_kb": 850,
+      "files": [
+        "index.html",
+        "css/style.css",
+        "js/*.js",
+        "vendor/globe.gl.min.js",
+        "vendor/satellite.min.js",
+        "assets/brand/*.webp",
+        "assets/earth/hero-1600.webp",
+        "data/craft-index.json",
+        "@craft-index",
+        "data/prefectures.json",
+        "data/events.json",
+        "data/launches.json"
+      ]
+    },
+    {
+      "id": "later",
+      "label": "あとから読むもの（地球の画像・地名・ミニ地図の陸地・機体の画像）",
+      "max_kb": 820,
+      "files": [
+        "assets/earth/day-2048.jpg",
+        "assets/earth/night-2048.jpg",
+        "data/places.json",
+        "data/land-minimap.json",
+        "assets/craft/*"
+      ]
+    },
+    {
+      "id": "far",
+      "label": "遠くを見る部屋を開いたときに読むもの（部屋の部品・3D の旅と探査機の模型・three.js r128・天体の位置の計算・探査機のカード・Horizons の距離の表）",
+      "max_kb": 230,
+      "files": ["js/far/*.js", "css/far.css", "vendor/three-r128.min.js", "vendor/astronomy.min.js", "data/probes.json", "data/horizons.json"]
+    }
+  ],
+  "max_file_kb": 600,
+  "preload": ["vendor/globe.gl.min.js"]
+}

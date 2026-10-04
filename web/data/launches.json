@@ -1,0 +1,243 @@
+{
+  "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
+  "source": "https://thespacedevs.com/llapi",
+  "source_label": "Launch Library 2（The Space Devs）",
+  "fetched_at": "2026-10-04T05:51:35.464Z",
+  "days_ahead": 45,
+  "launches": [
+    {
+      "id": "da43dc2c-00af-4cc1-8ef1-90a60b2eb9e5",
+      "net": "2026-10-05T08:17:00.000Z",
+      "precision": "min",
+      "window_end": null,
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-03T21:02:07Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "SDA Tranche 1 Transport Layer A",
+        "placeholder": false,
+        "type": "Government/Top Secret",
+        "type_ja": "政府（内容は非公開）",
+        "orbit": "Polar Orbit",
+        "orbit_ja": "極軌道"
+      },
+      "site": {
+        "location_id": 11,
+        "name": "Vandenberg SFB, CA, USA",
+        "ja": "ヴァンデンバーグ宇宙軍基地",
+        "short": "ヴァンデンバーグ",
+        "pad": "Space Launch Complex 4E",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 34.632,
+          "lng": -120.611
+        }
+      }
+    },
+    {
+      "id": "e0741415-6c63-4236-9736-24a6c04485bc",
+      "net": "2026-10-07T03:23:00.000Z",
+      "precision": "min",
+      "window_end": "2026-10-07T04:23:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-08-27T02:42:27Z",
+      "rocket": {
+        "name": "Nuri",
+        "full_name": "KSLV-2 Nuri"
+      },
+      "provider": {
+        "name": "Korea Aerospace Research Institute",
+        "ja": "韓国航空宇宙研究院（KARI）"
+      },
+      "mission": {
+        "name": "NeonSat-2 to 6",
+        "placeholder": false,
+        "type": "Earth Science",
+        "type_ja": "地球観測",
+        "orbit": "Sun-Synchronous Orbit",
+        "orbit_ja": "太陽同期軌道"
+      },
+      "site": {
+        "location_id": 9,
+        "name": "Naro Space Center, South Korea",
+        "ja": "羅老宇宙センター",
+        "short": "羅老",
+        "pad": "LC-2",
+        "country": "KOR",
+        "country_ja": "韓国",
+        "position": {
+          "lat": 34.431867,
+          "lng": 127.535069
+        }
+      }
+    },
+    {
+      "id": "a1bb0984-19d4-4b47-9bba-706d225573e2",
+      "net": "2026-10-09T19:25:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-10-09T19:49:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-09-30T02:25:58Z",
+      "rocket": {
+        "name": "Long March 12",
+        "full_name": "Long March 12"
+      },
+      "provider": {
+        "name": "China Aerospace Science and Technology Corporation",
+        "ja": "中国航天科技集団（CASC）"
+      },
+      "mission": {
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
+      },
+      "site": {
+        "location_id": 8,
+        "name": "Wenchang Space Launch Site, People's Republic of China",
+        "ja": "文昌宇宙発射場",
+        "short": "文昌",
+        "pad": "Commercial LC-2",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 19.59755,
+          "lng": 110.936481
+        }
+      }
+    },
+    {
+      "id": "97c6f5e1-299e-4652-b72d-9618ac047076",
+      "net": "2026-10-10T23:00:00.000Z",
+      "precision": "min",
+      "window_end": "2026-10-11T03:00:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-09-30T23:22:54Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "Starlink Group 15-25",
+        "placeholder": false,
+        "type": "Communications",
+        "type_ja": "通信",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 11,
+        "name": "Vandenberg SFB, CA, USA",
+        "ja": "ヴァンデンバーグ宇宙軍基地",
+        "short": "ヴァンデンバーグ",
+        "pad": "Space Launch Complex 4E",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 34.632,
+          "lng": -120.611
+        }
+      }
+    },
+    {
+      "id": "bf2c3027-a314-403e-a416-2bfd5d165ad1",
+      "net": "2026-10-13T10:33:44.000Z",
+      "precision": "sec",
+      "window_end": null,
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-03T21:02:08Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "Dragon CRS-2 SpX-35",
+        "placeholder": false,
+        "type": "Resupply",
+        "type_ja": "物資の補給",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 12,
+        "name": "Cape Canaveral SFS, FL, USA",
+        "ja": "ケープカナベラル宇宙軍基地",
+        "short": "ケープカナベラル",
+        "pad": "Space Launch Complex 40",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 28.56194122,
+          "lng": -80.57735736
+        }
+      }
+    },
+    {
+      "id": "69ebbcd2-b257-4070-9ef9-21e7d1f8a883",
+      "net": "2026-10-19T19:41:03.000Z",
+      "precision": "sec",
+      "window_end": null,
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-08-20T21:04:48Z",
+      "rocket": {
+        "name": "H3-24",
+        "full_name": "H3-24"
+      },
+      "provider": {
+        "name": "Mitsubishi Heavy Industries",
+        "ja": "三菱重工業"
+      },
+      "mission": {
+        "name": "Martian Moon eXplorer (MMX)",
+        "placeholder": false,
+        "type": "Planetary Science",
+        "type_ja": "惑星探査",
+        "orbit": "Mars Orbit",
+        "orbit_ja": "火星"
+      },
+      "site": {
+        "location_id": 26,
+        "name": "Tanegashima Space Center, Japan",
+        "ja": "種子島宇宙センター",
+        "short": "種子島",
+        "pad": "Yoshinobu Launch Complex LP-2",
+        "country": "JPN",
+        "country_ja": "日本",
+        "position": {
+          "lat": 30.400938,
+          "lng": 130.97564
+        }
+      }
+    }
+  ]
+}

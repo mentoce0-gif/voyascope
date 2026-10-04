@@ -2,6 +2,7 @@
 import { esc, numberJa, latJa, lngJa, dateTimeShortJa, plainDateJa } from "./format.js";
 import { RINGS, ringOf } from "./scale.js";
 import { summarizeStatus } from "./status.js";
+import { himawariImage, hmJstOf, HIMAWARI_PAGE } from "./himawari.js";
 
 const CLASS_LABELS = {
   crewed_station: "有人宇宙基地",
@@ -74,13 +75,18 @@ function approxNumber(fact) {
 const launchYear = (fact) => /^(\d{4})/.exec(fact?.value ?? "")?.[1];
 const nw = (t) => `<span class="nw">${t}</span>`;
 
+// 帰還日が来たか。予定が「2026-10」（月まで）や「2027」（年まで）のときは、その月・年が終わるまで滞在中とみなす
+function hasReturned(value, day) {
+  if (!value) return false;
+  return value.length === 10 ? value <= day : day.slice(0, value.length) > value;
+}
+
 // いま乗っているチーム（打ち上げ済みで、帰還日がないか、まだ来ていない）
 export function teamsAboard(crewData, now) {
   const day = now.toISOString().slice(0, 10);
   return (crewData?.teams ?? []).filter((t) => {
     const launched = t.launch_date?.value && t.launch_date.value <= day;
-    const returned = t.return_date?.value && t.return_date.value <= day;
-    return launched && !returned;
+    return launched && !hasReturned(t.return_date?.value, day);
   });
 }
 
@@ -156,7 +162,15 @@ function statusRows(sum) {
   return plan.length ? { status: lines.join(""), plan: plan.join("") + src } : { status: lines.join("") + src, plan: null };
 }
 
-function overviewHtml(card, aboard, family, statusSum) {
+// いま見ている雲（ひまわり9号だけ。気象衛星センターの最新の赤外画像を、出典つき・加工なしで）
+function liveSatHtml(card, realNow) {
+  if (card.id !== "himawari-9") return "";
+  const { url, observed } = himawariImage(realNow);
+  return `<figure class="ov-figure live-sat"><img class="ov-live" src="${esc(url)}" alt="ひまわり9号の赤外画像（日本付近、日本時間 ${hmJstOf(observed)} ごろ）" loading="lazy" data-live-sat>
+    <figcaption class="k small">ひまわり9号がいま見ている日本付近の雲（赤外画像・日本時間 ${hmJstOf(observed)} ごろ。10分ごとに新しくなる）<br>出典：<a href="${HIMAWARI_PAGE}" target="_blank" rel="noopener noreferrer">気象衛星センターホームページ（ひまわりリアルタイム画像）</a>へのリンク</figcaption></figure>`;
+}
+
+function overviewHtml(card, aboard, family, statusSum, realNow) {
   const s = card.stats ?? {};
   const orbitLine = [
     launchYear(card.launch_date) && `${launchYear(card.launch_date)}年〜`,
@@ -177,6 +191,7 @@ function overviewHtml(card, aboard, family, statusSum) {
   const st = statusRows(statusSum);
   return `
     <div class="ov">
+      ${liveSatHtml(card, realNow)}
       ${
         card.image
           ? `<figure class="ov-figure"><img class="ov-art" src="${esc(card.image.file)}" alt="${esc(card.image.caption)}"><figcaption class="k small">${imageCredit(card.image)}</figcaption></figure>`
@@ -238,7 +253,7 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
   const tabs = TABS.filter((t) => !t.crewedOnly || isCrewed(card));
   const current = tabs.some((t) => t.id === tab) ? tab : "overview";
   const bodies = {
-    overview: () => overviewHtml(card, aboard, family, statusSum),
+    overview: () => overviewHtml(card, aboard, family, statusSum, realNow),
     crew: () => crewHtml(aboard),
     orbit: () => orbitHtml(),
     links: () => linksHtml(card, orbitMeta),
@@ -249,7 +264,10 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
         <div class="panel-title"><span class="class-chip" style="--c:${family.color}">${esc(CLASS_LABELS[card.class] ?? "")}</span><span class="amber">${esc(card.name.ja)}</span></div>
         <div class="panel-ja"><span class="panel-en">${esc(card.name.en)}</span>　<span class="k">NORAD ${card.norad_id}</span></div>
       </div>
-      <button type="button" class="close mono" data-close aria-label="詳細を閉じる">×</button>
+      <div class="panel-actions">
+        <button type="button" class="follow-mini narrow-only" data-follow aria-pressed="false" title="カメラがこの機体を追いかけます">追尾</button>
+        <button type="button" class="close mono" data-close aria-label="詳細を閉じる">×</button>
+      </div>
     </header>
     ${
       showBanner
@@ -270,7 +288,7 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
   return current;
 }
 
-export function updatePanelLive(el, { pos, periodMin }) {
+export function updatePanelLive(el, { pos, periodMin, place }) {
   const set = (k, html) => {
     const n = el.querySelector(`[data-live="${k}"]`);
     if (n) n.innerHTML = html;
@@ -279,7 +297,9 @@ export function updatePanelLive(el, { pos, periodMin }) {
     for (const k of ["now", "alt", "spd", "lat", "lng", "ring"]) set(k, "計算できません");
     return;
   }
-  set("now", [latJa(pos.lat), lngJa(pos.lng), `高度 ${pos.altKm.toFixed(0)} km`].map(nw).join("　"));
+  // どこの上か（分からないときは座標だけ）
+  const where = place ? `<strong class="place">${esc(place.name)}</strong>の上　` : "";
+  set("now", where + [latJa(pos.lat), lngJa(pos.lng), `高度 ${pos.altKm.toFixed(0)} km`].map(nw).join("　"));
   set("alt", `${pos.altKm.toFixed(1)} km`);
   set("spd", `${pos.speedKmS.toFixed(2)} km/s`);
   set("period", Number.isFinite(periodMin) ? `約 ${periodMin.toFixed(1)} 分` : "--");

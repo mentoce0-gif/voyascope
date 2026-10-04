@@ -1,0 +1,17 @@
+{
+  "id": "pyotr-dubrov",
+  "name": {
+    "ja": "ピョートル・ドゥブロフ",
+    "en": "Pyotr Dubrov"
+  },
+  "agency": {
+    "value": "Roscosmos",
+    "source": "https://www.gctc.ru/main.php?id=1704",
+    "as_of": "2026-10-03"
+  },
+  "official_profile_url": "https://www.gctc.ru/main.php?id=1704",
+  "teams": [
+    "soyuz-ms-29"
+  ],
+  "updated_at": "2026-10-03"
+}

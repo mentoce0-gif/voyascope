@@ -1,0 +1,37 @@
+{
+  "id": "bepicolombo-mio-separation",
+  "kind": "separation",
+  "regions": [
+    "world",
+    "japan"
+  ],
+  "title": {
+    "ja": "「みお」と MPO が分かれる",
+    "en": "MPO and Mio separate"
+  },
+  "summary": {
+    "value": "水星を回る軌道に入ったあと、2機が分かれる。観測の本番は2027年4月から",
+    "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+    "as_of": "2026-10-01"
+  },
+  "when": {
+    "value": {
+      "from": "2026-12-09",
+      "to": "2026-12-10"
+    },
+    "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
+    "as_of": "2026-10-01",
+    "note": "ESA の発表は「9–10 December 2026」"
+  },
+  "links": [
+    {
+      "label": "ESA ベピコロンボ到着の最新情報（英語）",
+      "url": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury"
+    },
+    {
+      "label": "JAXA 国際水星探査計画 BepiColombo／みお",
+      "url": "https://www.jaxa.jp/projects/sas/bepi/index_j.html"
+    }
+  ],
+  "updated_at": "2026-10-01"
+}

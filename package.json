@@ -9,7 +9,11 @@
     "sync:web": "node scripts/sync-web-data.mjs",
     "build:prompts": "node scripts/build-prompts.mjs",
     "fetch:orbits": "node scripts/fetch-orbits.mjs",
-    "fetch:status": "node scripts/fetch-status.mjs"
+    "fetch:status": "node scripts/fetch-status.mjs",
+    "fetch:launches": "node scripts/fetch-launches.mjs",
+    "fetch:horizons": "node scripts/fetch-horizons.mjs",
+    "build:minimap-land": "node scripts/build-minimap-land.mjs",
+    "check:size": "node scripts/check-size.mjs"
   },
   "devDependencies": {
     "ajv": "^8.17.1"

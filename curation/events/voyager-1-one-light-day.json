@@ -1,0 +1,31 @@
+{
+  "id": "voyager-1-one-light-day",
+  "kind": "milestone",
+  "regions": [
+    "world"
+  ],
+  "title": {
+    "ja": "ボイジャー1号が地球から1光日に",
+    "en": "Voyager 1 reaches one light-day from Earth"
+  },
+  "summary": {
+    "value": "光で24時間かかる距離（約259億 km）。人がつくったもので、ここまで届くのはボイジャー1号が初めて",
+    "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+    "as_of": "2026-10-01"
+  },
+  "when": {
+    "value": {
+      "at": "2026-11-18T10:16:07Z"
+    },
+    "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
+    "as_of": "2026-10-01",
+    "note": "NASA の発表は 2026年11月18日 2時16分07秒（米国太平洋標準時）"
+  },
+  "links": [
+    {
+      "label": "NASA「Where Are Voyager 1 and Voyager 2 Now?」",
+      "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
+    }
+  ],
+  "updated_at": "2026-10-01"
+}

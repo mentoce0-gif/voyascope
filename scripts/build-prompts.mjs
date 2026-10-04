@@ -7,6 +7,8 @@ const rules = readFileSync("RULES.md", "utf8");
 const targets = [
   ["prompts/src/chappy.md", "prompts/chappy-research.md"],
   ["prompts/src/grok.md", "prompts/grok-news.md"],
+  ["prompts/src/codex-far-room-visual.md", "prompts/codex-far-room-visual.md"],
+  ["prompts/src/codex-far-room-models.md", "prompts/codex-far-room-models.md"],
 ];
 const header = "<!-- このファイルは scripts/build-prompts.mjs が作る。直接編集せず prompts/src/ を直す -->\n\n";
 

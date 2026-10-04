@@ -1,0 +1,51 @@
+{
+  "id": "new-horizons",
+  "name": {
+    "ja": "ニュー・ホライズンズ",
+    "en": "New Horizons"
+  },
+  "operator": {
+    "value": ["NASA", "Johns Hopkins APL"],
+    "source": "https://science.nasa.gov/mission/new-horizons/",
+    "as_of": "2026-10-03",
+    "note": "ジョンズ・ホプキンズ大学の応用物理研究所（APL）が運用している"
+  },
+  "launch_date": {
+    "value": "2006-01-19",
+    "source": "https://science.nasa.gov/mission/new-horizons/",
+    "as_of": "2026-10-03"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/",
+    "as_of": "2026-10-03",
+    "note": "2026年6月23日に、冬眠から目覚めて元気だと確かめられた"
+  },
+  "location": {
+    "value": "冥王星よりずっと遠い「カイパーベルト」を飛んでいる。2026年6月に、ほぼ1年の冬眠から目覚めた",
+    "source": "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/",
+    "as_of": "2026-10-03"
+  },
+  "mission": {
+    "value": "2015年に冥王星を近くから調べた、はじめての探査機。2019年には、さらに遠くの天体も近くから調べた",
+    "source": "https://science.nasa.gov/mission/new-horizons/",
+    "as_of": "2026-10-03"
+  },
+  "distance": {
+    "method": "dated",
+    "value": 9500000000,
+    "unit": "km",
+    "at": "2026-06-23",
+    "source": "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/",
+    "as_of": "2026-10-03",
+    "note": "冬眠から目覚めたと確かめた日の、約95億km（NASA の2026年7月7日の記事）"
+  },
+  "official_links": [
+    { "label": "NASA「New Horizons」", "url": "https://science.nasa.gov/mission/new-horizons/" },
+    {
+      "label": "NASA の記事（2026年7月7日）",
+      "url": "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/"
+    }
+  ],
+  "updated_at": "2026-10-03"
+}
