@@ -1,6 +1,7 @@
 <!doctype html>
 <!-- オーナーが Codex で作った、探査機の模型の確認ページ（2026-10-04）。依頼文：prompts/codex-far-room-models.md
-     Claude Code が直したのは、出典を確かめていない説明2つ（ウェッブの鏡の枚数・パーサヴィアランスの車輪の数）を、確かめた言葉に替えたところだけ -->
+     Claude Code が直したのは2つだけ：出典を確かめていない説明2つ（ウェッブの鏡の枚数・パーサヴィアランスの車輪の数）を確かめた言葉に替えた。
+     模型の注記を「公式を参考にしたイメージ」にした（2026-10-04 オーナー） -->
 <html lang="ja">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -38,7 +39,7 @@ footer{border-top:1px solid var(--line);padding:16px 0 22px;color:var(--dim);fon
 </section>
 <nav class="navigation" aria-label="模型を切り替える"><button class="nav-btn" id="prev"><b aria-hidden="true">←</b> 前へ</button><div class="dots" id="dots"></div><button class="nav-btn" id="next">次へ <b aria-hidden="true">→</b></button></nav>
 </main>
-<footer><p>形の目安です。公式の模型ではありません</p><p>※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません</p></footer>
+<footer><p>公式を参考にしたイメージ</p><p>※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません</p></footer>
 <details class="method"><summary>形の手がかりと、補ったところ</summary><p id="guessed"></p><p id="sources"></p><p>三角形数はインスタンスの個数を含む描画数。生成時間は、この端末での呼び出し1回の実測です。GPUへの転送・初回シェーダー準備は含みません。</p></details>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
