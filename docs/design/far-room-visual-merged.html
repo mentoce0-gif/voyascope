@@ -416,6 +416,7 @@ dialog .sub { margin: 0 0 14px; font-size: 12px; color: var(--dim); }
           <li>探査機の模型は、公式のページの写真と説明を参考に Codex が作ったもの（far-room-models.js、2026-10-04）。画面の注記は「公式を参考にしたイメージ」だけ（2026-10-04 オーナー）</li>
           <li>光と質感：太陽の光らしい白い主光で、模型に影ができる。宇宙の暗さに合わせて、映り込みを少し控えた。火星の地面には、ローバーの影が落ちる</li>
           <li>ジュノー：木星の重力でスイングバイ。機体は、本当の速さ（1分に2回）で回っている</li>
+          <li>1光日の輪の手前に、ボイジャー1号（11月18日にここへ届く予定。NASA の予告）。いまの距離の公式の値はまだないので、輪のそばに置いた（2026-10-04）。ボイジャー2号は、いまの距離が分かるまで置かない</li>
           <li>「探査機をもっと知る」は VOYASCOPE のカード（出典つき）だけで書いた。Codex 案の詳しい説明は、出典をまだ確かめていないので使っていない</li>
           <li>太陽・水星・火星は、地球からの距離の桁がほぼ同じ（1.5億〜2.5億 km）。スイングバイが重ならないように、そこだけ航路をゆっくり進む</li>
           <li>動きを減らす設定：星を流さず、傾けず、押した場所へすぐ移る</li>
@@ -505,6 +506,8 @@ const JPL_PERS = "https://www.jpl.nasa.gov/images/pia26726-nasas-hirise-captures
 const NASA_PERS = "https://science.nasa.gov/mission/mars-2020-perseverance/";
 const NASA_JUNO = "https://science.nasa.gov/mission/juno/";
 const NASA_THEBE = "https://science.nasa.gov/photojournal/nasas-juno-misson-captures-jupiter-moon-thebe/";
+const NASA_V1 = "https://science.nasa.gov/mission/voyager/voyager-1/";
+const NASA_VWHERE = "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/";
 const NASA_NH = "https://science.nasa.gov/mission/new-horizons/";
 const NASA_NH_WAKE = "https://science.nasa.gov/missions/new-horizons/nasas-new-horizons-spacecraft-wakes-from-hibernation-in-good-health/";
 const CARDS = {
@@ -553,6 +556,20 @@ const CARDS = {
     ],
     links: [["NASA「Juno」", NASA_JUNO], ["NASA の画像と説明（2026年5月5日）", NASA_THEBE]],
   },
+  "light-day": {
+    title: "ボイジャー1号",
+    en: "Voyager 1",
+    sub: "Voyager 1　・　2026年11月18日（水）19:16（日本時間）に、地球から1光日に届く予定（NASA）",
+    facts: [
+      ["いま", "太陽圏の外の「恒星間空間」を飛んでいる。人がつくったもので、いちばん遠くにある", NASA_V1],
+      ["予定", "2026年11月18日（水）19:16（日本時間）、地球から1光日（約259億 km）に届く。人がつくったもので、ここまで届くのは初めて", NASA_VWHERE],
+      ["任務", "木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った。いまもデータを送っている", NASA_V1],
+      ["状態", "運用中。電力を節約するため、観測装置を少しずつ止めながら運用している（2026年4月17日に1台止めた）（10月3日に確認）", NASA_VWHERE],
+      ["運用", "NASA・JPL", NASA_V1],
+      ["打ち上げ", "1977年9月5日", NASA_V1],
+    ],
+    links: [["NASA「Voyager 1」", NASA_V1], ["NASA「Where Are Voyager 1 and Voyager 2 Now?」", NASA_VWHERE]],
+  },
   "new-horizons": {
     en: "New Horizons",
     facts: [
@@ -576,7 +593,8 @@ const LOOK = {
   perseverance: { kind: "body", body: "mars", R: 2.4, kq: 3.0, turn: 76, tilt: -10, bank: 1, size: 1, swing: "gravity", by: "火星", lens: true, en: "PERSEVERANCE" },
   juno: { kind: "duo", body: "jupiter", model: "juno", R: 3.0, mR: 1.75, kq: 2.6, turn: 66, tilt: 10, bank: 1, size: 1, swing: "gravity", by: "木星", rpm: 2, en: "JUNO" }, // rpm：1分に2回まわる（NASA のジュノーのページ）
   "new-horizons": { kind: "model", model: "new-horizons", R: 1.5, kq: 2.7, turn: 32, tilt: 12, bank: 0.5, size: 0.72, swing: "around", en: "NEW HORIZONS" },
-  "light-day": { kind: "gate", R: 7, size: 1, swing: "gate", en: "ONE LIGHT-DAY" },
+  // 1光日の輪の手前にボイジャー1号（11月18日にここへ届く予定。NASA の予告）。アンテナを地球（こちら）に向け、回さない
+  "light-day": { kind: "gate", R: 7, size: 1, swing: "gate", model: "voyager", mR: 2.0, mOff: [1.3, 1.2, 5.0], mPose: [0.9, -0.6, -0.1], still: true, en: "ONE LIGHT-DAY" },
 };
 // その場所へ向かうときの言葉（Codex 案）
 const TRAVEL = {
@@ -1638,7 +1656,7 @@ if (renderer) {
   // 探査機の模型（Codex が作った9つのうち、航路にいる4機。公式を参考にしたイメージ）
   kit = CRAFT.makeKit(THREE);
   naturalKit(kit);
-  for (const id of ["jwst", "bepicolombo", "juno", "new-horizons"]) models[id] = CRAFT.MODELS[id](THREE, kit);
+  for (const id of ["jwst", "bepicolombo", "juno", "new-horizons", "voyager"]) models[id] = CRAFT.MODELS[id](THREE, kit);
   // 光：太陽の光らしい白い主光（影をつくる）と、弱い補助光。補助光はカメラについて回り、主光も「カメラから見て左上の前」の向きを保つ。
   // 主光の影は、見ている模型のまわりだけを測る（render で毎回置き直す）
   camera.add(new THREE.AmbientLight(0xc9d6e6, 0.12));
@@ -1755,9 +1773,10 @@ function placeScene() {
     if (lk.model) {
       const holder = models[lk.model].userData.holder ?? (models[lk.model].userData.holder = (() => { const h = holdModel(models[lk.model], lk.mR ?? lk.R); mainScene.add(h); return h; })());
       holder.position.copy(st.focus);
+      if (lk.mOff) holder.position.addScaledVector(st.right, lk.mOff[0]).addScaledVector(st.axis, lk.mOff[1]).addScaledVector(st.dirIn, -lk.mOff[2]); // 右・上・手前へずらす
       const inner = holder.userData.inner;
       inner.userData.spin = inner.userData.spin ?? 0;
-      holder.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(e.set(...inner.userData.pose)));
+      holder.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(e.set(...(lk.mPose ?? inner.userData.pose))));
       st.model = holder; st.objects.push(holder);
     }
     if (lk.kind === "gate") {
@@ -1880,8 +1899,8 @@ $("details").addEventListener("click", () => {
   const m = modeNow(), id = m.st?.pl.id, card = CARDS[id];
   if (!card) return;
   const pl = m.st.pl;
-  $("detail-title").textContent = pl.name;
-  $("detail-sub").textContent = `${card.en}　・　地球から${pl.approx ? "約" : ""}${kmJa(pl.km, pl.approx ? 2 : 3)}（${pl.how}）`;
+  $("detail-title").textContent = card.title ?? pl.name;
+  $("detail-sub").textContent = card.sub ?? `${card.en}　・　地球から${pl.approx ? "約" : ""}${kmJa(pl.km, pl.approx ? 2 : 3)}（${pl.how}）`;
   $("detail-facts").innerHTML = card.facts.map(([k, val, src]) => `<div class="fact"><dt>${esc(k)}</dt><dd>${esc(val)}<br><a class="src" href="${esc(src)}" target="_blank" rel="noopener noreferrer">出典 ↗</a></dd></div>`).join("");
   $("detail-links").innerHTML = card.links.map(([label, url]) => `<li><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a></li>`).join("");
   $("detail-dialog").showModal();
@@ -2288,7 +2307,7 @@ function render(now, dt, p, km, warp, m) {
       // ジュノーは本体の軸のまわりを、本当の速さ（1分に2回）で回る。ほかの機体は、ゆっくり向きを変えるだけ
       const inner = st.model.userData.inner;
       if (st.lk.rpm) inner.children[0].rotation.y += (dt * st.lk.rpm * Math.PI * 2) / 60;
-      else inner.rotation.y += dt * 0.05;
+      else if (!st.lk.still) inner.rotation.y += dt * 0.05;
     }
     if (st.lk.kind === "gate") { gate.userData.halo.quaternion.copy(camera.quaternion).premultiply(tmpQ.copy(gate.quaternion).invert()); }
     if (st.pl.id === "new-horizons") dust.material.uniforms.uAlpha.value = 0.55 * smooth01((60 - dist) / 30);
