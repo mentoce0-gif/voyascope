@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MMX を追う（予告）— VOYASCOPE</title>
+  <meta name="description" content="JAXA の火星衛星探査機 MMX を、打ち上げから火星のまわりまで「いま地球と火星のあいだのどこにいるか」で見せる予定です。非公式ファンメイド作品 VOYASCOPE の予告ページです。">
+  <!-- 予告のページ（2026-10-05）。MMX の画面ができたら、中身を入れ替えるか、アプリへ案内する -->
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#050e1f">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MMX を追う（予告）— VOYASCOPE">
+  <meta property="og:description" content="打ち上げから火星のまわりまで、「いま地球と火星のあいだのどこにいるか」を見せる予定です（非公式ファンメイド作品）。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"></noscript>
+  <link rel="stylesheet" href="mmx.css">
+  <script type="module" src="mmx.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a>
+    <a class="open-app" href="../">アプリを開く<span aria-hidden="true">›</span></a>
+  </header>
+
+  <main>
+    <!-- はじめ -->
+    <section class="hero wrap" aria-labelledby="title">
+      <div class="hero-text">
+        <p class="eyebrow mono">PREVIEW · MARTIAN MOONS EXPLORATION</p>
+        <h1 id="title">MMX を追う</h1>
+        <p class="badge">こんな感じで見せる予定です（準備中）</p>
+        <p class="lead">火星の衛星フォボスを観測し、表面の砂や岩石を地球に持ち帰る、JAXA の火星衛星探査機 MMX。<br>打ち上げから火星のまわりまで、<strong>「いま、地球と火星のあいだのどこにいるか」</strong>を見られるようにしていきます。</p>
+        <div class="countdown" aria-live="polite">
+          <p class="cd-label">打ち上げ予定まで</p>
+          <p class="cd-time mono" id="cd-time">—</p>
+          <p class="cd-when" id="cd-when">2026年10月20日（火）4時41分03秒（日本時間）の予定</p>
+          <p class="cd-meta" id="cd-meta">H3ロケット10号機・種子島宇宙センター</p>
+          <p class="src">出典：<a id="cd-src" href="https://www.jaxa.jp/press/2026/08/20260820-1_j.html" target="_blank" rel="noopener">JAXA プレスリリース（2026年8月20日）</a>。予定が変わったら、公式の発表を確かめてから直します</p>
+        </div>
+      </div>
+      <figure class="hero-model">
+        <img src="img/mmx-model.webp" width="960" height="503" alt="VOYASCOPE の MMX の模型。金色の箱形の本体に、左右へ太陽電池の翼が3枚ずつ。上に大きなアンテナ、下に銀色の円筒">
+        <figcaption>VOYASCOPE の MMX の模型（遠くを見る部屋で使う予定。公式の写真を参考にしたイメージで、細かいところは近似）</figcaption>
+      </figure>
+    </section>
+
+    <!-- 4つの場面 -->
+    <section class="wrap" aria-labelledby="scenes-title">
+      <h2 id="scenes-title" class="section-title"><span class="mono">01</span>見せ方の予定：4つの場面</h2>
+      <p class="section-lead">運用の「いまの状態」は、JAXA の公式の発信がいちばんの情報源です。VOYASCOPE は、<strong>位置と距離の感覚</strong>を補う入口として、公式のページや中継へご案内します。</p>
+
+      <ol class="scenes">
+        <li class="scene">
+          <div class="scene-head">
+            <p class="scene-no mono">SCENE 1</p>
+            <h3>打ち上げまで</h3>
+            <p class="state now">いまも見られます</p>
+          </div>
+          <div class="scene-body">
+            <p>アプリの「次の出来事」に、打ち上げまでの残り時間。地球の上に、種子島のピン。</p>
+            <figure class="shot">
+              <img src="img/app-now-pc.webp" width="1200" height="679" loading="lazy" alt="VOYASCOPE の PC の画面。左の「次の出来事」のいちばん上に「10/20 4:41 MMX の打ち上げ あと14日17時間 出典：JAXA」。右の地球の日本の南に「種子島 10/20」のピン">
+              <figcaption>2026年10月5日の画面（PC）</figcaption>
+            </figure>
+          </div>
+        </li>
+
+        <li class="scene">
+          <div class="scene-head">
+            <p class="scene-no mono">SCENE 2</p>
+            <h3>打ち上げの日</h3>
+            <p class="state plan">予定</p>
+          </div>
+          <div class="scene-body">
+            <p>打ち上げの時刻を、地球の画面で追います。打ち上がったかどうかは、<strong>JAXA の発表を確かめてから</strong>記録します（推測では書きません）。中継は JAXA の公式へご案内します。</p>
+            <ol class="flow" aria-label="打ち上げの日の表示の流れ">
+              <li><span class="mono">10/20 4:41</span>打ち上げ予定</li>
+              <li>JAXA の発表を確かめる</li>
+              <li>「打ち上げ」を記録・遠くを見る部屋へ</li>
+            </ol>
+            <p class="mock-button" aria-hidden="true">中継を見る（JAXA）<span class="mono">↗</span></p>
+            <p class="note">中継の案内は、JAXA の発表を待って置きます。</p>
+          </div>
+        </li>
+
+        <li class="scene wide">
+          <div class="scene-head">
+            <p class="scene-no mono">SCENE 3</p>
+            <h3>火星への旅（約1年）</h3>
+            <p class="state plan">予定・いちばんの見どころ</p>
+          </div>
+          <div class="scene-body orbit-layout">
+            <figure class="orbit">
+              <svg id="orbit-svg" viewBox="-205 -205 410 410" role="img" aria-labelledby="orbit-desc">
+                <desc id="orbit-desc">太陽を真ん中に、地球と火星の通り道を真上から見た図。地球と火星の点は、このページを開いた時刻の位置を計算したもの。地球から火星へ向かう点線は、MMX の道のりのイメージで、実際の軌道ではありません。</desc>
+              </svg>
+              <figcaption>
+                <span class="key real">実線と点</span>＝あなたのブラウザで計算した位置（Astronomy Engine）。
+                <span class="key image">点線</span>＝道のりのイメージ（実際の軌道は、打ち上げのあとに公開されるデータで描きます）
+              </figcaption>
+            </figure>
+            <div class="hud">
+              <p class="hud-title mono">MMX <span>火星衛星探査機</span></p>
+              <dl class="hud-rows">
+                <div><dt>打ち上げから</dt><dd class="mono"><span class="ph">—</span> 日目</dd></div>
+                <div><dt>地球から</dt><dd class="mono"><span class="ph">—</span> km</dd></div>
+                <div><dt>火星まで</dt><dd class="mono"><span class="ph">—</span> km</dd></div>
+                <div><dt>電波で片道</dt><dd class="mono"><span class="ph">—</span> 分</dd></div>
+              </dl>
+              <p class="hud-note">表示のイメージです。数字は、打ち上げのあとに公開されるデータ（NASA JPL の Horizons など）を確かめてから出します。それまでは MMX の位置を描きません。</p>
+              <div class="today">
+                <p class="today-title">きょうの地球と火星（計算）</p>
+                <p class="today-km mono" id="today-km">—</p>
+                <p class="today-light" id="today-light">—</p>
+                <p class="note">電波も光と同じ速さで進むので、火星まで届くのにこれだけかかります（このページを開いた時刻の距離で計算）。</p>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <li class="scene wide">
+          <div class="scene-head">
+            <p class="scene-no mono">SCENE 4</p>
+            <h3>火星のまわりで（2027〜2030年）</h3>
+            <p class="state plan">予定</p>
+          </div>
+          <div class="scene-body moons-layout">
+            <figure class="moons">
+              <svg viewBox="0 68 400 178" role="img" aria-labelledby="moons-desc">
+                <desc id="moons-desc">火星と、2つの衛星フォボスとダイモスの通り道。フォボスのすぐ近くを、MMX が小さな輪を描いて回るイメージ。大きさと距離は実際の比率ではありません。</desc>
+                <defs>
+                  <radialGradient id="mars-g" cx="38%" cy="35%" r="70%">
+                    <stop offset="0" stop-color="#f0a173"/><stop offset=".55" stop-color="#c4573a"/><stop offset="1" stop-color="#5e2416"/>
+                  </radialGradient>
+                </defs>
+                <ellipse cx="170" cy="135" rx="160" ry="56" class="m-orbit"/>
+                <ellipse cx="170" cy="135" rx="98" ry="34" class="m-orbit"/>
+                <circle cx="170" cy="135" r="40" fill="url(#mars-g)"/>
+                <text x="170" y="196" class="m-label" text-anchor="middle">火星</text>
+                <circle cx="317" cy="113" r="4.5" class="m-moon"/>
+                <text x="317" y="100" class="m-label" text-anchor="middle">ダイモス</text>
+                <g transform="translate(250 154)">
+                  <ellipse rx="26" ry="13" class="qso"/>
+                  <path d="M -6 -3 l 5 -2.5 l 6 1 l 3 4 l -4 3.5 l -7 0 z" class="m-moon"/>
+                  <rect x="-29.5" y="-3.5" width="7" height="7" transform="rotate(45 -26 0)" class="m-craft"/>
+                </g>
+                <text x="276" y="186" class="m-label">フォボス</text>
+                <text x="200" y="232" class="m-label mmx">MMX：フォボスの近くを回る（擬周回軌道 QSO）</text>
+              </svg>
+              <figcaption>イメージ（大きさ・距離は実際の比率ではありません）</figcaption>
+            </figure>
+            <p>フォボスの観測、ローバの先行着陸、フォボスでのサンプル採取、ダイモスの観測と、火星圏に3年いる予定です。新しい場面を作って、そのとき MMX がどこで何をしているかを見せます。</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 旅のしおり -->
+    <section class="wrap" aria-labelledby="schedule-title">
+      <h2 id="schedule-title" class="section-title"><span class="mono">02</span>旅のしおり（公式の予定）</h2>
+      <ol class="steps">
+        <li><p class="step mono">STEP 01<span>2026年度</span></p><p>種子島宇宙センターから H3 ロケットで打ち上げ。</p></li>
+        <li><p class="step mono">STEP 02<span>2027</span></p><p>約1年かけて火星圏へ。衛星フォボスをめざす。</p></li>
+        <li><p class="step mono">STEP 03<span>2027–2030</span></p><p>フォボスの観測、ローバの先行着陸。フォボスでのサンプル採取がミッションのクライマックス。もう一つの火星衛星・ダイモスを観測し、火星圏に3年滞在。</p></li>
+        <li><p class="step mono">STEP 04<span>2030</span></p><p>火星圏を離れ、1年かけて地球圏へ帰還。</p></li>
+        <li><p class="step mono">STEP 05<span>2031年度</span></p><p>カプセルを分離し、大気圏へ突入。カプセルはオーストラリアで回収する予定。</p></li>
+      </ol>
+      <p class="src">出典：<a href="https://www.mmx.jaxa.jp/" target="_blank" rel="noopener">MMX プロジェクトサイト（JAXA）</a>の「ミッションスケジュール」（2026年10月5日に確認）。言い回しは少し短くしています</p>
+    </section>
+
+    <!-- 公式で -->
+    <section class="wrap" aria-labelledby="official-title">
+      <h2 id="official-title" class="section-title"><span class="mono">03</span>いまの状態は、公式で</h2>
+      <ul class="links">
+        <li><a href="https://www.mmx.jaxa.jp/" target="_blank" rel="noopener"><span>MMX プロジェクトサイト</span><span class="mono">mmx.jaxa.jp ↗</span></a></li>
+        <li><a href="https://www.jaxa.jp/press/2026/08/20260820-1_j.html" target="_blank" rel="noopener"><span>JAXA プレスリリース：MMX の打上げ</span><span class="mono">jaxa.jp ↗</span></a></li>
+        <li><a href="https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf" target="_blank" rel="noopener"><span>打上げ計画書（PDF）</span><span class="mono">jaxa.jp ↗</span></a></li>
+        <li class="pending"><span>打ち上げの中継</span><span class="mono">JAXA の発表を待って</span></li>
+        <li class="pending"><span>運用の「いまの状態」</span><span class="mono">公式の発信が出たら、いちばん上に</span></li>
+      </ul>
+    </section>
+
+    <!-- VOYASCOPE について -->
+    <section class="wrap about" aria-labelledby="about-title">
+      <h2 id="about-title" class="section-title"><span class="mono">04</span>VOYASCOPE について</h2>
+      <p>地球のまわりの人工衛星や ISS、遠くの探査機の「いま」を、観測端末のような画面で覗く Web アプリです。中高生向けに作っています。事実には出典を付け、公式のページへご案内します。無料で、登録も広告もありません。</p>
+      <p><a class="open-app big" href="../">VOYASCOPE を開く<span aria-hidden="true">›</span></a></p>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <p><strong>VOYASCOPE は非公式のファンメイド作品です。</strong>JAXA・NASA をはじめとする宇宙機関・運用者とは関係ありません。</p>
+    <p>このページは、MMX の見せ方の予定を説明するためのものです。点線の道のり・火星のまわりの図・模型はイメージです。地球と火星の位置は Astronomy Engine（MIT License）で計算しています。</p>
+    <p class="mono">2026-10-05 作成</p>
+  </footer>
+</body>
+</html>
