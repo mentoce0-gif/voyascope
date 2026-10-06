@@ -74,14 +74,17 @@
             <p class="state plan">予定</p>
           </div>
           <div class="scene-body">
-            <p>打ち上げの時刻を、地球の画面で追います。打ち上がったかどうかは、<strong>JAXA の発表を確かめてから</strong>記録します（推測では書きません）。中継は JAXA の公式へご案内します。</p>
-            <ol class="flow" aria-label="打ち上げの日の表示の流れ">
-              <li><span class="mono">10/20 4:41</span>打ち上げ予定</li>
-              <li>JAXA の発表を確かめる</li>
-              <li>「打ち上げ」を記録・遠くを見る部屋へ</li>
+            <p>打ち上げの時刻を、地球の画面で追います。計画では、打ち上げの約1時間11分後に、火星へ向かう軌道（火星遷移軌道）で MMX がロケットから分かれます。それまでの間は、地球の画面に MMX の印（ビーコン）を出します（位置は描かず、計画の時刻だけ）。打ち上がったかどうかは、<strong>JAXA の発表を確かめてから</strong>記録します。</p>
+            <ol class="flow" aria-label="打ち上げの日の流れ（10月20日に打ち上げた場合の計画）">
+              <li><span class="mono">0:00:00</span>打ち上げ（10/20 4:41:03 の予定）</li>
+              <li><span class="mono">0:05:12</span>第2段エンジンの1回目の燃焼（〜0:10:40）</li>
+              <li><span class="mono">0:10:40</span>慣性飛行</li>
+              <li><span class="mono">1:03:57</span>第2段エンジンの2回目の燃焼（〜1:10:21）</li>
+              <li><span class="mono">1:11:12</span>MMX を分離（火星遷移軌道へ）→ 遠くを見る部屋へ</li>
             </ol>
-            <p class="mock-button" aria-hidden="true">中継を見る（JAXA）<span class="mono">↗</span></p>
-            <p class="note">中継の案内は、JAXA の発表を待って置きます。</p>
+            <p class="note">時刻は打ち上げからの経過時間で、どれも「約」です。出典：<a href="https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書</a>（10月20日に打ち上げた場合）。打ち上げの日がずれると、1回目の燃焼のあとの計画が変わります。</p>
+            <p><a class="live-link" href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">打ち上げの中継（JAXA）<span class="mono">↗</span></a></p>
+            <p class="note">YouTube LIVE（JAXA Channel）とニコニコ生放送で、打ち上げ55分前ごろから75分後ごろまで（JAXA の特設サイト）。VOYASCOPE からはリンクでご案内します。</p>
           </div>
         </li>
 
@@ -109,7 +112,7 @@
                 <div><dt>火星まで</dt><dd class="mono"><span class="ph">—</span> km</dd></div>
                 <div><dt>電波で片道</dt><dd class="mono"><span class="ph">—</span> 分</dd></div>
               </dl>
-              <p class="hud-note">表示のイメージです。数字は、打ち上げのあとに公開されるデータ（NASA JPL の Horizons など）を確かめてから出します。それまでは MMX の位置を描きません。</p>
+              <p class="hud-note">表示のイメージです。数字は、打ち上げのあとに公開されるデータ（NASA JPL の Horizons など）を確かめてから出します。それまでは MMX の位置を描きません（2026年10月6日の時点で、Horizons にはまだ MMX は載っていません）。</p>
               <div class="today">
                 <p class="today-title">きょうの地球と火星（計算）</p>
                 <p class="today-km mono" id="today-km">—</p>
@@ -123,7 +126,7 @@
         <li class="scene wide">
           <div class="scene-head">
             <p class="scene-no mono">SCENE 4</p>
-            <h3>火星のまわりで（2027〜2030年）</h3>
+            <h3>火星のまわりで（約3年）</h3>
             <p class="state plan">予定</p>
           </div>
           <div class="scene-body moons-layout">
@@ -151,7 +154,7 @@
               </svg>
               <figcaption>イメージ（大きさ・距離は実際の比率ではありません）</figcaption>
             </figure>
-            <p>フォボスの観測、ローバの先行着陸、フォボスでのサンプル採取、ダイモスの観測と、火星圏に3年いる予定です。新しい場面を作って、そのとき MMX がどこで何をしているかを見せます。</p>
+            <p>フォボスの観測、ローバの先行着陸、フォボスでのサンプル採取、ダイモスのフライバイ観測と、火星圏に3年いる予定です。新しい場面を作って、そのとき MMX がどこで何をしているかを見せます。</p>
           </div>
         </li>
       </ol>
@@ -161,13 +164,13 @@
     <section class="wrap" aria-labelledby="schedule-title">
       <h2 id="schedule-title" class="section-title"><span class="mono">02</span>旅のしおり（公式の予定）</h2>
       <ol class="steps">
-        <li><p class="step mono">STEP 01<span>2026年度</span></p><p>種子島宇宙センターから H3 ロケットで打ち上げ。</p></li>
-        <li><p class="step mono">STEP 02<span>2027</span></p><p>約1年かけて火星圏へ。衛星フォボスをめざす。</p></li>
-        <li><p class="step mono">STEP 03<span>2027–2030</span></p><p>フォボスの観測、ローバの先行着陸。フォボスでのサンプル採取がミッションのクライマックス。もう一つの火星衛星・ダイモスを観測し、火星圏に3年滞在。</p></li>
-        <li><p class="step mono">STEP 04<span>2030</span></p><p>火星圏を離れ、1年かけて地球圏へ帰還。</p></li>
+        <li><p class="step mono">STEP 01<span>2026年度</span></p><p>種子島宇宙センターから H3 ロケットで打ち上げ（10月20日の予定）。</p></li>
+        <li><p class="step mono">STEP 02<span>2027年度</span></p><p>約1年かけて火星圏へ。衛星フォボスをめざす。</p></li>
+        <li><p class="step mono">STEP 03<span>火星圏で3年</span></p><p>フォボスの観測、ローバの先行着陸。フォボスでのサンプル採取がミッションのクライマックス。もう一つの火星衛星・ダイモスをフライバイ観測。</p></li>
+        <li><p class="step mono">STEP 04<span>2030年度</span></p><p>火星圏を離れ、1年かけて地球圏へ帰還。</p></li>
         <li><p class="step mono">STEP 05<span>2031年度</span></p><p>カプセルを分離し、大気圏へ突入。カプセルはオーストラリアで回収する予定。</p></li>
       </ol>
-      <p class="src">出典：<a href="https://www.mmx.jaxa.jp/" target="_blank" rel="noopener">MMX プロジェクトサイト（JAXA）</a>の「ミッションスケジュール」（2026年10月5日に確認）。言い回しは少し短くしています</p>
+      <p class="src">出典：年度は <a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット（JAXA、2026年9月18日）</a>の「火星圏到着：2027年度」「火星圏離脱：2030年度」「地球帰還：2031年度」。中身は <a href="https://www.mmx.jaxa.jp/" target="_blank" rel="noopener">MMX プロジェクトサイト</a>の「ミッションスケジュール」とプレスキット（2026年10月6日に確認）。言い回しは少し短くしています</p>
     </section>
 
     <!-- 公式で -->
@@ -175,10 +178,13 @@
       <h2 id="official-title" class="section-title"><span class="mono">03</span>いまの状態は、公式で</h2>
       <ul class="links">
         <li><a href="https://www.mmx.jaxa.jp/" target="_blank" rel="noopener"><span>MMX プロジェクトサイト</span><span class="mono">mmx.jaxa.jp ↗</span></a></li>
+        <li><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/" target="_blank" rel="noopener"><span>MMX×H3ロケット10号機 特設サイト</span><span class="mono">fanfun.jaxa.jp ↗</span></a></li>
+        <li><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener"><span>打ち上げの中継（YouTube LIVE・ニコニコ生放送）</span><span class="mono">fanfun.jaxa.jp ↗</span></a></li>
+        <li><a href="https://www.isas.jaxa.jp/home/great/" target="_blank" rel="noopener"><span>地上局の運用状況（美笹深宇宙探査用地上局）</span><span class="mono">isas.jaxa.jp ↗</span></a></li>
+        <li><a href="https://x.com/mmx_jaxa_jp" target="_blank" rel="noopener"><span>MMX の公式 X（@mmx_jaxa_jp）</span><span class="mono">x.com ↗</span></a></li>
         <li><a href="https://www.jaxa.jp/press/2026/08/20260820-1_j.html" target="_blank" rel="noopener"><span>JAXA プレスリリース：MMX の打上げ</span><span class="mono">jaxa.jp ↗</span></a></li>
         <li><a href="https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf" target="_blank" rel="noopener"><span>打上げ計画書（PDF）</span><span class="mono">jaxa.jp ↗</span></a></li>
-        <li class="pending"><span>打ち上げの中継</span><span class="mono">JAXA の発表を待って</span></li>
-        <li class="pending"><span>運用の「いまの状態」</span><span class="mono">公式の発信が出たら、いちばん上に</span></li>
+        <li class="pending"><span>MMX の運用の「いまの状態」（はやぶさ2 の「はや2NOW」のようなページ）</span><span class="mono">出たら、いちばん上に</span></li>
       </ul>
     </section>
 

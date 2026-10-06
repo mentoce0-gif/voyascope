@@ -147,11 +147,12 @@ h1 { margin: 0; font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.15; letter
   font: 700 11px/1 var(--font-mono); color: var(--navy-900); background: var(--mint);
 }
 .flow .mono { margin-right: 8px; color: var(--amber); }
-.mock-button {
-  display: inline-flex !important; align-items: center; gap: 8px;
-  padding: 7px 16px; border: 1px dashed var(--ref-dim); border-radius: 999px;
-  color: var(--ref); font-size: 0.9rem;
+.live-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 18px; border: 1px solid var(--mint-dim); border-radius: 999px;
+  color: var(--mint); text-decoration: none; font-size: 0.95rem;
 }
+@media (hover: hover) { .live-link:hover { background: var(--mint-faint); } }
 
 /* 火星への旅 */
 .orbit-layout { display: grid; gap: 18px; }
