@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-06T18:22:35.575Z",
+  "fetched_at": "2026-10-07T05:59:57.842Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "e0741415-6c63-4236-9736-24a6c04485bc",
-      "net": "2026-10-07T03:23:00.000Z",
-      "precision": "min",
-      "window_end": "2026-10-07T04:23:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-08-27T02:42:27Z",
-      "rocket": {
-        "name": "Nuri",
-        "full_name": "KSLV-2 Nuri"
-      },
-      "provider": {
-        "name": "Korea Aerospace Research Institute",
-        "ja": "韓国航空宇宙研究院（KARI）"
-      },
-      "mission": {
-        "name": "NeonSat-2 to 6",
-        "placeholder": false,
-        "type": "Earth Science",
-        "type_ja": "地球観測",
-        "orbit": "Sun-Synchronous Orbit",
-        "orbit_ja": "太陽同期軌道"
-      },
-      "site": {
-        "location_id": 9,
-        "name": "Naro Space Center, South Korea",
-        "ja": "羅老宇宙センター",
-        "short": "羅老",
-        "pad": "LC-2",
-        "country": "KOR",
-        "country_ja": "韓国",
-        "position": {
-          "lat": 34.431867,
-          "lng": 127.535069
-        }
-      }
-    },
     {
       "id": "da43dc2c-00af-4cc1-8ef1-90a60b2eb9e5",
       "net": "2026-10-08T07:54:00.000Z",
