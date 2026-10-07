@@ -26,6 +26,16 @@
         "en": { "type": "string", "minLength": 1 }
       }
     },
+    "greeting": {
+      "type": "object",
+      "required": ["until"],
+      "additionalProperties": false,
+      "description": "更新のあと最初に開いたときの「いってらっしゃい」（打ち上げ）・「おかえり」（帰還）のお知らせ。打ち上げの成功・無事の帰還を公式の発表で確かめたときだけ付ける。事故・失敗・亡くなった方に関わるときは付けない（RULES.md 人物の扱い）",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 16, "description": "呼びかける名前（機体の名前。例：MMX）。チームはチームの名前を使うので書かない" },
+        "until": { "$ref": "#/$defs/date", "description": "この日（日本時間）まで出す。出来事の日からおよそ1週間" }
+      }
+    },
     "fact": {
       "description": "出典付きの事実、または公表されていないことの明示",
       "oneOf": [

@@ -53,6 +53,16 @@
       "maxItems": 3,
       "items": { "$ref": "common.schema.json#/$defs/link" }
     },
+    "greeting": { "$ref": "common.schema.json#/$defs/greeting" },
     "updated_at": { "$ref": "common.schema.json#/$defs/date" }
+  },
+  "dependentSchemas": {
+    "greeting": {
+      "$comment": "「おかえり」は、帰還の日付（年月日）が公式に出ているものだけ",
+      "required": ["return_date"],
+      "properties": {
+        "return_date": { "required": ["value"], "properties": { "value": { "$ref": "common.schema.json#/$defs/date" } } }
+      }
+    }
   }
 }

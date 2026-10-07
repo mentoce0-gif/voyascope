@@ -230,14 +230,16 @@ function sourcesHtml(ev) {
 export function eventPanelHtml(ev, now) {
   const status = statusOf(ev);
   const kind = KIND_LABELS[ev.kind] ?? "予定";
-  const chip = status === "postponed" ? `${kind}・延期` : `${kind}の予定`;
+  const chip = status === "postponed" ? `${kind}・延期` : status === "done" ? `${kind}・済み` : `${kind}の予定`;
   const big = bigCountdown(ev, now);
   const left = countdownText(ev, now);
   const asOf = ev.when.as_of ? `${Number(ev.when.as_of.slice(5, 7))}月${Number(ev.when.as_of.slice(8, 10))}日` : "";
   const statusText =
     status === "postponed"
       ? `<strong class="amber">延期</strong><span class="k">　新しい日時は、公式の発表を待ちます</span>`
-      : `公式の発表どおりの予定<span class="k">（${esc(asOf)}に確認）</span>`;
+      : status === "done"
+        ? `<strong>終わりました</strong><span class="k">（公式の発表）</span>`
+        : `公式の発表どおりの予定<span class="k">（${esc(asOf)}に確認）</span>`;
   const windowEnd = ev.window_end?.value
     ? `${Number(ev.window_end.value.slice(0, 4))}年${md(ev.window_end.value)}（${weekday(ev.window_end.value)}）まで`
     : null;
@@ -247,7 +249,7 @@ export function eventPanelHtml(ev, now) {
     ? `<div class="event-countdown"><span class="k">${ev.kind === "launch" ? "打ち上げまで" : "その時まで"}</span><span class="mono" data-live="countdown">${esc(big)}</span></div>`
     : passed
       ? `<div class="event-countdown"><span class="k">予定の時刻を過ぎました</span><span class="small">結果は、公式の発表で確かめてください</span></div>`
-      : left && status !== "postponed"
+      : left && status === "scheduled"
         ? `<div class="event-countdown"><span class="k">その日まで</span><span class="mono">${esc(left)}</span></div>`
         : "";
   return `
