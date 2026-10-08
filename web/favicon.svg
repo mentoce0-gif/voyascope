@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- VOYASCOPE のアイコン：ロゴの「O」と、斜めに回る金色の輪 -->
+  <defs>
+    <linearGradient id="ring" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffb547"/>
+      <stop offset="0.55" stop-color="#ffd27a"/>
+      <stop offset="1" stop-color="#ffb547"/>
+    </linearGradient>
+    <radialGradient id="spark">
+      <stop offset="0" stop-color="#fff8e6"/>
+      <stop offset="0.35" stop-color="#ffd27a" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#ffb547" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#07142b"/>
+  <circle cx="32" cy="33" r="14" fill="none" stroke="#eef6f3" stroke-width="4.2"/>
+  <ellipse cx="32" cy="32" rx="26" ry="8.5" fill="none" stroke="url(#ring)" stroke-width="3.4" transform="rotate(-40 32 32)"/>
+  <circle cx="43" cy="17.5" r="6" fill="url(#spark)"/>
+</svg>
