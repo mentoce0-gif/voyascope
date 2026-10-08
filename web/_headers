@@ -13,3 +13,9 @@
 # 自動で取り直すデータ（6時間ごと・週1回）。5分は覚えておいてよい
 /data/*
   Cache-Control: public, max-age=300
+
+# タブのアイコン（めったに変わらない）
+/favicon.*
+  Cache-Control: public, max-age=86400
+/apple-touch-icon.png
+  Cache-Control: public, max-age=86400
