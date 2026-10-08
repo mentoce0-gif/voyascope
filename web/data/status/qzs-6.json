@@ -3,24 +3,24 @@
   "id": "qzs-6",
   "source": "https://sys.qzss.go.jp/dod/constellation.html",
   "source_label": "みちびきウェブサイト「衛星運用状況」",
-  "page_updated": "2026-10-06",
-  "fetched_at": "2026-10-07T23:05:50.809Z",
+  "page_updated": "2026-10-08",
+  "fetched_at": "2026-10-08T13:30:06.651Z",
   "name": "QZS06",
   "svn": "007",
   "services": [
     {
       "service": "PNT",
       "signals": "L1C, L5",
-      "state": "in-operation",
-      "ok": true,
-      "naqu": null
+      "state": "outage",
+      "ok": false,
+      "naqu": "2026252"
     },
     {
       "service": "PNT",
       "signals": "L1C/B",
-      "state": "in-operation",
-      "ok": true,
-      "naqu": null
+      "state": "outage",
+      "ok": false,
+      "naqu": "2026252"
     },
     {
       "service": "PTV",
