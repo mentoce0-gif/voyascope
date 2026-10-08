@@ -22,10 +22,10 @@
         "note": "打ち上げ済み。米国東部時間 5:15"
       },
       "return_date": {
-        "value": "2026-10",
-        "source": "https://www.nasa.gov/missions/station/iss-research/heading-home-nasas-spacex-crew-12-concludes-station-science-mission/",
-        "as_of": "2026-10-03",
-        "note": "予定：10月上旬（NASA）。日付はまだ発表されていない"
+        "value": "2026-10-08",
+        "source": "https://www.nasa.gov/blogs/spacestation/2026/10/08/nasas-spacex-crew-12-dragon-splashes-down-at-1134-a-m-edt/",
+        "as_of": "2026-10-08",
+        "note": "帰還済み。米国東部夏時間 11:34、カリフォルニア州ロサンゼルス沖に着水（NASA）"
       },
       "crew": [
         {
@@ -135,7 +135,7 @@
           "url": "https://humans-in-space.jaxa.jp/iss/crew/"
         }
       ],
-      "updated_at": "2026-10-03"
+      "updated_at": "2026-10-08"
     },
     {
       "id": "crew-13",
