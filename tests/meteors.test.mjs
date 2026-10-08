@@ -59,3 +59,32 @@ test("文面：県がなければ案内だけ。県があれば方角・空の�
   assert.match(html, /空のどこにでも流れます/);
   assert.match(html, /出典：<a href="https:\/\/example.org\/meteor"/);
 });
+
+import { radiantDirection, createStream } from "../web/js/meteors.js";
+
+test("ちりが来る方向：放射点が真上になる地点は、今夜の東京から見て放射点が高いとき近くにある", () => {
+  const d = radiantDirection({ ra: 262, dec: 54 }, new Date("2026-10-08T09:00:00Z")); // 日本時間 18時
+  assert.equal(d.lat, 54);
+  assert.ok(d.lng > 95 && d.lng < 125, `lng ${d.lng}`); // 東京（東経140°）の西・北
+  assert.ok(Math.abs(Math.hypot(d.u.x, d.u.y, d.u.z) - 1) < 1e-9);
+});
+
+test("ちりの群れ：流れ星（光）は、放射点の側の半球の大気の高さにだけできる", () => {
+  let seed = 1;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const d = radiantDirection({ ra: 262, dec: 54 }, new Date("2026-10-08T09:00:00Z"));
+  const stream = createStream(200, rand);
+  const flashes = [];
+  for (let i = 0; i < 600; i++) flashes.push(...stream.step(1 / 30, d.u).flashes);
+  assert.ok(flashes.length > 100);
+  const D = Math.PI / 180;
+  for (const f of flashes) {
+    assert.ok(Math.abs(f.alt - 0.016) < 1e-6);
+    const v = { x: Math.cos(f.lat * D) * Math.cos(f.lng * D), y: Math.cos(f.lat * D) * Math.sin(f.lng * D), z: Math.sin(f.lat * D) };
+    assert.ok(v.x * d.u.x + v.y * d.u.y + v.z * d.u.z > -1e-9, "放射点と反対の半球に光がある");
+  }
+  // 止めた（dt=0）ときは動かない
+  const a = stream.step(0, d.u).points[0];
+  const b = stream.step(0, d.u).points[0];
+  assert.deepEqual(a, b);
+});

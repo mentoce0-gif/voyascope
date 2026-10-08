@@ -26,7 +26,7 @@ import {
   jstShort,
   REF_NOTE,
 } from "./launches.js";
-import { activeMeteors, meteorHtml } from "./meteors.js";
+import { activeMeteors, meteorHtml, radiantDirection, createStream } from "./meteors.js";
 import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
 
 const COLORS = {
@@ -279,6 +279,57 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     .htmlAltitude("alt")
     .htmlElement((d) => d.el)
     .htmlTransitionDuration(0);
+
+  // 流星群のちり（イメージ）：放射点の方向から地球へ近づき、大気に飛び込んで流れ星になる。「すべて」の表示のときだけ
+  globe
+    .particlesData([])
+    .particlesList((d) => d.pts)
+    .particleLat("lat")
+    .particleLng("lng")
+    .particleAltitude("alt")
+    .particlesSize((d) => d.size)
+    .particlesSizeAttenuation(false)
+    .particlesColor((d) => d.color);
+  const stream = createStream(140);
+  const streamStill = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let streamAt = 0;
+  let streamOn = false;
+  let streamEv = null;
+  let streamDir = null;
+  const radiantEl = document.createElement("button");
+  radiantEl.type = "button";
+  radiantEl.className = "radiant-marker";
+  radiantEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (streamEv) selectEvent(streamEv);
+  });
+  const radiantData = () =>
+    streamEv && streamDir ? [{ el: radiantEl, lat: streamDir.lat, lng: streamDir.lng, alt: 1.1 }] : [];
+  const updateStream = (t, now) => {
+    const ev = viewMode === "all" ? activeMeteors(events, now)[0] : null;
+    if (!ev) {
+      if (streamOn) globe.particlesData([]);
+      streamOn = false;
+      streamEv = null;
+      return;
+    }
+    if (ev !== streamEv) {
+      streamEv = ev;
+      radiantEl.innerHTML = `<span class="radiant-arrow" aria-hidden="true">↓</span><span class="tag">${esc(ev.title.ja.replace(/（.*）/, ""))}のちりが来る方向<span class="ref-mark">イメージ</span></span>`;
+      radiantEl.setAttribute("aria-label", `${ev.title.ja}：ちりが来る方向（イメージ）。詳細を開く`);
+    }
+    if (t - streamAt < 33) return;
+    const dt = streamStill ? 0 : Math.min((t - streamAt) / 1000, 0.1);
+    streamAt = t;
+    streamDir = radiantDirection(ev.radiant.value, now);
+    const { points, trails, flashes } = stream.step(dt, streamDir.u);
+    globe.particlesData([
+      { pts: trails, size: 3, color: "rgba(160, 235, 255, 0.35)" },
+      { pts: points, size: 4, color: "rgba(190, 245, 255, 0.95)" },
+      { pts: flashes, size: 6, color: "rgba(255, 210, 122, 0.9)" },
+    ]);
+    streamOn = true;
+  };
 
   // 「いま、どこの上？」の地名（重いので、起動のあとに裏で読んでいる。届くまでは座標だけを出す）
   let places = null;
@@ -661,6 +712,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     layoutGlobe();
     const p = ev.site?.position?.value;
     if (p) globe.pointOfView({ lat: p.lat, lng: p.lng }, 900);
+    // 流星群は、ちりが飛び込んでくる様子を斜め横から見られる向きに（放射点が真上になる地点から、赤道の側へ55°ずらす）
+    else if (ev.kind === "meteor" && ev === streamEv && streamDir)
+      globe.pointOfView({ lat: streamDir.lat - Math.sign(streamDir.lat || 1) * 55, lng: streamDir.lng }, 900);
   }
   // 世界の打ち上げ（参考）を詳細に出す。射場があれば地球をそこへ向ける
   function selectLaunch(l) {
@@ -1122,7 +1176,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     for (const s of sites) s.el.classList.toggle("selected", s.ev === selectedEvent);
     for (const p of worldPins) p.el.classList.toggle("selected", !!selectedLaunch && p.launches.includes(selectedLaunch));
     const pov = globe.pointOfView();
-    globe.htmlElementsData([...markerData(), ...siteData()]);
+    updateStream(t, now);
+    globe.htmlElementsData([...markerData(), ...siteData(), ...radiantData()]);
     if (follow && selected?.pos) globe.pointOfView({ lat: selected.pos.lat, lng: selected.pos.lng, altitude: pov.altitude }, 0);
 
     // 文字の更新は間引く

@@ -159,3 +159,88 @@ export function meteorHtml(ev, observer, prefName, now) {
     放射点と月の位置は、県庁あたりでの計算の目安です。天気（雲）と街の明かりは考えていません。</p>
   </section>`;
 }
+
+// ---------- 地球のまわり：流星群のちりが、放射点の方向から近づいてくる様子（イメージ） ----------
+// ちりの粒は、放射点の方向から平行に地球へ向かってくる。放射点の側の半球の大気に飛び込んで、流れ星になる。
+// 位置は地球に固定した座標（地球の半径＝1）。数と速さはイメージ（実際はずっと少なく、ずっと速い）
+
+// 放射点の方向（地球に固定した座標の単位ベクトル）と、その方向が真上になる地点
+export function radiantDirection(radiant, date) {
+  const gmst = gstime(date) * DEG;
+  const lat = radiant.dec;
+  const lng = ((((radiant.ra - gmst) % 360) + 540) % 360) - 180;
+  const u = {
+    x: Math.cos(lat / DEG) * Math.cos(lng / DEG),
+    y: Math.cos(lat / DEG) * Math.sin(lng / DEG),
+    z: Math.sin(lat / DEG),
+  };
+  return { u, lat, lng };
+}
+
+const ENTRY = 1.016; // 大気に飛び込む高さ（約100km）
+const START = 2.4; // 粒が現れる距離（地球の半径の何倍か）
+const toLatLngAlt = (p) => {
+  const r = Math.hypot(p.x, p.y, p.z);
+  return { lat: Math.asin(p.z / r) * DEG, lng: Math.atan2(p.y, p.x) * DEG, alt: r - 1 };
+};
+
+// 粒の群れ。step(dt, u) で動かして、いまの粒と、大気に飛び込んだ光（流れ星）を返す
+export function createStream(n = 140, random = Math.random) {
+  const spawn = (p, s = START + random() * START) => {
+    const r = 1.3 * Math.sqrt(random()); // 1.0 より内側は地球に当たる
+    p.a = random() * 2 * Math.PI;
+    p.r = r;
+    p.s = s;
+    p.flash = 0;
+    return p;
+  };
+  const parts = Array.from({ length: n }, () => spawn({}));
+  return {
+    step(dt, u) {
+      // u に直交する2つの向き
+      const ref = Math.abs(u.z) < 0.9 ? { x: 0, y: 0, z: 1 } : { x: 1, y: 0, z: 0 };
+      const e1 = norm(cross(u, ref));
+      const e2 = cross(u, e1);
+      const points = [];
+      const trails = [];
+      const flashes = [];
+      for (const p of parts) {
+        const ox = p.r * Math.cos(p.a);
+        const oy = p.r * Math.sin(p.a);
+        if (p.flash > 0) {
+          p.flash -= dt;
+          if (p.flash <= 0) spawn(p);
+          else {
+            const s = Math.sqrt(Math.max(ENTRY * ENTRY - p.r * p.r, 0));
+            flashes.push(toLatLngAlt(at(e1, e2, u, ox, oy, s)));
+          }
+          continue;
+        }
+        p.s -= dt * 0.9;
+        const hit = p.r < ENTRY && p.s <= Math.sqrt(ENTRY * ENTRY - p.r * p.r);
+        if (hit) {
+          p.flash = 0.6;
+          continue;
+        }
+        if (p.s < -START) {
+          spawn(p, START);
+          continue;
+        }
+        // 地球の向こう側に隠れる粒も、そのまま（地球の陰になって見えない）。うしろに短い尾を付けて、進む向きを見せる
+        points.push(toLatLngAlt(at(e1, e2, u, ox, oy, p.s)));
+        for (const k of [0.05, 0.1]) trails.push(toLatLngAlt(at(e1, e2, u, ox, oy, p.s + k)));
+      }
+      return { points, trails, flashes };
+    },
+  };
+}
+const cross = (a, b) => ({ x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x });
+const norm = (a) => {
+  const l = Math.hypot(a.x, a.y, a.z);
+  return { x: a.x / l, y: a.y / l, z: a.z / l };
+};
+const at = (e1, e2, u, ox, oy, s) => ({
+  x: ox * e1.x + oy * e2.x + s * u.x,
+  y: ox * e1.y + oy * e2.y + s * u.y,
+  z: ox * e1.z + oy * e2.z + s * u.z,
+});
