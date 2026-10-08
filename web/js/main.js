@@ -26,6 +26,7 @@ import {
   jstShort,
   REF_NOTE,
 } from "./launches.js";
+import { activeMeteors, meteorHtml } from "./meteors.js";
 import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
 
 const COLORS = {
@@ -838,6 +839,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     passes = pref && iss ? findVisiblePasses(iss.satrec, observerOf(pref), now, { days: 5, limit: 3 }) : [];
     passesAt = now.getTime();
     renderTonight(tonightBody, { pref, passes, now, jumpable });
+    // 流星群（極大の前の日から）：放射点の方角・高さと月明かり
+    const meteors = activeMeteors(events, now);
+    if (meteors.length) tonightBody.insertAdjacentHTML("beforeend", meteors.map((ev) => meteorHtml(ev, pref && observerOf(pref), pref?.name, now)).join(""));
     $("#tonight-label").textContent = pref ? `今夜・${pref.name}` : "今夜・頭の上";
     tonightChip.hidden = false;
     // PCは案内の文、スマホは短い「今夜」ボタン（文は読み上げ用に残す）
