@@ -37,6 +37,12 @@
       "label": "遠くを見る部屋を開いたときに読むもの（部屋の部品・3D の旅と探査機の模型・three.js r128・天体の位置の計算・探査機のカード・Horizons の距離の表）",
       "max_kb": 230,
       "files": ["js/far/*.js", "css/far.css", "vendor/three-r128.min.js", "vendor/astronomy.min.js", "data/probes.json", "data/horizons.json"]
+    },
+    {
+      "id": "tour-artemis2",
+      "label": "アルテミス2号ツアー（試作）を開いたときに読むもの（ページ・three.js r128・仮の通り道・地球の画像）",
+      "max_kb": 600,
+      "files": ["tour/artemis2/*", "vendor/three-r128.min.js", "assets/earth/day-2048.jpg", "assets/earth/night-2048.jpg"]
     }
   ],
   "max_file_kb": 600,
