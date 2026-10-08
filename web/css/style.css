@@ -940,16 +940,46 @@ body { overflow: hidden; }
 /* 流星群のちり（地球の上に重ねるキャンバス） */
 .dust-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
-/* 流星群のちりが来る方向（イメージ） */
+/* 流星群のポインタ（ちりが来る方向。機体の丸・射場のひし形とは別の形：点線の輪と、地球へ向かう矢印） */
 .radiant-marker {
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 0; border: 0; background: none; color: #a0ebff; cursor: pointer; pointer-events: auto;
-  transform: translate(-50%, -100%); font-size: 11px; white-space: nowrap;
+  position: relative; width: 34px; height: 34px;
+  padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto;
+  white-space: nowrap; text-align: left; font-family: var(--font-body);
 }
-.radiant-marker .radiant-arrow { font-size: 18px; line-height: 1; order: 2; }
-.radiant-marker .tag { padding: 1px 6px; border: 1px solid rgba(160, 235, 255, 0.5); border-radius: 4px; background: rgba(5, 14, 31, 0.75); }
-.radiant-marker .ref-mark { margin-left: 4px; font-size: 9px; opacity: 0.8; }
-.radiant-marker:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.rp-dial {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 1.5px dashed var(--amber); background: rgba(5, 14, 31, 0.55);
+  box-shadow: 0 0 12px rgba(255, 181, 71, 0.35);
+}
+.rp-dial::before {
+  content: ""; position: absolute; inset: -6px; border-radius: 50%;
+  border: 1px solid rgba(255, 181, 71, 0.35); animation: rp-pulse 2.4s ease-out infinite;
+}
+.rp-arrow {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  transform: rotate(var(--rp-angle, 90deg)); fill: none; stroke: var(--amber); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.rp-arrow path { animation: rp-flow 1.4s linear infinite; }
+.radiant-marker.head-on .rp-arrow { display: none; }
+.radiant-marker.head-on .rp-dial { background: radial-gradient(circle, rgba(255, 210, 122, 0.9) 0 3px, rgba(5, 14, 31, 0.55) 4px); }
+.rp-text { position: absolute; left: 42px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 1px; }
+.rp-name {
+  padding: 2px 8px; border: 1px solid var(--amber); border-radius: 999px; background: rgba(5, 14, 31, 0.82);
+  color: var(--amber); font-size: 12px;
+}
+.rp-more { margin-left: 6px; font-size: 11px; opacity: 0.9; }
+.rp-note { padding-left: 8px; color: var(--text-dim); font-size: 9px; }
+.radiant-marker:hover .rp-name, .radiant-marker:focus-visible .rp-name { background: rgba(255, 181, 71, 0.18); }
+.radiant-marker:focus-visible { outline: 2px solid var(--amber); outline-offset: 4px; border-radius: 18px; }
+@media (max-width: 900px) {
+  .rp-name { font-size: 11px; padding: 2px 7px; }
+  .rp-note { display: none; }
+}
+@keyframes rp-pulse { from { transform: scale(0.85); opacity: 1; } to { transform: scale(1.35); opacity: 0; } }
+@keyframes rp-flow { from { transform: translateX(-3px); opacity: 0.4; } 50% { opacity: 1; } to { transform: translateX(3px); opacity: 0.4; } }
+@media (prefers-reduced-motion: reduce) {
+  .rp-dial::before, .rp-arrow path { animation: none; }
+}
 .site-marker {
   position: relative;
   width: 44px;
