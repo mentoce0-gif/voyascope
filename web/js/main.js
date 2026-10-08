@@ -385,8 +385,14 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     e.stopPropagation();
     if (streamEv) selectEvent(streamEv);
   });
-  const radiantData = () =>
-    streamEv && streamDir ? [{ el: radiantEl, lat: streamDir.lat, lng: streamDir.lng, alt: 0.35 }] : [];
+  // 同じ物を使い回す（毎回新しく作ると、globe.gl が印を外して付け直すので、クリックが届かなくなる）
+  const radiantPin = { el: radiantEl, lat: 0, lng: 0, alt: 0.35 };
+  const radiantData = () => {
+    if (!streamEv || !streamDir) return [];
+    radiantPin.lat = streamDir.lat;
+    radiantPin.lng = streamDir.lng;
+    return [radiantPin];
+  };
   const updateStream = (t, now) => {
     const ev = viewMode === "all" ? activeMeteors(events, now)[0] : null;
     if (!ev) {
