@@ -240,6 +240,37 @@
     </div>
   </dialog>
 
+  <script>
+    // 起動の見張り：20秒たっても「観測を開始」を押せるようにならなければ、待ち続けずに理由と対処を出す
+    // （X などのアプリの中のブラウザで止まることがある。2026-10-08。理由が分かれば、そこを直す）
+    (function () {
+      var boot = (window.__voyascopeBoot = { errors: [], pending: {}, started: false, ready: false });
+      addEventListener("error", function (e) {
+        var t = e.target && e.target !== window ? e.target.src || e.target.href : "";
+        boot.errors.push(e.message || (t ? "読み込めない：" + t.replace(location.origin + "/", "") : "エラー"));
+      }, true);
+      addEventListener("unhandledrejection", function (e) {
+        boot.errors.push(String((e.reason && e.reason.message) || e.reason));
+      });
+      setTimeout(function () {
+        if (boot.ready) return;
+        var status = document.getElementById("boot-status");
+        var label = document.getElementById("start-label");
+        var pending = Object.keys(boot.pending);
+        var inApp = /Twitter|FBAN|FBAV|Instagram|Line\/|Threads/i.test(navigator.userAgent);
+        label.textContent = "うまく読み込めませんでした";
+        status.classList.add("error");
+        status.textContent = [
+          inApp || !boot.started
+            ? "アプリの中のブラウザでは開けないことがあります。メニュー（「…」や共有のボタン）から「ブラウザで開く」を選ぶか、Safari・Chrome で開いてください。"
+            : "通信が混んでいるかもしれません。再読み込みするか、ほかのブラウザで開いてください。",
+          boot.started ? "" : "（プログラムが動き出していません）",
+          pending.length ? "届いていないもの：" + pending.slice(0, 3).join("、") + (pending.length > 3 ? " ほか" + (pending.length - 3) + "件" : "") : "",
+          boot.errors.length ? "エラー：" + boot.errors.slice(0, 2).join(" / ") : "",
+        ].filter(Boolean).join("\n");
+      }, 20000);
+    })();
+  </script>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>
