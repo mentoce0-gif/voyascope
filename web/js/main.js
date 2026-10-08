@@ -328,27 +328,30 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     dctx.globalCompositeOperation = "lighter";
     dctx.lineCap = "round";
     for (const p of frame.points) {
+      if (p.glow < 0.03) continue; // 消えているあいだは描かない
       const head = screen(p);
       if (!head) continue;
       const tail = screen(p.tail);
       if (tail) {
+        // 光の筋：尾（放射点の側）は透明、頭に向かって明るく
         const g = dctx.createLinearGradient(tail.x, tail.y, head.x, head.y);
         g.addColorStop(0, "rgba(160, 225, 255, 0)");
-        g.addColorStop(1, `rgba(170, 230, 255, ${(0.35 * p.glow).toFixed(3)})`);
+        g.addColorStop(0.7, `rgba(190, 235, 255, ${(0.35 * p.glow).toFixed(3)})`);
+        g.addColorStop(1, `rgba(240, 250, 255, ${(0.95 * p.glow).toFixed(3)})`);
         dctx.strokeStyle = g;
-        dctx.lineWidth = 0.8;
+        dctx.lineWidth = 1.3;
         dctx.beginPath();
         dctx.moveTo(tail.x, tail.y);
         dctx.lineTo(head.x, head.y);
         dctx.stroke();
       }
-      const r = 1.1 + 1.2 * p.glow;
-      const g = dctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, r * 2.2);
-      g.addColorStop(0, `rgba(225, 245, 255, ${(0.9 * p.glow).toFixed(3)})`);
+      const r = 1.6 * p.glow + 0.4;
+      const g = dctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, r * 2);
+      g.addColorStop(0, `rgba(250, 253, 255, ${p.glow.toFixed(3)})`);
       g.addColorStop(1, "rgba(160, 225, 255, 0)");
       dctx.fillStyle = g;
       dctx.beginPath();
-      dctx.arc(head.x, head.y, r * 2.2, 0, Math.PI * 2);
+      dctx.arc(head.x, head.y, r * 2, 0, Math.PI * 2);
       dctx.fill();
     }
     for (const f of frame.flashes) {
