@@ -59,3 +59,63 @@ test("文面：県がなければ案内だけ。県があれば方角・空の�
   assert.match(html, /空のどこにでも流れます/);
   assert.match(html, /出典：<a href="https:\/\/example.org\/meteor"/);
 });
+
+import { radiantDirection, createStream } from "../web/js/meteors.js";
+
+test("ちりが来る方向：放射点が真上になる地点は、今夜の東京から見て放射点が高いとき近くにある", () => {
+  const d = radiantDirection({ ra: 262, dec: 54 }, new Date("2026-10-08T09:00:00Z")); // 日本時間 18時
+  assert.equal(d.lat, 54);
+  assert.ok(d.lng > 95 && d.lng < 125, `lng ${d.lng}`); // 東京（東経140°）の西・北
+  assert.ok(Math.abs(Math.hypot(d.u.x, d.u.y, d.u.z) - 1) < 1e-9);
+});
+
+test("ちりの群れ：流れ星（光）は、放射点の側の半球の大気の高さにだけできる", () => {
+  let seed = 1;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const d = radiantDirection({ ra: 262, dec: 54 }, new Date("2026-10-08T09:00:00Z"));
+  const stream = createStream(200, rand);
+  const flashes = [];
+  for (let i = 0; i < 600; i++) flashes.push(...stream.step(1 / 30, d.u).flashes);
+  assert.ok(flashes.length > 100);
+  const D = Math.PI / 180;
+  for (const f of flashes) {
+    assert.ok(Math.abs(f.alt - 0.016) < 1e-6);
+    const v = { x: Math.cos(f.lat * D) * Math.cos(f.lng * D), y: Math.cos(f.lat * D) * Math.sin(f.lng * D), z: Math.sin(f.lat * D) };
+    assert.ok(v.x * d.u.x + v.y * d.u.y + v.z * d.u.z > -1e-9, "放射点と反対の半球に光がある");
+  }
+  // 止めた（dt=0）ときは動かない
+  const a = stream.step(0, d.u).points[0];
+  const b = stream.step(0, d.u).points[0];
+  assert.deepEqual(a, b);
+});
+
+import { meteorWindow, orbitPoint, earthPoint, meteorStoryHtml } from "../web/js/meteors.js";
+import { readFileSync } from "node:fs";
+
+test("出現期間（active）があれば、そのあいだ（日本時間）だけ。ちりも今夜の欄もこれに合わせる", () => {
+  const w = meteorWindow({ ...ev(), active: { value: { from: "2026-10-06", to: "2026-10-10" }, source: src } });
+  assert.equal(new Date(w.start).toISOString(), "2026-10-05T15:00:00.000Z");
+  assert.equal(new Date(w.end).toISOString(), "2026-10-10T15:00:00.000Z");
+  const withActive = [{ ...ev(), active: { value: { from: "2026-10-06", to: "2026-10-10" }, source: src } }];
+  assert.equal(activeMeteors(withActive, new Date("2026-10-05T14:59:00Z")).length, 0);
+  assert.equal(activeMeteors(withActive, new Date("2026-10-06T00:00:00Z")).length, 1);
+  assert.equal(activeMeteors(withActive, new Date("2026-10-10T14:59:00Z")).length, 1);
+  assert.equal(activeMeteors(withActive, new Date("2026-10-10T15:00:00Z")).length, 0);
+});
+
+test("しくみの図：21P の通り道が黄道を横切る点のそばを、地球が10月8日ごろに通る（JPL の軌道要素）", () => {
+  const card = JSON.parse(readFileSync("curation/events/draconids-2026.json", "utf8"));
+  const o = card.parent.orbit.value;
+  const near = orbitPoint(o, 180 - o.w); // 太陽に近いほうの交点
+  const lon = (p) => (Math.atan2(p.y, p.x) * 180) / Math.PI;
+  assert.ok(Math.abs(near.z) < 1e-9);
+  assert.ok(Math.abs(Math.hypot(near.x, near.y) - 1) < 0.05, "交点は地球の軌道のそば");
+  const e = earthPoint(new Date("2026-10-08T12:00:00Z"));
+  assert.ok(Math.abs(lon(e) - lon(near)) < 2, `地球 ${lon(e)}° 交点 ${lon(near)}°`);
+  const html = meteorStoryHtml(card, new Date("2026-10-08T12:00:00Z"));
+  assert.match(html, /NASA JPL 小天体データベース/);
+  assert.match(html, /IAU 星名一覧/);
+  assert.match(html, /国立天文台 流星群とは/);
+  assert.match(html, /イメージ/);
+  assert.match(html, /彗星がいまそこにあるわけではありません/);
+});

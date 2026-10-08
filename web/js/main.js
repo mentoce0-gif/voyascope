@@ -26,7 +26,7 @@ import {
   jstShort,
   REF_NOTE,
 } from "./launches.js";
-import { activeMeteors, meteorHtml } from "./meteors.js";
+import { activeMeteors, meteorHtml, meteorStoryHtml, radiantDirection, createStream } from "./meteors.js";
 import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
 
 const COLORS = {
@@ -279,6 +279,134 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     .htmlAltitude("alt")
     .htmlElement((d) => d.el)
     .htmlTransitionDuration(0);
+
+  // 流星群のちり（イメージ）：放射点の方向から地球へ近づき、大気に飛び込んで流れ星になる。「すべて」の表示のときだけ
+  // 地球の上に透明なキャンバスを重ねて描く（丸くぼけた小さな光・瞬き・尾・消えていく流れ星）
+  const dustCanvas = document.createElement("canvas");
+  dustCanvas.className = "dust-layer";
+  dustCanvas.setAttribute("aria-hidden", "true");
+  globeEl.appendChild(dustCanvas);
+  const dctx = dustCanvas.getContext("2d");
+  let dustDrawn = false;
+  const drawDust = (frame) => {
+    const w = globeEl.clientWidth;
+    const h = globeEl.clientHeight;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    if (dustCanvas.width !== Math.round(w * dpr) || dustCanvas.height !== Math.round(h * dpr)) {
+      dustCanvas.width = Math.round(w * dpr);
+      dustCanvas.height = Math.round(h * dpr);
+    }
+    dctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (dustDrawn) dctx.clearRect(0, 0, w, h);
+    dustDrawn = !!frame;
+    if (!frame) return;
+    const cam = globe.camera().position;
+    const R = globe.getGlobeRadius();
+    const cc = cam.x * cam.x + cam.y * cam.y + cam.z * cam.z - R * R;
+    // 地球の陰（カメラから見て地球の向こう）なら null
+    const screen = ({ lat, lng, alt }) => {
+      const p = globe.getCoords(lat, lng, alt);
+      const dx = p.x - cam.x;
+      const dy = p.y - cam.y;
+      const dz = p.z - cam.z;
+      const aa = dx * dx + dy * dy + dz * dz;
+      const bb = 2 * (cam.x * dx + cam.y * dy + cam.z * dz);
+      const disc = bb * bb - 4 * aa * cc;
+      if (disc > 0) {
+        const t1 = (-bb - Math.sqrt(disc)) / (2 * aa);
+        if (t1 > 0 && t1 < 1) return null;
+      }
+      return globe.getScreenCoords(lat, lng, alt);
+    };
+    dctx.globalCompositeOperation = "lighter";
+    dctx.lineCap = "round";
+    for (const p of frame.points) {
+      const head = screen(p);
+      if (!head) continue;
+      const tail = screen(p.tail);
+      if (tail) {
+        const g = dctx.createLinearGradient(tail.x, tail.y, head.x, head.y);
+        g.addColorStop(0, "rgba(160, 225, 255, 0)");
+        g.addColorStop(1, `rgba(170, 230, 255, ${(0.35 * p.glow).toFixed(3)})`);
+        dctx.strokeStyle = g;
+        dctx.lineWidth = 0.8;
+        dctx.beginPath();
+        dctx.moveTo(tail.x, tail.y);
+        dctx.lineTo(head.x, head.y);
+        dctx.stroke();
+      }
+      const r = 1.1 + 1.2 * p.glow;
+      const g = dctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, r * 2.2);
+      g.addColorStop(0, `rgba(225, 245, 255, ${(0.9 * p.glow).toFixed(3)})`);
+      g.addColorStop(1, "rgba(160, 225, 255, 0)");
+      dctx.fillStyle = g;
+      dctx.beginPath();
+      dctx.arc(head.x, head.y, r * 2.2, 0, Math.PI * 2);
+      dctx.fill();
+    }
+    for (const f of frame.flashes) {
+      const a = screen(f);
+      const b = screen(f.end);
+      if (!a || !b) continue;
+      const k = f.life * f.life * f.bright; // 消えるときは早く暗くなる
+      const g = dctx.createLinearGradient(a.x, a.y, b.x, b.y);
+      g.addColorStop(0, "rgba(255, 220, 150, 0)");
+      g.addColorStop(1, `rgba(255, 236, 190, ${k.toFixed(3)})`);
+      dctx.strokeStyle = g;
+      dctx.lineWidth = 3.2;
+      dctx.globalAlpha = 0.35;
+      dctx.beginPath();
+      dctx.moveTo(a.x, a.y);
+      dctx.lineTo(b.x, b.y);
+      dctx.stroke();
+      dctx.globalAlpha = 1;
+      dctx.lineWidth = 1.2;
+      dctx.stroke();
+      const hg = dctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 4);
+      hg.addColorStop(0, `rgba(255, 250, 230, ${k.toFixed(3)})`);
+      hg.addColorStop(1, "rgba(255, 210, 122, 0)");
+      dctx.fillStyle = hg;
+      dctx.beginPath();
+      dctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+      dctx.fill();
+    }
+    dctx.globalCompositeOperation = "source-over";
+  };
+  const stream = createStream(240);
+  const streamStill = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let streamAt = 0;
+  let streamOn = false;
+  let streamEv = null;
+  let streamDir = null;
+  const radiantEl = document.createElement("button");
+  radiantEl.type = "button";
+  radiantEl.className = "radiant-marker";
+  radiantEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (streamEv) selectEvent(streamEv);
+  });
+  const radiantData = () =>
+    streamEv && streamDir ? [{ el: radiantEl, lat: streamDir.lat, lng: streamDir.lng, alt: 1.1 }] : [];
+  const updateStream = (t, now) => {
+    const ev = viewMode === "all" ? activeMeteors(events, now)[0] : null;
+    if (!ev) {
+      if (streamOn) drawDust(null);
+      streamOn = false;
+      streamEv = null;
+      return;
+    }
+    if (ev !== streamEv) {
+      streamEv = ev;
+      radiantEl.innerHTML = `<span class="radiant-arrow" aria-hidden="true">↓</span><span class="tag">${esc(ev.title.ja.replace(/（.*）/, ""))}のちりが来る方向<span class="ref-mark">イメージ</span></span>`;
+      radiantEl.setAttribute("aria-label", `${ev.title.ja}：ちりが来る方向（イメージ）。詳細を開く`);
+    }
+    if (t - streamAt < 33) return;
+    const dt = streamStill ? 0 : Math.min((t - streamAt) / 1000, 0.1);
+    streamAt = t;
+    streamDir = radiantDirection(ev.radiant.value, now);
+    drawDust(stream.step(dt, streamDir.u));
+    streamOn = true;
+  };
 
   // 「いま、どこの上？」の地名（重いので、起動のあとに裏で読んでいる。届くまでは座標だけを出す）
   let places = null;
@@ -613,6 +741,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     }
     if (selectedEvent) {
       detailBody.innerHTML = eventPanelHtml(selectedEvent, clock.now());
+      // 流星群は「しくみ」の図（母天体の通り道と、放射点のある星座）を、出典の前に足す
+      if (selectedEvent.kind === "meteor") detailBody.querySelector(".event-h")?.insertAdjacentHTML("beforebegin", meteorStoryHtml(selectedEvent, clock.now()));
       return;
     }
     if (!selected) return;
@@ -661,6 +791,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     layoutGlobe();
     const p = ev.site?.position?.value;
     if (p) globe.pointOfView({ lat: p.lat, lng: p.lng }, 900);
+    // 流星群は、ちりが飛び込んでくる様子を斜め横から見られる向きに（放射点が真上になる地点から、赤道の側へ55°ずらす）
+    else if (ev.kind === "meteor" && ev === streamEv && streamDir)
+      globe.pointOfView({ lat: streamDir.lat - Math.sign(streamDir.lat || 1) * 55, lng: streamDir.lng }, 900);
   }
   // 世界の打ち上げ（参考）を詳細に出す。射場があれば地球をそこへ向ける
   function selectLaunch(l) {
@@ -859,6 +992,11 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     updateTonight();
   });
   tonightBody.addEventListener("click", (e) => {
+    const story = e.target.closest("[data-meteor-story]");
+    if (story) {
+      selectEvent(events.find((ev) => ev.id === story.dataset.meteorStory));
+      return;
+    }
     const b = e.target.closest("[data-jump]");
     const p = b && passes[Number(b.dataset.jump)];
     if (!p || !iss) return;
@@ -1122,7 +1260,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     for (const s of sites) s.el.classList.toggle("selected", s.ev === selectedEvent);
     for (const p of worldPins) p.el.classList.toggle("selected", !!selectedLaunch && p.launches.includes(selectedLaunch));
     const pov = globe.pointOfView();
-    globe.htmlElementsData([...markerData(), ...siteData()]);
+    updateStream(t, now);
+    globe.htmlElementsData([...markerData(), ...siteData(), ...radiantData()]);
     if (follow && selected?.pos) globe.pointOfView({ lat: selected.pos.lat, lng: selected.pos.lng, altitude: pov.altitude }, 0);
 
     // 文字の更新は間引く
