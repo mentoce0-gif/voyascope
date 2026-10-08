@@ -11,6 +11,7 @@
 | 本番 | https://voyascope.org | Cloudflare（Workers の静的アセット）。`.github/workflows/deploy.yml`・`wrangler.jsonc`・`web/_headers`。鍵は GitHub の Secrets（`CLOUDFLARE_API_TOKEN`・`CLOUDFLARE_ACCOUNT_ID`） |
 | 仮の公開（並べて確かめ中） | https://mentoce0-gif.github.io/voyascope/ | GitHub Pages（`pages.yml`）。切り替えたら「新しい場所」の案内だけにする（M9 ②） |
 | MMX の予告ページ | https://voyascope.org/mmx/ | `web/mmx/`。noindex、アプリからはまだリンクしない。紹介のメールに添えた |
+| X（旧 Twitter） | https://x.com/voyascope （@voyascope） | オーナーのアカウント（作者として発信）。プロフィールは「VOYASCOPE をつくっている人。本業のかたわら…※非公式ファンメイド作品」（2026-10-08 案C）。開発記録の投稿文は Claude Code が下書き（X の重み付きで280以内、非公式ファンメイドの一文を入れる） |
 | 公開のリポジトリ | `mentoce0-gif/voyascope` | 2026-10-04 に作り直した（PR は #1 から振り直し） |
 | 非公開の記録 | `mentoce0-gif/voyascope-research` | `research/chappy/`（チャッピーの報告）・`research/verification/`（照合と JPL とのやりとり）・`research/outreach/`（紹介の送り先・文面・返事） |
 | 旧リポジトリ（非公開） | `mentoce0-gif/voyascope-archive` | 作り直す前の履歴（個人のメールアドレス入り）。**ここの履歴やブランチを公開のリポジトリへ push しない** |
