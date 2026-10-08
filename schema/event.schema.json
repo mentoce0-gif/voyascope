@@ -88,6 +88,14 @@
         }
       }
     },
+    "when_label": {
+      "enum": ["極大", "見ごろ"],
+      "description": "流星群の when が何の日時か。なければ「極大」。公式が極大の日時を出さず、見ごろだけを書いているときは「見ごろ」"
+    },
+    "rate": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "流星群の1時間あたりの数の目安。必ず条件（「空の暗い場所で」など）と一緒に、出典の書き方どおり"
+    },
     "radiant": {
       "description": "流星群の放射点（赤経・赤緯、度。J2000）。kind が meteor のときだけ。今夜の方角・高さはアプリが計算する",
       "allOf": [

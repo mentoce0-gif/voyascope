@@ -135,10 +135,13 @@ function radiantWords({ samples, best }) {
   return parts.join("");
 }
 
+const credit = (url) => `<span class="k">出典：<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(new URL(url).hostname.replace(/^www\./, ""))}</a></span>`;
+
 export function meteorHtml(ev, observer, prefName, now) {
   const name = ev.title.ja;
   const head = `<h3 class="meteor-title">${esc(name)}</h3>
-    <p class="small">極大：${esc(whenText(ev, now, { full: true }))}　<span class="k">出典：<a href="${esc(ev.when.source)}" target="_blank" rel="noopener noreferrer">${esc(new URL(ev.when.source).hostname.replace(/^www\./, ""))}</a></span></p>`;
+    <p class="small">${esc(ev.when_label ?? "極大")}：${esc(whenText(ev, now, { full: true }))}${ev.when.note ? `<span class="k">（${esc(ev.when.note)}）</span>` : ""}　${credit(ev.when.source)}</p>
+    ${ev.rate?.value ? `<p class="small">流れ星の数：${esc(ev.rate.value)}　${credit(ev.rate.source)}</p>` : ""}`;
   if (!observer) return `<section class="meteor">${head}<p class="k small">県を選ぶと、放射点がどの方角・高さにあるかが出ます。</p></section>`;
   const night = meteorNight(ev.radiant.value, observer, now);
   if (!night) return `<section class="meteor">${head}</section>`;
@@ -150,6 +153,7 @@ export function meteorHtml(ev, observer, prefName, now) {
     ${head}
     <p class="small">${esc(prefName)}から：${radiantWords(night)}</p>
     ${radiantChart(night)}
+    <p class="k small">放射点の位置の${credit(ev.radiant.source).replace('<span class="k">', "<span>")}</p>
     <p class="small">${moonText}</p>
     <p class="tonight-note k small">流れ星は放射点のまわりだけでなく、空のどこにでも流れます。放射点が高いほど、たくさん見えます。<br>
     放射点と月の位置は、県庁あたりでの計算の目安です。天気（雲）と街の明かりは考えていません。</p>
