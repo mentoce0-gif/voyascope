@@ -73,8 +73,15 @@ function startNoise(canvas) {
 }
 
 // options：fetch に足す指定（あとから読む重いデータは priority: "low"。対応していないブラウザは無視する）
+// 起動の見張り（index.html）に、まだ届いていないものを知らせる
+const bootWatch = window.__voyascopeBoot ?? { pending: {} };
+const tracked = (name, promise) => {
+  bootWatch.pending[name] = true;
+  return promise.finally(() => delete bootWatch.pending[name]);
+};
+
 async function loadJson(path, options = {}) {
-  const res = await fetch(path, { cache: "no-cache", ...options });
+  const res = await tracked(path, fetch(path, { cache: "no-cache", ...options }));
   if (!res.ok) {
     const err = new Error(`${path} を読み込めません（HTTP ${res.status}）`);
     err.status = res.status;
@@ -87,13 +94,13 @@ async function loadJson(path, options = {}) {
 // 3D 表示のライブラリ（globe.gl、約500KB）を実行する。index.html の <link rel="preload"> で最初に読み始めているので、
 // ここでは届いたものを実行するだけ。<script> をページに直接書くと、届くまでほかの部品とデータの読み込みが止まる
 function loadGlobeLib() {
-  return new Promise((resolve, reject) => {
+  return tracked("vendor/globe.gl.min.js", new Promise((resolve, reject) => {
     const s = document.createElement("script");
     s.src = "vendor/globe.gl.min.js";
     s.onload = () => (typeof Globe === "function" ? resolve() : reject(new Error("3D表示のライブラリを読み込めません")));
     s.onerror = () => reject(new Error("3D表示のライブラリを読み込めません"));
     document.head.append(s);
-  });
+  }));
 }
 
 // 「観測を開始」を押せるまでに要るデータ
@@ -1331,6 +1338,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
 
 // ---------- 起動 ----------
 async function boot() {
+  bootWatch.started = true;
   const stopNoise = startNoise($("#noise"));
   const status = $("#boot-status");
   const startBtn = $("#start");
@@ -1352,11 +1360,13 @@ async function boot() {
         ? `軌道データ（web/${e.path}）がありません。npm run fetch:orbits で取得してください。`
         : `読み込みに失敗しました：${e.message}`;
     $("#start-label").textContent = "読み込めませんでした";
+    bootWatch.ready = true; // 理由はもう出したので、見張りは何もしない
     return;
   }
   // 重いデータ（地名・ミニ地図の陸地）は、ここから裏で読む。ボタンを押すまでの時間を使う
   data.later = loadLater();
   $("#start-label").textContent = "観測を開始";
+  bootWatch.ready = true;
   startBtn.disabled = false;
   startBtn.focus();
   startBtn.addEventListener(
