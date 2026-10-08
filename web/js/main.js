@@ -372,7 +372,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     }
     dctx.globalCompositeOperation = "source-over";
   };
-  const stream = createStream(240);
+  const stream = createStream(130);
   const streamStill = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let streamAt = 0;
   let streamOn = false;

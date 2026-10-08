@@ -187,7 +187,8 @@ export function radiantDirection(radiant, date) {
 }
 
 const ENTRY = 1.016; // 大気に飛び込む高さ（約100km）
-const START = 2.4; // 粒が現れる距離（地球の半径の何倍か）
+const START = 3; // 粒が現れる距離（地球の半径の何倍か）
+const SPREAD = 3.2; // ちりの流れの広さ（半径。地球の半径の何倍か）。地球より広く、多くはそばを通り過ぎる
 const toLatLngAlt = (p) => {
   const r = Math.hypot(p.x, p.y, p.z);
   return { lat: Math.asin(p.z / r) * DEG, lng: Math.atan2(p.y, p.x) * DEG, alt: r - 1 };
@@ -200,7 +201,7 @@ const FLASH_SEC = 0.9;
 export function createStream(n = 140, random = Math.random) {
   let T = 0;
   const spawn = (p, s = START + random() * START) => {
-    const r = 1.3 * Math.sqrt(random()); // 1.0 より内側は地球に当たる
+    const r = SPREAD * Math.sqrt(random()); // 1.0 より内側（およそ10個に1個）は地球に当たる
     p.a = random() * 2 * Math.PI;
     p.r = r;
     p.s = s;
