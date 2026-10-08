@@ -188,6 +188,8 @@ export function radiantDirection(radiant, date) {
 
 const ENTRY = 1.016; // 大気に飛び込む高さ（約100km）
 const START = 3; // 粒が現れる距離（地球の半径の何倍か）
+const SPEED = 1.8; // 粒が近づく速さ（地球の半径／秒。イメージ）
+const TAIL = 0.45; // 光の筋の長さ（地球の半径の何倍か）
 const SPREAD = 3.2; // ちりの流れの広さ（半径。地球の半径の何倍か）。地球より広く、多くはそばを通り過ぎる
 const toLatLngAlt = (p) => {
   const r = Math.hypot(p.x, p.y, p.z);
@@ -195,7 +197,7 @@ const toLatLngAlt = (p) => {
 };
 
 // 粒の群れ。step(dt, u) で動かして、いまの粒（尾つき・瞬き）と、大気に飛び込んだ光（流れ星）を返す
-// - 粒：小さな光。現れるときにふわっと明るくなり、ゆらぐ（瞬く）。尾は来た向き（放射点の側）に伸びる
+// - 粒：一瞬「シュッ」と光って、来た向き（放射点の側）へ尾を引きながら消える光の筋。粒ごとにずらしてくり返す
 // - 流れ星：大気の高さ（約100km）で光り、進む向きに短い筋をのばしながら、0.9秒ほどで消える
 const FLASH_SEC = 0.9;
 export function createStream(n = 140, random = Math.random) {
@@ -208,7 +210,7 @@ export function createStream(n = 140, random = Math.random) {
     p.flash = 0;
     p.born = T;
     p.phase = random() * 2 * Math.PI;
-    p.freq = 3 + random() * 5;
+    p.rate = 0.35 + random() * 0.45; // 1秒に何回「シュッ」と光るか
     p.bright = 0.5 + random() * 0.5;
     return p;
   };
@@ -238,7 +240,7 @@ export function createStream(n = 140, random = Math.random) {
           }
           continue;
         }
-        p.s -= dt * 0.9;
+        p.s -= dt * SPEED;
         const hit = p.r < ENTRY && p.s <= Math.sqrt(ENTRY * ENTRY - p.r * p.r);
         if (hit) {
           p.flash = FLASH_SEC;
@@ -248,10 +250,12 @@ export function createStream(n = 140, random = Math.random) {
           spawn(p, START);
           continue;
         }
-        const fadeIn = Math.min(1, (T - p.born) / 0.8);
-        const glow = fadeIn * p.bright * (0.55 + 0.45 * Math.sin(T * p.freq + p.phase));
+        const fadeIn = Math.min(1, (T - p.born) / 0.4);
+        // 光り方：一瞬で明るくなり、尾を引きながらすぐ消える。これを粒ごとにずらしてくり返す
+        const cyc = (T * p.rate + p.phase / (2 * Math.PI)) % 1;
+        const glow = fadeIn * p.bright * (cyc < 0.06 ? cyc / 0.06 : Math.exp(-(cyc - 0.06) * 9));
         // 地球の向こう側に隠れる粒も、そのまま（描くときに地球の陰を見る）
-        points.push({ ...toLatLngAlt(at(e1, e2, u, ox, oy, p.s)), tail: toLatLngAlt(at(e1, e2, u, ox, oy, p.s + 0.14)), glow });
+        points.push({ ...toLatLngAlt(at(e1, e2, u, ox, oy, p.s)), tail: toLatLngAlt(at(e1, e2, u, ox, oy, p.s + TAIL)), glow });
       }
       return { points, flashes };
     },
