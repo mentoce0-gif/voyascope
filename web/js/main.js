@@ -26,7 +26,7 @@ import {
   jstShort,
   REF_NOTE,
 } from "./launches.js";
-import { activeMeteors, meteorHtml, radiantDirection, createStream } from "./meteors.js";
+import { activeMeteors, meteorHtml, meteorStoryHtml, radiantDirection, createStream } from "./meteors.js";
 import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
 
 const COLORS = {
@@ -290,7 +290,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     .particlesSize((d) => d.size)
     .particlesSizeAttenuation(false)
     .particlesColor((d) => d.color);
-  const stream = createStream(140);
+  const stream = createStream(240);
   const streamStill = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let streamAt = 0;
   let streamOn = false;
@@ -664,6 +664,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     }
     if (selectedEvent) {
       detailBody.innerHTML = eventPanelHtml(selectedEvent, clock.now());
+      // 流星群は「しくみ」の図（母天体の通り道と、放射点のある星座）を、出典の前に足す
+      if (selectedEvent.kind === "meteor") detailBody.querySelector(".event-h")?.insertAdjacentHTML("beforebegin", meteorStoryHtml(selectedEvent, clock.now()));
       return;
     }
     if (!selected) return;
@@ -913,6 +915,11 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     updateTonight();
   });
   tonightBody.addEventListener("click", (e) => {
+    const story = e.target.closest("[data-meteor-story]");
+    if (story) {
+      selectEvent(events.find((ev) => ev.id === story.dataset.meteorStory));
+      return;
+    }
     const b = e.target.closest("[data-jump]");
     const p = b && passes[Number(b.dataset.jump)];
     if (!p || !iss) return;

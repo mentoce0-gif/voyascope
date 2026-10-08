@@ -88,3 +88,34 @@ test("ちりの群れ：流れ星（光）は、放射点の側の半球の大�
   const b = stream.step(0, d.u).points[0];
   assert.deepEqual(a, b);
 });
+
+import { meteorWindow, orbitPoint, earthPoint, meteorStoryHtml } from "../web/js/meteors.js";
+import { readFileSync } from "node:fs";
+
+test("出現期間（active）があれば、そのあいだ（日本時間）だけ。ちりも今夜の欄もこれに合わせる", () => {
+  const w = meteorWindow({ ...ev(), active: { value: { from: "2026-10-06", to: "2026-10-10" }, source: src } });
+  assert.equal(new Date(w.start).toISOString(), "2026-10-05T15:00:00.000Z");
+  assert.equal(new Date(w.end).toISOString(), "2026-10-10T15:00:00.000Z");
+  const withActive = [{ ...ev(), active: { value: { from: "2026-10-06", to: "2026-10-10" }, source: src } }];
+  assert.equal(activeMeteors(withActive, new Date("2026-10-05T14:59:00Z")).length, 0);
+  assert.equal(activeMeteors(withActive, new Date("2026-10-06T00:00:00Z")).length, 1);
+  assert.equal(activeMeteors(withActive, new Date("2026-10-10T14:59:00Z")).length, 1);
+  assert.equal(activeMeteors(withActive, new Date("2026-10-10T15:00:00Z")).length, 0);
+});
+
+test("しくみの図：21P の通り道が黄道を横切る点のそばを、地球が10月8日ごろに通る（JPL の軌道要素）", () => {
+  const card = JSON.parse(readFileSync("curation/events/draconids-2026.json", "utf8"));
+  const o = card.parent.orbit.value;
+  const near = orbitPoint(o, 180 - o.w); // 太陽に近いほうの交点
+  const lon = (p) => (Math.atan2(p.y, p.x) * 180) / Math.PI;
+  assert.ok(Math.abs(near.z) < 1e-9);
+  assert.ok(Math.abs(Math.hypot(near.x, near.y) - 1) < 0.05, "交点は地球の軌道のそば");
+  const e = earthPoint(new Date("2026-10-08T12:00:00Z"));
+  assert.ok(Math.abs(lon(e) - lon(near)) < 2, `地球 ${lon(e)}° 交点 ${lon(near)}°`);
+  const html = meteorStoryHtml(card, new Date("2026-10-08T12:00:00Z"));
+  assert.match(html, /NASA JPL 小天体データベース/);
+  assert.match(html, /IAU 星名一覧/);
+  assert.match(html, /国立天文台 流星群とは/);
+  assert.match(html, /イメージ/);
+  assert.match(html, /彗星がいまそこにあるわけではありません/);
+});
