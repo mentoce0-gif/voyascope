@@ -193,25 +193,33 @@ const toLatLngAlt = (p) => {
   return { lat: Math.asin(p.z / r) * DEG, lng: Math.atan2(p.y, p.x) * DEG, alt: r - 1 };
 };
 
-// 粒の群れ。step(dt, u) で動かして、いまの粒と、大気に飛び込んだ光（流れ星）を返す
+// 粒の群れ。step(dt, u) で動かして、いまの粒（尾つき・瞬き）と、大気に飛び込んだ光（流れ星）を返す
+// - 粒：小さな光。現れるときにふわっと明るくなり、ゆらぐ（瞬く）。尾は来た向き（放射点の側）に伸びる
+// - 流れ星：大気の高さ（約100km）で光り、進む向きに短い筋をのばしながら、0.9秒ほどで消える
+const FLASH_SEC = 0.9;
 export function createStream(n = 140, random = Math.random) {
+  let T = 0;
   const spawn = (p, s = START + random() * START) => {
     const r = 1.3 * Math.sqrt(random()); // 1.0 より内側は地球に当たる
     p.a = random() * 2 * Math.PI;
     p.r = r;
     p.s = s;
     p.flash = 0;
+    p.born = T;
+    p.phase = random() * 2 * Math.PI;
+    p.freq = 3 + random() * 5;
+    p.bright = 0.5 + random() * 0.5;
     return p;
   };
   const parts = Array.from({ length: n }, () => spawn({}));
   return {
     step(dt, u) {
+      T += dt;
       // u に直交する2つの向き
       const ref = Math.abs(u.z) < 0.9 ? { x: 0, y: 0, z: 1 } : { x: 1, y: 0, z: 0 };
       const e1 = norm(cross(u, ref));
       const e2 = cross(u, e1);
       const points = [];
-      const trails = [];
       const flashes = [];
       for (const p of parts) {
         const ox = p.r * Math.cos(p.a);
@@ -221,25 +229,30 @@ export function createStream(n = 140, random = Math.random) {
           if (p.flash <= 0) spawn(p);
           else {
             const s = Math.sqrt(Math.max(ENTRY * ENTRY - p.r * p.r, 0));
-            flashes.push(toLatLngAlt(at(e1, e2, u, ox, oy, s)));
+            const head = toLatLngAlt(at(e1, e2, u, ox, oy, s));
+            // 光の筋：大気に入ったところから、進む向き（放射点と反対）へ少し
+            const len = 0.012 + 0.025 * (1 - p.flash / FLASH_SEC);
+            const end = toLatLngAlt(at(e1, e2, u, ox, oy, s - len));
+            flashes.push({ ...head, end, life: p.flash / FLASH_SEC, bright: p.bright });
           }
           continue;
         }
         p.s -= dt * 0.9;
         const hit = p.r < ENTRY && p.s <= Math.sqrt(ENTRY * ENTRY - p.r * p.r);
         if (hit) {
-          p.flash = 0.6;
+          p.flash = FLASH_SEC;
           continue;
         }
         if (p.s < -START) {
           spawn(p, START);
           continue;
         }
-        // 地球の向こう側に隠れる粒も、そのまま（地球の陰になって見えない）。うしろに短い尾を付けて、進む向きを見せる
-        points.push(toLatLngAlt(at(e1, e2, u, ox, oy, p.s)));
-        for (const k of [0.05, 0.1]) trails.push(toLatLngAlt(at(e1, e2, u, ox, oy, p.s + k)));
+        const fadeIn = Math.min(1, (T - p.born) / 0.8);
+        const glow = fadeIn * p.bright * (0.55 + 0.45 * Math.sin(T * p.freq + p.phase));
+        // 地球の向こう側に隠れる粒も、そのまま（描くときに地球の陰を見る）
+        points.push({ ...toLatLngAlt(at(e1, e2, u, ox, oy, p.s)), tail: toLatLngAlt(at(e1, e2, u, ox, oy, p.s + 0.14)), glow });
       }
-      return { points, trails, flashes };
+      return { points, flashes };
     },
   };
 }

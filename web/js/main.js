@@ -281,15 +281,97 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     .htmlTransitionDuration(0);
 
   // 流星群のちり（イメージ）：放射点の方向から地球へ近づき、大気に飛び込んで流れ星になる。「すべて」の表示のときだけ
-  globe
-    .particlesData([])
-    .particlesList((d) => d.pts)
-    .particleLat("lat")
-    .particleLng("lng")
-    .particleAltitude("alt")
-    .particlesSize((d) => d.size)
-    .particlesSizeAttenuation(false)
-    .particlesColor((d) => d.color);
+  // 地球の上に透明なキャンバスを重ねて描く（丸くぼけた小さな光・瞬き・尾・消えていく流れ星）
+  const dustCanvas = document.createElement("canvas");
+  dustCanvas.className = "dust-layer";
+  dustCanvas.setAttribute("aria-hidden", "true");
+  globeEl.appendChild(dustCanvas);
+  const dctx = dustCanvas.getContext("2d");
+  let dustDrawn = false;
+  const drawDust = (frame) => {
+    const w = globeEl.clientWidth;
+    const h = globeEl.clientHeight;
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    if (dustCanvas.width !== Math.round(w * dpr) || dustCanvas.height !== Math.round(h * dpr)) {
+      dustCanvas.width = Math.round(w * dpr);
+      dustCanvas.height = Math.round(h * dpr);
+    }
+    dctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (dustDrawn) dctx.clearRect(0, 0, w, h);
+    dustDrawn = !!frame;
+    if (!frame) return;
+    const cam = globe.camera().position;
+    const R = globe.getGlobeRadius();
+    const cc = cam.x * cam.x + cam.y * cam.y + cam.z * cam.z - R * R;
+    // 地球の陰（カメラから見て地球の向こう）なら null
+    const screen = ({ lat, lng, alt }) => {
+      const p = globe.getCoords(lat, lng, alt);
+      const dx = p.x - cam.x;
+      const dy = p.y - cam.y;
+      const dz = p.z - cam.z;
+      const aa = dx * dx + dy * dy + dz * dz;
+      const bb = 2 * (cam.x * dx + cam.y * dy + cam.z * dz);
+      const disc = bb * bb - 4 * aa * cc;
+      if (disc > 0) {
+        const t1 = (-bb - Math.sqrt(disc)) / (2 * aa);
+        if (t1 > 0 && t1 < 1) return null;
+      }
+      return globe.getScreenCoords(lat, lng, alt);
+    };
+    dctx.globalCompositeOperation = "lighter";
+    dctx.lineCap = "round";
+    for (const p of frame.points) {
+      const head = screen(p);
+      if (!head) continue;
+      const tail = screen(p.tail);
+      if (tail) {
+        const g = dctx.createLinearGradient(tail.x, tail.y, head.x, head.y);
+        g.addColorStop(0, "rgba(160, 225, 255, 0)");
+        g.addColorStop(1, `rgba(170, 230, 255, ${(0.35 * p.glow).toFixed(3)})`);
+        dctx.strokeStyle = g;
+        dctx.lineWidth = 0.8;
+        dctx.beginPath();
+        dctx.moveTo(tail.x, tail.y);
+        dctx.lineTo(head.x, head.y);
+        dctx.stroke();
+      }
+      const r = 1.1 + 1.2 * p.glow;
+      const g = dctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, r * 2.2);
+      g.addColorStop(0, `rgba(225, 245, 255, ${(0.9 * p.glow).toFixed(3)})`);
+      g.addColorStop(1, "rgba(160, 225, 255, 0)");
+      dctx.fillStyle = g;
+      dctx.beginPath();
+      dctx.arc(head.x, head.y, r * 2.2, 0, Math.PI * 2);
+      dctx.fill();
+    }
+    for (const f of frame.flashes) {
+      const a = screen(f);
+      const b = screen(f.end);
+      if (!a || !b) continue;
+      const k = f.life * f.life * f.bright; // 消えるときは早く暗くなる
+      const g = dctx.createLinearGradient(a.x, a.y, b.x, b.y);
+      g.addColorStop(0, "rgba(255, 220, 150, 0)");
+      g.addColorStop(1, `rgba(255, 236, 190, ${k.toFixed(3)})`);
+      dctx.strokeStyle = g;
+      dctx.lineWidth = 3.2;
+      dctx.globalAlpha = 0.35;
+      dctx.beginPath();
+      dctx.moveTo(a.x, a.y);
+      dctx.lineTo(b.x, b.y);
+      dctx.stroke();
+      dctx.globalAlpha = 1;
+      dctx.lineWidth = 1.2;
+      dctx.stroke();
+      const hg = dctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 4);
+      hg.addColorStop(0, `rgba(255, 250, 230, ${k.toFixed(3)})`);
+      hg.addColorStop(1, "rgba(255, 210, 122, 0)");
+      dctx.fillStyle = hg;
+      dctx.beginPath();
+      dctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+      dctx.fill();
+    }
+    dctx.globalCompositeOperation = "source-over";
+  };
   const stream = createStream(240);
   const streamStill = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let streamAt = 0;
@@ -308,7 +390,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   const updateStream = (t, now) => {
     const ev = viewMode === "all" ? activeMeteors(events, now)[0] : null;
     if (!ev) {
-      if (streamOn) globe.particlesData([]);
+      if (streamOn) drawDust(null);
       streamOn = false;
       streamEv = null;
       return;
@@ -322,12 +404,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     const dt = streamStill ? 0 : Math.min((t - streamAt) / 1000, 0.1);
     streamAt = t;
     streamDir = radiantDirection(ev.radiant.value, now);
-    const { points, trails, flashes } = stream.step(dt, streamDir.u);
-    globe.particlesData([
-      { pts: trails, size: 3, color: "rgba(160, 235, 255, 0.35)" },
-      { pts: points, size: 4, color: "rgba(190, 245, 255, 0.95)" },
-      { pts: flashes, size: 6, color: "rgba(255, 210, 122, 0.9)" },
-    ]);
+    drawDust(stream.step(dt, streamDir.u));
     streamOn = true;
   };
 

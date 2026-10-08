@@ -937,6 +937,9 @@ body { overflow: hidden; }
 .story-key.dust { color: rgba(160, 235, 255, 0.4); }
 .meteor-story-btn { display: block; margin: 6px auto 4px; }
 
+/* 流星群のちり（地球の上に重ねるキャンバス） */
+.dust-layer { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
 /* 流星群のちりが来る方向（イメージ） */
 .radiant-marker {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
