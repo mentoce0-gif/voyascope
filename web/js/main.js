@@ -386,7 +386,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     if (streamEv) selectEvent(streamEv);
   });
   const radiantData = () =>
-    streamEv && streamDir ? [{ el: radiantEl, lat: streamDir.lat, lng: streamDir.lng, alt: 1.1 }] : [];
+    streamEv && streamDir ? [{ el: radiantEl, lat: streamDir.lat, lng: streamDir.lng, alt: 0.35 }] : [];
   const updateStream = (t, now) => {
     const ev = viewMode === "all" ? activeMeteors(events, now)[0] : null;
     if (!ev) {
@@ -397,14 +397,22 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     }
     if (ev !== streamEv) {
       streamEv = ev;
-      radiantEl.innerHTML = `<span class="radiant-arrow" aria-hidden="true">↓</span><span class="tag">${esc(ev.title.ja.replace(/（.*）/, ""))}のちりが来る方向<span class="ref-mark">イメージ</span></span>`;
-      radiantEl.setAttribute("aria-label", `${ev.title.ja}：ちりが来る方向（イメージ）。詳細を開く`);
+      // 流星群のポインタ：ちりが来る方向に置き、地球へ向かう矢印を回す。押すと詳細（しくみの図）を開く
+      radiantEl.innerHTML = `<span class="rp-dial" aria-hidden="true"><svg class="rp-arrow" viewBox="-12 -12 24 24"><path d="M-7 -5L-1 0L-7 5M0 -5L6 0L0 5"/></svg></span>
+        <span class="rp-text"><span class="rp-name">${esc(ev.title.ja.replace(/（.*）/, ""))}<span class="rp-more">詳しく ›</span></span><span class="rp-note">ちりの来る方向（イメージ）</span></span>`;
+      radiantEl.setAttribute("aria-label", `${ev.title.ja}の詳細を開く（ちりが来る方向。ちりの流れはイメージ）`);
     }
     if (t - streamAt < 33) return;
     const dt = streamStill ? 0 : Math.min((t - streamAt) / 1000, 0.1);
     streamAt = t;
     streamDir = radiantDirection(ev.radiant.value, now);
     drawDust(stream.step(dt, streamDir.u));
+    // 矢印の向き：ポインタ（宇宙の側）から、その真下の地上（地球の中心の側）へ。真正面から来るときは矢印を隠して円だけ
+    const pa = globe.getScreenCoords(streamDir.lat, streamDir.lng, 0.35);
+    const pb = globe.getScreenCoords(streamDir.lat, streamDir.lng, 0);
+    const len = Math.hypot(pb.x - pa.x, pb.y - pa.y);
+    radiantEl.classList.toggle("head-on", len < 12);
+    radiantEl.style.setProperty("--rp-angle", `${((Math.atan2(pb.y - pa.y, pb.x - pa.x) * 180) / Math.PI).toFixed(1)}deg`);
     streamOn = true;
   };
 
@@ -791,9 +799,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     layoutGlobe();
     const p = ev.site?.position?.value;
     if (p) globe.pointOfView({ lat: p.lat, lng: p.lng }, 900);
-    // 流星群は、ちりが飛び込んでくる様子を斜め横から見られる向きに（放射点が真上になる地点から、赤道の側へ55°ずらす）
+    // 流星群は、ちりが飛び込んでくる様子を斜め横から見られる向きに（放射点が真上になる地点から、赤道の側へ30°ずらす）
     else if (ev.kind === "meteor" && ev === streamEv && streamDir)
-      globe.pointOfView({ lat: streamDir.lat - Math.sign(streamDir.lat || 1) * 55, lng: streamDir.lng }, 900);
+      globe.pointOfView({ lat: streamDir.lat - Math.sign(streamDir.lat || 1) * 30, lng: streamDir.lng }, 900);
   }
   // 世界の打ち上げ（参考）を詳細に出す。射場があれば地球をそこへ向ける
   function selectLaunch(l) {
