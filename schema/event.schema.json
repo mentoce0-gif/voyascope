@@ -9,8 +9,8 @@
   "properties": {
     "id": { "$ref": "common.schema.json#/$defs/id" },
     "kind": {
-      "enum": ["launch", "arrival", "separation", "flyby", "milestone"],
-      "description": "launch=打ち上げ / arrival=到着 / separation=分離 / flyby=接近（スイングバイ・フライバイ） / milestone=節目"
+      "enum": ["launch", "arrival", "separation", "flyby", "milestone", "meteor"],
+      "description": "launch=打ち上げ / arrival=到着 / separation=分離 / flyby=接近（スイングバイ・フライバイ） / milestone=節目 / meteor=流星群の極大"
     },
     "regions": {
       "type": "array",
@@ -88,6 +88,128 @@
         }
       }
     },
+    "when_label": {
+      "enum": ["極大", "見ごろ"],
+      "description": "流星群の when が何の日時か。なければ「極大」。公式が極大の日時を出さず、見ごろだけを書いているときは「見ごろ」"
+    },
+    "rate": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "流星群の1時間あたりの数の目安。必ず条件（「空の暗い場所で」など）と一緒に、出典の書き方どおり"
+    },
+    "active": {
+      "description": "流星群の出現期間（日本時間の日付 from〜to）。地球のまわりのちりは、このあいだだけ描く",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "object",
+                "required": ["from", "to"],
+                "additionalProperties": false,
+                "properties": { "from": { "$ref": "common.schema.json#/$defs/date" }, "to": { "$ref": "common.schema.json#/$defs/date" } }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "parent": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "description": "流星群の母天体。orbit は太陽のまわりの図に使う軌道要素（JPL SBDB など）",
+      "properties": {
+        "name": { "$ref": "common.schema.json#/$defs/fact" },
+        "orbit": {
+          "allOf": [
+            { "$ref": "common.schema.json#/$defs/fact" },
+            {
+              "if": { "required": ["value"] },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "object",
+                    "required": ["e", "q", "i", "om", "w"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "e": { "type": "number", "minimum": 0, "exclusiveMaximum": 1 },
+                      "a": { "type": "number" },
+                      "q": { "type": "number", "exclusiveMinimum": 0 },
+                      "i": { "type": "number" },
+                      "om": { "type": "number" },
+                      "w": { "type": "number" },
+                      "tp": { "type": "number" },
+                      "epoch": { "type": "number" }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "moid": { "$ref": "common.schema.json#/$defs/fact" }
+      }
+    },
+    "constellation": {
+      "type": "object",
+      "required": ["name", "stars"],
+      "additionalProperties": false,
+      "description": "放射点のある星座の主な星（星の図に使う）。lines は stars の番号どうしを結ぶ線（星座線はイメージ）",
+      "properties": {
+        "name": { "type": "string", "maxLength": 16 },
+        "stars": {
+          "allOf": [
+            { "$ref": "common.schema.json#/$defs/fact" },
+            {
+              "if": { "required": ["value"] },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["name", "ra", "dec", "mag"],
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": { "type": "string", "maxLength": 20 },
+                        "ra": { "type": "number", "minimum": 0, "maximum": 360 },
+                        "dec": { "type": "number", "minimum": -90, "maximum": 90 },
+                        "mag": { "type": "number" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "lines": { "type": "array", "items": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer", "minimum": 0 } } }
+      }
+    },
+    "radiant": {
+      "description": "流星群の放射点（赤経・赤緯、度。J2000）。kind が meteor のときだけ。今夜の方角・高さはアプリが計算する",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "object",
+                "required": ["ra", "dec"],
+                "additionalProperties": false,
+                "properties": {
+                  "ra": { "type": "number", "minimum": 0, "maximum": 360 },
+                  "dec": { "type": "number", "minimum": -90, "maximum": 90 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "links": {
       "type": "array",
       "minItems": 1,
@@ -106,7 +228,8 @@
         "greeting": { "required": ["name"] },
         "status": { "required": ["value"], "properties": { "value": { "const": "done" } } }
       }
-    }
+    },
+    "radiant": { "properties": { "kind": { "const": "meteor" } } }
   },
   "$defs": {
     "when": {

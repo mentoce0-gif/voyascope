@@ -30,9 +30,11 @@ npx serve web              # または python3 -m http.server -d web
 | `js/events.js` | 予定（次の出来事・これから行く）：日本時間の日付・残り時間・一覧と詳細の表示 |
 | `js/view.js` | 表示切替（すべて／日本のみ／衛星のみ／打ち上げ予定のみ）：日本の決め方と、それぞれの表示で出すもの。選んだ表示はブラウザに覚える |
 | `js/greetings.js` | 「いってらっしゃい」（打ち上げ）・「おかえり」（帰還）のお知らせ：curation で `greeting` を付けたものを、更新のあと最初に開いたときに1回だけ（見たものはこのブラウザの localStorage に） |
+| `js/meteors.js` | 流星群：今夜の放射点の方角・高さ（計算）、月の位置と明るい部分（簡易式）、今夜の画面に出す欄 |
 | `js/launches.js` | 世界の打ち上げ（参考）：日本時間の日時・残り時間・公式の予定との重なりの除外・射場のピンのまとめ・「参考」の印・一覧と詳細の表示 |
 | `js/far/` | 遠くを見る部屋（タスク013・015）。「遠くを見る」を押したときに読む（起動では読まない）。`room.js`＝部屋（画面いっぱいのダイアログ・開け閉め・データ・3D を使えないときの切り替え）、`journey.js`＝3D の旅（合わせた試作を本体のデータで動かすもの。航路・カメラ・景色・表示・操作。停留所は `journeyStops` が作る）、`models.js`＝探査機の模型（Codex 作。公式を参考にしたイメージ）、`fly.js`＝3D を使えない端末の飛ぶ画面（v0。Canvas 2D）、`distance.js`＝地球からの距離（月・太陽・惑星はブラウザで計算）と数の書き方、`probe-card.js`＝探査機のカードと距離のはしご |
 | `css/far.css` | 遠くを見る部屋の見た目（部屋を開いたときに読む） |
+| `favicon.svg`・`favicon.ico`・`apple-touch-icon.png` | タブ・ホーム画面のアイコン（ロゴの「O」と金色の輪。2026-10-08）。`favicon.svg` が元で、ico と png はそこから作った（16・32・48 と 180） |
 | `mmx/` | MMX を追う（予告）のページ（2026-10-05。https://voyascope.org/mmx/）。アプリからはまだリンクしない（JAXA 宇宙教育センター・日本宇宙少年団への紹介で使う）。打ち上げまでの残り時間は `data/events.json`、地球と火星の位置は `vendor/astronomy.min.js` と `js/far/distance.js` で計算。MMX の位置は描かない（点線の道のり・火星のまわりの図・模型はイメージ）。`img/` は模型の画像（`js/far/models.js` を描いたもの）と、2026-10-05 の PC の画面 |
 | `data/orbits/iss.json` | 軌道データ（CelesTrak の OMM JSON。TLE でも動く。取得日時・エポック・出典URLを含む） |
 | `data/prefectures.json` | 都道府県の代表地点（`config/prefectures.json` のコピー） |

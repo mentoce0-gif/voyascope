@@ -75,6 +75,153 @@
       "updated_at": "2026-10-01"
     },
     {
+      "id": "draconids-2026",
+      "kind": "meteor",
+      "regions": [
+        "world"
+      ],
+      "title": {
+        "ja": "10月りゅう座流星群（ジャコビニ流星群）",
+        "en": "Draconids"
+      },
+      "summary": {
+        "value": "ジャコビニ・ジンナー彗星（21P/Giacobini-Zinner）が母天体の流星群",
+        "source": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html",
+        "as_of": "2026-10-08",
+        "note": "国立天文台「主な流星群」"
+      },
+      "when": {
+        "value": {
+          "date": "2026-10-08"
+        },
+        "source": "https://www.amsmeteors.org/2026/10/meteor-activity-outlook-for-october-3-9-2026/",
+        "as_of": "2026-10-08",
+        "note": "8日の夕方、暗くなった直後がいちばんのチャンス。米国流星協会の予報"
+      },
+      "when_label": "見ごろ",
+      "active": {
+        "value": {
+          "from": "2026-10-06",
+          "to": "2026-10-10"
+        },
+        "source": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html",
+        "as_of": "2026-10-08",
+        "note": "国立天文台の表「流星出現期間」10月6日 - 10月10日（毎年の目安）"
+      },
+      "rate": {
+        "value": "多くはない。極大のころ、十分暗い空でも1時間に2個ほど",
+        "source": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html",
+        "as_of": "2026-10-08",
+        "note": "国立天文台の表「極大時1時間あたりの流星数」2（注4：薄明や月の影響がなく、5.5等の星まで見える空）"
+      },
+      "radiant": {
+        "value": {
+          "ra": 262,
+          "dec": 54
+        },
+        "source": "https://www.amsmeteors.org/2026/10/meteor-activity-outlook-for-october-3-9-2026/",
+        "as_of": "2026-10-08",
+        "note": "表の値 17:28 (262) +54（10月3〜4日の値）。本文の 252 は 17:28 と合わないので表を使う"
+      },
+      "parent": {
+        "name": {
+          "value": "ジャコビニ・ツィナー彗星（21P/Giacobini-Zinner）",
+          "source": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html",
+          "as_of": "2026-10-08",
+          "note": "国立天文台の表記は「ジャコビニ・ジンナー彗星」"
+        },
+        "orbit": {
+          "value": {
+            "e": 0.7104704806622195,
+            "a": 3.500302848566958,
+            "q": 1.013441001282255,
+            "i": 32.00259232473697,
+            "om": 195.4044801966894,
+            "w": 172.8124824274951,
+            "tp": 2458371.765901935,
+            "epoch": 2458070.5
+          },
+          "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=21P&full-prec=1",
+          "as_of": "2026-10-08",
+          "note": "JPL SBDB（解 2025-11-23・元期 2017-11-14 TDB）。角度は度、a・q は au、tp・epoch はユリウス日"
+        },
+        "moid": {
+          "value": 0.017758,
+          "unit": "au",
+          "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=21P&full-prec=1",
+          "as_of": "2026-10-08",
+          "note": "地球の軌道との最小距離（JPL）"
+        }
+      },
+      "constellation": {
+        "name": "りゅう座",
+        "stars": {
+          "value": [
+            {
+              "name": "ラスタバン（β）",
+              "ra": 262.608174,
+              "dec": 52.301389,
+              "mag": 2.79
+            },
+            {
+              "name": "エルタニン（γ）",
+              "ra": 269.151541,
+              "dec": 51.488896,
+              "mag": 2.24
+            },
+            {
+              "name": "グルミウム（ξ）",
+              "ra": 268.382207,
+              "dec": 56.872646,
+              "mag": 3.73
+            },
+            {
+              "name": "アルタイス（δ）",
+              "ra": 288.13875,
+              "dec": 67.661541,
+              "mag": 3.07
+            },
+            {
+              "name": "エダシク（ι）",
+              "ra": 231.232396,
+              "dec": 58.966063,
+              "mag": 3.29
+            },
+            {
+              "name": "トゥバン（α）",
+              "ra": 211.097291,
+              "dec": 64.375851,
+              "mag": 3.67
+            }
+          ],
+          "source": "https://iauarchive.eso.org/public/themes/naming_stars/",
+          "as_of": "2026-10-08",
+          "note": "IAU の星名一覧（J2000）。名前の読みは VOYASCOPE"
+        },
+        "lines": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            2
+          ]
+        ]
+      },
+      "links": [
+        {
+          "label": "国立天文台 主な流星群",
+          "url": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html"
+        },
+        {
+          "label": "米国流星協会 今週の流星（英語）",
+          "url": "https://www.amsmeteors.org/2026/10/meteor-activity-outlook-for-october-3-9-2026/"
+        }
+      ],
+      "updated_at": "2026-10-08"
+    },
+    {
       "id": "hayabusa2-earth-swingby",
       "kind": "flyby",
       "regions": [

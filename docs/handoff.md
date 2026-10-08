@@ -11,6 +11,7 @@
 | 本番 | https://voyascope.org | Cloudflare（Workers の静的アセット）。`.github/workflows/deploy.yml`・`wrangler.jsonc`・`web/_headers`。鍵は GitHub の Secrets（`CLOUDFLARE_API_TOKEN`・`CLOUDFLARE_ACCOUNT_ID`） |
 | 仮の公開（並べて確かめ中） | https://mentoce0-gif.github.io/voyascope/ | GitHub Pages（`pages.yml`）。切り替えたら「新しい場所」の案内だけにする（M9 ②） |
 | MMX の予告ページ | https://voyascope.org/mmx/ | `web/mmx/`。noindex、アプリからはまだリンクしない。紹介のメールに添えた |
+| X（旧 Twitter） | https://x.com/voyascope （@voyascope） | オーナーのアカウント（作者として発信）。プロフィールは「VOYASCOPE をつくっている人。本業のかたわら…※非公式ファンメイド作品」（2026-10-08 案C）。開発記録の投稿文は Claude Code が下書き（X の重み付きで280以内、非公式ファンメイドの一文を入れる） |
 | 公開のリポジトリ | `mentoce0-gif/voyascope` | 2026-10-04 に作り直した（PR は #1 から振り直し） |
 | 非公開の記録 | `mentoce0-gif/voyascope-research` | `research/chappy/`（チャッピーの報告）・`research/verification/`（照合と JPL とのやりとり）・`research/outreach/`（紹介の送り先・文面・返事） |
 | 旧リポジトリ（非公開） | `mentoce0-gif/voyascope-archive` | 作り直す前の履歴（個人のメールアドレス入り）。**ここの履歴やブランチを公開のリポジトリへ push しない** |
@@ -34,6 +35,7 @@
 |---|---|---|---|
 | JAXA 宇宙教育センター | 紹介のメール（予告ページを添えた） | 2026-10-05 | `research/outreach/2026-10-05-mmx-intro.md`（非公開） |
 | 日本宇宙少年団（YAC） | 問い合わせのフォーム（同上） | 2026-10-05 | 同上 |
+| Discord のコミュニティ「Cosmo Base」 | 雑談のチャンネルに投稿（リアクションあり・返事なし） | 2026-10-08 報告 | `research/outreach/2026-10-08-cosmo-base.md`（非公開） |
 | JPL の教育の部署（Engagement/Education Office） | JPL SSD の方が、やりとりを回してくれた。先方の計画に合えば直接連絡が来るかもしれない。こちらからは先に連絡しない | 2026-10-06 | `research/verification/2026-10-03-c14.md`（非公開） |
 
 返事が来たら、オーナーが要点を貼る → Claude Code が記録して、次の動きを一緒に考える（記録に、相手とオーナーの氏名・メールアドレスは書かない）。
@@ -63,6 +65,8 @@
 - ブラウザでの確認：Playwright（`createRequire('/opt/node-tools/node_modules/')`、Chromium は `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`、WebGL は SwiftShader）。アプリは「観測を開始」を押してから。この環境のブラウザは外の https を開けない（証明書）ので、公開先は curl で確かめる
 - ひまわり9号の軌道要素は、CelesTrak 側で 9/29 から新しくなっていない（静止衛星なので表示はほぼ同じ。足元の「軌道データ取得」は、いちばん古い日を出す）
 - 予告ページの旅のしおりと打ち上げの流れは、公式（プレスキット・MMX サイト・打上げ計画書）を照合したもの。`curation/` にはまだ入れていない
+- X などのアプリ内ブラウザで止まったら：20秒後に起動画面へ出る「届いていないもの」「エラー」のスクリーンショットをもらう（index.html の起動の見張り、2026-10-08）
+- 地球の上の印（htmlElementsData）は、同じ物を使い回して位置だけ書き換える。毎フレーム新しく作ると、ボタンが付け直されてクリックが届かない（2026-10-08 流星群のポインタで起きた）
 - コミットは日本語。アプリの変更はブランチと PR（CI を通す）。終わりの報告は「やったこと／やらなかったこと／判断してほしいこと」
 
 ## 新しいチャットの始め方（例）
