@@ -7,7 +7,7 @@ const JST = 9 * 3600000; // 予定は日本時間で出す（画面にも「日�
 // 時刻まで決まっている予定は、その時刻を過ぎてもしばらく一覧に残す（結果は公式で確かめてもらう）
 export const GRACE_MS = 6 * 3600000;
 
-export const KIND_LABELS = { launch: "打ち上げ", arrival: "到着", separation: "分離", flyby: "接近", milestone: "節目" };
+export const KIND_LABELS = { launch: "打ち上げ", arrival: "到着", separation: "分離", flyby: "接近", milestone: "節目", meteor: "流星群" };
 const REGION_LABELS = { japan: "日本", world: "世界" };
 const WEEKDAYS = "日月火水木金土";
 

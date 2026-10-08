@@ -9,8 +9,8 @@
   "properties": {
     "id": { "$ref": "common.schema.json#/$defs/id" },
     "kind": {
-      "enum": ["launch", "arrival", "separation", "flyby", "milestone"],
-      "description": "launch=打ち上げ / arrival=到着 / separation=分離 / flyby=接近（スイングバイ・フライバイ） / milestone=節目"
+      "enum": ["launch", "arrival", "separation", "flyby", "milestone", "meteor"],
+      "description": "launch=打ち上げ / arrival=到着 / separation=分離 / flyby=接近（スイングバイ・フライバイ） / milestone=節目 / meteor=流星群の極大"
     },
     "regions": {
       "type": "array",
@@ -88,6 +88,36 @@
         }
       }
     },
+    "when_label": {
+      "enum": ["極大", "見ごろ"],
+      "description": "流星群の when が何の日時か。なければ「極大」。公式が極大の日時を出さず、見ごろだけを書いているときは「見ごろ」"
+    },
+    "rate": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "流星群の1時間あたりの数の目安。必ず条件（「空の暗い場所で」など）と一緒に、出典の書き方どおり"
+    },
+    "radiant": {
+      "description": "流星群の放射点（赤経・赤緯、度。J2000）。kind が meteor のときだけ。今夜の方角・高さはアプリが計算する",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "object",
+                "required": ["ra", "dec"],
+                "additionalProperties": false,
+                "properties": {
+                  "ra": { "type": "number", "minimum": 0, "maximum": 360 },
+                  "dec": { "type": "number", "minimum": -90, "maximum": 90 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "links": {
       "type": "array",
       "minItems": 1,
@@ -95,6 +125,9 @@
       "items": { "$ref": "common.schema.json#/$defs/link" }
     },
     "updated_at": { "$ref": "common.schema.json#/$defs/date" }
+  },
+  "dependentSchemas": {
+    "radiant": { "properties": { "kind": { "const": "meteor" } } }
   },
   "$defs": {
     "when": {
