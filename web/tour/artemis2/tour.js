@@ -1,5 +1,6 @@
 // アルテミス2号に乗ってみる（試作）
-// - 通り道は sample-trajectory.json（地球と月の重力から計算した見本。本物の軌道データ〔C22〕に差し替える）
+// - 通り道は trajectory.json（NASA が公開した飛行の軌道データ〔エフェメリス〕を scripts/artemis2-trajectory.mjs で変換したもの）
+//   月・太陽の位置と地球の向きも、本物の時刻から計算してある
 // - 窓の外は「〜のような眺め」：地球・月・太陽の位置は通り道から計算し、見た目は NASA の写真を参考にした描き方
 // - 単位：1 = 1000 km。地球の中心が原点、月の公転面が x-z 面
 // - three.js は遠くを見る部屋と同じ r128 の部品だけの版（vendor/three-r128.min.js）。スプライト・線などは ShaderMaterial で作る
@@ -16,10 +17,13 @@ const DAY = 86400;
 const $ = (s) => document.querySelector(s);
 
 // ---------- 通り道 ----------
-const traj = await fetch("sample-trajectory.json").then((r) => r.json());
-const P = traj.points; // [t, x, y, mx, my]（秒・km）
+const traj = await fetch("trajectory.json").then((r) => r.json());
+const P = traj.points; // [t, x, y, z, mx, my, mz]（秒・km。x-y が月の公転面）
+const EPOCH = Date.parse(traj.epoch); // t = 0 の日時
 const T_END = P.at(-1)[0];
-const v3 = (x, y) => new THREE.Vector3(x * KM, 0, -y * KM);
+// データの (x, y, z) → 画面の (x, z, -y)（画面は y が上）
+const v3 = (x, y, z) => new THREE.Vector3(x * KM, z * KM, -y * KM);
+const dir3 = ([x, y, z]) => new THREE.Vector3(x, z, -y).normalize();
 
 // 時刻 t（秒）の宇宙船と月の位置（エルミート補間。速度は前後の点から）
 function stateAt(t) {
@@ -41,13 +45,22 @@ function stateAt(t) {
     const h00 = 2 * u ** 3 - 3 * u ** 2 + 1, h10 = u ** 3 - 2 * u ** 2 + u, h01 = -2 * u ** 3 + 3 * u ** 2, h11 = u ** 3 - u ** 2;
     return h00 * a[c] + h10 * h * der(i, c) + h01 * b[c] + h11 * h * der(j, c);
   };
-  const x = herm(1), y = herm(2);
-  const vx = der(i, 1) * (1 - u) + der(j, 1) * u, vy = der(i, 2) * (1 - u) + der(j, 2) * u;
-  const mx = a[3] + (b[3] - a[3]) * u, my = a[4] + (b[4] - a[4]) * u;
-  return { craft: v3(x, y), moon: v3(mx, my), speed: Math.hypot(vx, vy), rKm: Math.hypot(x, y), moonKm: Math.hypot(x - mx, y - my) };
+  const x = herm(1), y = herm(2), z = herm(3);
+  const vel = (c) => der(i, c) * (1 - u) + der(j, c) * u;
+  const mx = a[4] + (b[4] - a[4]) * u, my = a[5] + (b[5] - a[5]) * u, mz = a[6] + (b[6] - a[6]) * u;
+  return {
+    craft: v3(x, y, z),
+    moon: v3(mx, my, mz),
+    speed: Math.hypot(vel(1), vel(2), vel(3)),
+    rKm: Math.hypot(x, y, z),
+    moonKm: Math.hypot(x - mx, y - my, z - mz),
+  };
 }
 // 月にいちばん近づく時刻
-const T_MOON = P.reduce((b, p) => (Math.hypot(p[1] - p[3], p[2] - p[4]) < Math.hypot(b[1] - b[3], b[2] - b[4]) ? p : b))[0];
+const moonDist = (p) => Math.hypot(p[1] - p[4], p[2] - p[5], p[3] - p[6]);
+const T_MOON = P.reduce((b, p) => (moonDist(p) < moonDist(b) ? p : b))[0];
+// 太陽の向き（最接近のとき。数時間ではほとんど変わらない）
+const SUN = dir3(traj.sun);
 
 const d = (x) => x * DAY;
 
@@ -73,8 +86,17 @@ const T_RISE = (() => {
 })();
 
 // ---------- 乗っているあいだの台本（飛行の時刻 → 実際の秒数）。月のまわりはゆっくり ----------
-// 本物の順番（NASA 2026-04-06 の予定と、写真の時刻）：地球の入り → 月にいちばん近づく → 地球の出 → 日食
-const T_ECLIPSE = T_MOON + d(2 / 24); // 日食は、いちばん近づいてから1時間半ほどあとに始まった（午後8時35分ごろ）
+// 順番は本物のとおり：地球の入り → 月にいちばん近づく → 地球の出 → 日食（軌道データから計算すると、写真の時刻とそろう）
+// 日食のまんなか：宇宙船から見て、月と太陽がいちばん重なる時刻
+const T_ECLIPSE = (() => {
+  let best = T_MOON, bestA = Infinity;
+  for (let t = T_MOON; t < T_MOON + d(0.25); t += 60) {
+    const s = stateAt(t);
+    const a = s.moon.clone().sub(s.craft).angleTo(SUN);
+    if (a < bestA) [best, bestA] = [t, a];
+  }
+  return best;
+})();
 const SEGS = [
   { t0: 0, t1: d(0.35), sec: 20, look: "earth", say: "地球をはなれて、月へ。うしろの窓に、地球がだんだん小さくなっていきます。" },
   { t0: d(0.35), t1: T_MOON - d(0.42), sec: 26, look: "moon", say: "月まで、およそ38万km。何もない宇宙を、何日もかけて進みます。" },
@@ -100,13 +122,6 @@ const rideToMission = (r) => {
 };
 $("#tl-moon").style.left = `${((SEGS[4].r0 + SEGS[4].sec / 2) / RIDE_SEC) * 100}%`;
 
-// ---------- 太陽の向き：月の裏側で、月が太陽を隠す場面ができる向き（見本） ----------
-const SUN = (() => {
-  const s = stateAt(T_ECLIPSE);
-  const dir = s.moon.clone().sub(s.craft).normalize();
-  dir.y += 0.004; // ほんの少しずらして、月のふちから光が漏れる時間をつくる
-  return dir.normalize();
-})();
 
 // ---------- 3D ----------
 const canvas = $("#scene");
@@ -276,7 +291,7 @@ scene.add(corona);
 const pathLine = (() => {
   const pos = [];
   for (let i = 1; i < P.length; i++) {
-    const a = v3(P[i - 1][1], P[i - 1][2]), b = v3(P[i][1], P[i][2]);
+    const a = v3(P[i - 1][1], P[i - 1][2], P[i - 1][3]), b = v3(P[i][1], P[i][2], P[i][3]);
     pos.push(a.x, a.y, a.z, b.x, b.y, b.z);
   }
   const g = new THREE.BufferGeometry();
@@ -327,23 +342,23 @@ let yaw = 0, pitch = 0, dragging = false, lastDrag = 0;
 const INTRO_TARGET = new THREE.Vector3(), INTRO_CAM = new THREE.Vector3(), INTRO_UP = new THREE.Vector3();
 const INTRO_BOX = new THREE.Box3();
 for (const p of P) {
-  INTRO_BOX.expandByPoint(v3(p[1], p[2]));
-  INTRO_BOX.expandByPoint(v3(p[3], p[4]));
+  INTRO_BOX.expandByPoint(v3(p[1], p[2], p[3])); // 宇宙船の通り道だけで決める（月は9日で大きく動くので入れない）
 }
 function setIntroView() {
   const size = INTRO_BOX.getSize(new THREE.Vector3()).length();
   INTRO_BOX.getCenter(INTRO_TARGET);
   if (innerWidth < innerHeight) {
     // 月の側（月がいちばん近いときの位置）を上に。真上から見下ろす
-    const far = P.reduce((b, p) => (Math.hypot(p[1], p[2]) > Math.hypot(b[1], b[2]) ? p : b));
-    const toMoon = v3(far[1], far[2]).normalize(); // 地球から、いちばん遠いところへの向き
+    const far = P.reduce((b, p) => (Math.hypot(p[1], p[2], p[3]) > Math.hypot(b[1], b[2], b[3]) ? p : b));
+    const toMoon = v3(far[1], far[2], far[3]).setY(0).normalize(); // 地球から、いちばん遠いところへの向き
     INTRO_UP.copy(toMoon);
-    INTRO_TARGET.addScaledVector(toMoon, -size * 0.36); // 絵を画面の上のほうへ
-    INTRO_CAM.copy(INTRO_TARGET).add(new THREE.Vector3(0, size * 1.25, 0)).addScaledVector(toMoon, -size * 0.1);
+    INTRO_TARGET.addScaledVector(toMoon, -size * 0.5); // 絵を画面の上のほうへ
+    INTRO_CAM.copy(INTRO_TARGET).add(new THREE.Vector3(0, size * 2.0, 0)).addScaledVector(toMoon, -size * 0.14);
   } else {
     INTRO_UP.set(0, 1, 0);
-    INTRO_TARGET.x -= size * 0.06; // 左の案内の枠に隠れないよう、絵を少し右へ
-    INTRO_CAM.copy(INTRO_TARGET).add(new THREE.Vector3(0, size * 0.4, size * 0.28));
+    // 月の側を左・地球を右に見る向き（左下の案内の枠に地球が隠れないように）。絵を少し右へ
+    INTRO_TARGET.x += size * 0.3;
+    INTRO_CAM.copy(INTRO_TARGET).add(new THREE.Vector3(0, size * 0.96, -size * 0.65));
   }
 }
 function introCamera() {
@@ -375,13 +390,18 @@ function placeLabels() {
 }
 introCamera();
 
+const POLE = dir3(traj.earth.pole), G0 = dir3(traj.earth.greenwich0), EAST0 = POLE.clone().cross(G0);
+const mtxE = new THREE.Matrix4();
 function place(t) {
   const s = stateAt(t);
   moon.position.copy(s.moon);
   // 月はいつも同じ面を地球に向ける（テクスチャの真ん中が地球の側）
   const toE = s.moon.clone().negate();
   moon.rotation.y = Math.atan2(-toE.z, toE.x);
-  earth.rotation.y = (t / 86164) * Math.PI * 2;
+  // 地球の向き：北極と、その時刻のグリニッジの向きに合わせる（球の模型は、+y が北極・+x が経度0°）
+  const th = traj.earth.rate * t;
+  const g = G0.clone().multiplyScalar(Math.cos(th)).addScaledVector(EAST0, Math.sin(th));
+  earth.quaternion.setFromRotationMatrix(mtxE.makeBasis(g, POLE, g.clone().cross(POLE)));
   return s;
 }
 
@@ -477,10 +497,12 @@ function updateSunAndCorona() {
   return k;
 }
 
-// 打ち上げ（2026-04-01 18:35 EDT）から、月にいちばん近づく予定（2026-04-06 19:02 EDT）までの日数
-const MOON_DAY = (Date.UTC(2026, 3, 6, 23, 2) - Date.UTC(2026, 3, 1, 22, 35)) / 86400000;
+// 打ち上げ：2026-04-01 18:35 EDT（NASA）
+const LAUNCH = Date.UTC(2026, 3, 1, 22, 35);
+const jst = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" });
 function hud(s, t) {
-  $("#hud-day").textContent = `打ち上げから ${((t - T_MOON) / DAY + MOON_DAY).toFixed(1)} 日（見本）`;
+  const ms = EPOCH + t * 1000;
+  $("#hud-day").textContent = `${jst.format(ms)}（日本時間）· 打ち上げから ${((ms - LAUNCH) / 86400000).toFixed(1)} 日`;
   $("#hud-earth").textContent = fmtKm(s.rKm);
   $("#hud-moon").textContent = fmtKm(Math.max(0, s.moonKm - 1737.4));
   $("#hud-speed").textContent = `${s.speed.toFixed(2)} km/s`;
@@ -623,7 +645,7 @@ function frame(now) {
       const eclipse = updateSunAndCorona();
       hud(s, t);
       $("#tl-fill").style.width = `${(ride / RIDE_SEC) * 100}%`;
-      setCaption(eclipse > 0.35 ? "太陽が月に隠れました（日食）。月のふちだけが光って見えます。" : seg.far && Math.abs(t - T_MOON) < d(0.004) ? "月にいちばん近づきました。本物のオリオンは、月面から約6,545km（4,067マイル）まで近づきました。" : seg.say);
+      setCaption(eclipse > 0.35 ? "太陽が月に隠れました（日食）。月のふちだけが光って見えます。" : seg.far && Math.abs(t - T_MOON) < d(0.004) ? "月にいちばん近づきました。月面から約6,545km（4,067マイル）です。" : seg.say);
       showPhoto(seg.photo ?? null);
       // 大気に入る：最後の数秒、オレンジに光る
       $("#reentry").style.opacity = String(seg === SEGS.at(-1) ? smoothstep(u, 0.55, 1) * 0.9 : 0);
