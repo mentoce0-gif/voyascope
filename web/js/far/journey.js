@@ -246,7 +246,7 @@ export function journeyHtml({ coarse = false } = {}) {
       <div class="footline"><p id="far-warp-note">光より速く進むのはワープ（作り話）です</p><button type="button" data-j="home">地表へ戻る ↶</button></div>
     </div>
     <p class="model-note">公式を参考にしたイメージ</p>
-    <p class="look-hint" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"/></svg><span>${coarse ? "指でなぞって、まわりから眺める" : "ドラッグか ← → キーで、まわりから眺める"}</span></p>`;
+    <p class="look-hint" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"/></svg><span>${coarse ? "横になぞって眺める。縦に大きくはじくと、そのまま飛ぶ" : "ドラッグか ← → キーで、まわりから眺める"}</span></p>`;
 }
 
 // ---------- 3D の旅 ----------
@@ -1194,7 +1194,7 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
     const m = modeNow();
     if (m.mode === "encounter") {
       // そばで観測中：なぞると、見せたもののまわりを回りこんで見る（ここでは飛ばない。先へは「その先へ」のボタンで）
-      pointer = { id: e.pointerId, x: e.clientX, y: e.clientY, look: true };
+      pointer = { id: e.pointerId, x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, look: true, touch: e.pointerType !== "mouse" };
       look.st = m.st;
       root.classList.add("looked");
     } else {
@@ -1208,6 +1208,16 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
   viewport.addEventListener("pointermove", (e) => {
     if (!pointer || pointer.id !== e.pointerId) return;
     if (pointer.look) {
+      // 指で縦に大きくなぞったら（横より縦が2倍以上・80px 以上）、そばで見るのをやめて、そのまま飛ぶ（2026-10-10 オーナー）
+      const ty = e.clientY - pointer.y0, tx = e.clientX - pointer.x0;
+      if (pointer.touch && Math.abs(ty) > 80 && Math.abs(ty) > 2 * Math.abs(tx)) {
+        cancelTrip();
+        snap = null;
+        pointer = { id: pointer.id, y: e.clientY };
+        push(ty * TUNE.SWIPE_GAIN);
+        wake();
+        return;
+      }
       const dx = e.clientX - pointer.x, dy = e.clientY - pointer.y;
       pointer.x = e.clientX;
       pointer.y = e.clientY;
@@ -1596,6 +1606,7 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
       $("text").innerHTML = "光になって、地球の輪の外へ。<br>遠くで旅をつづける探査機に、会いにいこう。";
       $("scene-name").textContent = "EARTH";
       $("scene-caption").textContent = "高さ 100 km から、出発";
+      tour.hidden = false; // はじめの画面にも、アルテミス2号に乗る入口（2026-10-10 オーナー）
     } else if (mode === "end") {
       $("eyebrow").textContent = "BEYOND THE ORBIT";
       title.innerHTML = "地球の輪の外は、<br>桁が違う。";
