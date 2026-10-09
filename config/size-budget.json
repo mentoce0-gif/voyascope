@@ -40,9 +40,9 @@
     },
     {
       "id": "tour-artemis2",
-      "label": "アルテミス2号ツアー（試作）を開いたときに読むもの（ページ・three.js r128・軌道データ・地球の画像）",
-      "max_kb": 600,
-      "files": ["tour/artemis2/*", "vendor/three-r128.min.js", "assets/earth/day-2048.jpg", "assets/earth/night-2048.jpg"]
+      "label": "アルテミス2号ツアー（試作）を開いたときに読むもの（ページ・three.js r128・軌道データ・地球と月の画像）",
+      "max_kb": 950,
+      "files": ["tour/artemis2/*", "vendor/three-r128.min.js", "assets/earth/day-2048.jpg", "assets/earth/night-2048.jpg", "assets/moon/*"]
     }
   ],
   "max_file_kb": 600,

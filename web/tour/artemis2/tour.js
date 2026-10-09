@@ -226,41 +226,11 @@ const atmo = new THREE.Mesh(
 );
 scene.add(atmo);
 
-// 月：表側に海（暗いところ）、裏側はクレーターの多い明るい高地（月の裏側に海が少ないのは本当の特徴）
-const moonTex = canvasTex(1024, 512, (g, w, h) => {
-  g.fillStyle = "#9a9790";
-  g.fillRect(0, 0, w, h);
-  const rnd = (a, b) => a + Math.random() * (b - a);
-  for (let i = 0; i < 9000; i++) {
-    g.fillStyle = Math.random() < 0.5 ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)";
-    g.fillRect(rnd(0, w), rnd(0, h), rnd(1, 6), rnd(1, 6));
-  }
-  // 海（表側：経度の真ん中＝ u 0.5 のまわり）
-  if ("filter" in g) g.filter = "blur(10px)";
-  for (let i = 0; i < 26; i++) {
-    g.fillStyle = `rgba(52,52,56,${rnd(0.25, 0.45)})`;
-    g.beginPath();
-    g.ellipse(w * rnd(0.36, 0.64), h * rnd(0.28, 0.66), rnd(25, 95), rnd(18, 70), rnd(0, 3), 0, Math.PI * 2);
-    g.fill();
-  }
-  if ("filter" in g) g.filter = "none";
-  // クレーター（裏側に多め）
-  for (let i = 0; i < 1400; i++) {
-    let u = Math.random();
-    if (u > 0.33 && u < 0.67 && Math.random() < 0.55) u = (u + 0.5) % 1;
-    const x = u * w, y = rnd(0.06, 0.94) * h, r = Math.random() < 0.04 ? rnd(10, 26) : rnd(1.2, 7);
-    g.fillStyle = "rgba(0,0,0,0.18)";
-    g.beginPath();
-    g.arc(x, y, r, 0, Math.PI * 2);
-    g.fill();
-    g.strokeStyle = "rgba(255,255,255,0.22)";
-    g.lineWidth = Math.max(0.6, r * 0.18);
-    g.beginPath();
-    g.arc(x - r * 0.12, y - r * 0.12, r, 0, Math.PI * 2);
-    g.stroke();
-  }
-});
-const moon = new THREE.Mesh(new THREE.SphereGeometry(R_M, 96, 64), new THREE.MeshStandardMaterial({ map: moonTex, bumpMap: moonTex, bumpScale: 0.03, roughness: 1, metalness: 0 }));
+// 月：NASA SVS の CGI Moon Kit（LRO の写真をつないだ色の地図と、レーザー高度計の標高の地図）。経度0°（地球の側）が真ん中
+// https://svs.gsfc.nasa.gov/4720 （クレジット：NASA's Scientific Visualization Studio）。web/assets/moon/ に WebP にして置いた
+const moonTex = loadTex("../../assets/moon/lroc-color-2048.webp");
+const moonBump = loadTex("../../assets/moon/ldem-1024.webp");
+const moon = new THREE.Mesh(new THREE.SphereGeometry(R_M, 96, 64), new THREE.MeshStandardMaterial({ map: moonTex, bumpMap: moonBump, bumpScale: 0.02, roughness: 1, metalness: 0 }));
 scene.add(moon);
 
 // 太陽と、月に隠れたときに月のふちで光る輪（コロナのような光）
