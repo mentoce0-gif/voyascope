@@ -331,7 +331,7 @@ const wing = (() => {
 
 // ---------- 状態 ----------
 let mode = "intro"; // intro → boarding → ride → ending
-let view = "window"; // 乗っているあいだの見る場所：window（窓から）・outside（外から）・earth（地球から）・route（航路）
+let view = "window"; // 乗っているあいだの見る場所：window（窓から）・earth（地球から）・route（航路）。outside（外から）は乗ってすぐの数秒だけ（ボタンはなし。2026-10-10 オーナー）
 let autoOutside = false; // 乗ってすぐは、外からオリオンの姿を見せる（ボタンを押したらやめる）
 let lookOverride = null; // 「地球向き」「月向き」を押したとき。場面が変わったら台本の向きに戻る
 let lastSeg = null;
@@ -343,22 +343,34 @@ const camFrom = new THREE.Vector3(), lookQ = new THREE.Quaternion(), tmpQ = new 
 let yaw = 0, pitch = 0, dragging = false, lastDrag = 0;
 
 // 外から見る位置：通り道と月の通り道がぜんぶ入るように、斜め上から
-// 縦長の画面（スマホ）では、地球→月を縦に置いて、下の案内の枠より上に収める
+// 縦長の画面（スマホ）と「航路」では、上から見下ろして地球→月を横に置き、画面いっぱいに（2026-10-10 オーナー）
 const INTRO_TARGET = new THREE.Vector3(), INTRO_CAM = new THREE.Vector3(), INTRO_UP = new THREE.Vector3();
 const INTRO_BOX = new THREE.Box3();
 for (const p of P) {
   INTRO_BOX.expandByPoint(v3(p[1], p[2], p[3])); // 宇宙船の通り道だけで決める（月は9日で大きく動くので入れない）
 }
+// 上から見下ろして、地球→月が横に並ぶ向きで、通り道が画面に収まる距離を出す
+// top・bottom：上下に空けておく割合（計器・案内・下の操作の分）
+function fitTopDown(target, cam, up, { top = 0.1, bottom = 0.1 } = {}) {
+  const sz = INTRO_BOX.getSize(new THREE.Vector3());
+  INTRO_BOX.getCenter(target);
+  const vf = (camera.fov * Math.PI) / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
+  const avail = 1 - top - bottom; // 縦に使える割合
+  const dW = (sz.x / 2) * 1.35 / Math.tan(hf / 2); // 左右に余白（名前の文字の分も）
+  const dH = (sz.z / 2) * 1.2 / (Math.tan(vf / 2) * avail);
+  const dist = Math.max(dW, dH);
+  // 使える範囲のまんなかに通り道が来るように、見る点をずらす（画面の下＝ +z）
+  target.z += dist * Math.tan(vf / 2) * (bottom - top);
+  cam.copy(target).add(new THREE.Vector3(0, dist, 0));
+  up.set(0, 0, -1);
+}
 function setIntroView() {
   const size = INTRO_BOX.getSize(new THREE.Vector3()).length();
   INTRO_BOX.getCenter(INTRO_TARGET);
-  if (innerWidth < innerHeight) {
-    // 月の側（月がいちばん近いときの位置）を上に。真上から見下ろす
-    const far = P.reduce((b, p) => (Math.hypot(p[1], p[2], p[3]) > Math.hypot(b[1], b[2], b[3]) ? p : b));
-    const toMoon = v3(far[1], far[2], far[3]).setY(0).normalize(); // 地球から、いちばん遠いところへの向き
-    INTRO_UP.copy(toMoon);
-    INTRO_TARGET.addScaledVector(toMoon, -size * 0.5); // 絵を画面の上のほうへ
-    INTRO_CAM.copy(INTRO_TARGET).add(new THREE.Vector3(0, size * 2.0, 0)).addScaledVector(toMoon, -size * 0.14);
+  if (mode === "ride" && view === "route") {
+    fitTopDown(INTRO_TARGET, INTRO_CAM, INTRO_UP, innerWidth < innerHeight ? { top: 0.3, bottom: 0.38 } : { top: 0.26, bottom: 0.24 });
+  } else if (innerWidth < innerHeight) {
+    fitTopDown(INTRO_TARGET, INTRO_CAM, INTRO_UP, { top: 0.08, bottom: 0.56 }); // 下の案内の枠より上に
   } else {
     INTRO_UP.set(0, 1, 0);
     // 月の側を左・地球を右に見る向き（左下の案内の枠に地球が隠れないように）。絵を少し右へ
@@ -561,7 +573,7 @@ function setView(v, { auto = false } = {}) {
   pathLine.visible = v === "route" || v === "earth";
   orionMark.visible = v === "route" || v === "earth";
   setNear(v === "outside" ? 0.0008 : 0.05);
-  if (v === "route") introCamera();
+  if (v === "route") setIntroView(), introCamera();
   if (v === "window") lookQ.copy(camera.quaternion);
 }
 function setLook(l) {
@@ -586,6 +598,7 @@ function startRide(at = 0) {
 function leaveRide() {
   mode = "intro";
   setView("route", { auto: true });
+  setIntroView();
   setNear(0.05);
   wing.visible = false;
   $("#window-frame").classList.remove("on");
@@ -740,6 +753,8 @@ function frame(now) {
         camera.quaternion.setFromRotationMatrix(mtx);
         orionMark.scale.setScalar(camera.position.distanceTo(s.craft) * 0.035);
       } else {
+        setIntroView(); // 「航路」：画角が変わっている途中でも、通り道が収まるように毎回合わせる
+        introCamera();
         orionMark.scale.setScalar(22);
       }
       stars.position.copy(camera.position);
