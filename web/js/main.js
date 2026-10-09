@@ -1202,6 +1202,11 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   // 最初に開いたときは、いつも地球の画面から（2026-10-05 オーナー）。部屋の中で再読み込みしたときや、
   // #far つきのリンク・ブックマーク・ホーム画面から開いたときも、部屋へは飛ばずに #far を消す
   if (location.hash === "#far") history.replaceState(null, "", location.pathname + location.search);
+  // アルテミス2号のツアーから帰ってきたとき（?from=artemis2）は、遠くを見る部屋のはじめへ（2026-10-10 オーナー）
+  if (FROM_TOUR) {
+    history.replaceState(null, "", location.pathname);
+    setTimeout(() => openFar("pushed"), 700);
+  }
 
   // ---------- このアプリについて ----------
   const about = $("#about");
@@ -1361,6 +1366,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
 }
 
 // ---------- 起動 ----------
+// ツアー（web/tour/artemis2/）から戻ってきたか。そのときは「観測を開始」を待たずに始めて、遠くを見る部屋を開く
+const FROM_TOUR = new URLSearchParams(location.search).get("from") === "artemis2";
 async function boot() {
   bootWatch.started = true;
   const stopNoise = startNoise($("#noise"));
@@ -1393,6 +1400,7 @@ async function boot() {
   bootWatch.ready = true;
   startBtn.disabled = false;
   startBtn.focus();
+  if (FROM_TOUR) setTimeout(() => startBtn.click(), 0);
   startBtn.addEventListener(
     "click",
     () => {
