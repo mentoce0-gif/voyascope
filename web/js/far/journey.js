@@ -228,6 +228,7 @@ export function journeyHtml({ coarse = false } = {}) {
       <div class="hero-meta" data-j="meta" hidden></div>
       <div class="hero-event" data-j="event" hidden></div>
       <button type="button" class="detail-link" data-j="details" hidden>探査機をもっと知る <span aria-hidden="true">＋</span></button>
+      <a class="detail-link tour-link" data-j="tour" href="tour/artemis2/" hidden><i class="orion-dot" aria-hidden="true"></i>アルテミス2号に乗ってみる <span aria-hidden="true">›</span></a>
     </div>
     <div class="travel-label" aria-hidden="true"><span data-j="travel-word">地球を、離れる。</span><small data-j="travel-sub"></small></div>
 
@@ -1574,7 +1575,7 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
 
   // ---------- 表示（Codex 案の形） ----------
   let uiKey = "", lastUi = 0, travelKey = "";
-  const meta = $("meta"), evEl = $("event"), det = $("details"), title = $("title"), story = root.querySelector(".story");
+  const meta = $("meta"), evEl = $("event"), det = $("details"), tour = $("tour"), title = $("title"), story = root.querySelector(".story");
   function setStory(mode, st) {
     root.classList.toggle("moving", mode === "travel" || mode === "free" || mode === "swing");
     root.classList.toggle("encounter", mode === "encounter");
@@ -1584,7 +1585,7 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
     if (key === uiKey) return;
     uiKey = key;
     if (mode === "travel" || mode === "free" || mode === "swing" || mode === "rest") return;
-    meta.hidden = evEl.hidden = det.hidden = true;
+    meta.hidden = evEl.hidden = det.hidden = tour.hidden = true;
     const pl = st?.pl;
     const long = mode === "encounter" && pl.name.length > LONG_NAME;
     title.classList.toggle("fit", long); // スマホでは1行に縮めて収める（PC は2行のまま）
@@ -1613,6 +1614,7 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
         evEl.innerHTML = pl.event;
       }
       det.hidden = !pl.card;
+      tour.hidden = pl.id !== "moon"; // 月：アルテミス2号の旅に乗るページ（web/tour/artemis2/。2026-10-09 オーナー）
       $("scene-name").textContent = pl.en;
       $("story-en").textContent = pl.en;
       $("scene-caption").textContent = pl.kind === "probe" ? "いま、あなたのすぐそばに。" : "光の旅の、ひとつの目印。";
