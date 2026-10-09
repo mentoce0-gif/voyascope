@@ -67,9 +67,13 @@
           <button type="button" class="chip" data-view="earth" aria-pressed="false">地球から</button>
           <button type="button" class="chip" data-view="route" aria-pressed="false">航路</button>
         </div>
-        <div id="look" class="seg" role="group" aria-label="窓の向き">
-          <button type="button" class="chip" data-look="earth">地球向き</button>
-          <button type="button" class="chip" data-look="moon">月向き</button>
+        <div id="look" class="look" role="group" aria-label="窓の向き">
+          <button type="button" class="icon-btn" data-look="earth" aria-pressed="false" aria-label="地球のほうを見る" title="地球のほうを見る">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17"/></svg>
+          </button>
+          <button type="button" class="icon-btn" data-look="moon" aria-pressed="false" aria-label="月のほうを見る" title="月のほうを見る">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3.8a8.5 8.5 0 1 0 4.7 12.6A7 7 0 0 1 15.5 3.8z"/></svg>
+          </button>
         </div>
         <div class="buttons">
           <button id="pause" class="btn" type="button">一時停止</button>
