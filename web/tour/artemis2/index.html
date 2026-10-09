@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#050e1f">
+  <link rel="icon" href="../../favicon.ico" sizes="32x32">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <title>アルテミス2号に乗ってみる（試作）— VOYASCOPE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="tour.css">
+</head>
+<body>
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div id="window-frame" class="window-frame" aria-hidden="true"></div>
+  <div id="reentry" class="reentry" aria-hidden="true"></div>
+
+  <header class="bar">
+    <a class="brand mono" href="../../">VOYASCOPE</a>
+    <span class="sample-badge">試作</span>
+  </header>
+
+  <!-- はじめ（外から見る） -->
+  <section id="intro" class="intro">
+    <h1>アルテミス2号に乗ってみる</h1>
+    <p class="lead">2026年4月、4人の宇宙飛行士を乗せたオリオン宇宙船が、月の裏側をまわって地球へ帰ってきた、約10日の旅。<br>光るオリオンに触れると、<b>数分間、いっしょに乗れます</b>。</p>
+    <button id="board" class="btn btn-primary" type="button">オリオンに乗る <span aria-hidden="true">›</span></button>
+    <p class="fine">約4分。ドラッグで窓の外を見回せます。</p>
+  </section>
+
+  <!-- 乗っているあいだ -->
+  <section id="hud" class="hud" hidden>
+    <div class="hud-head mono">ON BOARD · ORION<span id="hud-day"></span></div>
+    <dl class="hud-list">
+      <div><dt>地球から</dt><dd id="hud-earth" class="mono">—</dd></div>
+      <div><dt>月の表面から</dt><dd id="hud-moon" class="mono">—</dd></div>
+      <div><dt>速さ</dt><dd id="hud-speed" class="mono">—</dd></div>
+      <div><dt>地球まで光で</dt><dd id="hud-light" class="mono">—</dd></div>
+    </dl>
+  </section>
+
+  <p id="caption" class="caption" aria-live="polite" hidden></p>
+
+  <aside id="photo" class="photo" hidden>
+    <p class="photo-k mono">📷 この場面の本物の写真（NASA）</p>
+    <p id="photo-text" class="photo-text"></p>
+    <a id="photo-link" class="photo-link" href="#" target="_blank" rel="noopener">NASA のページで見る ›</a>
+  </aside>
+
+  <nav id="controls" class="controls" hidden>
+    <div class="timeline" aria-hidden="true">
+      <div id="tl-fill" class="tl-fill"></div>
+      <span class="tl-mark" style="left:0%">4/2 出発</span>
+      <span class="tl-mark" id="tl-moon">4/7 月の裏側</span>
+      <span class="tl-mark" style="left:100%">4/11 帰還</span>
+    </div>
+    <div class="buttons">
+      <button id="pause" class="btn" type="button">一時停止</button>
+      <button id="speed" class="btn mono" type="button">×1</button>
+      <button id="leave" class="btn" type="button">降りる</button>
+    </div>
+  </nav>
+
+  <section id="outro" class="intro outro" hidden>
+    <h2>地球に帰ってきました</h2>
+    <p class="lead">約10日の旅を、数分で追いかけました。本物の写真は NASA のページで。</p>
+    <ul class="outro-links">
+      <li><a href="https://www.nasa.gov/news-release/nasas-artemis-ii-crew-beams-official-moon-flyby-photos-to-earth/" target="_blank" rel="noopener">月の裏側の写真（地球の出・日食など） ›</a></li>
+      <li><a href="https://science.nasa.gov/earth/earth-observatory/earthset-from-the-lunar-far-side/" target="_blank" rel="noopener">地球の入り ›</a></li>
+      <li><a href="https://www.nasa.gov/gallery/lunar-flyby/" target="_blank" rel="noopener">月のそばを通ったときの写真集 ›</a></li>
+    </ul>
+    <button id="again" class="btn btn-primary" type="button">もう一度乗る <span aria-hidden="true">›</span></button>
+  </section>
+
+  <p class="note">
+    <b>出典</b>：通り道は、NASA が公開した飛行の軌道データ（<a href="https://www.nasa.gov/missions/artemis/artemis-2/track-nasas-artemis-ii-mission-in-real-time/" target="_blank" rel="noopener">Artemis II エフェメリス</a>）から。月・太陽の位置と地球の向きは、その時刻から計算しています。月の表面は NASA の <a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">CGI Moon Kit</a>（NASA's Scientific Visualization Studio）。日付・時刻・写真の説明は NASA の発表から。
+    窓の外は、NASA の写真を参考にした「〜のような眺め」で、写真そのものではありません。写真は NASA のページでご覧ください。
+    ※非公式ファンメイド作品です。NASA などの宇宙機関とは関係ありません。
+  </p>
+
+  <script type="module" src="tour.js"></script>
+</body>
+</html>

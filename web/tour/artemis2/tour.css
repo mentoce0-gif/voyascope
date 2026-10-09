@@ -1,0 +1,116 @@
+/* アルテミス2号ツアー（試作）。配色は VOYASCOPE と同じ navy / amber / mint */
+:root {
+  --navy: #050e1f;
+  --mint: #5ef2c2;
+  --mint-dim: rgba(94, 242, 194, 0.55);
+  --amber: #ffb547;
+  --text: #d9f4ea;
+  --text-dim: #8fb3a8;
+  --font-body: "Zen Kaku Gothic New", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; background: var(--navy); color: var(--text); font-family: var(--font-body); overflow: hidden; }
+.mono { font-family: var(--font-mono); }
+#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+
+.bar { position: fixed; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 12px; padding: 14px 18px; pointer-events: none; z-index: 5; }
+.brand { color: #fff; text-decoration: none; letter-spacing: 0.3em; font-size: 15px; pointer-events: auto; }
+.sample-badge { border: 1px dashed var(--amber); color: var(--amber); border-radius: 6px; padding: 2px 8px; font-size: 12px; }
+
+.btn {
+  font: inherit; color: var(--mint); background: rgba(5, 14, 31, 0.6); border: 1px solid var(--mint-dim);
+  border-radius: 999px; padding: 8px 16px; cursor: pointer;
+}
+.btn:hover { background: rgba(94, 242, 194, 0.12); }
+.btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.btn-primary { color: var(--amber); border-color: var(--amber); font-size: 1.05rem; padding: 10px 22px; }
+.btn-primary:hover { background: rgba(255, 181, 71, 0.14); }
+
+.intro {
+  position: fixed; left: 24px; bottom: 120px; max-width: 460px; z-index: 4;
+  background: linear-gradient(180deg, rgba(12, 33, 64, 0.82), rgba(5, 14, 31, 0.88)); border: 1px solid var(--mint-dim);
+  border-radius: 12px; padding: 20px 22px;
+}
+.intro h1, .intro h2 { margin: 0 0 8px; font-size: 1.5rem; color: var(--amber); letter-spacing: 0.04em; }
+.lead { margin: 0 0 14px; line-height: 1.8; }
+.fine { margin: 10px 0 0; font-size: 0.8rem; color: var(--text-dim); }
+
+.hud {
+  position: fixed; top: 56px; left: 18px; z-index: 4; min-width: 230px;
+  background: rgba(5, 14, 31, 0.62); border: 1px solid var(--mint-dim); border-radius: 10px; padding: 10px 14px;
+}
+.hud-head { font-size: 11px; letter-spacing: 0.18em; color: var(--mint); margin-bottom: 6px; }
+.hud-head span { margin-left: 10px; color: var(--amber); letter-spacing: 0.05em; }
+.hud-list { margin: 0; display: grid; gap: 3px; }
+.hud-list div { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; }
+.hud-list dt { color: var(--text-dim); }
+.hud-list dd { margin: 0; color: var(--mint); }
+
+.caption {
+  position: fixed; left: 50%; bottom: 128px; transform: translateX(-50%); z-index: 4; margin: 0;
+  max-width: min(640px, calc(100vw - 32px)); text-align: center; line-height: 1.7; font-size: 1rem;
+  padding: 8px 16px; border-radius: 10px; background: rgba(5, 14, 31, 0.55); text-shadow: 0 1px 6px #000;
+  transition: opacity 0.6s;
+}
+.caption.fade { opacity: 0; }
+
+.photo {
+  position: fixed; right: 18px; top: 56px; z-index: 4; width: 270px;
+  background: rgba(5, 14, 31, 0.7); border: 1px solid rgba(255, 181, 71, 0.7); border-radius: 10px; padding: 10px 14px;
+}
+.photo-k { margin: 0 0 4px; font-size: 11px; color: var(--amber); letter-spacing: 0.08em; }
+.photo-text { margin: 0 0 8px; font-size: 13px; line-height: 1.6; }
+.photo-link { display: inline-block; color: var(--amber); border: 1px solid rgba(255, 181, 71, 0.5); border-radius: 999px; padding: 3px 12px; font-size: 13px; opacity: 0.75; }
+.photo-link { text-decoration: none; opacity: 1; }
+.photo-link:hover { background: rgba(255, 181, 71, 0.14); }
+.outro-links { margin: 0 0 14px; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; }
+.outro-links a { color: var(--amber); text-decoration: none; }
+.outro-links a:hover { text-decoration: underline; }
+
+.controls { position: fixed; left: 18px; right: 18px; bottom: 44px; z-index: 4; display: flex; align-items: center; gap: 14px; }
+.timeline { position: relative; flex: 1; height: 4px; background: rgba(94, 242, 194, 0.22); border-radius: 2px; }
+.tl-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--mint); border-radius: 2px; }
+.tl-mark { position: absolute; top: 8px; transform: translateX(-50%); font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+.tl-mark:first-of-type { transform: none; }
+.tl-mark:last-of-type { transform: translateX(-100%); }
+.buttons { display: flex; gap: 8px; }
+
+.note a { color: var(--text-dim); }
+.note {
+  position: fixed; left: 18px; right: 18px; bottom: 8px; z-index: 3; margin: 0;
+  font-size: 10.5px; line-height: 1.5; color: var(--text-dim); text-shadow: 0 1px 4px #000;
+}
+
+/* 外から見るときの名前 */
+.label { position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none; font-size: 12px; color: var(--text); text-shadow: 0 1px 4px #000; padding-left: 12px; margin-top: -8px; white-space: nowrap; }
+.label.orion { color: var(--amber); }
+.label.flip { padding-left: 0; padding-right: 12px; }
+
+/* 窓：まわりを少し暗く（窓からのぞいている感じ） */
+.window-frame {
+  position: fixed; inset: 0; pointer-events: none; z-index: 2; opacity: 0; transition: opacity 1.2s;
+  background: radial-gradient(ellipse 78% 72% at 50% 48%, transparent 62%, rgba(0, 0, 0, 0.55) 82%, rgba(0, 0, 0, 0.9) 100%);
+}
+.window-frame.on { opacity: 1; }
+/* 大気に入るときのオレンジの光 */
+.reentry { position: fixed; inset: 0; pointer-events: none; z-index: 2; opacity: 0; background: radial-gradient(ellipse at 50% 120%, rgba(255, 140, 40, 0.9), rgba(255, 90, 20, 0.35) 45%, transparent 70%); }
+
+@media (max-width: 700px) {
+  .intro { left: 12px; right: 12px; bottom: 150px; max-width: none; padding: 16px; }
+  .intro h1, .intro h2 { font-size: 1.25rem; }
+  .hud { top: 50px; left: 10px; min-width: 0; padding: 8px 10px; }
+  .hud-list div { font-size: 12px; }
+  .photo { top: auto; bottom: 140px; right: 10px; left: 10px; width: auto; padding: 8px 12px; }
+  .photo-text { font-size: 12px; margin-bottom: 6px; }
+  .caption { bottom: 140px; font-size: 0.92rem; }
+  /* 写真の説明が出ているあいだは、字幕をその上へ */
+  .has-photo .caption { bottom: 268px; }
+  .controls { left: 10px; right: 10px; bottom: 62px; flex-direction: column; align-items: stretch; gap: 22px; }
+  .buttons { justify-content: center; }
+  .note { font-size: 9.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .caption, .window-frame { transition: none; }
+}
