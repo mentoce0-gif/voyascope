@@ -158,6 +158,11 @@ test("詳細：出典を項目ごとに、打ち上げは残り時間と射場",
   const after = eventPanelHtml(card, at("2026-10-19T20:00:00Z"));
   assert.doesNotMatch(after, /data-live="countdown"/);
   assert.match(after, /予定の時刻を過ぎました/);
+  // 終わった（公式の発表で status が done）ものは「済み」。「予定」とは書かない
+  const done = eventPanelHtml({ ...card, status: { value: "done", source: "https://www.jaxa.jp/" } }, at("2026-10-20T00:00:00Z"));
+  assert.match(done, /打ち上げ・済み/);
+  assert.match(done, /終わりました/);
+  assert.doesNotMatch(done, /打ち上げの予定|予定の時刻を過ぎました/);
   assert.match(after, /公式の発表で確かめてください/);
 });
 

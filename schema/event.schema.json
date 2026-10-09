@@ -216,9 +216,19 @@
       "maxItems": 3,
       "items": { "$ref": "common.schema.json#/$defs/link" }
     },
+    "greeting": { "$ref": "common.schema.json#/$defs/greeting" },
     "updated_at": { "$ref": "common.schema.json#/$defs/date" }
   },
   "dependentSchemas": {
+    "greeting": {
+      "$comment": "「いってらっしゃい」は、打ち上げが公式に終わった（status が done）ものだけ",
+      "required": ["status"],
+      "properties": {
+        "kind": { "const": "launch" },
+        "greeting": { "required": ["name"] },
+        "status": { "required": ["value"], "properties": { "value": { "const": "done" } } }
+      }
+    },
     "radiant": { "properties": { "kind": { "const": "meteor" } } }
   },
   "$defs": {

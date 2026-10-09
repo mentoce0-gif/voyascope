@@ -26,6 +26,7 @@ import {
   jstShort,
   REF_NOTE,
 } from "./launches.js";
+import { pendingGreetings, greetingHtml, loadSeen, saveSeen } from "./greetings.js";
 import { activeMeteors, meteorHtml, meteorStoryHtml, radiantDirection, createStream } from "./meteors.js";
 import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
 
@@ -1209,6 +1210,26 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   });
   $("#about-open").addEventListener("click", () => about.showModal());
   $("#menu-open").addEventListener("click", () => about.showModal());
+  // ---------- いってらっしゃい・おかえり（更新のあと最初に開いたときに1回だけ） ----------
+  const greetDlg = $("#greeting");
+  greetDlg.addEventListener("click", (e) => {
+    const evBtn = e.target.closest("[data-greet-event]");
+    if (evBtn) {
+      greetDlg.close();
+      selectEvent(events.find((ev) => ev.id === evBtn.dataset.greetEvent));
+    } else if (e.target === greetDlg || e.target.closest("[data-close]")) greetDlg.close();
+  });
+  const seen = loadSeen();
+  const greetings = pendingGreetings({ events, craft }, new Date(), seen);
+  if (greetings.length) {
+    $("#greeting-body").innerHTML = greetings.map(greetingHtml).join("");
+    // 起動画面が消えてから出す
+    setTimeout(() => {
+      if (about.open) return;
+      greetDlg.showModal();
+      saveSeen(seen, greetings.map((g) => g.key));
+    }, 900);
+  }
   // 機体の画像の出典（利用条件どおりのクレジット）
   $("#about-images").innerHTML = craft
     .filter((c) => c.card.image)
