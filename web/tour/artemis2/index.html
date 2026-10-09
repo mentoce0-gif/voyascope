@@ -27,9 +27,9 @@
   <!-- はじめ（外から見る） -->
   <section id="intro" class="intro">
     <h1>アルテミス2号に乗ってみる</h1>
-    <p class="lead">人を乗せたオリオン宇宙船が、月の裏側をまわって地球へ帰ってきた旅。<br>光るオリオンに触れると、<b>数分間、いっしょに乗れます</b>。</p>
+    <p class="lead">2026年4月、4人の宇宙飛行士を乗せたオリオン宇宙船が、月の裏側をまわって地球へ帰ってきた、約10日の旅。<br>光るオリオンに触れると、<b>数分間、いっしょに乗れます</b>。</p>
     <button id="board" class="btn btn-primary" type="button">オリオンに乗る <span aria-hidden="true">›</span></button>
-    <p class="fine">約3分半。ドラッグで窓の外を見回せます。</p>
+    <p class="fine">約4分。ドラッグで窓の外を見回せます。</p>
   </section>
 
   <!-- 乗っているあいだ -->
@@ -46,17 +46,17 @@
   <p id="caption" class="caption" aria-live="polite" hidden></p>
 
   <aside id="photo" class="photo" hidden>
-    <p class="photo-k mono">📷 この場面の本物の写真</p>
+    <p class="photo-k mono">📷 この場面の本物の写真（NASA）</p>
     <p id="photo-text" class="photo-text"></p>
-    <span class="photo-link" aria-disabled="true">NASA のページで見る ›<small>（リンクは公式で確かめてから入れます）</small></span>
+    <a id="photo-link" class="photo-link" href="#" target="_blank" rel="noopener">NASA のページで見る ›</a>
   </aside>
 
   <nav id="controls" class="controls" hidden>
     <div class="timeline" aria-hidden="true">
       <div id="tl-fill" class="tl-fill"></div>
-      <span class="tl-mark" style="left:0%">出発</span>
-      <span class="tl-mark" id="tl-moon">月の裏側</span>
-      <span class="tl-mark" style="left:100%">帰還</span>
+      <span class="tl-mark" style="left:0%">4/2 出発</span>
+      <span class="tl-mark" id="tl-moon">4/7 月の裏側</span>
+      <span class="tl-mark" style="left:100%">4/11 帰還</span>
     </div>
     <div class="buttons">
       <button id="pause" class="btn" type="button">一時停止</button>
@@ -67,13 +67,18 @@
 
   <section id="outro" class="intro outro" hidden>
     <h2>地球に帰ってきました</h2>
-    <p class="lead">約8日の旅を、数分で追いかけました。</p>
+    <p class="lead">約10日の旅を、数分で追いかけました。本物の写真は NASA のページで。</p>
+    <ul class="outro-links">
+      <li><a href="https://www.nasa.gov/news-release/nasas-artemis-ii-crew-beams-official-moon-flyby-photos-to-earth/" target="_blank" rel="noopener">月の裏側の写真（地球の出・日食など） ›</a></li>
+      <li><a href="https://science.nasa.gov/earth/earth-observatory/earthset-from-the-lunar-far-side/" target="_blank" rel="noopener">地球の入り ›</a></li>
+      <li><a href="https://www.nasa.gov/gallery/lunar-flyby/" target="_blank" rel="noopener">月のそばを通ったときの写真集 ›</a></li>
+    </ul>
     <button id="again" class="btn btn-primary" type="button">もう一度乗る <span aria-hidden="true">›</span></button>
   </section>
 
   <p class="note">
-    <b>見本</b>：通り道は、地球と月の重力から計算した仮のものです（本物の軌道データに差し替えます）。
-    窓の外は、NASA が公開した写真を参考にした「〜のような眺め」で、写真そのものではありません。実際の写真は NASA のページでご覧ください。
+    <b>見本</b>：通り道は、地球と月の重力から計算した仮のもので、月にいちばん近づいた高さだけを本物（NASA）に合わせています。日付・時刻・写真の説明は NASA の発表から。
+    窓の外は、NASA が公開した写真を参考にした「〜のような眺め」で、写真そのものではありません。写真は NASA のページでご覧ください。
     ※非公式ファンメイド作品です。NASA などの宇宙機関とは関係ありません。
   </p>
 

@@ -1,6 +1,6 @@
 // アルテミス2号ツアーの「見本の道のり」を作る（本物の軌道データが届くまでの仮）
 // 地球と月の重力だけで、地球のそばから月の裏側をまわって自然に地球へ戻る通り道（自由帰還軌道）を探す。
-// 月は円軌道（半径 384,400 km・周期 27.32 日）、平面は月の公転面。数値は物理の定数だけで、ミッションの値は使っていない。
+// 月は円軌道（半径 384,400 km・周期 27.32 日）、平面は月の公転面。ミッションの値は、月にいちばん近づいた高さだけを使う。
 // 使い方：node scripts/artemis2-sample-trajectory.mjs > web/tour/artemis2/sample-trajectory.json
 const MU_E = 398600.4418; // km^3/s^2
 const MU_M = 4902.8;
@@ -54,13 +54,15 @@ function fly(v0, th0, { record = false, tMax = 12 * 86400 } = {}) {
   return { minMoonAlt: minMoon - R_M, tMoon, retAlt: retPeri - R_E, tRet, t, pts };
 }
 
-// 月の裏側を 8,000 km ほどで通り、地球の大気（高さ 120 km 以下）へ戻る組み合わせを探す
+// 月の裏側を、本物と同じくらいの高さ（月面から 4,067 マイル＝約 6,545 km。NASA 2026-04-11）で通り、地球の大気（高さ 120 km 以下）へ戻る組み合わせを探す
+// https://www.nasa.gov/blogs/missions/2026/04/11/artemis-ii-astronauts-back-in-houston-reunite-with-families/
+const TARGET_ALT = 6545;
 let best = null;
 for (let th0 = 1.6; th0 <= 2.4; th0 += 0.01) {
   for (let v0 = 10.84; v0 <= 10.96; v0 += 0.002) {
     const r = fly(v0, th0);
     if (r.crash || !Number.isFinite(r.retAlt)) continue;
-    const score = ((r.minMoonAlt - 8000) / 2000) ** 2 + (Math.max(0, r.retAlt - 60) / 200) ** 2;
+    const score = ((r.minMoonAlt - TARGET_ALT) / 2000) ** 2 + (Math.max(0, r.retAlt - 60) / 200) ** 2;
     if (!best || score < best.score) best = { score, v0, th0, ...r };
   }
 }
@@ -69,7 +71,7 @@ for (let i = 0; i < 400; i++) {
   const v0 = best.v0 + (Math.random() - 0.5) * 0.004, th0 = best.th0 + (Math.random() - 0.5) * 0.02;
   const r = fly(v0, th0);
   if (r.crash || !Number.isFinite(r.retAlt)) continue;
-  const score = ((r.minMoonAlt - 8000) / 2000) ** 2 + (Math.max(0, r.retAlt - 60) / 200) ** 2;
+  const score = ((r.minMoonAlt - TARGET_ALT) / 2000) ** 2 + (Math.max(0, r.retAlt - 60) / 200) ** 2;
   if (score < best.score) best = { score, v0, th0, ...r };
 }
 const rec = fly(best.v0, best.th0, { record: true });
@@ -77,7 +79,7 @@ console.error(`v0=${best.v0.toFixed(4)} km/s th0=${best.th0.toFixed(4)} 月の�
 const r1 = (v) => Math.round(v);
 process.stdout.write(
   JSON.stringify({
-    $comment: "見本の道のり（本物の軌道データではない）。scripts/artemis2-sample-trajectory.mjs が地球と月の重力だけで計算した自由帰還軌道。単位：秒・km。地球中心、月の公転面（x-y）。本物の軌道データ（C22）が届いたら差し替える",
+    $comment: "見本の道のり（本物の軌道データではない）。scripts/artemis2-sample-trajectory.mjs が地球と月の重力だけで計算した自由帰還軌道。単位：秒・km。地球中心、月の公転面（x-y）。月にいちばん近づく高さだけ本物（NASA：4,067 マイル）に合わせた。本物の軌道データを使うかはオーナーが決める",
     sample: true,
     moonClosestAltKm: r1(rec.minMoonAlt),
     durationSec: r1(rec.t),

@@ -63,7 +63,11 @@ html, body { margin: 0; height: 100%; background: var(--navy); color: var(--text
 .photo-k { margin: 0 0 4px; font-size: 11px; color: var(--amber); letter-spacing: 0.08em; }
 .photo-text { margin: 0 0 8px; font-size: 13px; line-height: 1.6; }
 .photo-link { display: inline-block; color: var(--amber); border: 1px solid rgba(255, 181, 71, 0.5); border-radius: 999px; padding: 3px 12px; font-size: 13px; opacity: 0.75; }
-.photo-link small { display: block; font-size: 10px; color: var(--text-dim); }
+.photo-link { text-decoration: none; opacity: 1; }
+.photo-link:hover { background: rgba(255, 181, 71, 0.14); }
+.outro-links { margin: 0 0 14px; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; }
+.outro-links a { color: var(--amber); text-decoration: none; }
+.outro-links a:hover { text-decoration: underline; }
 
 .controls { position: fixed; left: 18px; right: 18px; bottom: 44px; z-index: 4; display: flex; align-items: center; gap: 14px; }
 .timeline { position: relative; flex: 1; height: 4px; background: rgba(94, 242, 194, 0.22); border-radius: 2px; }

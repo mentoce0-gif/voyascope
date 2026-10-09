@@ -56,6 +56,11 @@ const earthHidden = (s) => {
   const e = s.craft.clone().negate().normalize(), m = s.moon.clone().sub(s.craft);
   return e.angleTo(m.clone().normalize()) < Math.asin(Math.min(1, R_M / m.length()));
 };
+// 地球が月の陰に入る時刻（地球の入り）
+const T_SET = (() => {
+  for (let t = T_MOON - d(0.3); t < T_MOON + d(0.3); t += 60) if (earthHidden(stateAt(t))) return t;
+  return T_MOON - d(0.02);
+})();
 // 地球が月の陰から出てくる時刻（地球の出）。月にいちばん近づいたあとで探す
 const T_RISE = (() => {
   let hidden = false;
@@ -68,14 +73,18 @@ const T_RISE = (() => {
 })();
 
 // ---------- 乗っているあいだの台本（飛行の時刻 → 実際の秒数）。月のまわりはゆっくり ----------
+// 本物の順番（NASA 2026-04-06 の予定と、写真の時刻）：地球の入り → 月にいちばん近づく → 地球の出 → 日食
+const T_ECLIPSE = T_MOON + d(2 / 24); // 日食は、いちばん近づいてから1時間半ほどあとに始まった（午後8時35分ごろ）
 const SEGS = [
-  { t0: 0, t1: d(0.35), sec: 22, look: "earth", say: "地球をはなれて、月へ。うしろの窓に、地球がだんだん小さくなっていきます。" },
-  { t0: d(0.35), t1: T_MOON - d(0.42), sec: 30, look: "moon", say: "月まで、およそ38万km。何もない宇宙を、2日以上かけて進みます。" },
-  { t0: T_MOON - d(0.42), t1: T_MOON - d(0.1), sec: 28, look: "moon", say: "月が大きくなってきました。月の重力に引かれて、だんだん速くなります。" },
-  { t0: T_MOON - d(0.1), t1: T_RISE - d(0.012), sec: 58, look: "moon", say: "月の裏側へ。地球からは見えない側です。地球が月に隠れているあいだは、電波も届きません。", far: true },
-  { t0: T_RISE - d(0.012), t1: T_RISE + d(0.045), sec: 26, look: "earth", rise: true, fov: 24, say: "月の地平線から、地球が昇ってきます（地球の出）。望遠で見ています。" },
-  { t0: T_RISE + d(0.045), t1: T_END - d(0.3), sec: 32, look: "earth", say: "地球へ帰ります。この見本の道のりは、月の重力で向きを変えて、エンジンを使わずに戻ってくる形です（自由帰還軌道）。" },
-  { t0: T_END - d(0.3), t1: T_END, sec: 20, look: "earth", say: "大気に入ります。まわりの空気がとても熱くなり、オレンジ色に光ります。" },
+  { t0: 0, t1: d(0.35), sec: 20, look: "earth", say: "地球をはなれて、月へ。うしろの窓に、地球がだんだん小さくなっていきます。" },
+  { t0: d(0.35), t1: T_MOON - d(0.42), sec: 26, look: "moon", say: "月まで、およそ38万km。何もない宇宙を、何日もかけて進みます。" },
+  { t0: T_MOON - d(0.42), t1: T_SET - d(0.008), sec: 26, look: "moon", say: "月が大きくなってきました。月の重力に引かれて、だんだん速くなります。" },
+  { t0: T_SET - d(0.008), t1: T_SET + d(0.004), sec: 16, look: "earth", set: true, fov: 24, photo: "earthset", say: "月のふちに、地球が沈んでいきます（地球の入り）。望遠で見ています。" },
+  { t0: T_SET + d(0.004), t1: T_RISE - d(0.008), sec: 44, look: "moon", far: true, photo: "farside", say: "月の裏側です。月が電波をさえぎるので、およそ40分、地球と連絡がとれません。" },
+  { t0: T_RISE - d(0.008), t1: T_RISE + d(0.012), sec: 24, look: "earth", rise: true, fov: 16, photo: "earthrise", say: "月の地平線から、地球が昇ってきます（地球の出）。望遠で見ています。" },
+  { t0: T_RISE + d(0.012), t1: T_ECLIPSE + d(0.02), sec: 28, look: "moon", photo: "eclipse", say: "月の向こうに、太陽が隠れていきます。" },
+  { t0: T_ECLIPSE + d(0.02), t1: T_END - d(0.3), sec: 28, look: "earth", say: "地球へ帰ります。月の重力で向きを変えて、地球へ戻ってくる通り道です（自由帰還軌道）。" },
+  { t0: T_END - d(0.3), t1: T_END, sec: 18, look: "earth", say: "大気に入ります。まわりの空気がとても熱くなり、オレンジ色に光ります。" },
 ];
 let acc = 0;
 for (const s of SEGS) {
@@ -89,10 +98,9 @@ const rideToMission = (r) => {
   const u = Math.min(1, Math.max(0, (r - s.r0) / s.sec));
   return { t: s.t0 + (s.t1 - s.t0) * u, seg: s, u };
 };
-$("#tl-moon").style.left = `${((SEGS[3].r0 + SEGS[3].sec / 2) / RIDE_SEC) * 100}%`;
+$("#tl-moon").style.left = `${((SEGS[4].r0 + SEGS[4].sec / 2) / RIDE_SEC) * 100}%`;
 
 // ---------- 太陽の向き：月の裏側で、月が太陽を隠す場面ができる向き（見本） ----------
-const T_ECLIPSE = T_MOON - d(0.03);
 const SUN = (() => {
   const s = stateAt(T_ECLIPSE);
   const dir = s.moon.clone().sub(s.craft).normalize();
@@ -112,7 +120,10 @@ scene.add(camera);
 const light = new THREE.DirectionalLight(0xffffff, 1.7);
 light.position.copy(SUN).multiplyScalar(1000);
 scene.add(light);
-scene.add(new THREE.AmbientLight(0x223344, 0.12));
+scene.add(new THREE.AmbientLight(0x2a3a4e, 0.32));
+// 地球照：地球で照り返した光が、月の夜の側をうっすら照らす（NASA の写真の説明にもある）
+const earthshine = new THREE.DirectionalLight(0x9fc3ff, 0.32);
+scene.add(earthshine);
 
 const loadTex = (src) => {
   const img = new Image();
@@ -390,19 +401,44 @@ function setCaption(text) {
   }, 350);
 }
 
-function showPhoto(text) {
+// 本物の写真（ページには載せず、NASA のページへ案内する）。説明は NASA の説明文から
+const NASA_FLYBY_PHOTOS = "https://www.nasa.gov/news-release/nasas-artemis-ii-crew-beams-official-moon-flyby-photos-to-earth/";
+const PHOTOS = {
+  earthset: {
+    text: "地球の入り：月の裏側で、地球が月のふちに沈む場面。2026年4月6日 午後6時41分（米国東部夏時間。日本時間 4月7日 午前7時41分）に撮影。",
+    url: "https://science.nasa.gov/earth/earth-observatory/earthset-from-the-lunar-far-side/",
+  },
+  farside: {
+    text: "月の裏側：ヴァヴィロフ・クレーターと、ヘルツシュプルング盆地のふち。乗員が手持ちのカメラ（焦点距離 400 mm）で撮影（2026年4月6日）。",
+    url: NASA_FLYBY_PHOTOS,
+  },
+  earthrise: {
+    text: "地球の出：2026年4月6日 午後7時22分（米国東部夏時間。日本時間 4月7日 午前8時22分）、オリオンの窓から撮影。地球は細い三日月の形。",
+    url: NASA_FLYBY_PHOTOS,
+  },
+  eclipse: {
+    text: "日食：うしろから太陽に照らされた月。月が太陽をすっぽり隠し、皆既が54分近くつづくほどの大きさに見えました。写真の左はしの銀色の光は金星（2026年4月6日）。",
+    url: NASA_FLYBY_PHOTOS,
+  },
+};
+let shownPhoto = null;
+function showPhoto(key) {
+  if (key === shownPhoto) return;
+  shownPhoto = key;
   const el = $("#photo");
-  el.hidden = !text;
-  document.body.classList.toggle("has-photo", !!text);
-  if (text) $("#photo-text").textContent = text;
+  el.hidden = !key;
+  document.body.classList.toggle("has-photo", !!key);
+  if (!key) return;
+  $("#photo-text").textContent = PHOTOS[key].text;
+  $("#photo-link").href = PHOTOS[key].url;
 }
 
 // 見る向き：台本の向き（地球・月）に、ドラッグで見回した分を足す
 function aim(s, seg, u) {
   let target = seg.look === "moon" ? s.moon : new THREE.Vector3();
   let up = new THREE.Vector3(0, 1, 0);
-  if (seg.rise) {
-    // 地球の出：月のふち（地球にいちばん近いところ）と地球のあいだを見る。月の地平線が下、地球が上になる向き
+  if (seg.rise || seg.set) {
+    // 地球の入り・地球の出：月のふち（地球にいちばん近いところ）と地球のあいだを見る。月の地平線が下、地球が上になる向き
     const eDir = s.craft.clone().negate().normalize();
     const toM = s.moon.clone().sub(s.craft);
     const mDir = toM.clone().normalize();
@@ -426,6 +462,7 @@ function aim(s, seg, u) {
 }
 
 function updateSunAndCorona() {
+  earthshine.position.copy(moon.position).negate(); // 地球（原点）から月へ向かう光
   sun.position.copy(camera.position).addScaledVector(SUN, 900);
   sun.scale.setScalar(70);
   // 月の見かけの大きさと、太陽との角度
@@ -440,8 +477,10 @@ function updateSunAndCorona() {
   return k;
 }
 
+// 打ち上げ（2026-04-01 18:35 EDT）から、月にいちばん近づく予定（2026-04-06 19:02 EDT）までの日数
+const MOON_DAY = (Date.UTC(2026, 3, 6, 23, 2) - Date.UTC(2026, 3, 1, 22, 35)) / 86400000;
 function hud(s, t) {
-  $("#hud-day").textContent = `飛行 ${(t / DAY).toFixed(1)} 日目（見本）`;
+  $("#hud-day").textContent = `打ち上げから ${((t - T_MOON) / DAY + MOON_DAY).toFixed(1)} 日（見本）`;
   $("#hud-earth").textContent = fmtKm(s.rKm);
   $("#hud-moon").textContent = fmtKm(Math.max(0, s.moonKm - 1737.4));
   $("#hud-speed").textContent = `${s.speed.toFixed(2)} km/s`;
@@ -478,7 +517,8 @@ function endRide(finished) {
   wing.visible = false;
   $("#window-frame").classList.remove("on");
   $("#reentry").style.opacity = 0;
-  for (const id of ["#hud", "#controls", "#caption", "#photo"]) $(id).hidden = true;
+  for (const id of ["#hud", "#controls", "#caption"]) $(id).hidden = true;
+  showPhoto(null);
   document.body.classList.remove("has-photo");
   lastCaption = null;
   introCamera();
@@ -583,13 +623,8 @@ function frame(now) {
       const eclipse = updateSunAndCorona();
       hud(s, t);
       $("#tl-fill").style.width = `${(ride / RIDE_SEC) * 100}%`;
-      setCaption(eclipse > 0.35 ? "太陽が月に隠れました。月のふちだけが光って見えます。" : seg.say);
-      // 本物の写真の案内（リンクは C22 で確かめてから入れる）
-      const earthBehindMoon = earthHidden(s);
-      if (eclipse > 0.35) showPhoto("月の裏側で、月が太陽を隠した場面（日食）。NASA の写真では、金星と土星も写っていたとされます（公式で確認中）。");
-      else if (seg === SEGS[4]) showPhoto("月の地平線から昇る地球（地球の出）を写した写真があるか、公式で確認中。");
-      else showPhoto(null);
-      if (seg.far && earthBehindMoon) setCaption("地球が月に隠れました。いまは地球と電波がつながりません。");
+      setCaption(eclipse > 0.35 ? "太陽が月に隠れました（日食）。月のふちだけが光って見えます。" : seg.far && Math.abs(t - T_MOON) < d(0.004) ? "月にいちばん近づきました。本物のオリオンは、月面から約6,545km（4,067マイル）まで近づきました。" : seg.say);
+      showPhoto(seg.photo ?? null);
       // 大気に入る：最後の数秒、オレンジに光る
       $("#reentry").style.opacity = String(seg === SEGS.at(-1) ? smoothstep(u, 0.55, 1) * 0.9 : 0);
     }
