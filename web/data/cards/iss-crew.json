@@ -27,6 +27,9 @@
         "as_of": "2026-10-08",
         "note": "帰還済み。米国東部夏時間 11:34、カリフォルニア州ロサンゼルス沖に着水（NASA）"
       },
+      "greeting": {
+        "until": "2026-10-15"
+      },
       "crew": [
         {
           "astronaut": {
@@ -135,7 +138,7 @@
           "url": "https://humans-in-space.jaxa.jp/iss/crew/"
         }
       ],
-      "updated_at": "2026-10-08"
+      "updated_at": "2026-10-09"
     },
     {
       "id": "crew-13",
