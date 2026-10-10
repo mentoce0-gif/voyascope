@@ -2,18 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-09T22:38:49.811Z",
+  "fetched_at": "2026-10-10T05:53:06.535Z",
   "days_ahead": 45,
   "launches": [
     {
       "id": "da43dc2c-00af-4cc1-8ef1-90a60b2eb9e5",
-      "net": "2026-10-10T07:39:00.000Z",
-      "precision": "min",
+      "net": "2026-10-10T07:39:44.000Z",
+      "precision": "sec",
       "window_end": null,
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-09T14:57:50Z",
+      "updated": "2026-10-10T00:49:04Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -197,6 +197,45 @@
         "position": {
           "lat": 30.400938,
           "lng": 130.97564
+        }
+      }
+    },
+    {
+      "id": "8dd5de11-831b-445f-86f0-bffefe0550d9",
+      "net": "2026-11-24T05:03:00.000Z",
+      "precision": "min",
+      "window_end": null,
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-06-08T21:46:36Z",
+      "rocket": {
+        "name": "Soyuz 2.1b",
+        "full_name": "Soyuz 2.1b"
+      },
+      "provider": {
+        "name": "Russian Federal Space Agency (ROSCOSMOS)",
+        "ja": "ロスコスモス"
+      },
+      "mission": {
+        "name": "Progress MS-36 (97P)",
+        "placeholder": false,
+        "type": "Resupply",
+        "type_ja": "物資の補給",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 15,
+        "name": "Baikonur Cosmodrome, Republic of Kazakhstan",
+        "ja": "バイコヌール宇宙基地",
+        "short": "バイコヌール",
+        "pad": "31/6",
+        "country": "KAZ",
+        "country_ja": "カザフスタン",
+        "position": {
+          "lat": 45.996034,
+          "lng": 63.564003
         }
       }
     }
