@@ -97,15 +97,19 @@ const T_ECLIPSE = (() => {
   }
   return best;
 })();
+// 場面の台本。sec：その場面を見る秒（読める速さ。速くする操作はなし）
+// 月までと地球までの、何もない長い道のりは「ワープ」で飛ばして、月のそばの場面をじっくり見せる（2026-10-11 オーナー）
+//   warp：数秒で、何日ぶんの道のりを進む。字幕のかわりに、章の見出し（日付と行き先）を出す
 const SEGS = [
-  { t0: 0, t1: d(0.35), sec: 20, look: "earth", say: "地球をはなれて、月へ。うしろの窓に、地球がだんだん小さくなっていきます。" },
-  { t0: d(0.35), t1: T_MOON - d(0.42), sec: 20, look: "moon", say: "月まで、およそ38万km。何もない宇宙を、何日もかけて進みます。" },
-  { t0: T_MOON - d(0.42), t1: T_SET - d(0.008), sec: 22, look: "moon", say: "月が大きくなってきました。月の重力に引かれて、だんだん速くなります。" },
+  { t0: 0, t1: d(0.35), sec: 16, look: "earth", say: "地球をはなれて、月へ。うしろの窓に、地球がだんだん小さくなっていきます。" },
+  { t0: d(0.35), t1: T_MOON - d(0.42), sec: 6, look: "moon", warp: { head: "月のそばへ", sub: "何もない宇宙を、何日もかけて、およそ38万km" } },
+  { t0: T_MOON - d(0.42), t1: T_SET - d(0.008), sec: 20, look: "moon", say: "月が大きくなってきました。月の重力に引かれて、だんだん速くなります。" },
   { t0: T_SET - d(0.008), t1: T_SET + d(0.004), sec: 16, look: "earth", set: true, fov: 24, photo: "earthset", say: "月のふちに、地球が沈んでいきます（地球の入り）。望遠で見ています。" },
   { t0: T_SET + d(0.004), t1: T_RISE - d(0.008), sec: 44, look: "moon", far: true, photo: "farside", say: "月の裏側です。月が電波をさえぎるので、およそ40分、地球と連絡がとれません。" },
   { t0: T_RISE - d(0.008), t1: T_RISE + d(0.012), sec: 24, look: "earth", rise: true, fov: 16, photo: "earthrise", say: "月の地平線から、地球が昇ってきます（地球の出）。望遠で見ています。" },
-  { t0: T_RISE + d(0.012), t1: T_ECLIPSE + d(0.02), sec: 28, look: "moon", photo: "eclipse", say: "月の向こうに、太陽が隠れていきます。" },
-  { t0: T_ECLIPSE + d(0.02), t1: T_END - d(0.3), sec: 24, look: "earth", say: "地球へ帰ります。月の重力で向きを変えて、地球へ戻ってくる通り道です（自由帰還軌道）。" },
+  { t0: T_RISE + d(0.012), t1: T_ECLIPSE + d(0.02), sec: 26, look: "moon", photo: "eclipse", say: "月の向こうに、太陽が隠れていきます。" },
+  { t0: T_ECLIPSE + d(0.02), t1: T_END - d(0.6), sec: 6, look: "earth", warp: { head: "地球へ", sub: "月の重力で向きを変えて、また何日もかけて" } },
+  { t0: T_END - d(0.6), t1: T_END - d(0.3), sec: 14, look: "earth", say: "地球が近づいてきました。月をまわって、そのまま地球へ戻ってくる通り道です（自由帰還軌道）。" },
   { t0: T_END - d(0.3), t1: T_END, sec: 18, look: "earth", say: "大気に入ります。まわりの空気がとても熱くなり、オレンジ色に光ります。" },
 ];
 let acc = 0;
@@ -118,9 +122,11 @@ const RIDE_SEC = acc;
 const rideToMission = (r) => {
   const s = SEGS.find((x) => r < x.r1) ?? SEGS.at(-1);
   const u = Math.min(1, Math.max(0, (r - s.r0) / s.sec));
-  return { t: s.t0 + (s.t1 - s.t0) * u, seg: s, u };
+  const k = s.warp ? u * u * (3 - 2 * u) : u; // ワープは、ゆっくり出て、いっきに進んで、ゆっくり着く
+  return { t: s.t0 + (s.t1 - s.t0) * k, seg: s, u };
 };
-$("#tl-moon").style.left = `${((SEGS[4].r0 + SEGS[4].sec / 2) / RIDE_SEC) * 100}%`;
+const FAR_SEG = SEGS.find((s) => s.far);
+$("#tl-moon").style.left = `${((FAR_SEG.r0 + FAR_SEG.sec / 2) / RIDE_SEC) * 100}%`;
 
 
 // ---------- 3D ----------
@@ -386,7 +392,6 @@ let autoOutside = false; // 乗ってすぐは、外からオリオンの姿を�
 let lookOverride = null; // 「地球向き」「月向き」を押したとき。場面が変わったら台本の向きに戻る
 let lastSeg = null;
 let ride = 0; // 乗ってからの秒（台本の時計）
-let speedMul = 1;
 let paused = false;
 let boardT = 0;
 const camFrom = new THREE.Vector3(), lookQ = new THREE.Quaternion(), tmpQ = new THREE.Quaternion(), mtx = new THREE.Matrix4();
@@ -434,27 +439,37 @@ function introCamera() {
   camera.quaternion.setFromRotationMatrix(mtx);
 }
 setIntroView();
-// 外から見るときの名前（地球・月・オリオン）
+// 外から見るときの目印：名前の文字のかわりに、絵のアイコン（2026-10-11 オーナー：文字は野暮ったいので）
+const ICONS = {
+  earth: '<svg viewBox="0 0 40 40"><defs><radialGradient id="ie" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#a8e6ff"/><stop offset=".5" stop-color="#2f7fd0"/><stop offset="1" stop-color="#0a2457"/></radialGradient></defs><circle cx="20" cy="20" r="14" fill="url(#ie)"/><path d="M6 20h28M20 6c5 4 5 24 0 28M20 6c-5 4-5 24 0 28M8.5 13h23M8.5 27h23" fill="none" stroke="#d9f4ea" stroke-opacity=".38" stroke-width="1"/><circle cx="20" cy="20" r="16.5" fill="none" stroke="#9fe3ff" stroke-opacity=".5"/></svg>',
+  moon: '<svg viewBox="0 0 40 40"><defs><radialGradient id="im" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="#f2f0ea"/><stop offset=".6" stop-color="#a9a69d"/><stop offset="1" stop-color="#5a5852"/></radialGradient></defs><circle cx="20" cy="20" r="12" fill="url(#im)"/><g fill="#6f6c64" opacity=".7"><circle cx="16" cy="16" r="2.6"/><circle cx="24" cy="23" r="3.2"/><circle cx="15" cy="25" r="1.6"/><circle cx="24" cy="14" r="1.3"/></g></svg>',
+  orion: '<svg viewBox="0 0 48 48"><circle class="ring" cx="24" cy="24" r="20" fill="none" stroke="#ffb547" stroke-width="1.6"/><g fill="#ffb547"><path d="M20.5 12h7l3.5 10h-14z"/><rect x="18" y="23" width="12" height="9" rx="1"/><path d="M8 26.5h9v2H8zM31 26.5h9v2h-9z" opacity=".9"/><rect x="6" y="24.5" width="4" height="6" rx=".6" opacity=".7"/><rect x="38" y="24.5" width="4" height="6" rx=".6" opacity=".7"/><path d="M21 32h6l-1 3h-4z" opacity=".8"/></g></svg>',
+};
 const labels = [
-  { el: document.createElement("span"), text: "地球", obj: () => earth.position },
-  { el: document.createElement("span"), text: "月", obj: () => moon.position },
-  { el: document.createElement("span"), text: "オリオン（触れると乗れます）", obj: () => orionMark.position, cls: "orion", orion: true },
+  { el: document.createElement("span"), name: "地球", icon: ICONS.earth, obj: () => earth.position, cls: "earth" },
+  { el: document.createElement("span"), name: "月", icon: ICONS.moon, obj: () => moon.position, cls: "moon" },
+  { el: document.createElement("span"), name: "オリオン", icon: ICONS.orion, obj: () => orionMark.position, cls: "orion", orion: true },
 ];
 for (const m of labels) {
-  m.el.className = `label ${m.cls ?? ""}`;
-  m.el.textContent = m.text;
+  m.el.className = `label ${m.cls}`;
+  m.el.innerHTML = m.icon;
+  m.el.setAttribute("role", "img");
+  m.el.setAttribute("aria-label", m.name);
   document.body.append(m.el);
 }
+// 光るオリオンの目印は、押すと乗れる
+labels[2].el.addEventListener("click", () => mode === "intro" && board());
 function placeLabels() {
   for (const m of labels) {
     const p = m.obj().clone().project(camera);
     const showAll = mode === "intro" || (mode === "ride" && view === "route");
     m.el.hidden = !(showAll || (m.orion && mode === "ride" && view === "earth")) || p.z > 1;
-    if (m.orion) m.el.textContent = mode === "intro" ? "オリオン（触れると乗れます）" : "オリオン（いまここ）";
-    const x = ((p.x + 1) / 2) * innerWidth;
-    const flip = x + m.el.offsetWidth > innerWidth - 8; // 右にはみ出すときは、左側に出す
-    m.el.classList.toggle("flip", flip);
-    m.el.style.transform = `translate(${x}px, ${((1 - p.y) / 2) * innerHeight}px)${flip ? " translateX(-100%)" : ""}`;
+    if (m.orion) {
+      m.el.classList.toggle("tap", mode === "intro");
+      m.el.setAttribute("aria-label", mode === "intro" ? "オリオン（押すと乗れます）" : "オリオン（いまここ）");
+    }
+    // 絵は、その天体・オリオンの位置にちょうど重ねる（遠くて小さい本物の姿の、目印として）
+    m.el.style.transform = `translate(${((p.x + 1) / 2) * innerWidth}px, ${((1 - p.y) / 2) * innerHeight}px) translate(-50%, -50%)`;
   }
 }
 introCamera();
@@ -678,6 +693,7 @@ function startRide(at = 0) {
 }
 function leaveRide() {
   mode = "intro";
+  warpFx(null);
   body.classList.remove("riding");
   setCinema(true);
   setView("route", { auto: true });
@@ -696,6 +712,7 @@ function leaveRide() {
 const endTimers = [];
 function finishRide() {
   mode = "ending";
+  warpFx(null);
   const el = $("#ending");
   el.hidden = false;
   el.classList.remove("on", "credits", "done");
@@ -720,9 +737,11 @@ $("#pause").addEventListener("click", () => {
   paused = !paused;
   $("#pause").textContent = paused ? "つづける" : "一時停止";
 });
-$("#speed").addEventListener("click", () => {
-  speedMul = speedMul === 1 ? 2 : speedMul === 2 ? 4 : 1;
-  $("#speed").textContent = `×${speedMul}`;
+// 次の場面へ（速くする「×2・×4」のかわり。字幕を読む速さは変えない。2026-10-11 オーナー）
+$("#skip").addEventListener("click", () => {
+  if (mode !== "ride") return;
+  if (autoOutside) ride = OUTSIDE_SEC;
+  else ride = rideToMission(ride).seg.r1;
 });
 for (const b of document.querySelectorAll("[data-view]")) b.addEventListener("click", () => setView(b.dataset.view));
 for (const b of document.querySelectorAll("[data-look]")) b.addEventListener("click", () => setLook(lookOverride === b.dataset.look ? null : b.dataset.look));
@@ -774,6 +793,24 @@ function resize() {
 addEventListener("resize", resize);
 resize();
 
+// ワープ：光の筋と、章の見出し（日付は、着いたときの日本時間）
+const jstDay = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "long", day: "numeric" });
+let chapterSeg = null;
+function warpFx(seg, u) {
+  const w = seg?.warp ? smoothstep(u, 0, 0.2) * (1 - smoothstep(u, 0.8, 1)) : 0;
+  $("#warp").style.opacity = String(w);
+  $("#caption").classList.toggle("off", !!seg?.warp);
+  const ch = $("#chapter");
+  if (seg?.warp && chapterSeg !== seg) {
+    chapterSeg = seg;
+    $("#chapter-date").textContent = `${jstDay.format(EPOCH + seg.t1 * 1000)}（日本時間）`;
+    $("#chapter-head").textContent = seg.warp.head;
+    $("#chapter-sub").textContent = seg.warp.sub;
+  }
+  ch.classList.toggle("on", !!seg?.warp && u > 0.08 && u < 0.86);
+  if (!seg?.warp) chapterSeg = null;
+}
+
 // ---------- 毎フレーム ----------
 const OUTSIDE_SEC = 9; // 乗ってすぐ、外からオリオンの姿を見せる秒数
 const OUTSIDE_SAY = "オリオン宇宙船。4人の宇宙飛行士が乗っています（姿は再現モデル）。";
@@ -814,7 +851,7 @@ function frame(now) {
     updateSunAndCorona();
     if (boardT >= 1) startRide();
   } else if (mode === "ride") {
-    if (!paused) ride += dt * speedMul;
+    if (!paused) ride += dt;
     if (ride >= RIDE_SEC) {
       finishRide();
     } else {
@@ -827,7 +864,8 @@ function frame(now) {
         autoOutside = false;
         dip(() => setView("window", { auto: true }));
       }
-      setCinema(autoOutside || dipping || ride > RIDE_SEC - END_CINEMA_SEC);
+      setCinema(autoOutside || dipping || !!seg.warp || ride > RIDE_SEC - END_CINEMA_SEC);
+      warpFx(seg, u, t);
       const s = place(t);
       placeOrion(s);
       orionMark.position.copy(s.craft);

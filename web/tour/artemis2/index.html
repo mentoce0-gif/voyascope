@@ -22,6 +22,9 @@
   <div class="lb lb-top" aria-hidden="true"></div>
   <div class="lb lb-bottom" aria-hidden="true"></div>
   <div id="fade" class="fade on" aria-hidden="true"></div>
+  <!-- ワープ：長い道のりを数秒で。光の筋と、章の見出し -->
+  <div id="warp" class="warp" aria-hidden="true"></div>
+  <div id="chapter" class="chapter" aria-live="polite"><p id="chapter-date" class="ch-date mono"></p><p id="chapter-head" class="ch-head"></p><p id="chapter-sub" class="ch-sub"></p></div>
 
   <header class="bar">
     <a class="brand mono" href="../../">VOYASCOPE</a>
@@ -33,7 +36,7 @@
     <p class="t-line t1 mono">2026年4月</p>
     <p class="t-line t2">4人を乗せて、月の裏側へ。そして、地球へ。</p>
     <h1 class="t-line t3">アルテミス2号に乗ってみる</h1>
-    <p class="t-line t4 lead">光るオリオンに触れるか、下のボタンで。約4分、いっしょに乗ります。</p>
+    <p class="t-line t4 lead">光るオリオンに触れるか、下のボタンで。約3分、いっしょに乗ります。</p>
     <div class="t-line t5"><button id="board" class="btn btn-primary" type="button">オリオンに乗る <span aria-hidden="true">›</span></button></div>
   </section>
 
@@ -81,7 +84,7 @@
         </div>
         <div class="buttons">
           <button id="pause" class="btn" type="button">一時停止</button>
-          <button id="speed" class="btn mono" type="button">×1</button>
+          <button id="skip" class="btn" type="button">次の場面 <span aria-hidden="true">›</span></button>
           <button id="leave" class="btn" type="button">降りる</button>
         </div>
       </div>
