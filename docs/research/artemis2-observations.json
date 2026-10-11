@@ -1,0 +1,1171 @@
+{
+  "$comment": "Phase A の検証用の計算結果（ドラフト）。scripts/artemis2-observations.mjs で作った。アプリには読み込まない。月は球（地形の高さなし）。宇宙船の姿勢・窓の向きは入っていない（位置だけ）",
+  "source": {
+    "ephemerisPage": "https://www.nasa.gov/missions/artemis/artemis-2/track-nasas-artemis-ii-mission-in-real-time/",
+    "file": "Artemis_II_OEM_2026_04_10_Post-ICPS-Sep-to-EI.asc",
+    "creationDate": "2026-04-10T03:22:19",
+    "originator": "NASA/JSC/FOD/FDO",
+    "frame": "EARTH / EME2000 / UTC",
+    "useableStart": "2026-04-02T01:57:37.084",
+    "useableStop": "2026-04-10T23:53:16.723",
+    "rows": 3262
+  },
+  "method": {
+    "moonSun": "Astronomy Engine GeoVector（EQJ = J2000 赤道）",
+    "moonOrientation": "IAU WGCCRE 2009（周期項つき）",
+    "moonRadiusKm": 1737.4,
+    "earthRadiusKm": 6378.137,
+    "visible": "出射角 e < 90°",
+    "lit": "入射角 i < 90°",
+    "readable": "e < 70° かつ i < 88°",
+    "texelKm": 5.33,
+    "step": "60 s",
+    "window": "2026-04-06T00:00:00Z — 2026-04-07T06:00:00Z"
+  },
+  "events": {
+    "earthset_first_contact": {
+      "utc": "2026-04-06T22:41:00Z"
+    },
+    "earthset_center": {
+      "utc": "2026-04-06T22:42:00Z"
+    },
+    "earthset_complete": {
+      "utc": "2026-04-06T22:44:00Z"
+    },
+    "closest_approach": {
+      "utc": "2026-04-06T23:00:40Z",
+      "altitudeKm": 6555,
+      "altitudeMi": 4073
+    },
+    "earthrise_first_limb": {
+      "utc": "2026-04-06T23:20:00Z"
+    },
+    "earthrise_center": {
+      "utc": "2026-04-06T23:22:00Z"
+    },
+    "earthrise_complete": {
+      "utc": "2026-04-06T23:24:00Z"
+    },
+    "eclipse_first_contact": {
+      "utc": "2026-04-07T00:33:00Z"
+    },
+    "eclipse_total_start": {
+      "utc": "2026-04-07T00:35:00Z"
+    },
+    "eclipse_total_end": {
+      "utc": "2026-04-07T01:29:00Z"
+    },
+    "eclipse_last_contact": {
+      "utc": "2026-04-07T01:32:00Z"
+    }
+  },
+  "subPoints": {
+    "utc": "2026-04-06T23:01:00Z",
+    "subOrion": [
+      -2.62,
+      179.45
+    ],
+    "subEarth": [
+      6.73,
+      -0.71
+    ],
+    "subSolar": [
+      1.03,
+      -55.14
+    ],
+    "moonPole": {
+      "raDeg": 271.6568,
+      "decDeg": 68.0105,
+      "WDeg": 70.5
+    }
+  },
+  "atTimes": [
+    {
+      "utc": "2026-04-06T17:00:00Z",
+      "moonDistanceKm": 24721,
+      "moonAngularDiameterDeg": 8.06,
+      "subOrion": [
+        2.5,
+        -89.3
+      ],
+      "subSolar": [
+        1,
+        -52.1
+      ],
+      "features": {
+        "reiner_gamma": {
+          "e": 32.8,
+          "i": 9.4,
+          "angDiamDeg": 0.18,
+          "off": 0.54,
+          "visible": true,
+          "lit": true
+        },
+        "glushko": {
+          "e": 13.8,
+          "i": 26.5,
+          "angDiamDeg": 0.1,
+          "off": 0.24,
+          "visible": true,
+          "lit": true
+        },
+        "pierazzo": {
+          "e": 11.8,
+          "i": 48.2,
+          "angDiamDeg": 0.02,
+          "off": 0.2,
+          "visible": true,
+          "lit": true
+        },
+        "ohm": {
+          "e": 30.8,
+          "i": 62.9,
+          "angDiamDeg": 0.15,
+          "off": 0.51,
+          "visible": true,
+          "lit": true
+        },
+        "mare_orientale": {
+          "e": 24.6,
+          "i": 46.7,
+          "angDiamDeg": 0.73,
+          "off": 0.42,
+          "visible": true,
+          "lit": true
+        },
+        "hertzsprung": {
+          "e": 42.1,
+          "i": 76.6,
+          "angDiamDeg": 1.31,
+          "off": 0.67,
+          "visible": true,
+          "lit": true
+        },
+        "vavilov": {
+          "e": 52.8,
+          "i": 86.7,
+          "angDiamDeg": 0.24,
+          "off": 0.8,
+          "visible": true,
+          "lit": true
+        },
+        "mare_imbrium": {
+          "e": 79.7,
+          "i": 48.3,
+          "angDiamDeg": 2.7,
+          "off": 0.98,
+          "visible": true,
+          "lit": true
+        }
+      }
+    },
+    {
+      "utc": "2026-04-06T18:19:00Z",
+      "moonDistanceKm": 20238,
+      "moonAngularDiameterDeg": 9.85,
+      "subOrion": [
+        2.1,
+        -96.2
+      ],
+      "subSolar": [
+        1,
+        -52.8
+      ],
+      "features": {
+        "reiner_gamma": {
+          "e": 40.7,
+          "i": 8.9,
+          "angDiamDeg": 0.22,
+          "off": 0.65,
+          "visible": true,
+          "lit": true
+        },
+        "glushko": {
+          "e": 21.2,
+          "i": 25.8,
+          "angDiamDeg": 0.12,
+          "off": 0.36,
+          "visible": true,
+          "lit": true
+        },
+        "pierazzo": {
+          "e": 4.6,
+          "i": 47.5,
+          "angDiamDeg": 0.03,
+          "off": 0.08,
+          "visible": true,
+          "lit": true
+        },
+        "ohm": {
+          "e": 25.8,
+          "i": 62.3,
+          "angDiamDeg": 0.19,
+          "off": 0.43,
+          "visible": true,
+          "lit": true
+        },
+        "mare_orientale": {
+          "e": 24.1,
+          "i": 46.1,
+          "angDiamDeg": 0.9,
+          "off": 0.41,
+          "visible": true,
+          "lit": true
+        },
+        "hertzsprung": {
+          "e": 35.3,
+          "i": 75.9,
+          "angDiamDeg": 1.64,
+          "off": 0.58,
+          "visible": true,
+          "lit": true
+        },
+        "vavilov": {
+          "e": 46.2,
+          "i": 86,
+          "angDiamDeg": 0.3,
+          "off": 0.72,
+          "visible": true,
+          "lit": true
+        },
+        "mare_imbrium": {
+          "e": 86.5,
+          "i": 48.8,
+          "angDiamDeg": 3.27,
+          "off": 1,
+          "visible": true,
+          "lit": true
+        }
+      }
+    },
+    {
+      "utc": "2026-04-06T19:00:00Z",
+      "moonDistanceKm": 17937,
+      "moonAngularDiameterDeg": 11.12,
+      "subOrion": [
+        1.9,
+        -101
+      ],
+      "subSolar": [
+        1,
+        -53.1
+      ],
+      "features": {
+        "reiner_gamma": {
+          "e": 46.3,
+          "i": 8.6,
+          "angDiamDeg": 0.25,
+          "off": 0.72,
+          "visible": true,
+          "lit": true
+        },
+        "glushko": {
+          "e": 26.5,
+          "i": 25.5,
+          "angDiamDeg": 0.14,
+          "off": 0.45,
+          "visible": true,
+          "lit": true
+        },
+        "pierazzo": {
+          "e": 1.8,
+          "i": 47.2,
+          "angDiamDeg": 0.03,
+          "off": 0.03,
+          "visible": true,
+          "lit": true
+        },
+        "ohm": {
+          "e": 22.8,
+          "i": 61.9,
+          "angDiamDeg": 0.22,
+          "off": 0.39,
+          "visible": true,
+          "lit": true
+        },
+        "mare_orientale": {
+          "e": 25,
+          "i": 45.8,
+          "angDiamDeg": 1.03,
+          "off": 0.42,
+          "visible": true,
+          "lit": true
+        },
+        "hertzsprung": {
+          "e": 30.5,
+          "i": 75.5,
+          "angDiamDeg": 1.87,
+          "off": 0.51,
+          "visible": true,
+          "lit": true
+        },
+        "vavilov": {
+          "e": 41.5,
+          "i": 85.7,
+          "angDiamDeg": 0.34,
+          "off": 0.66,
+          "visible": true,
+          "lit": true
+        },
+        "mare_imbrium": {
+          "e": 91.3,
+          "i": 49,
+          "angDiamDeg": 3.67,
+          "off": 1,
+          "visible": false,
+          "lit": true
+        }
+      }
+    },
+    {
+      "utc": "2026-04-06T19:41:00Z",
+      "moonDistanceKm": 15682,
+      "moonAngularDiameterDeg": 12.72,
+      "subOrion": [
+        1.6,
+        -107.1
+      ],
+      "subSolar": [
+        1,
+        -53.4
+      ],
+      "features": {
+        "reiner_gamma": {
+          "e": 53.4,
+          "i": 8.4,
+          "angDiamDeg": 0.29,
+          "off": 0.8,
+          "visible": true,
+          "lit": true
+        },
+        "glushko": {
+          "e": 33.5,
+          "i": 25.1,
+          "angDiamDeg": 0.16,
+          "off": 0.55,
+          "visible": true,
+          "lit": true
+        },
+        "pierazzo": {
+          "e": 8,
+          "i": 46.8,
+          "angDiamDeg": 0.04,
+          "off": 0.14,
+          "visible": true,
+          "lit": true
+        },
+        "ohm": {
+          "e": 20.2,
+          "i": 61.6,
+          "angDiamDeg": 0.25,
+          "off": 0.34,
+          "visible": true,
+          "lit": true
+        },
+        "mare_orientale": {
+          "e": 27.6,
+          "i": 45.5,
+          "angDiamDeg": 1.19,
+          "off": 0.46,
+          "visible": true,
+          "lit": true
+        },
+        "hertzsprung": {
+          "e": 24.1,
+          "i": 75.2,
+          "angDiamDeg": 2.18,
+          "off": 0.41,
+          "visible": true,
+          "lit": true
+        },
+        "vavilov": {
+          "e": 35.4,
+          "i": 85.3,
+          "angDiamDeg": 0.4,
+          "off": 0.58,
+          "visible": true,
+          "lit": true
+        },
+        "mare_imbrium": {
+          "e": 97.2,
+          "i": 49.2,
+          "angDiamDeg": 4.15,
+          "off": 0.99,
+          "visible": false,
+          "lit": true
+        }
+      }
+    },
+    {
+      "utc": "2026-04-06T20:30:00Z",
+      "moonDistanceKm": 13107,
+      "moonAngularDiameterDeg": 15.23,
+      "subOrion": [
+        1,
+        -116.9
+      ],
+      "subSolar": [
+        1,
+        -53.9
+      ],
+      "features": {
+        "reiner_gamma": {
+          "e": 65,
+          "i": 8.1,
+          "angDiamDeg": 0.34,
+          "off": 0.91,
+          "visible": true,
+          "lit": true
+        },
+        "glushko": {
+          "e": 45.1,
+          "i": 24.8,
+          "angDiamDeg": 0.19,
+          "off": 0.71,
+          "visible": true,
+          "lit": true
+        },
+        "pierazzo": {
+          "e": 19.4,
+          "i": 46.4,
+          "angDiamDeg": 0.05,
+          "off": 0.33,
+          "visible": true,
+          "lit": true
+        },
+        "ohm": {
+          "e": 20.2,
+          "i": 61.2,
+          "angDiamDeg": 0.31,
+          "off": 0.34,
+          "visible": true,
+          "lit": true
+        },
+        "mare_orientale": {
+          "e": 34.5,
+          "i": 45.1,
+          "angDiamDeg": 1.45,
+          "off": 0.57,
+          "visible": true,
+          "lit": true
+        },
+        "hertzsprung": {
+          "e": 13.5,
+          "i": 74.8,
+          "angDiamDeg": 2.69,
+          "off": 0.23,
+          "visible": true,
+          "lit": true
+        },
+        "vavilov": {
+          "e": 25.1,
+          "i": 84.9,
+          "angDiamDeg": 0.49,
+          "off": 0.42,
+          "visible": true,
+          "lit": true
+        },
+        "mare_imbrium": {
+          "e": 106.6,
+          "i": 49.5,
+          "angDiamDeg": 4.86,
+          "off": 0.96,
+          "visible": false,
+          "lit": true
+        }
+      }
+    },
+    {
+      "utc": "2026-04-06T21:12:00Z",
+      "moonDistanceKm": 11104,
+      "moonAngularDiameterDeg": 18,
+      "subOrion": [
+        0.3,
+        -128.7
+      ],
+      "subSolar": [
+        1,
+        -54.2
+      ],
+      "features": {
+        "reiner_gamma": {
+          "e": 78.7,
+          "i": 7.9,
+          "angDiamDeg": 0.4,
+          "off": 0.98,
+          "visible": true,
+          "lit": true
+        },
+        "glushko": {
+          "e": 59.2,
+          "i": 24.4,
+          "angDiamDeg": 0.23,
+          "off": 0.86,
+          "visible": true,
+          "lit": true
+        },
+        "pierazzo": {
+          "e": 33.6,
+          "i": 46,
+          "angDiamDeg": 0.06,
+          "off": 0.55,
+          "visible": true,
+          "lit": true
+        },
+        "ohm": {
+          "e": 27.3,
+          "i": 60.9,
+          "angDiamDeg": 0.37,
+          "off": 0.46,
+          "visible": true,
+          "lit": true
+        },
+        "mare_orientale": {
+          "e": 45.4,
+          "i": 44.8,
+          "angDiamDeg": 1.72,
+          "off": 0.71,
+          "visible": true,
+          "lit": true
+        },
+        "hertzsprung": {
+          "e": 1.2,
+          "i": 74.4,
+          "angDiamDeg": 3.28,
+          "off": 0.02,
+          "visible": true,
+          "lit": true
+        },
+        "vavilov": {
+          "e": 12,
+          "i": 84.6,
+          "angDiamDeg": 0.6,
+          "off": 0.21,
+          "visible": true,
+          "lit": true
+        },
+        "mare_imbrium": {
+          "e": 117.2,
+          "i": 49.7,
+          "angDiamDeg": 5.57,
+          "off": 0.89,
+          "visible": false,
+          "lit": true
+        }
+      }
+    },
+    {
+      "utc": "2026-04-06T22:00:00Z",
+      "moonDistanceKm": 9276,
+      "moonAngularDiameterDeg": 21.59,
+      "subOrion": [
+        -0.8,
+        -147.6
+      ],
+      "subSolar": [
+        1,
+        -54.6
+      ],
+      "features": {
+        "reiner_gamma": {
+          "e": 99.5,
+          "i": 7.7,
+          "angDiamDeg": 0.45,
+          "off": 0.99,
+          "visible": false,
+          "lit": true
+        },
+        "glushko": {
+          "e": 81,
+          "i": 24,
+          "angDiamDeg": 0.26,
+          "off": 0.99,
+          "visible": true,
+          "lit": true
+        },
+        "pierazzo": {
+          "e": 56.6,
+          "i": 45.6,
+          "angDiamDeg": 0.06,
+          "off": 0.83,
+          "visible": true,
+          "lit": true
+        },
+        "ohm": {
+          "e": 46.2,
+          "i": 60.5,
+          "angDiamDeg": 0.44,
+          "off": 0.72,
+          "visible": true,
+          "lit": true
+        },
+        "mare_orientale": {
+          "e": 64.9,
+          "i": 44.5,
+          "angDiamDeg": 2.01,
+          "off": 0.9,
+          "visible": true,
+          "lit": true
+        },
+        "hertzsprung": {
+          "e": 23.4,
+          "i": 74,
+          "angDiamDeg": 4.01,
+          "off": 0.39,
+          "visible": true,
+          "lit": true
+        },
+        "vavilov": {
+          "e": 10.9,
+          "i": 84.2,
+          "angDiamDeg": 0.74,
+          "off": 0.19,
+          "visible": true,
+          "lit": true
+        },
+        "mare_imbrium": {
+          "e": 132.4,
+          "i": 50,
+          "angDiamDeg": 6.34,
+          "off": 0.74,
+          "visible": false,
+          "lit": true
+        }
+      }
+    },
+    {
+      "utc": "2026-04-06T22:41:00Z",
+      "moonDistanceKm": 8402,
+      "moonAngularDiameterDeg": 23.87,
+      "subOrion": [
+        -2.1,
+        -169
+      ],
+      "subSolar": [
+        1,
+        -55
+      ],
+      "features": {
+        "reiner_gamma": {
+          "e": 120.4,
+          "i": 7.5,
+          "angDiamDeg": 0.46,
+          "off": 0.86,
+          "visible": false,
+          "lit": true
+        },
+        "glushko": {
+          "e": 103.2,
+          "i": 23.7,
+          "angDiamDeg": 0.27,
+          "off": 0.97,
+          "visible": false,
+          "lit": true
+        },
+        "pierazzo": {
+          "e": 80.7,
+          "i": 45.3,
+          "angDiamDeg": 0.07,
+          "off": 0.99,
+          "visible": true,
+          "lit": true
+        },
+        "ohm": {
+          "e": 69.2,
+          "i": 60.2,
+          "angDiamDeg": 0.46,
+          "off": 0.93,
+          "visible": true,
+          "lit": true
+        },
+        "mare_orientale": {
+          "e": 86.5,
+          "i": 44.2,
+          "angDiamDeg": 2.08,
+          "off": 1,
+          "visible": true,
+          "lit": true
+        },
+        "hertzsprung": {
+          "e": 49.5,
+          "i": 73.7,
+          "angDiamDeg": 4.29,
+          "off": 0.76,
+          "visible": true,
+          "lit": true
+        },
+        "vavilov": {
+          "e": 37.5,
+          "i": 83.8,
+          "angDiamDeg": 0.81,
+          "off": 0.61,
+          "visible": true,
+          "lit": true
+        },
+        "mare_imbrium": {
+          "e": 146,
+          "i": 50.3,
+          "angDiamDeg": 6.71,
+          "off": 0.56,
+          "visible": false,
+          "lit": true
+        }
+      }
+    },
+    {
+      "utc": "2026-04-06T23:10:00Z",
+      "moonDistanceKm": 8317,
+      "moonAngularDiameterDeg": 24.12,
+      "subOrion": [
+        -2.8,
+        174.2
+      ],
+      "subSolar": [
+        1,
+        -55.2
+      ],
+      "features": {
+        "reiner_gamma": {
+          "e": 135.3,
+          "i": 7.4,
+          "angDiamDeg": 0.44,
+          "off": 0.7,
+          "visible": false,
+          "lit": true
+        },
+        "glushko": {
+          "e": 118.9,
+          "i": 23.5,
+          "angDiamDeg": 0.25,
+          "off": 0.87,
+          "visible": false,
+          "lit": true
+        },
+        "pierazzo": {
+          "e": 97.7,
+          "i": 45,
+          "angDiamDeg": 0.06,
+          "off": 0.99,
+          "visible": false,
+          "lit": true
+        },
+        "ohm": {
+          "e": 85.9,
+          "i": 60,
+          "angDiamDeg": 0.44,
+          "off": 1,
+          "visible": true,
+          "lit": true
+        },
+        "mare_orientale": {
+          "e": 101.9,
+          "i": 44,
+          "angDiamDeg": 1.98,
+          "off": 0.98,
+          "visible": false,
+          "lit": true
+        },
+        "hertzsprung": {
+          "e": 68.5,
+          "i": 73.4,
+          "angDiamDeg": 4.09,
+          "off": 0.93,
+          "visible": true,
+          "lit": true
+        },
+        "vavilov": {
+          "e": 57.1,
+          "i": 83.6,
+          "angDiamDeg": 0.78,
+          "off": 0.84,
+          "visible": true,
+          "lit": true
+        },
+        "mare_imbrium": {
+          "e": 152.5,
+          "i": 50.4,
+          "angDiamDeg": 6.68,
+          "off": 0.46,
+          "visible": false,
+          "lit": true
+        }
+      }
+    }
+  ],
+  "litFractionOfVisibleHemisphere": {
+    "at_earthset": 33,
+    "at_closest_approach": 25,
+    "at_earthrise": 17
+  },
+  "observations": [
+    {
+      "id": "reiner_gamma",
+      "en": "Reiner Gamma",
+      "usgsFeatureId": 4987,
+      "usgsUrl": "https://planetarynames.wr.usgs.gov/Feature/4987",
+      "type": "Albedo Feature",
+      "latDeg": 7.39,
+      "lonEastDeg": -58.96,
+      "diameterKm": 73.44,
+      "texelsAcrossIn2kMap": 13.8,
+      "texture2k": "visible",
+      "inLunarTargetingPlan": true,
+      "nasaPhotos": [
+        "https://www.nasa.gov/image-detail/amf-art002e012114/"
+      ],
+      "proposal": "VERIFIED",
+      "windows": {
+        "visible": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T21:39:00Z"
+          }
+        ],
+        "visibleLit": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T21:39:00Z"
+          }
+        ],
+        "readable": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T20:46:00Z"
+          }
+        ]
+      },
+      "best": {
+        "utc": "2026-04-06T00:00:00Z",
+        "emissionDeg": 4.3,
+        "incidenceDeg": 16.7,
+        "distanceKm": 79375,
+        "angularDiameterDeg": 0.05,
+        "foreshortening": 1,
+        "offsetFromMoonCenter": 0.08
+      }
+    },
+    {
+      "id": "glushko",
+      "en": "Glushko",
+      "usgsFeatureId": 2195,
+      "usgsUrl": "https://planetarynames.wr.usgs.gov/Feature/2195",
+      "type": "Crater",
+      "latDeg": 8.11,
+      "lonEastDeg": -77.67,
+      "diameterKm": 40.1,
+      "texelsAcrossIn2kMap": 7.5,
+      "texture2k": "visible",
+      "inLunarTargetingPlan": true,
+      "nasaPhotos": [],
+      "proposal": "HIDDEN",
+      "windows": {
+        "visible": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T22:17:00Z"
+          }
+        ],
+        "visibleLit": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T22:17:00Z"
+          }
+        ],
+        "readable": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T21:37:00Z"
+          }
+        ]
+      },
+      "best": {
+        "utc": "2026-04-06T13:09:00Z",
+        "emissionDeg": 5.5,
+        "incidenceDeg": 28.3,
+        "distanceKm": 36107,
+        "angularDiameterDeg": 0.06,
+        "foreshortening": 1,
+        "offsetFromMoonCenter": 0.1
+      }
+    },
+    {
+      "id": "pierazzo",
+      "en": "Pierazzo",
+      "usgsFeatureId": 15328,
+      "usgsUrl": "https://planetarynames.wr.usgs.gov/Feature/15328",
+      "type": "Crater",
+      "latDeg": 3.3,
+      "lonEastDeg": -100.24,
+      "diameterKm": 9.29,
+      "texelsAcrossIn2kMap": 1.7,
+      "texture2k": "not_resolved",
+      "inLunarTargetingPlan": true,
+      "nasaPhotos": [
+        "https://www.nasa.gov/image-detail/amf-art002e012261/"
+      ],
+      "proposal": "HIDDEN",
+      "windows": {
+        "visible": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T22:56:00Z"
+          }
+        ],
+        "visibleLit": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T22:56:00Z"
+          }
+        ],
+        "readable": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T22:23:00Z"
+          }
+        ]
+      },
+      "best": {
+        "utc": "2026-04-06T18:53:00Z",
+        "emissionDeg": 1.5,
+        "incidenceDeg": 47.2,
+        "distanceKm": 16591,
+        "angularDiameterDeg": 0.03,
+        "foreshortening": 1,
+        "offsetFromMoonCenter": 0.03
+      }
+    },
+    {
+      "id": "ohm",
+      "en": "Ohm",
+      "usgsFeatureId": 4417,
+      "usgsUrl": "https://planetarynames.wr.usgs.gov/Feature/4417",
+      "type": "Crater",
+      "latDeg": 18.32,
+      "lonEastDeg": -113.78,
+      "diameterKm": 61.75,
+      "texelsAcrossIn2kMap": 11.6,
+      "texture2k": "faint",
+      "inLunarTargetingPlan": true,
+      "nasaPhotos": [
+        "https://www.nasa.gov/image-detail/amf-art002e012261/"
+      ],
+      "proposal": "HIDDEN",
+      "windows": {
+        "visible": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T23:17:00Z"
+          }
+        ],
+        "visibleLit": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T23:17:00Z"
+          }
+        ],
+        "readable": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T22:42:00Z"
+          }
+        ]
+      },
+      "best": {
+        "utc": "2026-04-06T20:08:00Z",
+        "emissionDeg": 19.4,
+        "incidenceDeg": 61.4,
+        "distanceKm": 12591,
+        "angularDiameterDeg": 0.28,
+        "foreshortening": 0.94,
+        "offsetFromMoonCenter": 0.33
+      }
+    },
+    {
+      "id": "mare_orientale",
+      "en": "Mare Orientale",
+      "usgsFeatureId": 3685,
+      "usgsUrl": "https://planetarynames.wr.usgs.gov/Feature/3685",
+      "type": "Mare",
+      "latDeg": -19.87,
+      "lonEastDeg": -94.67,
+      "diameterKm": 294.16,
+      "texelsAcrossIn2kMap": 55.2,
+      "texture2k": "visible",
+      "inLunarTargetingPlan": true,
+      "nasaPhotos": [
+        "https://www.nasa.gov/image-detail/amf-art002e009277/",
+        "https://www.nasa.gov/image-detail/amf-art002e009279/",
+        "https://www.nasa.gov/image-detail/amf-art002e010232/"
+      ],
+      "proposal": "VERIFIED",
+      "windows": {
+        "visible": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T22:47:00Z"
+          }
+        ],
+        "visibleLit": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T22:47:00Z"
+          }
+        ],
+        "readable": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T22:10:00Z"
+          }
+        ]
+      },
+      "best": {
+        "utc": "2026-04-06T18:02:00Z",
+        "emissionDeg": 24,
+        "incidenceDeg": 46.2,
+        "distanceKm": 19601,
+        "angularDiameterDeg": 0.86,
+        "foreshortening": 0.91,
+        "offsetFromMoonCenter": 0.41
+      }
+    },
+    {
+      "id": "hertzsprung",
+      "en": "Hertzsprung",
+      "usgsFeatureId": 2482,
+      "usgsUrl": "https://planetarynames.wr.usgs.gov/Feature/2482",
+      "type": "Crater",
+      "latDeg": 1.37,
+      "lonEastDeg": -128.66,
+      "diameterKm": 536.37,
+      "texelsAcrossIn2kMap": 100.6,
+      "texture2k": "faint",
+      "inLunarTargetingPlan": true,
+      "nasaPhotos": [
+        "https://www.nasa.gov/image-detail/amf-art002e012093/",
+        "https://www.nasa.gov/image-detail/amf-art002e021296/",
+        "https://www.nasa.gov/image-detail/amf-art002e009287/"
+      ],
+      "proposal": "FALLBACK",
+      "windows": {
+        "visible": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T23:49:00Z"
+          }
+        ],
+        "visibleLit": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T23:49:00Z"
+          }
+        ],
+        "readable": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T23:12:00Z"
+          }
+        ]
+      },
+      "best": {
+        "utc": "2026-04-06T21:12:00Z",
+        "emissionDeg": 1.2,
+        "incidenceDeg": 74.4,
+        "distanceKm": 9367,
+        "angularDiameterDeg": 3.28,
+        "foreshortening": 1,
+        "offsetFromMoonCenter": 0.02
+      }
+    },
+    {
+      "id": "vavilov",
+      "en": "Vavilov",
+      "usgsFeatureId": 6336,
+      "usgsUrl": "https://planetarynames.wr.usgs.gov/Feature/6336",
+      "type": "Crater",
+      "latDeg": -0.87,
+      "lonEastDeg": -138.77,
+      "diameterKm": 98.22,
+      "texelsAcrossIn2kMap": 18.4,
+      "texture2k": "faint",
+      "inLunarTargetingPlan": true,
+      "nasaPhotos": [
+        "https://www.nasa.gov/image-detail/amf-art002e009282/",
+        "https://www.nasa.gov/image-detail/amf-art002e012093/"
+      ],
+      "proposal": "FALLBACK",
+      "windows": {
+        "visible": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-07T00:13:00Z"
+          }
+        ],
+        "visibleLit": [
+          {
+            "from": "2026-04-06T10:31:00Z",
+            "to": "2026-04-07T00:13:00Z"
+          }
+        ],
+        "readable": [
+          {
+            "from": "2026-04-06T14:27:00Z",
+            "to": "2026-04-06T23:31:00Z"
+          }
+        ]
+      },
+      "best": {
+        "utc": "2026-04-06T21:40:00Z",
+        "emissionDeg": 0.7,
+        "incidenceDeg": 84.3,
+        "distanceKm": 8219,
+        "angularDiameterDeg": 0.68,
+        "foreshortening": 1,
+        "offsetFromMoonCenter": 0.01
+      }
+    },
+    {
+      "id": "mare_imbrium",
+      "en": "Mare Imbrium",
+      "usgsFeatureId": 3678,
+      "usgsUrl": "https://planetarynames.wr.usgs.gov/Feature/3678",
+      "type": "Mare",
+      "latDeg": 34.72,
+      "lonEastDeg": -14.91,
+      "diameterKm": 1145.53,
+      "texelsAcrossIn2kMap": 214.9,
+      "texture2k": "visible",
+      "inLunarTargetingPlan": false,
+      "nasaPhotos": [],
+      "proposal": "HIDDEN",
+      "windows": {
+        "visible": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T18:49:00Z"
+          }
+        ],
+        "visibleLit": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T18:49:00Z"
+          }
+        ],
+        "readable": [
+          {
+            "from": "2026-04-06T00:00:00Z",
+            "to": "2026-04-06T13:52:00Z"
+          }
+        ]
+      },
+      "best": {
+        "utc": "2026-04-06T00:00:00Z",
+        "emissionDeg": 53.2,
+        "incidenceDeg": 42.9,
+        "distanceKm": 80056,
+        "angularDiameterDeg": 0.82,
+        "foreshortening": 0.6,
+        "offsetFromMoonCenter": 0.8
+      }
+    }
+  ]
+}
