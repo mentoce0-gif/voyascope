@@ -79,6 +79,9 @@ export function gate(target, o, screen) {
 //   fov：[景色の画角, 見つけるときの画角]（縦の画角。度）
 //   origin：名前の由来（USGS の各ページの Origin。承認の年は Approval Date）。地名は「」で囲んで、どこまでが名前か分かるように
 //   research：その地形での研究・探査（C26 を公式ページで照合したものだけ。予定は「計画」と書く）
+//   log：NASA の観測計画（Lunar Targeting Plan。4/5 時点の「計画」）にあるか（planned）と、
+//        NASA の写真の説明文がその地形の名前を出しているか（photographed）。「撮影された」は写真があること。観測の中身の評価ではない
+//        計画：https://assets.science.nasa.gov/content/dam/science/missions/artemis/ArtemisII_LunarTargetingPlan.pdf
 //   zoom：拡大図（CGI Moon Kit の 16K の地図から切り出したもの。web/assets/moon/）
 export const TARGETS = [
   {
@@ -103,6 +106,7 @@ export const TARGETS = [
     // 明るさの幅を少し広げて（autocontrast を 45% だけ混ぜる）224×224 の WebP にした（docs/research/artemis2-lunar-observation-verification.md §12）
     zoom: { file: "reiner-gamma-zoom-224.webp", alt: "Reiner Gamma の拡大。暗い海のなかに、明るい渦模様（幅約200 kmの範囲）", caption: "拡大 · 幅200 km · NASA SVS" },
     link: "https://www.nasa.gov/image-detail/amf-art002e012114/",
+    log: { planned: true, photographed: true },
   },
   {
     id: "mare_orientale",
@@ -127,6 +131,7 @@ export const TARGETS = [
     //   アルテミス2号 https://science.nasa.gov/feature/artemis-ii-preliminary-lunar-science-report/（2026年10月）
     research: ["GRAIL：重力の地図（NASA・2016 公開）", "かぐや：輪の高さと直径を計測（JAXA・2014）", "アルテミス2号の写真を LRO の地図に重ねた（NASA・2026年10月）"],
     link: "https://www.nasa.gov/image-detail/amf-art002e009277/",
+    log: { planned: true, photographed: true }, // 計画の名前は「Orientale Basin」
   },
   {
     id: "hertzsprung",
@@ -145,6 +150,7 @@ export const TARGETS = [
     //   かぐや https://www.selene.jaxa.jp/ja/science/RSAT/Farside_Gravity_Field_j.htm（2009）
     research: ["LRO：内側の輪の岩（斜長岩とみられる）を撮影（NASA）", "かぐや：裏側の重力の地図（JAXA・2009）"],
     link: "https://www.nasa.gov/image-detail/amf-art002e012093/",
+    log: { planned: true, photographed: true }, // 計画の名前は「Hertzsprung Basin」
   },
 ];
 
@@ -155,3 +161,14 @@ export const OBSERVE_WINDOWS = {
   reiner_gamma: ["2026-04-06T17:45:00Z", "2026-04-06T18:25:00Z"],
   mare_orientale: ["2026-04-06T18:25:00Z", "2026-04-06T19:50:00Z"],
 };
+
+// 観測の記録（NASA の観測計画 → NASA の写真）。地形のほかに、計画にあった出来事も
+//   地球の入り：計画「Earthset」、写真 art002e021219（6:41 p.m. EDT）
+//   地球の出：計画「Earthrise」、写真（NASA の発表 https://www.nasa.gov/news-release/nasas-artemis-ii-crew-beams-official-moon-flyby-photos-to-earth/ 7:22 p.m. EDT）
+//   日食：計画「Sunset」（As the sun is eclipsed by the Moon）、写真（同じ発表）
+export const OBS_LOG = [
+  ...TARGETS.map((x) => ({ name: x.ja ?? x.en, planned: x.log.planned, photographed: x.log.photographed })),
+  { name: "地球の入り", planned: true, photographed: true },
+  { name: "地球の出", planned: true, photographed: true },
+  { name: "日食", planned: true, photographed: true },
+];
