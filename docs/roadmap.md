@@ -84,6 +84,7 @@ M3 は外部データなしで作れるので、M2 の調査待ちの間に先�
   - ✅ だいち4号（2026-09-30 受領・引用は未検証）→ `research/chappy/2026-09-30-c12-daichi-4.md`
   - ✅ いぶきGW（2026-09-30 受領・引用は未検証）→ `research/chappy/2026-09-30-c12-ibuki-gw.md`
   - ✅ ひので（2026-09-30 受領・引用は未検証）→ `research/chappy/2026-09-30-c12-hinode.md`
+  - ✅ XRISM（クリズム）（C23、2026-10-11 受領。Claude Code が公式ページで照合済み → `research/verification/2026-10-11-c23.md`）→ `research/chappy/2026-10-11-c23-xrism.md`。カードと軌道の自動取得を足した（画像なし）
 - ✅ 引用の確認（Claude Code が公式ページを開いて照合。77件中74件そのまま一致、3件は値が一致）→ `research/verification/2026-09-30.md`（非公開）
 - ✅ 各機体のカード（`curation/spacecraft/`）と軌道の自動取得（`config/orbits.json` に追加）
 - ✅ 「状態」をカードに持つ（スキーマに `status` を追加：運用中／待機中／運用終了。出典つき）。6機とも公式ページで「運用中」を確認済み
