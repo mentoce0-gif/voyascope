@@ -193,7 +193,7 @@ button.label { padding: 0; border: 0; background: none; color: inherit; font: in
 .obs-link:first-child { color: var(--mint); border-color: var(--mint-dim); }
 .obs-link:hover { background: rgba(255, 181, 71, 0.14); }
 /* 景色を見せるところは、計器と写真の欄を消す */
-body.quiet .hud, body.quiet .photo { opacity: 0; pointer-events: none; }
+body.quiet .hud, body.quiet .photo, body.reading .hud { opacity: 0; pointer-events: none; }
 
 /* 窓：まわりを少し暗く（窓からのぞいている感じ） */
 .window-frame {

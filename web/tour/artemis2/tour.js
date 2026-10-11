@@ -757,7 +757,11 @@ function setPaused(p) {
 }
 $("#pause").addEventListener("click", () => setPaused(!paused));
 // 観測のカードをくわしく開いたら、止めて読めるように（閉じても、つづけるは自分で）
-$("#obs-more").addEventListener("toggle", () => $("#obs-more").open && mode === "ride" && setPaused(true));
+$("#obs-more").addEventListener("toggle", () => {
+  const open = $("#obs-more").open;
+  body.classList.toggle("reading", open); // 開いているあいだは計器を消して、カードを読みやすく
+  if (open && mode === "ride") setPaused(true);
+});
 // 進む・戻る（2026-10-11 オーナー：進む・戻るは必須）。場面の頭へ移る
 function nextScene() {
   if (mode !== "ride") return;
@@ -901,6 +905,8 @@ function resetObserve() {
   observeState = "none:";
   body.classList.remove("quiet");
   $("#obs").hidden = true;
+  $("#obs-more").open = false;
+  body.classList.remove("reading");
   $("#reticle").classList.remove("on");
 }
 // 時間圧縮：章の見出し（行き先と、進んでいく日時。日本時間）
@@ -952,6 +958,7 @@ function observePhase(seg, u, s, sv) {
       $("#obs-name").textContent = tg.ja ? `${tg.ja}（${tg.en}）` : tg.en;
       $("#obs-lead").textContent = tg.facts[0];
       $("#obs-more").open = false;
+      body.classList.remove("reading");
       $("#obs-origin").textContent = tg.origin;
       const li = (f) => Object.assign(document.createElement("li"), { textContent: f });
       $("#obs-facts").replaceChildren(...tg.facts.slice(1).map(li)); // 1行目は、上にいつも出している
@@ -967,6 +974,10 @@ function observePhase(seg, u, s, sv) {
       $("#obs-usgs").href = tg.usgs;
     }
     card.hidden = !(phase === "reveal" || phase === "info");
+    if (card.hidden) {
+      $("#obs-more").open = false;
+      body.classList.remove("reading");
+    }
   }
   // 照準：見つける・知るのとき、条件を満たせば
   let show = false;
