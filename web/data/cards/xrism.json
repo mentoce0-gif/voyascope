@@ -1,0 +1,79 @@
+{
+  "id": "xrism",
+  "norad_id": 57800,
+  "name": {
+    "ja": "XRISM（クリズム）",
+    "en": "XRISM (X-Ray Imaging and Spectroscopy Mission)"
+  },
+  "class": "science",
+  "operator": {
+    "value": ["JAXA", "NASA"],
+    "source": "https://heasarc.gsfc.nasa.gov/docs/xrism/",
+    "as_of": "2026-10-11",
+    "note": "JAXA と NASA の共同ミッション。ESA も参加（NASA の書き方）"
+  },
+  "operator_type": {
+    "value": "civil",
+    "source": "https://www.xrism.jaxa.jp/project/docs/XRISM-presskit-JP_2308.pdf",
+    "as_of": "2026-10-11",
+    "note": "JAXA が NASA・ESA と覚書を結んで進める国際共同プロジェクト（JAXA プレスキット）"
+  },
+  "launch_date": {
+    "value": "2023-09-07",
+    "source": "https://www.xrism.jaxa.jp/topics/news/962/",
+    "as_of": "2026-10-11",
+    "note": "日本標準時 8:42。H-IIA ロケット47号機で、小型月着陸実証機 SLIM といっしょに種子島から"
+  },
+  "mission": {
+    "value": "X線で宇宙の高温のガスを観測し、物質やエネルギーの流れと、天体の進化を調べる",
+    "source": "https://www.xrism.jaxa.jp/project/docs/XRISM-presskit-JP_2308.pdf",
+    "as_of": "2026-10-11"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://www.xrism.jaxa.jp/topics/news/1368/",
+    "as_of": "2026-10-11",
+    "note": "2030年3月までの延長が決定。主力の検出器 Resolve のゲートバルブは開かないまま、観測を続けている"
+  },
+  "stats": {
+    "altitude_km": {
+      "value": 550,
+      "unit": "km",
+      "source": "https://xrism.isas.jaxa.jp/technology/detail_01/",
+      "as_of": "2026-10-11",
+      "note": "公表の値は 550±50 km"
+    },
+    "period_min": {
+      "value": 96,
+      "unit": "min",
+      "source": "https://www.xrism.jaxa.jp/project/docs/XRISM-presskit-JP_2308.pdf",
+      "as_of": "2026-10-11",
+      "note": "約96分（JAXA プレスキット）"
+    },
+    "mass_kg": {
+      "value": 2300,
+      "unit": "kg",
+      "source": "https://xrism.isas.jaxa.jp/technology/detail_01/",
+      "as_of": "2026-10-11",
+      "note": "2.3 t"
+    },
+    "length_m": {
+      "value": 8,
+      "unit": "m",
+      "source": "https://www.xrism.jaxa.jp/project/docs/XRISM-presskit-JP_2308.pdf",
+      "as_of": "2026-10-11",
+      "note": "全長 約8 m（太陽電池パドルを広げた幅は約9 m）"
+    }
+  },
+  "official_links": [
+    {
+      "label": "JAXA XRISM",
+      "url": "https://www.xrism.jaxa.jp/"
+    },
+    {
+      "label": "NASA XRISM（HEASARC）",
+      "url": "https://heasarc.gsfc.nasa.gov/docs/xrism/"
+    }
+  ],
+  "updated_at": "2026-10-11"
+}
