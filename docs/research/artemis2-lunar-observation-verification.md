@@ -186,3 +186,15 @@ CGI Moon Kit の色の地図（`web/assets/moon/lroc-color-2048.webp`、赤道�
 - 負の例（月の向こう側・夜・画面の外・小さすぎる・未確認の地形）では照準を出さない（テスト）
 - 太陽の向きは最接近のときの値で固定している（Mare Orientale の入射角・出射角は、時刻ごとに太陽を計算した Phase A の値と 0.1° 以内で合う。18:19・19:41 UTC で確認）
 - 読み込み：896 KB／950 KB（`lunar.js` と、`trajectory.json` の月の向きのぶん、約8 KB 増えた）
+
+## 11. Phase C の結果（2026-10-11）
+
+- 観測の場面の時間は `web/tour/artemis2/lunar.js` の `OBSERVE_WINDOWS`。Reiner Gamma 17:45〜18:25 UTC、Mare Orientale 18:25〜19:50 UTC。はじめ・まんなか・おわりで、出射角 75° 未満・入射角 88° 未満をテストで確かめる
+- Hertzsprung は FALLBACK（位置を指さない情報のカード）。中心は USGS で確認済みだが、2K の地図ではうすいため
+- Reiner Gamma は見かけ約 0.2°。縦の画角 5.5° まで寄せると、2K の地図の画素が見えて少しぼやける（渦の形は分かる）
+- 字幕・カードの事実と出典：
+  - 地球の入り 4/7 7:41 JST・地球の出 4/7 8:22 JST：NASA の写真の撮影時刻（6:41・7:22 p.m. EDT）
+  - 日食 4/7 9:35 JST〜：NASA の実況（8:35 p.m. EDT）。「皆既（計算）」は軌道データからの計算
+  - 最接近 4,067 mi・通信の途絶 約40分：NASA の実況
+  - 各地形の事実：NASA の写真の説明文・NASA の観測計画の説明・NASA Moon Facts・USGS（`lunar.js` のコメントに原文）
+- 読み込み：899 KB／950 KB

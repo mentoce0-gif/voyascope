@@ -71,10 +71,26 @@ export function gate(target, o, screen) {
   return { ok: true, why: "" };
 }
 
-// 観測する地形（位置は USGS / IAU Gazetteer。説明は NASA の写真の説明文から）
-//   status：VERIFIED＝照準を出してよい／FALLBACK＝位置を指さない説明だけ／HIDDEN＝出さない
+// 観測する地形（位置は USGS / IAU Gazetteer。事実は NASA の写真の説明文・NASA の解説から）
+//   status：VERIFIED＝照準を出してよい／FALLBACK＝位置を指さない情報カードだけ／HIDDEN＝出さない
+//   画面に出すのは「情報」だけ（文の説明はしない。2026-10-11 オーナー）。facts の1行が1つの事実
 //   日本語の呼び方は C25（チャッピー）の確認待ち。それまでは英語の名前だけを出す
+//   fov：[景色の画角, 見つけるときの画角]（縦の画角。度）
 export const TARGETS = [
+  {
+    id: "reiner_gamma",
+    en: "Reiner Gamma",
+    ja: null,
+    status: "VERIFIED",
+    latDeg: 7.39,
+    lonEastDeg: -58.96,
+    diameterKm: 73.44,
+    fov: [11, 5.5],
+    usgs: "https://planetarynames.wr.usgs.gov/Feature/4987",
+    // NASA の写真 art002e012114 の説明文「The sinuous Reiner Gamma swirl contrasts with the darker mare surface」
+    facts: ["明るい渦模様（swirl）· 約73 km（USGS）", "暗い海のなか（NASA）"],
+    link: "https://www.nasa.gov/image-detail/amf-art002e012114/",
+  },
   {
     id: "mare_orientale",
     en: "Mare Orientale",
@@ -83,12 +99,35 @@ export const TARGETS = [
     latDeg: -19.87,
     lonEastDeg: -94.67,
     diameterKm: 294.16,
+    fov: [12, 8.5],
     usgs: "https://planetarynames.wr.usgs.gov/Feature/3685",
     // 盆地全体（Orientale basin）の位置ではない。照準は、まんなかの暗いところ（Mare Orientale）だけを指す
-    discover: "まんなかに、暗いところが見えますか。",
-    reveal: "水の海ではなく、大昔の溶岩が広がったところ。まわりの山の輪をふくめて、幅約970 km（600マイル）の大きな衝突のあと（Orientale basin）です。",
     // 「海」は溶岩：NASA Moon Facts（https://science.nasa.gov/moon/facts/）「The dark features, called maria (Latin for seas), are impact basins that were filled with lava」
-    // NASA の写真（説明文に「Orientale basin is visible in the center, with a black patch of ancient lava in the center」「This 600-mile-wide impact crater」。2:19 p.m. EDT 撮影）
-    link: { url: "https://www.nasa.gov/image-detail/amf-art002e009277/", text: "NASA の写真と説明を見る" },
+    // NASA の写真 art002e009277 の説明文「Orientale basin is visible in the center, with a black patch of ancient lava in the center」「This 600-mile-wide impact crater」（2:19 p.m. EDT 撮影）
+    // 山の輪：art002e009278「wrapped in rings of mountains」
+    facts: ["海（mare）· 直径 294 km（USGS）", "溶岩の平原（NASA）", "まわりの山の輪 · Orientale basin · 幅約970 km（600 mi・NASA）"],
+    link: "https://www.nasa.gov/image-detail/amf-art002e009277/",
+  },
+  {
+    id: "hertzsprung",
+    en: "Hertzsprung",
+    ja: null,
+    status: "FALLBACK", // 中心は USGS で確認済み。2K の地図ではうすく、見えるとは言えないので、位置は指さない
+    latDeg: 1.37,
+    lonEastDeg: -128.66,
+    diameterKm: 536.37,
+    usgs: "https://planetarynames.wr.usgs.gov/Feature/2482",
+    // NASA の写真 art002e012093「Hertzsprung Basin comes into view with its distinctive two concentric rings of mountains」
+    // NASA の観測計画（Lunar Targeting Plan）の説明「Older, degraded multiring basin on the lunar farside to compare with the younger Orientale Basin」
+    facts: ["盆地 · 直径 536 km（USGS）", "2重の山の輪（NASA）", "Orientale より古い（NASA）"],
+    link: "https://www.nasa.gov/image-detail/amf-art002e012093/",
   },
 ];
+
+// 観測の場面の時間（UTC）。どれも、その地形が見えて照らされている時間のなか（tests/artemis2-lunar.test.mjs で確かめる）
+//   検証：docs/research/artemis2-lunar-observation-verification.md §5（Reiner Gamma は 20:46、Mare Orientale は 22:10 まで見やすい）
+//   Mare Orientale の時間は、NASA の写真 art002e009279（3:41 p.m. EDT＝19:41 UTC。オリエンターレ盆地の輪）の時刻をふくむ
+export const OBSERVE_WINDOWS = {
+  reiner_gamma: ["2026-04-06T17:45:00Z", "2026-04-06T18:25:00Z"],
+  mare_orientale: ["2026-04-06T18:25:00Z", "2026-04-06T19:50:00Z"],
+};

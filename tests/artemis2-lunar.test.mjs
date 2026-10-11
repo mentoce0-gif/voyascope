@@ -98,3 +98,25 @@ test("照準を出す地形は USGS で確認した点だけ。盆地全体（Or
     assert.equal(ref.proposal, "VERIFIED");
   }
 });
+
+test("観測の場面の時間には、その地形が見えて照らされている（はじめ・まんなか・おわり）", async () => {
+  const { OBSERVE_WINDOWS } = await import("../web/tour/artemis2/lunar.js");
+  for (const [id, [a, b]] of Object.entries(OBSERVE_WINDOWS)) {
+    const tg = TARGETS.find((x) => x.id === id);
+    assert.equal(tg.status, "VERIFIED", id);
+    const t0 = tOf(a), t1 = tOf(b);
+    for (const t of [t0, (t0 + t1) / 2, t1]) {
+      const s = stateAt(t), o = observe(tg, moonAxesAt(traj.moonFrame, t), s.craft, s.moon, sun);
+      assert.ok(o.e < 75 && o.i < 88, `${id} ${new Date(EPOCH + t * 1000).toISOString()} e ${o.e} i ${o.i}`);
+    }
+  }
+  // 時刻は前にしか進まない（Reiner Gamma → Mare Orientale）
+  assert.ok(Date.parse(OBSERVE_WINDOWS.reiner_gamma[1]) <= Date.parse(OBSERVE_WINDOWS.mare_orientale[0]));
+});
+
+test("位置を指さない地形（FALLBACK）は、出典つきの情報だけ", () => {
+  for (const x of TARGETS) {
+    assert.ok(x.facts.length >= 1 && x.facts.every((f) => /（(USGS|NASA)|NASA）|USGS）/.test(f)), `${x.id} の事実に出典`);
+    assert.match(x.link, /^https:\/\/www\.nasa\.gov\/image-detail\//);
+  }
+});

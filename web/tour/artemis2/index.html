@@ -23,7 +23,7 @@
   <div class="lb lb-bottom" aria-hidden="true"></div>
   <div id="fade" class="fade on" aria-hidden="true"></div>
   <!-- 時間圧縮：長い道のりを数秒で（点と日時だけが進む）。章の見出し -->
-  <div id="chapter" class="chapter" aria-live="polite"><p id="chapter-date" class="ch-date mono"></p><p id="chapter-head" class="ch-head"></p><p id="chapter-sub" class="ch-sub"></p></div>
+  <div id="chapter" class="chapter" aria-label="時間圧縮"><p id="chapter-head" class="ch-head mono"></p><p id="chapter-sub" class="ch-sub mono"></p></div>
 
   <header class="bar">
     <a class="brand mono" href="../../">VOYASCOPE</a>
@@ -51,22 +51,23 @@
     </dl>
   </section>
 
+  <!-- はじめて乗ったとき一度だけ：縦にはじくと時間が進む・戻る（絵だけ） -->
+  <div id="flick-hint" class="flick-hint" aria-hidden="true"><svg viewBox="0 0 48 72"><rect x="14" y="4" width="20" height="40" rx="10"/><path d="M24 14v12"/><path d="M24 52v16M18 58l6-6 6 6M18 62l6 6 6-6"/></svg></div>
   <!-- 月面の観測：照準（飾り。読み上げは下のカードで） -->
   <div id="reticle" class="reticle" aria-hidden="true"><span id="reticle-name" class="reticle-name mono"></span></div>
 
   <aside id="photo" class="photo" hidden>
-    <p class="photo-k mono">📷 この場面の本物の写真（NASA）</p>
+    <p class="photo-k mono">📷 NASA</p>
     <p id="photo-text" class="photo-text"></p>
-    <a id="photo-link" class="photo-link" href="#" target="_blank" rel="noopener">NASA のページで見る ›</a>
+    <a id="photo-link" class="photo-link" href="#" target="_blank" rel="noopener" aria-label="NASA のページで写真を見る">NASA ↗</a>
   </aside>
 
   <!-- 画面の下：字幕・タイムライン・操作・出典を、重ならないように縦に積む -->
   <div class="dock">
     <section id="obs" class="obs" hidden aria-live="polite" aria-label="月面の観測">
-      <p class="obs-k mono">月面の観測 · <a id="obs-usgs" href="#" target="_blank" rel="noopener">USGS 地名</a></p>
       <p id="obs-name" class="obs-name"></p>
-      <p id="obs-text" class="obs-text"></p>
-      <a id="obs-link" class="obs-link" href="#" target="_blank" rel="noopener"></a>
+      <ul id="obs-facts" class="obs-facts"></ul>
+      <p class="obs-links"><a id="obs-usgs" class="obs-link" href="#" target="_blank" rel="noopener" aria-label="USGS の地名のページ">USGS ↗</a><a id="obs-link" class="obs-link" href="#" target="_blank" rel="noopener" aria-label="NASA の写真と説明">📷 NASA ↗</a></p>
     </section>
     <p id="caption" class="caption" aria-live="polite" hidden></p>
     <nav id="controls" class="controls" hidden aria-label="操作">
@@ -78,9 +79,9 @@
       </div>
       <div class="ctl-row">
         <div class="seg" role="group" aria-label="見る場所">
-          <button type="button" class="chip" data-view="window" aria-pressed="true">窓から</button>
-          <button type="button" class="chip" data-view="earth" aria-pressed="false">地球から</button>
-          <button type="button" class="chip" data-view="route" aria-pressed="false">航路</button>
+          <button type="button" class="chip icon-chip" data-view="window" aria-pressed="true" aria-label="窓から見る" title="窓から"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="4"/><path d="M12 5v14M4 12h16" opacity=".5"/></svg></button>
+          <button type="button" class="chip icon-chip" data-view="earth" aria-pressed="false" aria-label="地球から見上げる" title="地球から"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20a9 9 0 0 1 18 0"/><path d="M12 11V3M9 6l3-3 3 3"/></svg></button>
+          <button type="button" class="chip icon-chip" data-view="route" aria-pressed="false" aria-label="航路を見る" title="航路"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.5"/><circle cx="20" cy="12" r="1.6"/><path d="M7.5 12c4-5 9-5 11 0-2 5-7 5-11 0z"/></svg></button>
         </div>
         <div id="look" class="look" role="group" aria-label="窓の向き">
           <button type="button" class="icon-btn" data-look="earth" aria-pressed="false" aria-label="地球のほうを見る" title="地球のほうを見る">
@@ -91,9 +92,10 @@
           </button>
         </div>
         <div class="buttons">
-          <button id="pause" class="btn" type="button">一時停止</button>
-          <button id="skip" class="btn" type="button">次の場面 <span aria-hidden="true">›</span></button>
-          <button id="leave" class="btn" type="button">降りる</button>
+          <button id="prev" class="icon-btn big" type="button" aria-label="前の場面へ戻る" title="戻る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M18 5 9 12l9 7z"/></svg></button>
+          <button id="pause" class="icon-btn big" type="button" aria-label="一時停止" title="一時停止" aria-pressed="false"><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg></button>
+          <button id="skip" class="icon-btn big" type="button" aria-label="次の場面へ進む" title="進む"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14M6 5l9 7-9 7z"/></svg></button>
+          <button id="leave" class="icon-btn big" type="button" aria-label="降りる（はじめの画面へ）" title="降りる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"/></svg></button>
         </div>
       </div>
     </nav>
@@ -101,7 +103,7 @@
       <summary>出典・注意（非公式ファンメイド作品）</summary>
       <p>
         通り道は、NASA が公開した飛行の軌道データ（<a href="https://www.nasa.gov/missions/artemis/artemis-2/track-nasas-artemis-ii-mission-in-real-time/" target="_blank" rel="noopener">Artemis II エフェメリス</a>）から。月・太陽の位置と地球の向きは、その時刻から計算しています。月の表面は NASA の <a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">CGI Moon Kit</a>（NASA's Scientific Visualization Studio）。日付・時刻・写真の説明は NASA の発表から。
-        窓の外は、NASA の写真を参考にした「〜のような眺め」で、写真そのものではありません。見ている向きは、航路の上に置いた仮の観測の視点で、乗員の窓の向き・宇宙船の姿勢を再現したものではありません（姿勢のデータはありません）。月の向きは IAU のモデル（Archinal ほか 2011）、月面の地名の位置は <a href="https://planetarynames.wr.usgs.gov/" target="_blank" rel="noopener">USGS / IAU Gazetteer of Planetary Nomenclature</a> から。長い道のりは時間を縮めて見せています（宇宙船が速くなったのではありません）。オリオンの姿は、公式の文章と NASA の写真を参考にした再現モデルです。写真は NASA のページでご覧ください。
+        窓の外は、NASA の写真を参考にした「〜のような眺め」で、写真そのものではありません。見ている向きは、航路の上に置いた仮の観測の視点で、乗員の窓の向き・宇宙船の姿勢を再現したものではありません（姿勢のデータはありません）。月の向きは IAU のモデル（Archinal ほか 2011）、月面の地名の位置は <a href="https://planetarynames.wr.usgs.gov/" target="_blank" rel="noopener">USGS / IAU Gazetteer of Planetary Nomenclature</a> から。長い道のりは時間を縮めて見せています（宇宙船が速くなったのではありません）。縦にはじく（PC はホイール）と、時間が進む・戻ります。オリオンの姿は、公式の文章と NASA の写真を参考にした再現モデルです。写真は NASA のページでご覧ください。
         ※非公式ファンメイド作品です。NASA などの宇宙機関とは関係ありません。
       </p>
     </details>
