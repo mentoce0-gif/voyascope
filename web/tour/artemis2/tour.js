@@ -286,36 +286,60 @@ scene.add(orionMark);
 // 下にメインエンジン1基と補助エンジン8基、横に姿勢制御エンジンのポッド6つ。太陽電池の翼は4枚の X 字、1枚 約7.4 m（板3枚）、
 // 広げると 約19 m（ESA）。細かい角度・色は公式の値がないので近い形にしたもの。NASA・ESA の画像や3Dデータはそのまま使っていない。
 // 本当の大きさでは見えないので、外から見るときだけ、カメラのすぐそばに置く（1 m ＝ 画面の ORION_M）
-const wingTex = canvasTex(256, 96, (g, w, h) => {
-  g.fillStyle = "#121a2e";
+const wingTex = canvasTex(256, 128, (g, w, h) => {
+  // 太陽電池の板：濃い紺のセルと、明るい枠（NASA の写真を参考に）
+  g.fillStyle = "#c9ccd2";
   g.fillRect(0, 0, w, h);
-  g.strokeStyle = "rgba(120,150,210,0.35)";
-  for (let x = 0; x <= w; x += 12) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
-  for (let y = 0; y <= h; y += 12) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+  g.fillStyle = "#101a33";
+  g.fillRect(6, 6, w - 12, h - 12);
+  g.strokeStyle = "rgba(110,140,200,0.35)";
+  for (let x = 6; x <= w - 6; x += 10) { g.beginPath(); g.moveTo(x, 6); g.lineTo(x, h - 6); g.stroke(); }
+  for (let y = 6; y <= h - 6; y += 10) { g.beginPath(); g.moveTo(6, y); g.lineTo(w - 6, y); g.stroke(); }
+});
+// クルーモジュールの外側：金属の光沢のタイル（飛んでいるときの NASA の写真では、青みがかって見える）
+const cmTex = canvasTex(512, 256, (g, w, h) => {
+  g.fillStyle = "#9fb4c0";
+  g.fillRect(0, 0, w, h);
+  for (let y = 0; y < h; y += 16) {
+    for (let x = (y / 16) % 2 ? 0 : 12; x < w; x += 24) {
+      const v = 150 + Math.floor(Math.random() * 60);
+      g.fillStyle = `rgba(${v - 40},${v},${v + 20},0.55)`;
+      g.fillRect(x, y, 23, 15);
+    }
+  }
+  g.fillStyle = "rgba(160,95,55,0.9)"; // 銅色の帯
+  g.fillRect(0, h * 0.62, w, 5);
+  g.fillRect(0, h * 0.97, w, 6);
 });
 const ORION_M = 0.0018;
 const orion = (() => {
   const grp = new THREE.Group();
-  const white = new THREE.MeshStandardMaterial({ color: 0xeef0f2, roughness: 0.6, metalness: 0.05 });
-  const metal = new THREE.MeshStandardMaterial({ color: 0xc9ccd2, roughness: 0.28, metalness: 0.85 }); // クルーモジュールの金属光沢の被覆
+  const white = new THREE.MeshStandardMaterial({ color: 0xf1f2f3, roughness: 0.62, metalness: 0.05 });
+  const cmMat = new THREE.MeshStandardMaterial({ map: cmTex, roughness: 0.35, metalness: 0.45 });
   const grey = new THREE.MeshStandardMaterial({ color: 0x9aa0a8, roughness: 0.5, metalness: 0.4 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x2a2c31, roughness: 0.55, metalness: 0.5 });
   const wingMat = new THREE.MeshStandardMaterial({ map: wingTex, roughness: 0.4, metalness: 0.35 });
   const add = (geo, mat, x, y, z = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); grp.add(m); return m; };
-  add(new THREE.CylinderGeometry(0.95, 2.5, 3.35, 48), metal, 0, 1.775); // クルーモジュール
-  add(new THREE.CylinderGeometry(0.55, 0.6, 0.35, 24), grey, 0, 3.62); // ドッキングのところ
-  add(new THREE.CylinderGeometry(2.5, 2.5, 0.12, 48), dark, 0, 0.1); // 熱をふせぐ盾のふち
-  add(new THREE.CylinderGeometry(2.45, 2.0, 0.7, 48), white, 0, -0.25); // クルーモジュールアダプター（白い輪）
-  add(new THREE.CylinderGeometry(2.0, 2.0, 2.0, 48), white, 0, -1.6); // サービスモジュールの本体
-  add(new THREE.CylinderGeometry(2.0, 1.6, 0.8, 48), grey, 0, -3.0); // 下のほう
-  add(new THREE.CylinderGeometry(0.25, 0.55, 1.1, 24), dark, 0, -3.95); // メインエンジン
+  add(new THREE.CylinderGeometry(0.95, 2.45, 3.0, 48, 1, true), cmMat, 0, 2.15); // クルーモジュール（円すい）
+  add(new THREE.CylinderGeometry(0.95, 0.95, 0.05, 32), grey, 0, 3.65); // てっぺん
+  add(new THREE.CylinderGeometry(0.5, 0.55, 0.35, 24), grey, 0, 3.82); // ドッキングのところ
+  add(new THREE.CylinderGeometry(2.5, 2.5, 1.0, 48), white, 0, 0.15); // クルーモジュールアダプター（白い幅広の帯。クルーモジュールの底と同じくらいの太さ）
+  add(new THREE.CylinderGeometry(2.5, 2.0, 0.3, 48), white, 0, -0.5); // 段になって細くなる
+  add(new THREE.CylinderGeometry(2.0, 2.0, 2.2, 48), white, 0, -1.75); // サービスモジュールの本体（白い円柱）
+  add(new THREE.CylinderGeometry(2.0, 1.7, 0.6, 48), grey, 0, -3.15); // 下のほう
+  add(new THREE.CylinderGeometry(1.7, 1.7, 0.08, 48), dark, 0, -3.48); // 底の面
+  add(new THREE.CylinderGeometry(0.28, 0.6, 1.1, 24, 1, true), dark, 0, -4.05); // メインエンジン
   for (let k = 0; k < 8; k++) {
     const a = (k / 8) * Math.PI * 2;
-    add(new THREE.CylinderGeometry(0.06, 0.12, 0.35, 10), dark, Math.cos(a) * 1.25, -3.55, Math.sin(a) * 1.25); // 補助エンジン
+    add(new THREE.CylinderGeometry(0.06, 0.13, 0.38, 10), dark, Math.cos(a) * 1.25, -3.7, Math.sin(a) * 1.25); // 補助エンジン
   }
   for (let k = 0; k < 6; k++) {
     const a = (k / 6) * Math.PI * 2 + 0.3;
-    add(new THREE.BoxGeometry(0.3, 0.3, 0.3), grey, Math.cos(a) * 2.08, -0.95, Math.sin(a) * 2.08); // 姿勢制御エンジンのポッド
+    add(new THREE.BoxGeometry(0.3, 0.32, 0.3), grey, Math.cos(a) * 2.08, -1.05, Math.sin(a) * 2.08); // 姿勢制御エンジンのポッド
+  }
+  for (let k = 0; k < 10; k++) {
+    const a = (k / 10) * Math.PI * 2 + 0.15;
+    add(new THREE.BoxGeometry(0.22, 0.14, 0.18), grey, Math.cos(a) * 2.03, -2.4 + (k % 2) * 0.9, Math.sin(a) * 2.03); // 側面の小さな箱（取り付け具など）
   }
   // 太陽電池の翼：4枚の X 字。板3枚（2.13 m × 1.92 m）を並べる。板の面は太陽（うしろ）に向ける
   for (let i = 0; i < 4; i++) {
@@ -324,12 +348,12 @@ const orion = (() => {
     boom.position.x = 2.25;
     arm.add(boom);
     for (let k = 0; k < 3; k++) {
-      const panel = new THREE.Mesh(new THREE.BoxGeometry(2.13, 0.03, 1.92), wingMat);
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(2.13, 0.04, 1.92), wingMat);
       panel.position.x = 2.5 + 1.065 + k * 2.25;
       arm.add(panel);
     }
     arm.rotation.y = Math.PI / 4 + (i * Math.PI) / 2;
-    arm.position.y = -1.6;
+    arm.position.y = -1.75; // サービスモジュールの横から（NASA の写真を参考に）
     grp.add(arm);
   }
   grp.scale.setScalar(ORION_M);
@@ -559,16 +583,25 @@ function hud(s, t) {
 // 外から見るカメラの位置：オリオンの斜めうしろ。ゆっくり回りこむ
 const vel = new THREE.Vector3(), side = new THREE.Vector3(), upv = new THREE.Vector3();
 function outsideCam(s, t, spin, out) {
-  // 地球を背にしたオリオン：地球からオリオンへ向かう線の、さらに先から見る。ゆっくり回りこむ
+  // 地球を背にしたオリオンを、斜め横から（4分の3の向き）見る。白い帯とサービスモジュールが見えるように。ゆっくり回りこむ
   vel.copy(s.craft).normalize(); // 地球 → オリオン
-  side.set(0, 1, 0).cross(vel).normalize();
-  upv.crossVectors(vel, side);
-  const a = 0.5 + spin;
-  return out
-    .copy(s.craft)
-    .addScaledVector(vel, 0.1)
-    .addScaledVector(side, 0.011 + Math.cos(a) * 0.004)
-    .addScaledVector(upv, 0.004 + Math.sin(a) * 0.003);
+  const axis = tailToSun.copy(SUN).negate(); // オリオンの先の向き（うしろを太陽に）
+  side.copy(vel).addScaledVector(axis, -vel.dot(axis));
+  if (side.lengthSq() < 1e-6) side.set(1, 0, 0).cross(axis);
+  side.normalize(); // 機体の軸に直角で、地球と反対寄りの向き
+  upv.crossVectors(axis, side).normalize();
+  const a = spin * 0.6;
+  const dir = new THREE.Vector3()
+    .addScaledVector(vel, 0.9) // 地球を背に
+    .addScaledVector(side, 0.42 * Math.cos(a))
+    .addScaledVector(upv, 0.2 * Math.sin(a))
+    .addScaledVector(axis, -0.22) // 少しうしろ（太陽の当たる側）から
+    .normalize();
+  return out.copy(s.craft).addScaledVector(dir, 0.1);
+}
+// 外から見るときの画面の上の向き：横長の画面ではオリオンと地球を左右に、縦長（スマホ）では上下に（地球が上）並べる
+function outsideUp(toO, toE) {
+  return innerWidth < innerHeight ? toE.clone().sub(toO).normalize() : upv;
 }
 const ORION_UP = new THREE.Vector3(0, 1, 0), tailToSun = new THREE.Vector3();
 function placeOrion(s) {
@@ -769,7 +802,9 @@ function frame(now) {
     outsideCam(s, 0, 0, camTo);
     camera.position.lerpVectors(camFrom, camTo, k);
     if (k > 0.85) setNear(0.0008);
-    mtx.lookAt(camera.position, s.craft, new THREE.Vector3(0, 1, 0));
+    // 外から見るときと同じく、オリオンと地球のあいだを見る（乗ったあとに向きが飛ばないように）
+    const toO = s.craft.clone().sub(camera.position).normalize(), toE = camera.position.clone().negate().normalize();
+    mtx.lookAt(camera.position, camera.position.clone().add(toO.clone().multiplyScalar(innerWidth < innerHeight ? 4.5 : 1.6).add(toE)), k > 0.6 ? outsideUp(toO, toE) : new THREE.Vector3(0, 1, 0));
     tmpQ.setFromRotationMatrix(mtx);
     camera.quaternion.copy(lookQ.slerp(tmpQ, 0.08));
     orionMark.position.copy(s.craft);
@@ -801,7 +836,9 @@ function frame(now) {
         aim(s, seg, u);
       } else if (view === "outside") {
         outsideCam(s, t, ride * 0.12, camera.position);
-        mtx.lookAt(camera.position, s.craft, upv);
+        // オリオンと地球のあいだを見る（両方が画面に入るように）
+        const toO = s.craft.clone().sub(camera.position).normalize(), toE = camera.position.clone().negate().normalize();
+        mtx.lookAt(camera.position, camera.position.clone().add(toO.clone().multiplyScalar(innerWidth < innerHeight ? 4.5 : 1.6).add(toE)), outsideUp(toO, toE));
         camera.quaternion.setFromRotationMatrix(mtx);
       } else if (view === "earth") {
         // 地球から見上げる：地球の表面のすぐ上から、オリオンのほうを見る（オリオンは光る印で）
@@ -815,7 +852,7 @@ function frame(now) {
         orionMark.scale.setScalar(22);
       }
       stars.position.copy(camera.position);
-      const fovGoal = view === "window" ? seg.fov ?? (innerWidth < innerHeight ? 70 : 55) : view === "earth" ? 40 : view === "outside" ? (innerWidth < innerHeight ? 44 : 30) : innerWidth < innerHeight ? 70 : 55;
+      const fovGoal = view === "window" ? seg.fov ?? (innerWidth < innerHeight ? 70 : 55) : view === "earth" ? 40 : view === "outside" ? (innerWidth < innerHeight ? 62 : 46) : innerWidth < innerHeight ? 70 : 55;
       if (Math.abs(camera.fov - fovGoal) > 0.05) {
         camera.fov += (fovGoal - camera.fov) * 0.06;
         camera.updateProjectionMatrix();
