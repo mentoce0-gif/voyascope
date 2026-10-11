@@ -250,6 +250,16 @@ NASA JPL の Horizons（https://ssd-api.jpl.nasa.gov/doc/horizons.html）で、�
   - 月の表面の地図の画像（NASA の Scientific Visualization Studio の CGI Moon Kit など）の利用条件
 - カードJSON は なし（Claude Code が照合してから形を決める）
 
+**C23　XRISM（クリズム）の機体カード**
+地球のまわりの「日本の第一棚」に、XRISM（X線分光撮像衛星）を足したい。ほかの日本の衛星（ひまわり・みちびき・だいち・いぶき・ひので）は地球や太陽を見る役なので、「地球のそばから、X線で遠くの宇宙を見る」役として並べる。C12 と同じ形（`schema/spacecraft.schema.json`）で、公式ソースで確認する。
+- C12 の項目すべて：`norad_id`（CelesTrak の衛星カタログなど公的データ）・`name`（ja は日本の公式の呼び方。読み「クリズム」が公式に書かれているか。en は公式の英語名）・`class`・`operator`・`operator_type`・`launch_date`（打ち上げたロケットと、いっしょに打ち上げた機体があれば公式の書き方で note に）・`mission`・`stats`（`altitude_km`・`period_min`・`mass_kg`・`length_m`。公式に書かれているものだけ）・`official_links`（最大3）・`status`
+- 運用している機関の書き方：JAXA と NASA の共同（ESA の参加など）を、公式ページの言い方のまま
+- 観測装置：2つの装置（Resolve・Xtend）が何をするものか、公式の説明の原文
+- いまの運用の様子：装置の一部に不具合や制約（例：Resolve のゲートバルブ）が公式に書かれていれば、その内容・日付・いまの状態を原文で。書かれていなければ「なし」とする（推測しない）
+- 中高生に伝えられる「XRISM で分かったこと」：公式の成果の発表（JAXA・NASA）から1〜3件。日付と原文
+- 画像：機体の画像（公式の CG・写真）を自分のサイトに載せてよいか。JAXA の画像の利用条件の原文と、NASA の画像の場合の原文。中高生向けの非公式ファンサイトで使うときの注意（クレジットの書き方など）
+- カードJSON：C12 と同じ形で書く。`catchphrase`・`special_move`・`weakness` は書かない
+
 ---
 
 ## プロジェクトのルール（RULES.md 全文）
