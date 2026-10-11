@@ -74,10 +74,10 @@ export function gate(target, o, screen) {
 // 観測する地形（位置は USGS / IAU Gazetteer。事実は NASA の写真の説明文・NASA の解説から）
 //   status：VERIFIED＝照準を出してよい／FALLBACK＝位置を指さない情報カードだけ／HIDDEN＝出さない
 //   画面に出すのは「情報」だけ（文の説明はしない。2026-10-11 オーナー）。facts の1行が1つの事実
-//   日本語の呼び方は C25（チャッピー）の確認待ち。それまでは英語の名前だけを出す
+//   日本語の呼び方：JAXA の公式ページの表記があるものだけ（ja）。ほかは C25（チャッピー）の確認待ちで、英語の名前だけ
 //   fov：[景色の画角, 見つけるときの画角]（縦の画角。度）
 //   origin：名前の由来（USGS の各ページの Origin。承認の年は Approval Date）。地名は「」で囲んで、どこまでが名前か分かるように
-//   research：その地形での研究・探査（C26 で確認してから入れる。確認するまでは空）
+//   research：その地形での研究・探査（C26 を公式ページで照合したものだけ。予定は「計画」と書く）
 //   zoom：拡大図（CGI Moon Kit の 16K の地図から切り出したもの。web/assets/moon/）
 export const TARGETS = [
   {
@@ -91,18 +91,22 @@ export const TARGETS = [
     fov: [11, 5.5],
     usgs: "https://planetarynames.wr.usgs.gov/Feature/4987",
     // NASA の写真 art002e012114 の説明文「The sinuous Reiner Gamma swirl contrasts with the darker mare surface」
-    origin: "イタリアの天文学者・数学者 Vincentio Reinieri（?–1648）· IAU 承認 1935（USGS）",
-    facts: ["明るい渦模様（swirl）· 約73 km（USGS）", "暗い海のなか（NASA）"],
+    // 近くのクレーター：NASA のポッドキャスト「And it was renamed Reiner Gamma, for the nearby Reiner impact crater.」
+    origin: "近くの「Reiner」クレーターにちなむ（NASA）· その名はイタリアの天文学者・数学者 Vincentio Reinieri（?–1648）· IAU 承認 1935（USGS）",
+    facts: ["明るい渦模様（swirl）· 約73 km（USGS）", "暗い海のなか（NASA）", "クレーターではなく、明るさの模様（USGS の分類）· 月にしかない（NASA）"],
+    // 研究（C26 を照合：voyascope-research の research/verification/2026-10-11-c26.md）。形成の原因は断定しない
+    //   LRO：https://science.nasa.gov/photojournal/reiner-gamma/（2010）・局所的な磁場：https://science.nasa.gov/image-detail/20100521/
+    //   Lunar Vertex：https://science.nasa.gov/lunar-science/clps-deliveries/cp-11/（計画。年はページの本文で確認できず、出さない）
+    research: ["LRO が撮影（NASA・2010）", "局所的な磁場がある · できかたは研究中（NASA）", "Lunar Vertex：着陸して磁場と太陽風を調べる計画（NASA）"],
     // 拡大図：CGI Moon Kit の lroc_color_16bit_srgb_16k.tif（1画素 約0.67 km）から、中心のまわり 300×300 画素（幅約200 km）を切り出し、
     // 明るさの幅を少し広げて（autocontrast を 45% だけ混ぜる）224×224 の WebP にした（docs/research/artemis2-lunar-observation-verification.md §12）
     zoom: { file: "reiner-gamma-zoom-224.webp", alt: "Reiner Gamma の拡大。暗い海のなかに、明るい渦模様（幅約200 kmの範囲）", caption: "拡大 · 幅200 km" },
-    research: [],
     link: "https://www.nasa.gov/image-detail/amf-art002e012114/",
   },
   {
     id: "mare_orientale",
     en: "Mare Orientale",
-    ja: null,
+    ja: "東の海", // JAXA「かぐや」の成果のページの表記（https://www.kaguya.jaxa.jp/ja/science/result_of_kaguya_j_info_201401.htm）
     status: "VERIFIED",
     latDeg: -19.87,
     lonEastDeg: -94.67,
@@ -114,14 +118,19 @@ export const TARGETS = [
     // NASA の写真 art002e009277 の説明文「Orientale basin is visible in the center, with a black patch of ancient lava in the center」「This 600-mile-wide impact crater」（2:19 p.m. EDT 撮影）
     // 山の輪：art002e009278「wrapped in rings of mountains」
     origin: "ラテン語で「東の海」（Eastern sea）· IAU 承認 1964（USGS）",
-    facts: ["海（mare）· 直径 294 km（USGS）", "溶岩の平原（NASA）", "まわりの山の輪をふくめた「Orientale basin」· 幅約970 km（600 mi・NASA）"],
-    research: [],
+    // 盆地：https://science.nasa.gov/moon/lunar-craters/the-explosive-history-of-orientale-basin/「formed about 3.8 billion years ago」
+    //       https://science.nasa.gov/photojournal/orientale-basin/「The distinct outer ring is about 950 kilometers (590 miles) from east-to-west」
+    facts: ["海（mare）· 直径 294 km（USGS）", "溶岩の平原（NASA）", "まわりの山の輪とあわせて「Orientale basin」· 外側の輪 東西約950 km（NASA）", "約38億年前の衝突でできた（NASA）"],
+    // 研究（C26 を照合）：GRAIL https://science.nasa.gov/photojournal/grail-gravity-map-of-orientale-basin/（2016 公開）
+    //   かぐや https://www.kaguya.jaxa.jp/ja/science/result_of_kaguya_j_info_201401.htm（2014）
+    //   アルテミス2号 https://science.nasa.gov/feature/artemis-ii-preliminary-lunar-science-report/（2026年10月）
+    research: ["GRAIL：重力の地図（NASA・2016 公開）", "かぐや：輪の高さと直径を計測（JAXA・2014）", "アルテミス2号の写真を LRO の地図に重ねた（NASA・2026年10月）"],
     link: "https://www.nasa.gov/image-detail/amf-art002e009277/",
   },
   {
     id: "hertzsprung",
     en: "Hertzsprung",
-    ja: null,
+    ja: "ヘルツシュプルング盆地", // JAXA「かぐや」の成果のページの表記（https://www.selene.jaxa.jp/ja/science/RSAT/Farside_Gravity_Field_j.htm）
     status: "FALLBACK", // 中心は USGS で確認済み。2K の地図ではうすく、見えるとは言えないので、位置は指さない
     latDeg: 1.37,
     lonEastDeg: -128.66,
@@ -131,7 +140,9 @@ export const TARGETS = [
     // NASA の観測計画（Lunar Targeting Plan）の説明「Older, degraded multiring basin on the lunar farside to compare with the younger Orientale Basin」
     origin: "デンマークの天文学者 Ejnar Hertzsprung（1873–1967）· IAU 承認 1970（USGS）",
     facts: ["盆地 · 直径 536 km（USGS）", "2重の山の輪（NASA）", "「Orientale basin」より古い（NASA）"],
-    research: [],
+    // 研究（C26 を照合）：LRO https://science.nasa.gov/photojournal/hertzsprung-constellation-site/
+    //   かぐや https://www.selene.jaxa.jp/ja/science/RSAT/Farside_Gravity_Field_j.htm（2009）
+    research: ["LRO：内側の輪の岩（斜長岩とみられる）を撮影（NASA）", "かぐや：裏側の重力の地図（JAXA・2009）"],
     link: "https://www.nasa.gov/image-detail/amf-art002e012093/",
   },
 ];

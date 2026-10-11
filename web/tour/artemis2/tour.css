@@ -170,6 +170,15 @@ button.label { padding: 0; border: 0; background: none; color: inherit; font: in
 .obs-head { display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px !important; }
 .obs-tag { font-size: 10px; letter-spacing: 0.12em; color: var(--navy); background: var(--amber); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
 .obs-name { color: var(--amber); font-weight: 700; font-size: 1.12rem; letter-spacing: 0.04em; font-family: var(--font-mono); }
+.obs-top { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
+.obs-lead { font-size: 13px; line-height: 1.5; margin: 0; }
+.obs-more { margin-top: 4px; }
+.obs-more summary { cursor: pointer; list-style: none; font-size: 12px; color: var(--mint); padding: 4px 0; }
+.obs-more summary::-webkit-details-marker { display: none; }
+.obs-more summary::before { content: "▸ "; }
+.obs-more[open] summary::before { content: "▾ "; }
+.obs-more summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.obs-more .obs-body { max-height: 38vh; overflow-y: auto; }
 .obs-body { display: flex; gap: 10px; align-items: flex-start; }
 .obs-dl { flex: 1; margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 13px; line-height: 1.55; }
 .obs-dl dt { color: var(--text-dim); font-size: 11px; padding-top: 2px; white-space: nowrap; }
@@ -225,6 +234,9 @@ body.quiet .hud, body.quiet .photo { opacity: 0; pointer-events: none; }
 .ending-actions { position: absolute; left: 0; right: 0; bottom: 34px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; opacity: 0; transition: opacity 1.2s ease; pointer-events: none; }
 .ending.done .ending-actions { opacity: 1; pointer-events: auto; }
 
+@media (min-width: 701px) {
+  .obs { position: fixed; right: var(--gutter); top: 52px; width: 380px; }
+}
 @media (max-width: 700px) {
   :root { --gutter: 12px; }
   .t2 { font-size: 14px; }

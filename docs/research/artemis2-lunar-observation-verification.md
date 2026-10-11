@@ -210,3 +210,13 @@ CGI Moon Kit の色の地図（`web/assets/moon/lroc-color-2048.webp`、赤道�
 - 研究・探査：新しい調査なので C26（チャッピー）に依頼。確認できるまでカードには出さない（`research: []`）
 - 拡大図（Reiner Gamma だけ）：CGI Moon Kit（https://svs.gsfc.nasa.gov/4720）の `lroc_color_16bit_srgb_16k.tif`（16384×8192、1画素 約0.67 km）から、USGS の中心のまわり 300×300 画素（幅約200 km）を切り出した。2K の地図（1画素 約5.3 km）では渦の形が粗いが、16K では「明るい渦と暗い筋」がはっきり見える。明るさの幅を少し広げ（autocontrast を 45% だけ混ぜる）、224×224 の WebP（約7 KB）にした。元の TIFF（約900 MB）はリポジトリに入れない
   - Orientale・Hertzsprung も 16K で切り出して見た。Orientale は 2K でも暗い部分が見え、Hertzsprung は 16K でも輪がうすい。拡大図は付けない
+
+## 13. C26（名前の由来・研究）を照合して入れたもの（2026-10-11）
+
+照合の記録：voyascope-research の `research/verification/2026-10-11-c26.md`（引用 14 件を公式ページで確認。すべて一致）
+
+- 日本語の名前：Mare Orientale →「東の海」、Hertzsprung →「ヘルツシュプルング盆地」（どちらも JAXA「かぐや」の成果のページの表記）。Reiner Gamma は日本語の公式の表記が見つからず、英語のまま
+- Reiner Gamma：由来に「近くの Reiner クレーターにちなむ（NASA）」。研究：LRO が撮影（2010）・局所的な磁場がある（できかたは研究中）・Lunar Vertex（着陸して調べる計画。**年は出さない**：NASA のページの本文で確認できなかった。実施も未確認）。「Gamma」の意味は未確認のまま
+- Mare Orientale：盆地は「外側の輪 東西約950 km（NASA）」（これまでの「幅約970 km（600 mi）」から、測ったものが分かる値に替えた）・約38億年前の衝突（NASA）。研究：GRAIL（2016 公開）・かぐや（2014）・アルテミス2号の写真と LRO の地図の照合（2026年10月）
+- Hertzsprung：研究：LRO（内側の輪の岩、斜長岩とみられる）・かぐや（裏側の重力、2009）。直径は USGS の 536 km だけ（NASA の約570 km は定義が違うので出さない）
+- カードの形：いつも出すのは「地名 · IAU」の札と名前・要点1行・拡大図（Reiner Gamma）・リンク。「由来 · 概要 · 研究」は開くと出る（開くと一時停止）。PC ではカードを右上に置いて、照準の地形を隠さない

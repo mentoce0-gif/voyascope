@@ -116,7 +116,7 @@ test("観測の場面の時間には、その地形が見えて照らされて�
 
 test("位置を指さない地形（FALLBACK）は、出典つきの情報だけ", () => {
   for (const x of TARGETS) {
-    assert.ok(x.facts.length >= 1 && x.facts.every((f) => /（(USGS|NASA)|NASA）|USGS）/.test(f)) && /（USGS）$/.test(x.origin), `${x.id} の事実に出典`);
+    assert.ok(x.facts.length >= 1 && x.facts.every((f) => /（(USGS|NASA)|NASA）|USGS）/.test(f)) && /（USGS）/.test(x.origin) && (x.research ?? []).every((f) => /（(NASA|JAXA)/.test(f)), `${x.id} の事実に出典`);
     assert.match(x.link, /^https:\/\/www\.nasa\.gov\/image-detail\//);
   }
 });
