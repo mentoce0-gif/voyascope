@@ -18,18 +18,23 @@
   <canvas id="scene" aria-hidden="true"></canvas>
   <div id="window-frame" class="window-frame" aria-hidden="true"></div>
   <div id="reentry" class="reentry" aria-hidden="true"></div>
+  <!-- 映画のような上下の黒い帯と、暗転 -->
+  <div class="lb lb-top" aria-hidden="true"></div>
+  <div class="lb lb-bottom" aria-hidden="true"></div>
+  <div id="fade" class="fade on" aria-hidden="true"></div>
 
   <header class="bar">
     <a class="brand mono" href="../../">VOYASCOPE</a>
     <span class="sample-badge">試作</span>
   </header>
 
-  <!-- はじめ（外から見る） -->
-  <section id="intro" class="intro">
-    <h1>アルテミス2号に乗ってみる</h1>
-    <p class="lead">2026年4月、4人の宇宙飛行士を乗せたオリオン宇宙船が、月の裏側をまわって地球へ帰ってきた、約10日の旅。<br>光るオリオンに触れると、<b>数分間、いっしょに乗れます</b>。</p>
-    <button id="board" class="btn btn-primary" type="button">オリオンに乗る <span aria-hidden="true">›</span></button>
-    <p class="fine">約4分。ドラッグで窓の外を見回せます。</p>
+  <!-- はじめ：タイトル（1行ずつ出る） -->
+  <section id="intro" class="intro title-card">
+    <p class="t-line t1 mono">2026年4月</p>
+    <p class="t-line t2">4人を乗せて、月の裏側へ。そして、地球へ。</p>
+    <h1 class="t-line t3">アルテミス2号に乗ってみる</h1>
+    <p class="t-line t4 lead">光るオリオンに触れるか、下のボタンで。約4分、いっしょに乗ります。</p>
+    <div class="t-line t5"><button id="board" class="btn btn-primary" type="button">オリオンに乗る <span aria-hidden="true">›</span></button></div>
   </section>
 
   <!-- 乗っているあいだ：計器 -->
@@ -91,10 +96,32 @@
     </details>
   </div>
 
-  <!-- 帰ってきたとき：暗くなって、ひとこと。そのあと遠くを見る部屋のはじめへ -->
+  <!-- 帰ってきたとき：暗くなって、事実 → ひとこと → エンドクレジット（2026-10-11 オーナー：映画のエンディングのように） -->
   <section id="ending" class="ending" hidden aria-live="polite">
-    <p class="ending-main">地球に、帰ってきました。</p>
-    <p class="ending-sub">あなたもまた、よい旅を。</p>
+    <div class="end-a">
+      <p class="e-line e1 mono">2026年4月10日 午後8時07分（米国東部夏時間）</p>
+      <p class="e-line e2">太平洋に着水。</p>
+      <p class="e-line e3">地球からいちばん遠いところで、約40万6,800 km（252,756 マイル）。</p>
+      <p class="e-line ending-main">地球に、帰ってきました。</p>
+      <p class="e-line ending-sub">あなたもまた、よい旅を。</p>
+    </div>
+    <div class="end-b" aria-label="クレジット">
+      <div class="roll">
+        <p class="c-title">アルテミス2号に乗ってみる</p>
+        <dl>
+          <dt>通り道</dt><dd>NASA「Artemis II エフェメリス」（NASA/JSC/FOD/FDO）</dd>
+          <dt>月の表面</dt><dd>NASA's Scientific Visualization Studio「CGI Moon Kit」</dd>
+          <dt>地球</dt><dd>NASA Blue Marble・Black Marble</dd>
+          <dt>日時・写真の説明</dt><dd>NASA の発表</dd>
+          <dt>月と太陽の位置</dt><dd>Astronomy Engine（Don Cross）</dd>
+          <dt>3D</dt><dd>three.js</dd>
+          <dt>オリオンの姿</dt><dd>NASA・ESA の公式の資料の形と大きさをもとにしたイメージ</dd>
+          <dt>窓の外</dt><dd>NASA の写真を参考にした「〜のような眺め」</dd>
+        </dl>
+        <p class="c-note">VOYASCOPE は非公式のファンメイド作品です。<br>NASA・ESA などの宇宙機関とは関係ありません。</p>
+        <p class="c-end mono">VOYASCOPE</p>
+      </div>
+    </div>
     <div class="ending-actions">
       <a id="to-far" class="btn btn-primary" href="../../?from=artemis2">遠くを見る部屋へ <span aria-hidden="true">›</span></a>
       <button id="again" class="btn" type="button">もう一度乗る</button>
