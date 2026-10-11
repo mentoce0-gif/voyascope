@@ -31,7 +31,7 @@ html, body { margin: 0; height: 100%; background: var(--navy); color: var(--text
 
 /* はじめ：タイトル。1行ずつ、ゆっくり出る */
 .title-card {
-  position: fixed; left: 0; right: 0; bottom: calc(var(--lb) + 20px); z-index: 4; padding: 0 var(--gutter);
+  position: fixed; left: 0; right: 0; bottom: calc(var(--lb) + 52px); z-index: 4; padding: 0 var(--gutter);
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; pointer-events: none;
 }
 .title-card > * { pointer-events: auto; }
@@ -50,6 +50,24 @@ body.cinema { --lb: clamp(34px, 9vh, 88px); }
 .lb-top { top: 0; transform: translateY(-100%); }
 .lb-bottom { bottom: 0; transform: translateY(100%); }
 body.cinema .lb { transform: none; }
+/* ワープ：まんなかから外へ流れる光の筋 */
+.warp {
+  position: fixed; inset: -20%; z-index: 3; pointer-events: none; opacity: 0;
+  background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(217, 244, 234, 0) 0deg 2.6deg, rgba(217, 244, 234, 0.3) 2.75deg, rgba(217, 244, 234, 0) 3deg 5.3deg);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 12%, #000 38%, transparent 72%); mask-image: radial-gradient(circle at 50% 50%, transparent 12%, #000 38%, transparent 72%);
+  animation: warp 0.9s linear infinite;
+}
+@keyframes warp { from { transform: scale(0.8) rotate(0deg); } to { transform: scale(1.25) rotate(1.5deg); } }
+/* 章の見出し（ワープのあいだ） */
+.chapter {
+  position: fixed; left: 0; right: 0; top: 50%; transform: translateY(-50%); z-index: 7; text-align: center; padding: 0 var(--gutter);
+  pointer-events: none; opacity: 0; transition: opacity 0.9s ease; text-shadow: 0 1px 10px #000;
+}
+.chapter.on { opacity: 1; }
+.chapter p { margin: 0; }
+.ch-date { color: var(--amber); letter-spacing: 0.3em; font-size: 13px; }
+.ch-head { color: #fff; font-size: clamp(1.6rem, 4.4vw, 2.4rem); font-weight: 700; letter-spacing: 0.12em; margin: 8px 0 6px !important; }
+.ch-sub { color: var(--text-dim); font-size: 14px; letter-spacing: 0.06em; }
 /* 暗転 */
 .fade { position: fixed; inset: 0; background: #000; z-index: 9; pointer-events: none; opacity: 0; transition: opacity 0.9s ease; }
 .fade.on { opacity: 1; }
@@ -93,7 +111,7 @@ body.cinema .bar { top: var(--lb); }
   align-self: center; margin: 0; max-width: min(640px, 100%); text-align: center; line-height: 1.7; font-size: 1rem;
   padding: 8px 16px; border-radius: 10px; background: rgba(5, 14, 31, 0.62); text-shadow: 0 1px 6px #000; transition: opacity 0.6s;
 }
-.caption.fade { opacity: 0; }
+.caption.fade, .caption.off { opacity: 0; }
 .controls { display: flex; flex-direction: column; gap: 18px; }
 .timeline { position: relative; height: 4px; margin: 0 4px 12px; background: rgba(94, 242, 194, 0.22); border-radius: 2px; }
 .tl-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--mint); border-radius: 2px; }
@@ -124,10 +142,14 @@ body.cinema .bar { top: var(--lb); }
 .note p { margin: 4px 0 0; padding: 8px 10px; border-radius: 8px; background: rgba(5, 14, 31, 0.86); }
 .note a { color: var(--text-dim); }
 
-/* 外から見るときの名前 */
-.label { position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none; font-size: 12px; color: var(--text); text-shadow: 0 1px 4px #000; padding-left: 12px; margin-top: -8px; white-space: nowrap; }
-.label.orion { color: var(--amber); font-size: 13px; font-weight: 700; }
-.label.flip { padding-left: 0; padding-right: 12px; }
+/* 外から見るときの目印（文字のかわりに絵のアイコン） */
+.label { position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none; width: 36px; height: 36px; filter: drop-shadow(0 1px 4px #000); }
+.label svg { display: block; width: 100%; height: 100%; }
+.label.moon { width: 30px; height: 30px; }
+.label.orion { width: 48px; height: 48px; }
+.label.orion.tap { pointer-events: auto; cursor: pointer; }
+.label.orion .ring { transform-origin: 24px 24px; animation: ring 2.2s ease-out infinite; }
+@keyframes ring { from { transform: scale(0.7); opacity: 0.9; } to { transform: scale(1.15); opacity: 0; } }
 
 /* 窓：まわりを少し暗く（窓からのぞいている感じ） */
 .window-frame {
@@ -191,7 +213,8 @@ body.cinema .bar { top: var(--lb); }
   .hud-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .caption, .window-frame, .ending, .e-line, .ending-actions, .lb, .fade, .end-a, .end-b { transition: none !important; }
+  .warp { display: none; }
+  .caption, .window-frame, .chapter, .ending, .e-line, .ending-actions, .lb, .fade, .end-a, .end-b { transition: none !important; }
   .t-line { animation-duration: 0.01s; }
   .ending.credits .roll { animation: none; position: static; }
 }
