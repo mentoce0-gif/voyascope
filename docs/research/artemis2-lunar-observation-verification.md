@@ -178,3 +178,11 @@ CGI Moon Kit の色の地図（`web/assets/moon/lroc-color-2048.webp`、赤道�
 - CGI Moon Kit のクレジット（いまは NASA's Scientific Visualization Studio）
 - 「NASA」「Artemis」「Orion」の名前の使い方と、公式と誤解させない書き方（「NASA 航路データ」という表示）
 - 中高生にためしてもらうときの、同意と個人情報の扱い
+
+## 10. Phase B の結果（2026-10-11）
+
+- 月の模型の向きを IAU のモデルにした（`trajectory.json` の `moonFrame`）。Mare Orientale の照準を描くと、2K の地図の暗い部分にちょうど重なった（スクリーンショットで確認）。軸の向き・経度の符号・右手系はテスト（`tests/artemis2-lunar.test.mjs`）で、Phase A の計算と照らし合わせている
+- `trajectory.json` を作り直したので、座標の向き（最接近のときの月で決める）がわずかに変わった（最接近の時刻を詰めたため。太陽の向きの差は 0.0002 ほど）
+- 負の例（月の向こう側・夜・画面の外・小さすぎる・未確認の地形）では照準を出さない（テスト）
+- 太陽の向きは最接近のときの値で固定している（Mare Orientale の入射角・出射角は、時刻ごとに太陽を計算した Phase A の値と 0.1° 以内で合う。18:19・19:41 UTC で確認）
+- 読み込み：896 KB／950 KB（`lunar.js` と、`trajectory.json` の月の向きのぶん、約8 KB 増えた）

@@ -12,8 +12,12 @@
 //   - 座標は地球中心。月の公転面（最接近のときの月の位置と速さで決める）を x-y、北を z にした向き
 //   - 月と太陽の位置は Astronomy Engine（web/vendor/astronomy.min.js）で計算
 //   - 地球の向き（北極と、グリニッジの向き）も同じ座標で出す（地球の自転を本物の時刻に合わせるため）
+//   - 月の向き（経度0°の向きと北極の向き）を1時間ごとに出す（IAU WGCCRE 2009。scripts/lib/moon-orientation.mjs）。
+//     月面の地名（USGS）を正しい場所に置くため（2026-10-11 オーナーの再設計 Phase B）
+//   - 最接近の時刻は、点のあいだも1秒きざみで詰める（点は4分ごとなので、点だけで選ぶと約2分ずれる）
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { moonAxes } from "./lib/moon-orientation.mjs";
 
 const A = createRequire(import.meta.url)("../web/vendor/astronomy.min.js");
 const AU = A.KM_PER_AU;
@@ -28,9 +32,10 @@ const meta = Object.fromEntries([...text.matchAll(/^(\w+)\s*=\s*(.+)$/gm)].map((
 if (meta.REF_FRAME !== "EME2000" || meta.CENTER_NAME !== "EARTH" || meta.TIME_SYSTEM !== "UTC") throw new Error("想定と違う OEM です");
 
 // 行：時刻 x y z vx vy vz（EME2000・km・km/s）
-const rows = [...text.matchAll(/^(\d{4}-\d\d-\d\dT[\d:.]+)\s+(\S+)\s+(\S+)\s+(\S+)\s+\S+\s+\S+\s+\S+\s*$/gm)].map((m) => ({
+const rows = [...text.matchAll(/^(\d{4}-\d\d-\d\dT[\d:.]+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s*$/gm)].map((m) => ({
   ms: Date.parse(`${m[1]}Z`),
   r: [Number(m[2]), Number(m[3]), Number(m[4])],
+  v: [Number(m[5]), Number(m[6]), Number(m[7])],
 }));
 const epoch = rows[0].ms;
 
@@ -50,7 +55,19 @@ for (const [i, p] of rows.entries()) {
   const dd = len(sub(p.r, geo(A.Body.Moon, p.ms)));
   if (dd < dMin) [dMin, iMin] = [dd, i];
 }
-const tMin = rows[iMin].ms;
+// 点のあいだ（位置と速度で3次エルミート補間）も、1秒きざみで詰める
+const craftAt = (ms) => {
+  let i = rows.findIndex((p) => p.ms > ms) - 1;
+  if (i < 0) i = rows.length - 2;
+  const a = rows[i], b = rows[i + 1], h = (b.ms - a.ms) / 1000, u = (ms - a.ms) / (b.ms - a.ms);
+  const h00 = 2 * u ** 3 - 3 * u ** 2 + 1, h10 = u ** 3 - 2 * u ** 2 + u, h01 = -2 * u ** 3 + 3 * u ** 2, h11 = u ** 3 - u ** 2;
+  return a.r.map((_, c) => h00 * a.r[c] + h10 * h * a.v[c] + h01 * b.r[c] + h11 * h * b.v[c]);
+};
+let tMin = rows[iMin].ms;
+for (let ms = rows[Math.max(0, iMin - 1)].ms; ms <= rows[Math.min(rows.length - 1, iMin + 1)].ms; ms += 1000) {
+  const dd = len(sub(craftAt(ms), geo(A.Body.Moon, ms)));
+  if (dd < dMin) [dMin, tMin] = [dd, ms];
+}
 
 // 座標の向き：z＝月の公転の軸、x＝最接近のときの月の向き
 const m0 = geo(A.Body.Moon, tMin), m1 = geo(A.Body.Moon, tMin + 60000);
@@ -80,8 +97,16 @@ const th0 = era(epoch);
 const greenwich0 = rot([Math.cos(th0), Math.sin(th0), 0]);
 
 const r4 = (a) => a.map((v) => Math.round(v * 1e4) / 1e4);
+// 月の向き：1時間ごと。x＝経度0°・緯度0°の向き、z＝北極の向き（この座標で。5桁に丸める）
+const MOON_STEP = 3600;
+const moonX = [], moonZ = [];
+for (let t = 0; t <= (rows.at(-1).ms - epoch) / 1000 + MOON_STEP; t += MOON_STEP) {
+  const ax = moonAxes(epoch + t * 1000);
+  moonX.push(...rot(ax.x).map((v) => Math.round(v * 1e5) / 1e5));
+  moonZ.push(...rot(ax.z).map((v) => Math.round(v * 1e5) / 1e5));
+}
 console.error(
-  `点 ${out.length}（元 ${rows.length}）。最接近 ${new Date(tMin).toISOString()} 月面から ${Math.round(dMin - 1737.4)} km。終わり ${new Date(rows.at(-1).ms).toISOString()}`,
+  `点 ${out.length}（元 ${rows.length}）。最接近 ${new Date(tMin).toISOString()} 月面から ${Math.round(dMin - 1737.4)} km（球）。月の向き ${moonX.length / 3} 個。終わり ${new Date(rows.at(-1).ms).toISOString()}`,
 );
 process.stdout.write(
   JSON.stringify({
@@ -94,6 +119,7 @@ process.stdout.write(
     closestApproach: new Date(tMin).toISOString(),
     sun: r4(sunDir),
     earth: { pole: r4(pole), greenwich0: r4(greenwich0), rate: (2 * Math.PI * 1.00273781191135448) / 86400 },
+    moonFrame: { model: "IAU WGCCRE 2009", step: MOON_STEP, x: moonX, z: moonZ },
     points: out,
   }) + "\n",
 );

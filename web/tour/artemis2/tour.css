@@ -38,7 +38,7 @@ html, body { margin: 0; height: 100%; background: var(--navy); color: var(--text
 .t-line { margin: 0; opacity: 0; transform: translateY(6px); animation: t-in 1.4s ease forwards; }
 .t1 { color: var(--amber); letter-spacing: 0.3em; font-size: 13px; animation-delay: 1.4s; }
 .t2 { font-size: 15px; color: var(--text); letter-spacing: 0.06em; animation-delay: 2.8s; }
-.t3 { font-size: clamp(1.6rem, 4.4vw, 2.6rem); color: #fff; letter-spacing: 0.08em; font-weight: 700; margin: 6px 0 2px; animation-delay: 4.2s; }
+.t3 { font-size: clamp(1.3rem, max(4.4vw, min(6.2vw, 1.6rem)), 2.6rem); color: #fff; letter-spacing: 0.08em; font-weight: 700; margin: 6px 0 2px; animation-delay: 4.2s; }
 .t4 { font-size: 13px; color: var(--text-dim); animation-delay: 5.6s; }
 .t5 { margin-top: 10px; animation-delay: 6.4s; }
 @keyframes t-in { to { opacity: 1; transform: none; } }
@@ -50,17 +50,9 @@ body.cinema { --lb: clamp(34px, 9vh, 88px); }
 .lb-top { top: 0; transform: translateY(-100%); }
 .lb-bottom { bottom: 0; transform: translateY(100%); }
 body.cinema .lb { transform: none; }
-/* ワープ：まんなかから外へ流れる光の筋 */
-.warp {
-  position: fixed; inset: -20%; z-index: 3; pointer-events: none; opacity: 0;
-  background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(217, 244, 234, 0) 0deg 2.6deg, rgba(217, 244, 234, 0.3) 2.75deg, rgba(217, 244, 234, 0) 3deg 5.3deg);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 12%, #000 38%, transparent 72%); mask-image: radial-gradient(circle at 50% 50%, transparent 12%, #000 38%, transparent 72%);
-  animation: warp 0.9s linear infinite;
-}
-@keyframes warp { from { transform: scale(0.8) rotate(0deg); } to { transform: scale(1.25) rotate(1.5deg); } }
-/* 章の見出し（ワープのあいだ） */
+/* 章の見出し（時間圧縮のあいだ。航路の線にかからないよう上に） */
 .chapter {
-  position: fixed; left: 0; right: 0; top: 50%; transform: translateY(-50%); z-index: 7; text-align: center; padding: 0 var(--gutter);
+  position: fixed; left: 0; right: 0; top: calc(var(--lb) + 16px); z-index: 7; text-align: center; padding: 0 var(--gutter);
   pointer-events: none; opacity: 0; transition: opacity 0.9s ease; text-shadow: 0 1px 10px #000;
 }
 .chapter.on { opacity: 1; }
@@ -147,9 +139,31 @@ body.cinema .bar { top: var(--lb); }
 .label svg { display: block; width: 100%; height: 100%; }
 .label.moon { width: 30px; height: 30px; }
 .label.orion { width: 48px; height: 48px; }
+button.label { padding: 0; border: 0; background: none; color: inherit; font: inherit; border-radius: 50%; }
 .label.orion.tap { pointer-events: auto; cursor: pointer; }
+.label.orion:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
 .label.orion .ring { transform-origin: 24px 24px; animation: ring 2.2s ease-out infinite; }
 @keyframes ring { from { transform: scale(0.7); opacity: 0.9; } to { transform: scale(1.15); opacity: 0; } }
+
+/* 月面の観測：照準（細い角だけ。光らせつづけない）と、下の小さなカード */
+.reticle { position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none; opacity: 0; transition: opacity 0.8s ease;
+  background:
+    linear-gradient(var(--amber), var(--amber)) left top / 12px 1.5px no-repeat, linear-gradient(var(--amber), var(--amber)) left top / 1.5px 12px no-repeat,
+    linear-gradient(var(--amber), var(--amber)) right top / 12px 1.5px no-repeat, linear-gradient(var(--amber), var(--amber)) right top / 1.5px 12px no-repeat,
+    linear-gradient(var(--amber), var(--amber)) left bottom / 12px 1.5px no-repeat, linear-gradient(var(--amber), var(--amber)) left bottom / 1.5px 12px no-repeat,
+    linear-gradient(var(--amber), var(--amber)) right bottom / 12px 1.5px no-repeat, linear-gradient(var(--amber), var(--amber)) right bottom / 1.5px 12px no-repeat; }
+.reticle.on { opacity: 1; }
+.reticle-name { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 6px; white-space: nowrap; font-size: 12px; color: var(--amber); letter-spacing: 0.08em; text-shadow: 0 1px 4px #000; }
+.obs { align-self: center; width: min(560px, 100%); padding: 10px 14px; border-radius: 10px; background: rgba(5, 14, 31, 0.78); border: 1px solid rgba(255, 181, 71, 0.6); }
+.obs p { margin: 0; }
+.obs-k { font-size: 10.5px; letter-spacing: 0.12em; color: var(--text-dim); }
+.obs-k a { color: var(--mint); }
+.obs-name { color: var(--amber); font-weight: 700; margin: 2px 0 4px !important; }
+.obs-text { font-size: 14px; line-height: 1.65; }
+.obs-link { display: inline-block; margin-top: 8px; color: var(--amber); border: 1px solid rgba(255, 181, 71, 0.5); border-radius: 999px; padding: 3px 12px; font-size: 13px; text-decoration: none; }
+.obs-link:hover { background: rgba(255, 181, 71, 0.14); }
+/* 景色を見せるところは、計器と写真の欄を消す */
+body.quiet .hud, body.quiet .photo { opacity: 0; pointer-events: none; }
 
 /* 窓：まわりを少し暗く（窓からのぞいている感じ） */
 .window-frame {
@@ -195,6 +209,7 @@ body.cinema .bar { top: var(--lb); }
   .t2 { font-size: 14px; }
   .hud { top: 46px; left: 10px; right: 10px; width: auto; padding: 8px 12px 10px; }
   .hud-day { margin: 2px 0 6px; font-size: 12px; }
+  .hud-head { letter-spacing: 0.08em; font-size: 10px; }
   .hud-grid { grid-template-columns: repeat(4, auto); gap: 4px 10px; justify-content: space-between; }
   .hud-grid dt { font-size: 10px; }
   .hud-grid dd { font-size: 15px; }
@@ -213,8 +228,7 @@ body.cinema .bar { top: var(--lb); }
   .hud-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .warp { display: none; }
-  .caption, .window-frame, .chapter, .ending, .e-line, .ending-actions, .lb, .fade, .end-a, .end-b { transition: none !important; }
+  .caption, .window-frame, .chapter, .reticle, .ending, .e-line, .ending-actions, .lb, .fade, .end-a, .end-b { transition: none !important; }
   .t-line { animation-duration: 0.01s; }
   .ending.credits .roll { animation: none; position: static; }
 }

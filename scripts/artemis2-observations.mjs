@@ -9,13 +9,14 @@
 //   - オリオン：OEM の位置と速度で、3次エルミート補間
 //   - 月・太陽：Astronomy Engine（web/vendor/astronomy.min.js）の GeoVector。太陽は光行差つき
 //   - 月の向き：IAU WGCCRE 2009 の月の自転モデル（北極の赤経・赤緯と W。周期項 E1〜E13 つき）を、このファイルで計算
-//     （Astronomy Engine 本体の RotationAxis と同じ式。照合は検証メモに記録）
+//     （scripts/lib/moon-orientation.mjs。Astronomy Engine 本体の RotationAxis と同じ式。照合は検証メモに記録）
 //   - 月は半径 1737.4 km の球（地形の高さは入れない）
 //   - 見える：地形の中心の法線と、オリオンへの向きの角度（出射角 e）が 90° 未満
 //   - 照らされている：法線と太陽への向きの角度（入射角 i）が 90° 未満
 //   - 大きさ：地形の直径（USGS）を、オリオンからの距離で割った見かけの角度（出射角による縮みも別に出す）
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { moonAxes } from "./lib/moon-orientation.mjs";
 
 const A = createRequire(import.meta.url)("../web/vendor/astronomy.min.js");
 const AU = A.KM_PER_AU;
@@ -64,27 +65,7 @@ const geo = (body, ms) => {
   return [v.x * AU, v.y * AU, v.z * AU];
 };
 
-// ---------- 月の向き（IAU WGCCRE 2009） ----------
-// d：J2000（TDB）からの日数。UTC→TT は 69.184 秒（2026年。うるう秒 37 + 32.184）
-function moonAxes(ms) {
-  const d = (ms + 69184) / 86400000 + 2440587.5 - 2451545.0, T = d / 36525;
-  const E = [
-    125.045 - 0.0529921 * d, 250.089 - 0.1059842 * d, 260.008 + 13.0120009 * d, 176.625 + 13.3407154 * d,
-    357.529 + 0.9856003 * d, 311.589 + 26.4057084 * d, 134.963 + 13.064993 * d, 276.617 + 0.3287146 * d,
-    34.226 + 1.7484877 * d, 15.134 - 0.1589763 * d, 119.743 + 0.0036096 * d, 239.961 + 0.1643573 * d, 25.053 + 12.9590088 * d,
-  ].map((x) => x * DEG);
-  const s = (k) => Math.sin(E[k - 1]), c = (k) => Math.cos(E[k - 1]);
-  const ra = 269.9949 + 0.0031 * T - 3.8787 * s(1) - 0.1204 * s(2) + 0.07 * s(3) - 0.0172 * s(4) + 0.0072 * s(6) - 0.0052 * s(10) + 0.0043 * s(13);
-  const dec = 66.5392 + 0.013 * T + 1.5419 * c(1) + 0.0239 * c(2) - 0.0278 * c(3) + 0.0068 * c(4) - 0.0029 * c(6) + 0.0009 * c(7) + 0.0008 * c(10) - 0.0009 * c(13);
-  const W = 38.3213 + 13.17635815 * d - 1.4e-12 * d * d + 3.561 * s(1) + 0.1208 * s(2) - 0.0642 * s(3) + 0.0158 * s(4) + 0.0252 * s(5) - 0.0066 * s(6) - 0.0047 * s(7) - 0.0046 * s(8) + 0.0028 * s(9) + 0.0052 * s(10) + 0.004 * s(11) + 0.0019 * s(12) - 0.0044 * s(13);
-  const a = ra * DEG, de = dec * DEG, w = (W % 360) * DEG;
-  const pole = [Math.cos(de) * Math.cos(a), Math.cos(de) * Math.sin(a), Math.sin(de)];
-  const node = [Math.cos(a + Math.PI / 2), Math.sin(a + Math.PI / 2), 0]; // W を測りはじめる点（ICRF の赤道と月の赤道の交点。IAU の定義）
-  const q = [pole[1] * node[2] - pole[2] * node[1], pole[2] * node[0] - pole[0] * node[2], pole[0] * node[1] - pole[1] * node[0]]; // pole × node（赤道面で、node から 90° 東）
-  const x = add(mul(node, Math.cos(w)), mul(q, Math.sin(w))); // 経度 0°
-  const y = [pole[1] * x[2] - pole[2] * x[1], pole[2] * x[0] - pole[0] * x[2], pole[0] * x[1] - pole[1] * x[0]]; // 東経 90°
-  return { x, y, z: pole, ra, dec, W: W % 360 };
-}
+// ---------- 月の向き（IAU WGCCRE 2009。scripts/lib/moon-orientation.mjs） ----------
 const surfaceDir = (ax, lat, lonE) => {
   const cl = Math.cos(lat * DEG);
   return add(add(mul(ax.x, cl * Math.cos(lonE * DEG)), mul(ax.y, cl * Math.sin(lonE * DEG))), mul(ax.z, Math.sin(lat * DEG)));

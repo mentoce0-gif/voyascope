@@ -22,8 +22,7 @@
   <div class="lb lb-top" aria-hidden="true"></div>
   <div class="lb lb-bottom" aria-hidden="true"></div>
   <div id="fade" class="fade on" aria-hidden="true"></div>
-  <!-- ワープ：長い道のりを数秒で。光の筋と、章の見出し -->
-  <div id="warp" class="warp" aria-hidden="true"></div>
+  <!-- 時間圧縮：長い道のりを数秒で（点と日時だけが進む）。章の見出し -->
   <div id="chapter" class="chapter" aria-live="polite"><p id="chapter-date" class="ch-date mono"></p><p id="chapter-head" class="ch-head"></p><p id="chapter-sub" class="ch-sub"></p></div>
 
   <header class="bar">
@@ -42,7 +41,7 @@
 
   <!-- 乗っているあいだ：計器 -->
   <section id="hud" class="hud" hidden aria-label="オリオンの計器">
-    <div class="hud-head mono">ON BOARD · ORION</div>
+    <div class="hud-head mono">REPLAY 2026-04 · NASA 航路データ · 再現視点</div>
     <div id="hud-day" class="hud-day mono"></div>
     <dl class="hud-grid">
       <div><dt>地球から</dt><dd id="hud-earth" class="mono">—</dd></div>
@@ -52,6 +51,9 @@
     </dl>
   </section>
 
+  <!-- 月面の観測：照準（飾り。読み上げは下のカードで） -->
+  <div id="reticle" class="reticle" aria-hidden="true"><span id="reticle-name" class="reticle-name mono"></span></div>
+
   <aside id="photo" class="photo" hidden>
     <p class="photo-k mono">📷 この場面の本物の写真（NASA）</p>
     <p id="photo-text" class="photo-text"></p>
@@ -60,6 +62,12 @@
 
   <!-- 画面の下：字幕・タイムライン・操作・出典を、重ならないように縦に積む -->
   <div class="dock">
+    <section id="obs" class="obs" hidden aria-live="polite" aria-label="月面の観測">
+      <p class="obs-k mono">月面の観測 · <a id="obs-usgs" href="#" target="_blank" rel="noopener">USGS 地名</a></p>
+      <p id="obs-name" class="obs-name"></p>
+      <p id="obs-text" class="obs-text"></p>
+      <a id="obs-link" class="obs-link" href="#" target="_blank" rel="noopener"></a>
+    </section>
     <p id="caption" class="caption" aria-live="polite" hidden></p>
     <nav id="controls" class="controls" hidden aria-label="操作">
       <div class="timeline" aria-hidden="true">
@@ -93,7 +101,7 @@
       <summary>出典・注意（非公式ファンメイド作品）</summary>
       <p>
         通り道は、NASA が公開した飛行の軌道データ（<a href="https://www.nasa.gov/missions/artemis/artemis-2/track-nasas-artemis-ii-mission-in-real-time/" target="_blank" rel="noopener">Artemis II エフェメリス</a>）から。月・太陽の位置と地球の向きは、その時刻から計算しています。月の表面は NASA の <a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">CGI Moon Kit</a>（NASA's Scientific Visualization Studio）。日付・時刻・写真の説明は NASA の発表から。
-        窓の外は、NASA の写真を参考にした「〜のような眺め」で、写真そのものではありません。オリオンの姿は、公式の文章と NASA の写真を参考にした再現モデルです。写真は NASA のページでご覧ください。
+        窓の外は、NASA の写真を参考にした「〜のような眺め」で、写真そのものではありません。見ている向きは、航路の上に置いた仮の観測の視点で、乗員の窓の向き・宇宙船の姿勢を再現したものではありません（姿勢のデータはありません）。月の向きは IAU のモデル（Archinal ほか 2011）、月面の地名の位置は <a href="https://planetarynames.wr.usgs.gov/" target="_blank" rel="noopener">USGS / IAU Gazetteer of Planetary Nomenclature</a> から。長い道のりは時間を縮めて見せています（宇宙船が速くなったのではありません）。オリオンの姿は、公式の文章と NASA の写真を参考にした再現モデルです。写真は NASA のページでご覧ください。
         ※非公式ファンメイド作品です。NASA などの宇宙機関とは関係ありません。
       </p>
     </details>
