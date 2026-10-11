@@ -65,6 +65,13 @@
       "note": "全長 約8 m（太陽電池パドルを広げた幅は約9 m）"
     }
   },
+  "image": {
+    "file": "assets/craft/xrism.jpg",
+    "source": "https://science.nasa.gov/resource/xrism-x-ray-imaging-and-spectroscopy-mission/",
+    "credit": "NASA",
+    "caption": "XRISM のイラスト（色は見た目のためのもの）",
+    "terms": "https://www.nasa.gov/nasa-brand-center/images-and-media/"
+  },
   "official_links": [
     {
       "label": "JAXA XRISM",
