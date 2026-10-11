@@ -948,7 +948,17 @@ function observePhase(seg, u, s, sv) {
     if (phase === "reveal" || phase === "info") {
       const tg = obsTarget(seg);
       $("#obs-name").textContent = tg.ja ? `${tg.ja}（${tg.en}）` : tg.en;
-      $("#obs-facts").replaceChildren(...tg.facts.map((f) => Object.assign(document.createElement("li"), { textContent: f })));
+      $("#obs-origin").textContent = tg.origin;
+      const li = (f) => Object.assign(document.createElement("li"), { textContent: f });
+      $("#obs-facts").replaceChildren(...tg.facts.map(li));
+      $("#obs-research").replaceChildren(...(tg.research ?? []).map(li));
+      $("#obs-research-k").hidden = $("#obs-research-v").hidden = !tg.research?.length;
+      $("#obs-zoom").hidden = !tg.zoom;
+      if (tg.zoom) {
+        $("#obs-zoom-img").src = `../../assets/moon/${tg.zoom.file}`;
+        $("#obs-zoom-img").alt = tg.zoom.alt;
+        $("#obs-zoom-cap").textContent = tg.zoom.caption;
+      }
       $("#obs-link").href = tg.link;
       $("#obs-usgs").href = tg.usgs;
     }

@@ -167,8 +167,17 @@ button.label { padding: 0; border: 0; background: none; color: inherit; font: in
 .reticle-name { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 6px; white-space: nowrap; font-size: 12px; color: var(--amber); letter-spacing: 0.08em; text-shadow: 0 1px 4px #000; }
 .obs { align-self: center; width: min(560px, 100%); padding: 10px 14px; border-radius: 10px; background: rgba(5, 14, 31, 0.78); border: 1px solid rgba(255, 181, 71, 0.6); }
 .obs p { margin: 0; }
-.obs-name { color: var(--amber); font-weight: 700; margin: 0 0 4px !important; letter-spacing: 0.04em; }
-.obs-facts { margin: 0; padding: 0; list-style: none; font-size: 13.5px; line-height: 1.6; }
+.obs-head { display: flex; align-items: baseline; gap: 8px; margin: 0 0 6px !important; }
+.obs-tag { font-size: 10px; letter-spacing: 0.12em; color: var(--navy); background: var(--amber); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+.obs-name { color: var(--amber); font-weight: 700; font-size: 1.12rem; letter-spacing: 0.04em; font-family: var(--font-mono); }
+.obs-body { display: flex; gap: 10px; align-items: flex-start; }
+.obs-dl { flex: 1; margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 13px; line-height: 1.55; }
+.obs-dl dt { color: var(--text-dim); font-size: 11px; padding-top: 2px; white-space: nowrap; }
+.obs-dl dd { margin: 0; }
+.obs-zoom { margin: 0; flex: none; text-align: center; }
+.obs-zoom img { display: block; width: 112px; height: 112px; border-radius: 6px; border: 1px solid rgba(255, 181, 71, 0.45); object-fit: cover; }
+.obs-zoom figcaption { font-size: 9.5px; color: var(--text-dim); margin-top: 2px; }
+.obs-facts { margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.55; }
 .obs-facts li::before { content: "▸ "; color: var(--mint-dim); }
 .obs-links { display: flex; gap: 8px; margin-top: 8px !important; }
 .obs-link { display: inline-block; color: var(--amber); border: 1px solid rgba(255, 181, 71, 0.5); border-radius: 999px; padding: 3px 12px; font-size: 13px; text-decoration: none; }
@@ -234,6 +243,10 @@ body.quiet .hud, body.quiet .photo { opacity: 0; pointer-events: none; }
   .buttons .icon-btn.big { flex: 1; border-radius: 999px; }
   .chip { font-size: 12px; padding: 5px 9px; }
   .icon-chip { width: 42px; height: 32px; padding: 0; }
+  .obs { padding: 8px 12px; }
+  .obs-dl { font-size: 12px; }
+  .obs-facts { font-size: 12px; }
+  .obs-zoom img { width: 88px; height: 88px; }
   .icon-btn { width: 30px; height: 30px; }
   .icon-btn svg { width: 16px; height: 16px; }
 }

@@ -198,3 +198,15 @@ CGI Moon Kit の色の地図（`web/assets/moon/lroc-color-2048.webp`、赤道�
   - 最接近 4,067 mi・通信の途絶 約40分：NASA の実況
   - 各地形の事実：NASA の写真の説明文・NASA の観測計画の説明・NASA Moon Facts・USGS（`lunar.js` のコメントに原文）
 - 読み込み：899 KB／950 KB
+
+## 12. 観測のカードの「地名・由来・拡大図」（2026-10-11 オーナー FB）
+
+- オーナー「どこからどこまでが地名か分かりづらい。名前の由来や概要を載せよう。研究も分かるとよい。Gamma は拡大するともっと渦なら、拡大図がほしい」
+- カード：「地名 · IAU」の札と名前（等幅の太字）→ 由来 → 概要 → 研究（C26 の確認後）→ 拡大図。文中の地名は「」で囲む
+- 由来（USGS の各ページの Origin・Approval Date。2026-10-11 確認）
+  - Reiner Gamma（4987）：「Reinieri, Vincentio; Italian astronomer, mathematician (unkn-1648)」・1935。**「Gamma」の意味は USGS のページにない**（C26 で確認）
+  - Mare Orientale（3685）：「"Eastern sea."」・1964。カードでは「ラテン語で『東の海』（Eastern sea）」と、意味の訳として書く（日本語の正式な呼び方は C25 で確認）
+  - Hertzsprung（2482）：「Ejnar; Danish astronomer (1873-1967)」・1970
+- 研究・探査：新しい調査なので C26（チャッピー）に依頼。確認できるまでカードには出さない（`research: []`）
+- 拡大図（Reiner Gamma だけ）：CGI Moon Kit（https://svs.gsfc.nasa.gov/4720）の `lroc_color_16bit_srgb_16k.tif`（16384×8192、1画素 約0.67 km）から、USGS の中心のまわり 300×300 画素（幅約200 km）を切り出した。2K の地図（1画素 約5.3 km）では渦の形が粗いが、16K では「明るい渦と暗い筋」がはっきり見える。明るさの幅を少し広げ（autocontrast を 45% だけ混ぜる）、224×224 の WebP（約7 KB）にした。元の TIFF（約900 MB）はリポジトリに入れない
+  - Orientale・Hertzsprung も 16K で切り出して見た。Orientale は 2K でも暗い部分が見え、Hertzsprung は 16K でも輪がうすい。拡大図は付けない

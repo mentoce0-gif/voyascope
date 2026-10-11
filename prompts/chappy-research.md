@@ -284,6 +284,20 @@ NASA JPL の Horizons（https://ssd-api.jpl.nasa.gov/doc/horizons.html）で、�
 - 使ってよいか：日本語の地名を、出典を書いて自分のサイトで使うときの決まりが、出典のページに書かれていれば原文で（なければ「なし」）
 - カードJSON は なし（Claude Code が照合してからツアーに使う）
 
+**C26　月の地形の「名前の由来」と「そこで行われた・予定の研究」（アルテミス2号のツアーの観測カード）**
+アルテミス2号のツアーで、乗った先で観測する月の地形3つに、名前の由来・概要・研究の情報を、出典つきで短く出したい。位置と名前の由来の英語の原文は USGS / IAU Gazetteer で確認済み（Reiner Gamma：Origin「Reinieri, Vincentio; Italian astronomer, mathematician (unkn-1648)」、Mare Orientale：Origin「"Eastern sea."」、Hertzsprung：Origin「Ejnar; Danish astronomer (1873-1967)」）。次を公式ソースで確認する。
+- 対象：Reiner Gamma（USGS 4987）・Mare Orientale（3685）と Orientale Basin（オリエンターレ盆地）・Hertzsprung（2482。Hertzsprung Basin）
+- 名前
+  - Reiner Gamma の「Gamma」が何を表すか（近くのクレーター Reiner との関係など）。IAU / USGS の公式の説明（命名の規則のページなど）の原文
+  - 名前の由来の人物・言葉について、日本語の公式・公的な説明があれば（国立天文台・JAXA など）
+- 概要：それぞれの地形が何か（成り立ち・大きさ・特徴）を、NASA・USGS・LPI・JAXA の公式ページの原文で1〜3文
+- 研究：その地形で行われた・行われている・予定されている観測や探査
+  - 探査機・計画の名前、機関、年、何を調べた（調べる）か。公式ページの原文
+  - 例として確認してほしいもの（あるかどうかも含めて確かめる。推測で書かない）：Reiner Gamma の磁気異常と、着陸を目指す計画（NASA の CLPS・Lunar Vertex など）。Orientale の重力の観測（GRAIL など）。かぐや（SELENE）の観測
+  - 計画の段階（予定・実施済み・延期・中止）を、日付つきで分ける。予定を実績と書かない
+- 拡大の画像：これらの地形を大きく写した公式の画像（LRO の LROC など）のページ URL と、自分のサイトで使う（リンクする・見て描く・切り出して載せる）ときの決まりの原文。NASA の CGI Moon Kit（https://svs.gsfc.nasa.gov/4720）の高解像度の地図を切り出して載せてよいかも、ページに書かれていれば原文で
+- カードJSON は なし（Claude Code が照合してからツアーに使う）
+
 ---
 
 ## プロジェクトのルール（RULES.md 全文）

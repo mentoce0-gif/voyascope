@@ -65,8 +65,15 @@
   <!-- 画面の下：字幕・タイムライン・操作・出典を、重ならないように縦に積む -->
   <div class="dock">
     <section id="obs" class="obs" hidden aria-live="polite" aria-label="月面の観測">
-      <p id="obs-name" class="obs-name"></p>
-      <ul id="obs-facts" class="obs-facts"></ul>
+      <p class="obs-head"><span class="obs-tag mono">地名 · IAU</span><span id="obs-name" class="obs-name"></span></p>
+      <div class="obs-body">
+        <dl class="obs-dl">
+          <dt>由来</dt><dd id="obs-origin"></dd>
+          <dt>概要</dt><dd><ul id="obs-facts" class="obs-facts"></ul></dd>
+          <dt id="obs-research-k" hidden>研究</dt><dd id="obs-research-v" hidden><ul id="obs-research" class="obs-facts"></ul></dd>
+        </dl>
+        <figure id="obs-zoom" class="obs-zoom" hidden><img id="obs-zoom-img" alt="" width="112" height="112" loading="lazy"><figcaption id="obs-zoom-cap" class="mono"></figcaption></figure>
+      </div>
       <p class="obs-links"><a id="obs-usgs" class="obs-link" href="#" target="_blank" rel="noopener" aria-label="USGS の地名のページ">USGS ↗</a><a id="obs-link" class="obs-link" href="#" target="_blank" rel="noopener" aria-label="NASA の写真と説明">📷 NASA ↗</a></p>
     </section>
     <p id="caption" class="caption" aria-live="polite" hidden></p>
@@ -102,7 +109,7 @@
     <details class="note">
       <summary>出典・注意（非公式ファンメイド作品）</summary>
       <p>
-        通り道は、NASA が公開した飛行の軌道データ（<a href="https://www.nasa.gov/missions/artemis/artemis-2/track-nasas-artemis-ii-mission-in-real-time/" target="_blank" rel="noopener">Artemis II エフェメリス</a>）から。月・太陽の位置と地球の向きは、その時刻から計算しています。月の表面は NASA の <a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">CGI Moon Kit</a>（NASA's Scientific Visualization Studio）。日付・時刻・写真の説明は NASA の発表から。
+        通り道は、NASA が公開した飛行の軌道データ（<a href="https://www.nasa.gov/missions/artemis/artemis-2/track-nasas-artemis-ii-mission-in-real-time/" target="_blank" rel="noopener">Artemis II エフェメリス</a>）から。月・太陽の位置と地球の向きは、その時刻から計算しています。月の表面は NASA の <a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">CGI Moon Kit</a>（NASA's Scientific Visualization Studio）。観測のカードの拡大図も、その 16K の地図から切り出し、明るさの幅を少し広げたものです。日付・時刻・写真の説明は NASA の発表から。
         窓の外は、NASA の写真を参考にした「〜のような眺め」で、写真そのものではありません。見ている向きは、航路の上に置いた仮の観測の視点で、乗員の窓の向き・宇宙船の姿勢を再現したものではありません（姿勢のデータはありません）。月の向きは IAU のモデル（Archinal ほか 2011）、月面の地名の位置は <a href="https://planetarynames.wr.usgs.gov/" target="_blank" rel="noopener">USGS / IAU Gazetteer of Planetary Nomenclature</a> から。長い道のりは時間を縮めて見せています（宇宙船が速くなったのではありません）。縦にはじく（PC はホイール）と、時間が進む・戻ります。オリオンの姿は、公式の文章と NASA の写真を参考にした再現モデルです。写真は NASA のページでご覧ください。
         ※非公式ファンメイド作品です。NASA などの宇宙機関とは関係ありません。
       </p>

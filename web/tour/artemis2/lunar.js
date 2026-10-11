@@ -76,6 +76,9 @@ export function gate(target, o, screen) {
 //   画面に出すのは「情報」だけ（文の説明はしない。2026-10-11 オーナー）。facts の1行が1つの事実
 //   日本語の呼び方は C25（チャッピー）の確認待ち。それまでは英語の名前だけを出す
 //   fov：[景色の画角, 見つけるときの画角]（縦の画角。度）
+//   origin：名前の由来（USGS の各ページの Origin。承認の年は Approval Date）。地名は「」で囲んで、どこまでが名前か分かるように
+//   research：その地形での研究・探査（C26 で確認してから入れる。確認するまでは空）
+//   zoom：拡大図（CGI Moon Kit の 16K の地図から切り出したもの。web/assets/moon/）
 export const TARGETS = [
   {
     id: "reiner_gamma",
@@ -88,7 +91,12 @@ export const TARGETS = [
     fov: [11, 5.5],
     usgs: "https://planetarynames.wr.usgs.gov/Feature/4987",
     // NASA の写真 art002e012114 の説明文「The sinuous Reiner Gamma swirl contrasts with the darker mare surface」
+    origin: "イタリアの天文学者・数学者 Vincentio Reinieri（?–1648）· IAU 承認 1935（USGS）",
     facts: ["明るい渦模様（swirl）· 約73 km（USGS）", "暗い海のなか（NASA）"],
+    // 拡大図：CGI Moon Kit の lroc_color_16bit_srgb_16k.tif（1画素 約0.67 km）から、中心のまわり 300×300 画素（幅約200 km）を切り出し、
+    // 明るさの幅を少し広げて（autocontrast を 45% だけ混ぜる）224×224 の WebP にした（docs/research/artemis2-lunar-observation-verification.md §12）
+    zoom: { file: "reiner-gamma-zoom-224.webp", alt: "Reiner Gamma の拡大。暗い海のなかに、明るい渦模様（幅約200 kmの範囲）", caption: "拡大 · 幅200 km" },
+    research: [],
     link: "https://www.nasa.gov/image-detail/amf-art002e012114/",
   },
   {
@@ -105,7 +113,9 @@ export const TARGETS = [
     // 「海」は溶岩：NASA Moon Facts（https://science.nasa.gov/moon/facts/）「The dark features, called maria (Latin for seas), are impact basins that were filled with lava」
     // NASA の写真 art002e009277 の説明文「Orientale basin is visible in the center, with a black patch of ancient lava in the center」「This 600-mile-wide impact crater」（2:19 p.m. EDT 撮影）
     // 山の輪：art002e009278「wrapped in rings of mountains」
-    facts: ["海（mare）· 直径 294 km（USGS）", "溶岩の平原（NASA）", "まわりの山の輪 · Orientale basin · 幅約970 km（600 mi・NASA）"],
+    origin: "ラテン語で「東の海」（Eastern sea）· IAU 承認 1964（USGS）",
+    facts: ["海（mare）· 直径 294 km（USGS）", "溶岩の平原（NASA）", "まわりの山の輪をふくめた「Orientale basin」· 幅約970 km（600 mi・NASA）"],
+    research: [],
     link: "https://www.nasa.gov/image-detail/amf-art002e009277/",
   },
   {
@@ -119,7 +129,9 @@ export const TARGETS = [
     usgs: "https://planetarynames.wr.usgs.gov/Feature/2482",
     // NASA の写真 art002e012093「Hertzsprung Basin comes into view with its distinctive two concentric rings of mountains」
     // NASA の観測計画（Lunar Targeting Plan）の説明「Older, degraded multiring basin on the lunar farside to compare with the younger Orientale Basin」
-    facts: ["盆地 · 直径 536 km（USGS）", "2重の山の輪（NASA）", "Orientale より古い（NASA）"],
+    origin: "デンマークの天文学者 Ejnar Hertzsprung（1873–1967）· IAU 承認 1970（USGS）",
+    facts: ["盆地 · 直径 536 km（USGS）", "2重の山の輪（NASA）", "「Orientale basin」より古い（NASA）"],
+    research: [],
     link: "https://www.nasa.gov/image-detail/amf-art002e012093/",
   },
 ];
