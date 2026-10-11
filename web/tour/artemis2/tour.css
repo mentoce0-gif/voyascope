@@ -29,14 +29,31 @@ html, body { margin: 0; height: 100%; background: var(--navy); color: var(--text
 .btn-primary { color: var(--amber); border-color: var(--amber); font-size: 1.05rem; padding: 10px 22px; }
 .btn-primary:hover { background: rgba(255, 181, 71, 0.14); }
 
-.intro {
-  position: fixed; left: 24px; bottom: 96px; max-width: 460px; z-index: 4;
-  background: linear-gradient(180deg, rgba(12, 33, 64, 0.82), rgba(5, 14, 31, 0.88)); border: 1px solid var(--mint-dim);
-  border-radius: 12px; padding: 20px 22px;
+/* はじめ：タイトル。1行ずつ、ゆっくり出る */
+.title-card {
+  position: fixed; left: 0; right: 0; bottom: calc(var(--lb) + 20px); z-index: 4; padding: 0 var(--gutter);
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; pointer-events: none;
 }
-.intro h1 { margin: 0 0 8px; font-size: 1.5rem; color: var(--amber); letter-spacing: 0.04em; }
-.lead { margin: 0 0 14px; line-height: 1.8; }
-.fine { margin: 10px 0 0; font-size: 0.8rem; color: var(--text-dim); }
+.title-card > * { pointer-events: auto; }
+.t-line { margin: 0; opacity: 0; transform: translateY(6px); animation: t-in 1.4s ease forwards; }
+.t1 { color: var(--amber); letter-spacing: 0.3em; font-size: 13px; animation-delay: 1.4s; }
+.t2 { font-size: 15px; color: var(--text); letter-spacing: 0.06em; animation-delay: 2.8s; }
+.t3 { font-size: clamp(1.6rem, 4.4vw, 2.6rem); color: #fff; letter-spacing: 0.08em; font-weight: 700; margin: 6px 0 2px; animation-delay: 4.2s; }
+.t4 { font-size: 13px; color: var(--text-dim); animation-delay: 5.6s; }
+.t5 { margin-top: 10px; animation-delay: 6.4s; }
+@keyframes t-in { to { opacity: 1; transform: none; } }
+
+/* 映画のような上下の黒い帯（はじめ・外から見るとき・終わりのほう） */
+:root { --lb: 0px; }
+body.cinema { --lb: clamp(34px, 9vh, 88px); }
+.lb { position: fixed; left: 0; right: 0; height: clamp(34px, 9vh, 88px); background: #000; z-index: 6; pointer-events: none; transition: transform 1.2s ease; }
+.lb-top { top: 0; transform: translateY(-100%); }
+.lb-bottom { bottom: 0; transform: translateY(100%); }
+body.cinema .lb { transform: none; }
+/* 暗転 */
+.fade { position: fixed; inset: 0; background: #000; z-index: 9; pointer-events: none; opacity: 0; transition: opacity 0.9s ease; }
+.fade.on { opacity: 1; }
+.fade.slow { transition-duration: 2.2s; }
 
 /* 計器：数字を大きく、ラベルは小さく */
 .hud {
@@ -58,6 +75,13 @@ html, body { margin: 0; height: 100%; background: var(--navy); color: var(--text
 .photo-text { margin: 0 0 8px; font-size: 13px; line-height: 1.6; }
 .photo-link { display: inline-block; color: var(--amber); border: 1px solid rgba(255, 181, 71, 0.5); border-radius: 999px; padding: 3px 12px; font-size: 13px; text-decoration: none; }
 .photo-link:hover { background: rgba(255, 181, 71, 0.14); }
+
+/* 映画のようなところでは、計器・操作・出典・写真を隠して、字幕だけ */
+.hud, .controls, .note, .photo, .bar { transition: opacity 0.8s ease; }
+body.cinema .hud, body.cinema .controls, body.cinema .photo { opacity: 0; pointer-events: none; }
+body.cinema.riding .note, body.cinema.riding .bar { opacity: 0; pointer-events: none; }
+body.cinema .dock { padding-bottom: calc(var(--lb) + 10px); }
+body.cinema .bar { top: var(--lb); }
 
 /* 画面の下：上から 字幕 → 操作 → 出典。積むので重ならない */
 .dock {
@@ -114,22 +138,39 @@ html, body { margin: 0; height: 100%; background: var(--navy); color: var(--text
 /* 大気に入るときのオレンジの光 */
 .reentry { position: fixed; inset: 0; pointer-events: none; z-index: 2; opacity: 0; background: radial-gradient(ellipse at 50% 120%, rgba(255, 140, 40, 0.9), rgba(255, 90, 20, 0.35) 45%, transparent 70%); }
 
-/* 帰ってきたとき：暗くなる → ひとこと */
+/* 帰ってきたとき：暗くなる → 事実を1行ずつ → ひとこと → エンドクレジット → ボタン */
 .ending {
   position: fixed; inset: 0; z-index: 10; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 10px; padding: 24px; text-align: center; opacity: 0; transition: opacity 1.6s ease;
+  padding: 24px; text-align: center; opacity: 0; transition: opacity 2.2s ease;
 }
 .ending.on { opacity: 1; }
-.ending-main { margin: 0; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: 0.08em; color: #fff; }
-.ending-sub { margin: 0 0 18px; font-size: clamp(1rem, 2.6vw, 1.25rem); color: var(--amber); letter-spacing: 0.1em; opacity: 0; transition: opacity 1.6s ease 1.2s; }
-.ending.on .ending-sub { opacity: 1; }
-.ending-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; opacity: 0; transition: opacity 1s ease 2.4s; }
-.ending.on .ending-actions { opacity: 1; }
+.end-a { display: flex; flex-direction: column; align-items: center; gap: 10px; transition: opacity 1.4s ease; }
+.e-line { margin: 0; opacity: 0; transition: opacity 1.6s ease; }
+.ending.on .e-line { opacity: 1; }
+.e1 { color: var(--text-dim); font-size: 13px; letter-spacing: 0.08em; transition-delay: 2.4s !important; }
+.e2 { color: var(--text); font-size: 15px; transition-delay: 3.6s !important; }
+.e3 { color: var(--text-dim); font-size: 13px; transition-delay: 4.8s !important; margin-bottom: 26px; }
+.ending-main { font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: 0.08em; color: #fff; transition-delay: 7s !important; }
+.ending-sub { font-size: clamp(1rem, 2.6vw, 1.25rem); color: var(--amber); letter-spacing: 0.1em; transition-delay: 9s !important; }
+.ending.credits .end-a { opacity: 0; }
+.end-b { position: absolute; inset: 0 0 96px; overflow: hidden; opacity: 0; transition: opacity 1.6s ease; pointer-events: none;
+  -webkit-mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent); }
+.ending.credits .end-b { opacity: 1; }
+.roll { position: absolute; left: 0; right: 0; top: 100%; padding: 0 24px; }
+.ending.credits .roll { animation: roll 26s linear forwards; }
+@keyframes roll { to { transform: translateY(calc(-100% - 42vh)); } }
+.c-title { color: var(--amber); font-size: 1.15rem; letter-spacing: 0.1em; margin: 0 0 28px; }
+.roll dl { margin: 0 auto; max-width: 520px; display: grid; gap: 4px; }
+.roll dt { color: var(--text-dim); font-size: 11px; letter-spacing: 0.12em; margin-top: 14px; }
+.roll dd { margin: 0; color: var(--text); font-size: 14px; line-height: 1.6; }
+.c-note { margin: 36px 0 0; color: var(--text-dim); font-size: 12px; line-height: 1.8; }
+.c-end { margin: 46px 0 0; color: #fff; letter-spacing: 0.4em; font-size: 15px; }
+.ending-actions { position: absolute; left: 0; right: 0; bottom: 34px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; opacity: 0; transition: opacity 1.2s ease; pointer-events: none; }
+.ending.done .ending-actions { opacity: 1; pointer-events: auto; }
 
 @media (max-width: 700px) {
   :root { --gutter: 12px; }
-  .intro { left: 12px; right: 12px; bottom: 64px; max-width: none; padding: 16px; }
-  .intro h1 { font-size: 1.25rem; }
+  .t2 { font-size: 14px; }
   .hud { top: 46px; left: 10px; right: 10px; width: auto; padding: 8px 12px 10px; }
   .hud-day { margin: 2px 0 6px; font-size: 12px; }
   .hud-grid { grid-template-columns: repeat(4, auto); gap: 4px 10px; justify-content: space-between; }
@@ -150,5 +191,7 @@ html, body { margin: 0; height: 100%; background: var(--navy); color: var(--text
   .hud-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .caption, .window-frame, .ending, .ending-sub, .ending-actions { transition: none; }
+  .caption, .window-frame, .ending, .e-line, .ending-actions, .lb, .fade, .end-a, .end-b { transition: none !important; }
+  .t-line { animation-duration: 0.01s; }
+  .ending.credits .roll { animation: none; position: static; }
 }
