@@ -73,9 +73,11 @@ npm run check:size          # 読み込み量が上限の中か（スマホで�
 
 | 対象 | ライセンス |
 |---|---|
-| プログラム（`web/` の HTML・CSS・JavaScript、`scripts/`、`schema/`、`tests/`、`config/`、`docs/design/` の試作の HTML・JavaScript） | [MIT License](LICENSE) |
+| プログラム（`web/` の HTML・CSS・JavaScript、`scripts/`、`schema/`、`tests/`、`config/`、`docs/design/` の試作の HTML・JavaScript） | All rights reserved（作者の許可なく使えない。[LICENSE](LICENSE)。2026年10月12日より前の版は MIT） |
 | VOYASCOPE が書いた文章（カードの説明文、`docs/` など） | [CC BY 4.0](CONTENT_LICENSE.md) |
 | ロゴ・ブランド画像と完成図（`web/assets/brand/`、`docs/design/` の画像） | 作者が権利を持つ（自由に使ってよいものとしては配らない） |
 | 軌道データ・探査機の距離・打ち上げ予定・地名・画像・ライブラリなど | それぞれの提供元の条件（[CONTENT_LICENSE.md](CONTENT_LICENSE.md)、[web/vendor/README.md](web/vendor/README.md)） |
 
 上の「お願い」はライセンスの条件ではありません。
+
+VOYASCOPE に書いてある事実は、それぞれの出典（一次情報）で確かめてください。VOYASCOPE は、公式の発表へ案内する入口です。
