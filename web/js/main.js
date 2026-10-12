@@ -1203,9 +1203,10 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   // #far つきのリンク・ブックマーク・ホーム画面から開いたときも、部屋へは飛ばずに #far を消す
   if (location.hash === "#far") history.replaceState(null, "", location.pathname + location.search);
   // アルテミス2号のツアーから帰ってきたとき（?from=artemis2）は、遠くを見る部屋のはじめへ（2026-10-10 オーナー）
+  //   起動画面は暗いまま、部屋が開いてから消す（地球の画面を通らない。2026-10-12 オーナー）。部屋を閉じれば地球の画面
   if (FROM_TOUR) {
     history.replaceState(null, "", location.pathname);
-    setTimeout(() => openFar("pushed"), 700);
+    openFar("pushed").finally(() => dispatchEvent(new Event("voyascope:tour-return")));
   }
 
   // ---------- このアプリについて ----------
@@ -1374,6 +1375,7 @@ async function boot() {
   const status = $("#boot-status");
   const startBtn = $("#start");
   let data;
+  if (FROM_TOUR) import("./far/room.js").catch(() => {}); // 部屋の部品も、データと並べて読み始める
   try {
     // データと 3D 表示のライブラリを並べて読む（どちらかを待ってからもう一方、にしない）
     [data] = await Promise.all([loadAll(), loadGlobeLib()]);
@@ -1401,6 +1403,13 @@ async function boot() {
   startBtn.disabled = false;
   startBtn.focus();
   if (FROM_TOUR) setTimeout(() => startBtn.click(), 0);
+  // ツアーから戻るとき：部屋が開くまで（長くても8秒）起動画面を残す
+  const roomReady = FROM_TOUR
+    ? new Promise((r) => {
+        addEventListener("voyascope:tour-return", r, { once: true });
+        setTimeout(r, 8000);
+      })
+    : Promise.resolve();
   startBtn.addEventListener(
     "click",
     () => {
@@ -1414,11 +1423,14 @@ async function boot() {
         return;
       }
       const bootEl = $("#boot");
-      bootEl.classList.add("leaving");
-      setTimeout(() => {
-        bootEl.hidden = true;
-        stopNoise();
-      }, 650);
+      roomReady.then(() => {
+        bootEl.classList.add("leaving");
+        setTimeout(() => {
+          bootEl.hidden = true;
+          stopNoise();
+          document.documentElement.classList.remove("from-tour");
+        }, 650);
+      });
     },
     { once: true },
   );
