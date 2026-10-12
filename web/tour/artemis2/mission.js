@@ -41,6 +41,7 @@ export const MISSION = {
 //    and completing a safe re-entry and recovery. The astronauts also set a record for the farthest distance traveled by humans away …」
 //   最遠の距離 252,756 マイル：https://www.nasa.gov/blogs/missions/2026/04/06/artemis-ii-flight-day-6-lunar-flyby-updates/（7:02 p.m.）
 export const RESULTS = {
+  source: "https://www.nasa.gov/news-release/nasa-to-host-artemis-ii-crew-postflight-news-conference/",
   head: "主要目標を達成 · NASA の発表（飛行後）",
   items: ["生命維持の試験 ✓", "手動での操縦 ✓", "月への噴射と、軌道の修正 ✓", "月フライバイ ✓", "安全な再突入と回収 ✓", "人類の最遠記録 · 地球から 252,756 mi ✓"],
 };

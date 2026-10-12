@@ -6,6 +6,7 @@
 
 ## 2026-10-12
 
+- 「一言でわかる」ページ（`web/missions/`）：探査機10・人工衛星8・アルテミス2号を、一言（カードの mission）と要点で。JavaScript なしで読める文字のページ（検索・AI の入口）。`scripts/build-summaries.mjs` で curation/ から作り、CI で最新か確かめる。アルテミス2号のページの読み込みの上限を 950KB → 1100KB に（オーナー）。
 - アルテミス2号のページの月の地図に「着陸」：月面に降りたもの24か所（NASA NSSDCA の一覧。アポロ・ルナ・嫦娥・SLIM・IM・Blue Ghost・HAKUTO-R など）と、運用の状態（各機関の公式の発表）。位置が確かでないもの（Luna 9）・ローバーのいまの位置は「推測」と書いた。「月のいま」のカードに、月を回る探査機と月面の拠点の計画（C29 を照合）。
 - コードのライセンスを MIT から All rights reserved に（オーナー承認。許可のないコピーサイトを断る意思表示。それより前の版は MIT のまま）。「事実は出典（一次情報）で確かめて」と LICENSE・README・画面に書いた。文章は CC BY 4.0 のまま。
 - robots.txt と sitemap.xml を置いた（オーナー：AI の検索・引用は許可、学習は断る）。学習用の GPTBot・ClaudeBot・CCBot・Applebot-Extended だけ断る。Google-Extended は Gemini での引用にも関わるので許可（オーナー）。
