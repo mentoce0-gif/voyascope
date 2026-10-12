@@ -101,7 +101,7 @@ body:not(.ch-hero) .hero { display: none; }
 .pill[aria-pressed="true"] { background: var(--mint); color: var(--navy); }
 .pill-home { color: var(--amber); }
 .map-hint { position: fixed; left: 0; right: 0; bottom: calc(80px + env(safe-area-inset-bottom)); text-align: center; font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; transition: opacity 1s; pointer-events: none; }
-.map-hint.off, body:has(#card:not([hidden])) .map-hint { opacity: 0; }
+.map-hint.off, body:has(#card:not([hidden])) .map-hint, body:has(#tip:not([hidden])) .map-hint { opacity: 0; }
 
 .card {
   position: fixed; right: var(--gutter); top: 64px; bottom: 96px; width: var(--card-w); overflow-y: auto; pointer-events: auto;
@@ -142,9 +142,14 @@ body:not(.ch-hero) .hero { display: none; }
 .tip-text { margin: 0; font-size: 15px; line-height: 1.7; font-weight: 700; }
 .tip-src { margin: 8px 0 0; font-size: 12px; }
 .tip-src a { color: var(--text-dim); }
-.tip-nav { position: absolute; right: 8px; top: 6px; display: flex; gap: 2px; }
-.tip-nav button { width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; color: #fff; font-size: 18px; cursor: pointer; }
-.tip-nav button:hover { background: rgba(255, 255, 255, 0.08); }
+/* 豆知識：めくるボタンは右の中ほど〜下に大きく。戻るは出さない（2026-10-13 オーナー）。閉じるは右上に小さく */
+.tip { padding-right: 76px; }
+#tip-prev { display: none; }
+#tip-close { position: absolute; right: 6px; top: 4px; width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; color: var(--text-dim); font-size: 18px; cursor: pointer; }
+#tip-close:hover { background: rgba(255, 255, 255, 0.08); }
+#tip-next { position: absolute; right: 14px; top: 58%; transform: translateY(-50%); width: 50px; height: 50px; border: 0; border-radius: 50%; background: var(--mint); color: var(--navy); font-size: 26px; font-weight: 700; line-height: 1; cursor: pointer; box-shadow: 0 0 0 4px rgba(94, 242, 194, 0.18), 0 4px 16px rgba(0, 0, 0, 0.4); }
+#tip-next:hover { filter: brightness(1.08); }
+#tip-next:active { transform: translateY(-50%) scale(0.94); }
 
 /* ---------- 第3章：撮影モード ---------- */
 .photo { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
@@ -181,7 +186,9 @@ body:not(.ch-hero) .hero { display: none; }
   /* スマホ：カードは下から（月は上へよける） */
   .card { left: 10px; right: 10px; top: auto; bottom: calc(82px + env(safe-area-inset-bottom)); width: auto; max-height: 52vh; animation-name: sheet-in; }
   @keyframes sheet-in { from { opacity: 0; transform: translateY(30px); } }
-  .tip { top: 58px; left: 10px; right: 10px; width: auto; }
+  /* スマホ：読んでいるあいだは月とけんかしないので、下のボタンの上に */
+  .tip { top: auto; bottom: calc(88px + env(safe-area-inset-bottom)); left: 10px; right: 10px; width: auto; padding-top: 16px; padding-bottom: 16px; }
+  .tip-text { font-size: 16px; }
   .pill { padding: 9px 11px; font-size: 12px; }
   .pill span { display: none; }
   .mapbar .pill span { display: inline; }
