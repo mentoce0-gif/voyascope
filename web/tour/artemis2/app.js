@@ -13,6 +13,8 @@ import { TARGETS, moonAxesAt } from "./lunar.js";
 import { MISSION, RESULTS } from "./mission.js";
 
 const PLACES = (await fetch("moon-places.json").then((r) => r.json())).places;
+// 月面に降りたもの（NASA NSSDCA の一覧と、各機関の公式の発表。moon-landers.json のコメント）
+const LANDERS = await fetch("moon-landers.json").then((r) => r.json());
 const body = document.body;
 const portrait = () => innerWidth < innerHeight;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -303,6 +305,21 @@ orionTag.textContent = "ORION";
 orionTag.setAttribute("aria-label", "オリオン（アルテミス2号のミッション）");
 orionTag.addEventListener("click", () => selectOrion());
 labelsEl.append(orionTag);
+// 着陸地点のボタン（「着陸」を押したときだけ出す）
+const SITE_KIND = { crewed: "人が降りた場所", lander: "着陸機", rover: "ローバー（止まった場所）", impact: "衝突した場所" };
+const SITES = LANDERS.sites.map((p) => {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = `place site ${p.kind} off`;
+  el.textContent = p.name + (p.guess ? "（推測）" : "");
+  el.setAttribute("aria-label", `${p.name}（${SITE_KIND[p.kind]}）`);
+  el.addEventListener("click", () => selectSite(p));
+  labelsEl.append(el);
+  const pri = { crewed: 3000, lander: 2000, rover: 1000, impact: 1500 }[p.kind] + (p.who.includes("日本") ? 500 : 0);
+  return { p, el, pri, site: true, local: local(p.lat, p.lon), normal: local(p.lat, p.lon, 1) };
+});
+const ALL_LABELS = [...LABELS, ...SITES];
+let siteView = false;
 // 最接近の高さのものさし（航路を見るとき）：月の直径と、月面からオリオンまでを、同じ線の上に並べる
 //   NASA「4,067 miles above the lunar surface at their closest approach」（https://www.nasa.gov/blogs/missions/2026/04/11/artemis-ii-astronauts-back-in-houston-reunite-with-families/。C22 で照合）
 //   NASA Moon Facts「With a radius of about 1,080 miles (1,740 kilometers)」（https://science.nasa.gov/moon/facts/）→ 直径 約3,480 km。6,545 ÷ 3,480 ≒ 1.9
@@ -414,7 +431,8 @@ const tmpV = new THREE.Vector3(), tmpN = new THREE.Vector3();
 function placeLabels() {
   const boxes = [];
   const toCam = (w) => tmpN.copy(camera.position).sub(w).normalize();
-  const items = [...LABELS].sort((a, b) => b.pri - a.pri);
+  const items = ALL_LABELS.filter((L) => !!L.site === siteView).sort((a, b) => b.pri - a.pri);
+  for (const L of ALL_LABELS) if (!!L.site !== siteView) L.el.classList.add("off");
   for (const L of items) {
     moon.localToWorld(tmpV.copy(L.local));
     const n = L.normal.clone().applyQuaternion(moon.quaternion);
@@ -514,6 +532,56 @@ function selectOrion() {
   links(MISSION.links);
   showCard();
 }
+const fmtLat = (v) => `${Math.abs(v)}°${v < 0 ? "S" : "N"}`, fmtLon = (v) => `${Math.abs(v)}°${v < 0 ? "W" : "E"}`;
+function selectSite(p) {
+  selected = p;
+  cam.auto = false;
+  cam.toLat = clamp(p.lat, -75, 75);
+  cam.toLon = p.lon;
+  cam.toDist = 2.4 + (portrait() ? 0.8 : 0);
+  $("#card-tag").textContent = "着陸地点 · NASA";
+  $("#card-art").hidden = true;
+  $("#card-name").textContent = p.name;
+  $("#card-meta").textContent = `${SITE_KIND[p.kind]} · ${p.who} · ${p.date}（UTC）`;
+  $("#card-why").textContent = p.statusText ?? (p.status === "unknown" ? "いまの状態：不明（終わったという公式の発表を確認できていない）" : p.kind === "crewed" ? "人が月面に降りた場所" : "");
+  $("#card-compare").hidden = $("#card-zoom").hidden = true;
+  const dl = $("#card-dl");
+  dl.replaceChildren();
+  row(dl, "座標", `${fmtLat(p.lat)}, ${fmtLon(p.lon)}（NASA NSSDCA）`);
+  if (p.guess) row(dl, "推測", p.guess);
+  if (p.note) row(dl, "注記", p.note);
+  links([
+    { href: LANDERS.source.href, text: "NASA の一覧 ↗", aria: LANDERS.source.text },
+    ...(p.statusSrc ? [{ href: p.statusSrc, text: "公式の発表 ↗", aria: "運用の状態の公式の発表" }] : []),
+  ]);
+  showCard();
+}
+// 「着陸」を押したとき：月のいま（C29 を照合。voyascope-research の research/verification/2026-10-12-c29.md）
+//   LRO：https://science.nasa.gov/solar-system/moon/nasas-moon-orbiter-spots-new-once-in-century-moon-crater/（2026-09-16）
+//   Chandrayaan-2：https://www.isro.gov.in/Indian_Space_Situational_Awareness_Report_2025.html（2026-04-16）「Chandrayaan-2 Orbiter (CH2O) … are also active.」
+//   CAPSTONE：https://www.nasa.gov/technology/space-comms/nasas-capstone-completes-extended-mission-testing-lunar-technologies/（2026-07-06）
+//   Moon Base：https://www.nasa.gov/reference/moonbase-about/ 「NASA plans to establish the Moon Base near the lunar South Pole」「Phase Three (2032 and Beyond): Live and Work on the Moon」
+//   アルテミス4号：https://www.nasa.gov/news-release/nasa-marches-toward-artemis-iii-mission-in-2027-names-crew-members/ 「Artemis IV, the first planned crewed mission to the lunar South Pole in 2028」
+//   ILRS：https://english.www.gov.cn/news/202504/24/content_WS680976d7c6d0868f4e8f2045.html 「a basic model to be built by 2035 in the lunar south pole region」
+function showMoonNow() {
+  selected = { now: true };
+  $("#card-tag").textContent = "月のいま · 2026年10月";
+  $("#card-art").hidden = true;
+  $("#card-name").textContent = "月面に降りたもの";
+  $("#card-meta").textContent = `${LANDERS.sites.length} か所（NASA の一覧から）`;
+  $("#card-why").textContent = "人が住む基地は、まだない（推測：NASA は南極付近に Moon Base を「これから」作る計画）";
+  $("#card-compare").hidden = $("#card-zoom").hidden = true;
+  const dl = $("#card-dl");
+  dl.replaceChildren();
+  row(dl, "月を回る探査機", ["LRO（NASA）· 2026年9月の記事で、撮った写真から新しいクレーターを報告", "Chandrayaan-2 周回機（ISRO）· 2026年4月の報告で「運用中」", "CAPSTONE · NASA の活動は2026年6月に終了。Advanced Space が試験に使い続ける（NASA）"]);
+  row(dl, "これからの計画", ["アルテミス4号：月の南極に人が降りる（2028年の計画・NASA）", "Moon Base：南極付近。2032年以降に長く住んで働く（3段階の計画・NASA）", "ILRS（中国・ロシア）：2035年までに南極域で基本形（計画）"]);
+  row(dl, "印の色", ["白：人が降りた場所（アポロ）", "緑：着陸機・ローバー", "赤：着陸できずに衝突した場所"]);
+  links([
+    { href: LANDERS.source.href, text: "NASA の一覧 ↗", aria: LANDERS.source.text },
+    { href: "https://www.nasa.gov/reference/moonbase-about/", text: "NASA Moon Base ↗", aria: "NASA の Moon Base の計画" },
+  ]);
+  showCard();
+}
 function showCard() {
   card.hidden = false;
   card.scrollTop = 0;
@@ -563,8 +631,21 @@ $("#b-tips").addEventListener("click", () => ($("#tip").hidden ? showTip(tipI) :
 $("#tip-next").addEventListener("click", () => showTip(tipI + 1));
 $("#tip-prev").addEventListener("click", () => showTip(tipI - 1));
 $("#tip-close").addEventListener("click", () => ($("#tip").hidden = true));
+$("#b-sites").addEventListener("click", () => {
+  siteView = !siteView;
+  $("#b-sites").setAttribute("aria-pressed", String(siteView));
+  if (routeView) $("#b-route").click();
+  if (siteView) {
+    cam.toDist = portrait() ? 4.4 : 3.4;
+    showMoonNow();
+  } else closeCard();
+});
 $("#b-route").addEventListener("click", () => {
   routeView = !routeView;
+  if (routeView && siteView) {
+    siteView = false;
+    $("#b-sites").setAttribute("aria-pressed", "false");
+  }
   $("#b-route").setAttribute("aria-pressed", String(routeView));
   cam.toDist = routeView ? (portrait() ? 34 : 24) : portrait() ? 4.4 : 3.4;
   cam.auto = !routeView;
@@ -673,7 +754,7 @@ async function enterPhoto() {
   viewOff = { x: 0, y: 0 };
   setChapter("photo");
   overlay.material.uniforms.k.value = trackLine.material.uniforms.k.value = 0;
-  for (const L of LABELS) L.el.classList.add("off");
+  for (const L of ALL_LABELS) L.el.classList.add("off");
   orionTag.classList.add("off");
   orionMark.visible = false;
   light.intensity = 1.7;
@@ -714,7 +795,7 @@ function startLeave() {
   closeCard();
   $("#tip").hidden = true;
   camera.clearViewOffset();
-  for (const L of LABELS) L.el.classList.add("off");
+  for (const L of ALL_LABELS) L.el.classList.add("off");
   orionTag.classList.add("off");
   setChapter("leave");
   leaveT = 0;
