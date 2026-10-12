@@ -51,3 +51,18 @@ export function launchProgress(ev, now) {
 export function beaconTag(p) {
   return p.separated ? `${p.plan.craft} 分離の予定の時刻を過ぎました` : `${p.plan.craft} 打ち上げから ${hms(p.elapsed)}（計画）`;
 }
+
+// 予定の詳細に出す「計画の流れ」（残り時間の代わりに。経過は毎秒書き換える）
+export function launchFlowHtml(p) {
+  const items = p.plan.steps
+    .map((s, i) => `<li class="${i < p.current ? "done" : i === p.current ? "now" : ""}"><span class="mono">${hms(s.t)}</span>${s.label}</li>`)
+    .join("");
+  return `
+    <div class="event-countdown launch-live">
+      <span class="k">${p.separated ? "分離の予定の時刻を過ぎました（計画）" : "打ち上げから（計画の時刻で追っています）"}</span>
+      <span class="mono" data-live="elapsed">${hms(p.elapsed)}</span>
+      <span class="small">打ち上がったか・分離できたかは、JAXA の発表で確かめてください。位置は描きません</span>
+    </div>
+    <ol class="launch-flow" aria-label="打ち上げの日の流れ（計画）">${items}</ol>
+    <p class="k small">時刻は打ち上げからの経過で、どれも「約」。出典：<a href="${p.plan.source}" target="_blank" rel="noopener">${p.plan.sourceLabel}</a></p>`;
+}

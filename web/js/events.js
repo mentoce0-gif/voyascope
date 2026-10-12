@@ -227,7 +227,7 @@ function sourcesHtml(ev) {
     .join("");
 }
 
-export function eventPanelHtml(ev, now) {
+export function eventPanelHtml(ev, now, { flowHtml = null } = {}) {
   const status = statusOf(ev);
   const kind = KIND_LABELS[ev.kind] ?? "予定";
   const chip = status === "postponed" ? `${kind}・延期` : status === "done" ? `${kind}・済み` : `${kind}の予定`;
@@ -245,7 +245,10 @@ export function eventPanelHtml(ev, now) {
     : null;
   const span = eventSpan(ev);
   const passed = status === "scheduled" && span?.precision === "at" && span.start <= now.getTime();
-  const countdown = big
+  // 打ち上げの日の計画の流れ（launch-plan.js）があれば、残り時間の代わりに出す
+  const countdown = flowHtml
+    ? flowHtml
+    : big
     ? `<div class="event-countdown"><span class="k">${ev.kind === "launch" ? "打ち上げまで" : "その時まで"}</span><span class="mono" data-live="countdown">${esc(big)}</span></div>`
     : passed
       ? `<div class="event-countdown"><span class="k">予定の時刻を過ぎました</span><span class="small">結果は、公式の発表で確かめてください</span></div>`
