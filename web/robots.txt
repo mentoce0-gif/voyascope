@@ -7,6 +7,7 @@
 #   Common Crawl https://commoncrawl.org/ccbot  CCBot（公開データセット。学習に広く使われる）
 #   Google    https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers
 #             Google-Extended は Gemini の学習と、Gemini アプリの回答の裏づけ（grounding）の両方を決める。Google 検索には影響しない
+#             → 許可（2026-10-12 オーナー：Gemini で引用されるほうを取る）
 # robots.txt は「お願い」で、守らない相手は止められない
 
 # 学習には使わないでほしい
@@ -22,10 +23,7 @@ Disallow: /
 User-agent: Applebot-Extended
 Disallow: /
 
-User-agent: Google-Extended
-Disallow: /
-
-# それ以外（検索・AI の検索と引用：OAI-SearchBot・ChatGPT-User・Claude-SearchBot・Claude-User・PerplexityBot・Googlebot・Bingbot など）は許可
+# それ以外（Google-Extended と、検索・AI の検索と引用：OAI-SearchBot・ChatGPT-User・Claude-SearchBot・Claude-User・PerplexityBot・Googlebot・Bingbot など）は許可
 User-agent: *
 Allow: /
 
