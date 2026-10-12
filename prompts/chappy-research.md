@@ -309,6 +309,20 @@ NASA JPL の Horizons（https://ssd-api.jpl.nasa.gov/doc/horizons.html）で、�
 - 地球の出・地球の入り：アポロ8号の「Earthrise」との関係を NASA が公式に書いていれば、その原文（比べる言い方を NASA がしているかどうか）
 - カードJSON は なし（Claude Code が照合してからツアーに使う）
 
+**C28　月の地名マップの日本語の呼び方（約40）と、「月の豆知識」の出典**
+アルテミス2号のページを「月の地名マップ」中心に作り直す。地名の位置・大きさ・由来の英語の原文は USGS / IAU Gazetteer で確認済み。日本語の呼び方は、公式・公的な表記があるものだけ使う（東の海・雨の海・ライナーガンマ・オーム・コルディレラ山脈・ヘルツシュプルング盆地は C25 で確認済みなので不要）。
+- 次の地名の日本語の呼び方と、それが書かれた公式・公的なページの URL と原文（優先：国立天文台 ＞ JAXA ＞ 大学・研究機関・学会 ＞ 文部科学省・教科書関係の公的資料。報道・辞書・百科事典は「報道」として分ける。カタカナや訳を自分で作らない。見つからなければ「未確認」）
+  - 海など：Oceanus Procellarum・Mare Serenitatis・Mare Tranquillitatis・Mare Crisium・Mare Fecunditatis・Mare Nectaris・Mare Nubium・Mare Humorum・Mare Frigoris・Mare Vaporum・Mare Cognitum・Mare Insularum・Mare Smythii・Mare Marginis・Mare Undarum・Mare Australe・Mare Moscoviense・Mare Ingenii・Sinus Iridum
+  - クレーターなど：Copernicus・Tycho・Kepler・Aristarchus・Plato・Grimaldi・Clavius・Ptolemaeus・Langrenus・Theophilus・Petavius・Archimedes・Eratosthenes・Tsiolkovskiy・Korolev・Apollo（クレーター・盆地）・Vavilov・Schrödinger・Glushko・Montes Rook
+- 月の豆知識（中高生向けに1〜2行で出す。公式の原文が必要。数字は単位つき）。NASA・JAXA・国立天文台のページで
+  - 月のでき方：地球に別の天体がぶつかってできた、という説の説明（「説」であることが分かる原文）。日本語の公式の説明があれば
+  - 月がいつも同じ面を地球に向けている理由
+  - 月が地球から少しずつ遠ざかっていること（1年あたりの量）
+  - 表側と裏側の違い（裏側に海が少ないなど）
+  - 月の海が溶岩でできたこと（年代）
+  - ほかに、中高生がおもしろがる公式の事実があれば2〜3個
+- カードJSON は なし（Claude Code が照合してからツアーに使う）
+
 ---
 
 ## プロジェクトのルール（RULES.md 全文）
