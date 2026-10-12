@@ -79,7 +79,7 @@ const text = (html) =>
     .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, "")
     .replace(/<[^>]+>/g, " ")
     .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
+    .replace(/&quot;|&#34;/g, '"')
     .replace(/&#39;|&#x27;/g, "'")
     .replace(/\s+/g, " ");
 const num = (t, k) => {

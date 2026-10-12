@@ -26,7 +26,7 @@
 - 4/10 版は月のそばを通ったあと（4/6〜4/7）に作られたので、月のそばの部分は「飛んだあとの推定」と考えられる。ただし NASA は確定版とは書いていない → **未確認**（どの版を正とするかは、NASA の説明がない）
 - 4/9 版（CREATION_DATE 2026-04-08T22:20:54）で同じ計算をしても、下の出来事の時刻は分単位で同じだった
 
-### いまのアプリの処理（`scripts/artemis2-trajectory.mjs`・`web/tour/artemis2/tour.js`）
+### いまのアプリの処理（`scripts/artemis2-trajectory.mjs`・`web/tour/artemis2/world.js・app.js`）
 
 - trajectory.json：4/10 版の OEM を変換。座標は地球中心で、x-y が月の公転面になる向きに回している。月と太陽は Astronomy Engine で計算。地球の向きは ERA（UT1≒UTC）で近似
 - 月の向き：**「経度0°（テクスチャのまんなか）がいつも地球を向く」だけ**。秤動（±7〜8°）と、月の自転軸の傾きは入っていない。そのため、地名を月の上に置くときは向きの直しが要る（Phase B）

@@ -1,5 +1,5 @@
 // アルテミス2号ツアー：月面の地形を観測する場面の計算（three.js を使わない。tests/artemis2-lunar.test.mjs で確かめる）
-// 座標は trajectory.json と同じ（地球中心・km。月の公転面が x-y）。画面の座標への変換は tour.js（dir3）で行う。
+// 座標は trajectory.json と同じ（地球中心・km。月の公転面が x-y）。画面の座標への変換は world.js（dir3）で行う。
 // 根拠と検証：docs/research/artemis2-lunar-observation-verification.md
 
 export const R_MOON_KM = 1737.4;
