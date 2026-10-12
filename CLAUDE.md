@@ -45,6 +45,7 @@ VOYASCOPE は、地球のまわりを飛ぶ衛星・宇宙船・宇宙飛行士�
 npm install
 npm run validate            # curation/ を検証（CIと同じ）
 npm run validate:examples   # 見本を検証（エラーが出るのが正常）
+node scripts/build-summaries.mjs   # curation/ を直したら「一言でわかる」ページ（web/missions/）と sitemap.xml を作り直す（CI は --check）
 ```
 
 ローカルプレビュー（Phase 0 以降）：`npx serve web` または `python3 -m http.server -d web`

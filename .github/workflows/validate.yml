@@ -21,5 +21,7 @@ jobs:
         run: node scripts/sync-web-data.mjs --check
       - name: AI 依頼文が最新か
         run: node scripts/build-prompts.mjs --check
+      - name: 「一言でわかる」ページが最新か
+        run: node scripts/build-summaries.mjs --check
       - name: 読み込み量が上限の中か（スマホで重くしない）
         run: node scripts/check-size.mjs
