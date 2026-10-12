@@ -16,6 +16,8 @@
   <meta property="og:image" content="https://mentoce0-gif.github.io/voyascope/assets/earth/hero-1600.webp">
   <meta property="og:url" content="https://mentoce0-gif.github.io/voyascope/">
   <meta name="twitter:card" content="summary_large_image">
+  <!-- アルテミス2号のページから「遠くを見る部屋へ」で戻ってきたとき（?from=artemis2）は、起動画面と地球を見せずに、暗いまま部屋を開く（2026-10-12 オーナー） -->
+  <script>if (/[?&]from=artemis2(&|$)/.test(location.search)) document.documentElement.classList.add("from-tour");</script>
   <!-- 3D 表示のライブラリ（約500KB）は最初に読み始める。実行は js/main.js がする（ほかの読み込みを止めないため） -->
   <link rel="preload" href="vendor/globe.gl.min.js" as="script">
   <link rel="preconnect" href="https://fonts.googleapis.com">
