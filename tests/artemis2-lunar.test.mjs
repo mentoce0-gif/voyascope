@@ -120,3 +120,10 @@ test("位置を指さない地形（FALLBACK）は、出典つきの情報だけ
     assert.match(x.link, /^https:\/\/www\.nasa\.gov\/image-detail\//);
   }
 });
+
+test("観測の記録：どれも NASA の観測計画にあり、NASA の写真がある（計画を実績と書かない）", async () => {
+  const { OBS_LOG } = await import("../web/tour/artemis2/lunar.js");
+  assert.ok(OBS_LOG.length >= 6);
+  for (const x of OBS_LOG) assert.ok(typeof x.planned === "boolean" && typeof x.photographed === "boolean" && x.name, JSON.stringify(x));
+  for (const t of TARGETS) assert.ok(t.log && t.link, `${t.id} の写真のリンク`);
+});

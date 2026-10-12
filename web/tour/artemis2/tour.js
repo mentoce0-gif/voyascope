@@ -5,7 +5,7 @@
 // - 単位：1 = 1000 km。地球の中心が原点、月の公転面が x-z 面
 // - three.js は遠くを見る部屋と同じ r128 の部品だけの版（vendor/three-r128.min.js）。スプライト・線などは ShaderMaterial で作る
 import * as THREE from "../../vendor/three-r128.min.js";
-import { moonAxesAt, observe, gate, TARGETS, OBSERVE_WINDOWS } from "./lunar.js";
+import { moonAxesAt, observe, gate, TARGETS, OBSERVE_WINDOWS, OBS_LOG } from "./lunar.js";
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const smoothstep = (x, a, b) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
@@ -406,7 +406,6 @@ let lookOverride = null; // 「地球向き」「月向き」を押したとき�
 let lastSeg = null;
 let ride = 0; // 乗ってからの秒（台本の時計）
 let paused = false;
-let boardT = 0;
 const camFrom = new THREE.Vector3(), lookQ = new THREE.Quaternion(), tmpQ = new THREE.Quaternion(), mtx = new THREE.Matrix4();
 let yaw = 0, pitch = 0, dragging = false, lastDrag = 0;
 
@@ -452,11 +451,50 @@ function introCamera() {
   camera.quaternion.setFromRotationMatrix(mtx);
 }
 setIntroView();
+// 再現モデルのオリオンを、一度だけ小さな絵に描く（透明な背景。読み込みは増えない）
+function orionIconURL(size = 128) {
+  const iconScene = new THREE.Scene();
+  const parent = orion.parent, vis = orion.visible;
+  const p0 = orion.position.clone(), q0 = orion.quaternion.clone(), s0 = orion.scale.clone();
+  iconScene.add(orion);
+  orion.visible = true;
+  orion.position.set(0, 0, 0);
+  orion.quaternion.setFromEuler(new THREE.Euler(1.15, 0.0, -0.8));
+  orion.scale.setScalar(1);
+  const key = new THREE.DirectionalLight(0xffffff, 1.7);
+  key.position.set(6, 9, 12);
+  iconScene.add(key, new THREE.AmbientLight(0xbfd4ff, 0.55));
+  const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 200);
+  cam.position.set(0, 0.2, 38);
+  cam.lookAt(0, 0.2, 0);
+  const rt = new THREE.WebGLRenderTarget(size, size);
+  renderer.setRenderTarget(rt);
+  renderer.setClearColor(0x000000, 0);
+  renderer.clear();
+  renderer.render(iconScene, cam);
+  const px = new Uint8Array(size * size * 4);
+  renderer.readRenderTargetPixels(rt, 0, 0, size, size, px);
+  renderer.setRenderTarget(null);
+  rt.dispose();
+  parent.add(orion);
+  orion.visible = vis;
+  orion.position.copy(p0);
+  orion.quaternion.copy(q0);
+  orion.scale.copy(s0);
+  // 上下を反転して 2D の絵に
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const g = c.getContext("2d"), img = g.createImageData(size, size);
+  for (let y = 0; y < size; y++) img.data.set(px.subarray((size - 1 - y) * size * 4, (size - y) * size * 4), y * size * 4);
+  g.putImageData(img, 0, 0);
+  return c.toDataURL("image/png");
+}
 // 外から見るときの目印：名前の文字のかわりに、絵のアイコン（2026-10-11 オーナー：文字は野暮ったいので）
 const ICONS = {
   earth: '<svg viewBox="0 0 40 40"><defs><radialGradient id="ie" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#a8e6ff"/><stop offset=".5" stop-color="#2f7fd0"/><stop offset="1" stop-color="#0a2457"/></radialGradient></defs><circle cx="20" cy="20" r="14" fill="url(#ie)"/><path d="M6 20h28M20 6c5 4 5 24 0 28M20 6c-5 4-5 24 0 28M8.5 13h23M8.5 27h23" fill="none" stroke="#d9f4ea" stroke-opacity=".38" stroke-width="1"/><circle cx="20" cy="20" r="16.5" fill="none" stroke="#9fe3ff" stroke-opacity=".5"/></svg>',
   moon: '<svg viewBox="0 0 40 40"><defs><radialGradient id="im" cx="35%" cy="32%" r="75%"><stop offset="0" stop-color="#f2f0ea"/><stop offset=".6" stop-color="#a9a69d"/><stop offset="1" stop-color="#5a5852"/></radialGradient></defs><circle cx="20" cy="20" r="12" fill="url(#im)"/><g fill="#6f6c64" opacity=".7"><circle cx="16" cy="16" r="2.6"/><circle cx="24" cy="23" r="3.2"/><circle cx="15" cy="25" r="1.6"/><circle cx="24" cy="14" r="1.3"/></g></svg>',
-  orion: '<svg viewBox="0 0 48 48"><circle class="ring" cx="24" cy="24" r="20" fill="none" stroke="#ffb547" stroke-width="1.6"/><g fill="#ffb547"><path d="M20.5 12h7l3.5 10h-14z"/><rect x="18" y="23" width="12" height="9" rx="1"/><path d="M8 26.5h9v2H8zM31 26.5h9v2h-9z" opacity=".9"/><rect x="6" y="24.5" width="4" height="6" rx=".6" opacity=".7"/><rect x="38" y="24.5" width="4" height="6" rx=".6" opacity=".7"/><path d="M21 32h6l-1 3h-4z" opacity=".8"/></g></svg>',
+  // オリオン：外から見せるのと同じ再現モデルを、小さな絵にして使う（2026-10-11 オーナー：作ったモデルをアイコンに）。光の輪は SVG
+  orion: `<svg viewBox="0 0 48 48"><circle class="ring" cx="24" cy="24" r="20" fill="none" stroke="#ffb547" stroke-width="1.6"/></svg><img class="orion-img" src="${orionIconURL()}" alt="">`,
 };
 const labels = [
   { el: document.createElement("span"), name: "地球", icon: ICONS.earth, obj: () => earth.position, cls: "earth" },
@@ -636,14 +674,17 @@ function setNear(n) {
   camera.updateProjectionMatrix();
 }
 
+// 乗る：暗転して、オリオンのそばへ（遠くから地球へ急に近づく動きはやめた。2026-10-11 オーナー「よく分からない」）
 function board() {
+  if (mode !== "intro") return;
   mode = "boarding";
-  boardT = 0;
-  camFrom.copy(camera.position);
-  lookQ.copy(camera.quaternion);
   $("#intro").hidden = true;
-  pathLine.visible = false; // 通り道の線がカメラの前を横切らないように
   for (const m of labels) m.el.hidden = true;
+  dip(() => {
+    pathLine.visible = false;
+    place(0);
+    startRide(0);
+  });
 }
 function setView(v, { auto = false } = {}) {
   view = v;
@@ -956,6 +997,7 @@ function observePhase(seg, u, s, sv) {
     if (phase === "reveal" || phase === "info") {
       const tg = obsTarget(seg);
       $("#obs-name").textContent = tg.ja ? `${tg.ja}（${tg.en}）` : tg.en;
+      $("#obs-log").textContent = `NASA 観測計画 ${tg.log.planned ? "✓" : "—"} · NASA の写真 ${tg.log.photographed ? "✓" : "—"}`;
       $("#obs-lead").textContent = tg.facts[0];
       $("#obs-more").open = false;
       body.classList.remove("reading");
@@ -1009,7 +1051,6 @@ const OUTSIDE_SAY = "Orion · 4人 · 再現モデル";
 const END_CINEMA_SEC = 26; // 終わりの何秒前から、映画のような帯にするか
 let last = performance.now();
 let introT = 0;
-const camTo = new THREE.Vector3();
 function frame(now) {
   const dt = Math.min(0.1, (now - last) / 1000);
   last = now;
@@ -1022,26 +1063,7 @@ function frame(now) {
     stars.position.copy(camera.position);
     updateSunAndCorona();
   } else if (mode === "boarding") {
-    // 光るオリオンへ近づいて、外から姿を見る位置まで
-    boardT += dt / 3.2;
-    const s = place(0);
-    placeOrion(s);
-    orion.visible = orion.userData.fill.visible = boardT > 0.55;
-    const k = smoothstep(boardT, 0, 1);
-    outsideCam(s, 0, 0, camTo);
-    camera.position.lerpVectors(camFrom, camTo, k);
-    if (k > 0.85) setNear(0.0008);
-    // 外から見るときと同じく、オリオンと地球のあいだを見る（乗ったあとに向きが飛ばないように）
-    const toO = s.craft.clone().sub(camera.position).normalize(), toE = camera.position.clone().negate().normalize();
-    mtx.lookAt(camera.position, camera.position.clone().add(toO.clone().multiplyScalar(innerWidth < innerHeight ? 4.5 : 1.6).add(toE)), k > 0.6 ? outsideUp(toO, toE) : new THREE.Vector3(0, 1, 0));
-    tmpQ.setFromRotationMatrix(mtx);
-    camera.quaternion.copy(lookQ.slerp(tmpQ, 0.08));
-    orionMark.position.copy(s.craft);
-    orionMark.visible = boardT < 0.8;
-    orionMark.scale.setScalar(Math.max(0.002, camera.position.distanceTo(s.craft) * 0.08));
-    stars.position.copy(camera.position);
-    updateSunAndCorona();
-    if (boardT >= 1) startRide();
+    // 暗転のあいだは、そのまま（暗転が明けたら、外から見たオリオン）
   } else if (mode === "ride") {
     if (!paused) ride += dt;
     scrubStep(dt);
@@ -1118,6 +1140,9 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+// エンドクレジットの「観測の記録」
+$("#c-log").replaceChildren(...OBS_LOG.map((x) => Object.assign(document.createElement("li"), { textContent: `${x.name}  計画 ${x.planned ? "✓" : "—"} · 写真 ${x.photographed ? "✓" : "—"}` })));
 
 // はじめ：黒から、ゆっくり明るく（映画の幕開けのように）
 setCinema(true);

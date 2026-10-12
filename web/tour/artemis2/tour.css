@@ -149,7 +149,9 @@ body.cinema .bar { top: var(--lb); }
 .label { position: fixed; left: 0; top: 0; z-index: 3; pointer-events: none; width: 36px; height: 36px; filter: drop-shadow(0 1px 4px #000); }
 .label svg { display: block; width: 100%; height: 100%; }
 .label.moon { width: 30px; height: 30px; }
-.label.orion { width: 48px; height: 48px; }
+.label.orion { width: 56px; height: 56px; }
+.label.orion svg { position: absolute; inset: 0; }
+.label.orion .orion-img { position: absolute; inset: 6px; width: 44px; height: 44px; filter: drop-shadow(0 0 6px rgba(255, 181, 71, 0.55)); }
 button.label { padding: 0; border: 0; background: none; color: inherit; font: inherit; border-radius: 50%; }
 .label.orion.tap { pointer-events: auto; cursor: pointer; }
 .label.orion:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
@@ -172,8 +174,15 @@ button.label { padding: 0; border: 0; background: none; color: inherit; font: in
 .obs-name { color: var(--amber); font-weight: 700; font-size: 1.12rem; letter-spacing: 0.04em; font-family: var(--font-mono); }
 .obs-top { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; }
 .obs-lead { font-size: 13px; line-height: 1.5; margin: 0; }
+.obs-log { font-size: 11px; color: var(--mint); letter-spacing: 0.04em; margin: -2px 0 6px !important; }
+.c-log { margin: 0 auto 30px; max-width: 520px; }
+.c-log-k { color: var(--amber); font-size: 12px; letter-spacing: 0.1em; margin: 0 0 8px; }
+.c-log ul { list-style: none; margin: 0; padding: 0; font-size: 13px; line-height: 1.9; color: var(--text); }
 .obs-more { margin-top: 4px; }
-.obs-more summary { cursor: pointer; list-style: none; font-size: 12px; color: var(--mint); padding: 4px 0; }
+.obs-more summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; min-height: 40px; padding: 6px 16px; margin-top: 4px;
+  font-size: 14px; color: var(--mint); border: 1px solid var(--mint-dim); border-radius: 999px; background: rgba(94, 242, 194, 0.08); }
+.obs-more summary:hover { background: rgba(94, 242, 194, 0.16); }
+.obs-more[open] summary { color: var(--navy); background: var(--mint); border-color: var(--mint); }
 .obs-more summary::-webkit-details-marker { display: none; }
 .obs-more summary::before { content: "▸ "; }
 .obs-more[open] summary::before { content: "▾ "; }
