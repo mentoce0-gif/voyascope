@@ -77,6 +77,11 @@ body:not(.ch-hero) .hero { display: none; }
 .place.mare { font-size: 13px; letter-spacing: 0.04em; }
 .place.art { color: var(--amber); font-weight: 700; }
 .place.art::before { background: var(--amber); box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 181, 71, 0.8); }
+.place.site::before { border-radius: 1px; transform: rotate(45deg); background: var(--mint); }
+.place.site.crewed { color: #fff; font-weight: 700; }
+.place.site.crewed::before { background: #fff; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.7); }
+.place.site.impact::before { background: #ff7a7a; }
+.place.site.impact { color: #ffb3b3; }
 .place.sel { color: #fff; }
 .place.sel::before { background: #fff; transform: scale(1.5); }
 .place.off { opacity: 0; pointer-events: none; }
@@ -180,11 +185,14 @@ body:not(.ch-hero) .hero { display: none; }
   .pill { padding: 9px 11px; font-size: 12px; }
   .pill span { display: none; }
   .mapbar .pill span { display: inline; }
+  /* 地図の下のボタン：5つ並ぶので、絵の下に小さく字 */
+  .mapbar { gap: 2px; padding: 4px; }
+  .mapbar .pill { flex-direction: column; gap: 2px; padding: 6px 10px; font-size: 10px; letter-spacing: 0.04em; }
   .place { font-size: 11px; }
   .place.mare { font-size: 12px; }
 }
 @media (max-width: 380px) {
-  .mapbar .pill span { display: none; }
+  .mapbar .pill { padding: 6px 8px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .slide, .fade, .leave-actions, .card, .tip { transition: none !important; animation: none !important; }
