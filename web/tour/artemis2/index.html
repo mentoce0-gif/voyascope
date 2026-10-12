@@ -3,162 +3,143 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#050e1f">
+  <meta name="theme-color" content="#000000">
   <link rel="icon" href="../../favicon.ico" sizes="32x32">
   <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
-  <title>アルテミス2号に乗ってみる（試作）— VOYASCOPE</title>
-  <meta name="description" content="2026年4月、月の裏側をまわって帰ってきたアルテミス2号の旅に、数分間いっしょに乗るページ。NASA の軌道データと写真をもとにした、非公式ファンメイド作品です。">
+  <title>ARTEMIS II — VOYASCOPE</title>
+  <meta name="description" content="2026年4月、4人を乗せて月の裏側をまわり、地球へ帰ってきたアルテミス2号。NASA の軌道データと USGS の月の地名から作った、非公式ファンメイドのページです。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="tour.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="app.css">
 </head>
-<body>
+<body class="ch-hero">
   <canvas id="scene" aria-hidden="true"></canvas>
-  <div id="window-frame" class="window-frame" aria-hidden="true"></div>
-  <div id="reentry" class="reentry" aria-hidden="true"></div>
-  <!-- 映画のような上下の黒い帯と、暗転 -->
-  <div class="lb lb-top" aria-hidden="true"></div>
-  <div class="lb lb-bottom" aria-hidden="true"></div>
   <div id="fade" class="fade on" aria-hidden="true"></div>
-  <!-- 時間圧縮：長い道のりを数秒で（点と日時だけが進む）。章の見出し -->
-  <div id="chapter" class="chapter" aria-label="時間圧縮"><p id="chapter-head" class="ch-head mono"></p><p id="chapter-sub" class="ch-sub mono"></p></div>
 
   <header class="bar">
     <a class="brand mono" href="../../">VOYASCOPE</a>
     <span class="sample-badge">試作</span>
+    <button id="info-open" class="info-btn" type="button" aria-label="出典・注意" title="出典・注意">i</button>
   </header>
 
-  <!-- はじめ：タイトル（1行ずつ出る） -->
-  <section id="intro" class="intro title-card">
-    <p class="t-line t1 mono">2026年4月</p>
-    <p class="t-line t2">4人を乗せて、月の裏側へ。そして、地球へ。</p>
-    <h1 class="t-line t3">アルテミス2号に乗ってみる</h1>
-    <p class="t-line t4 lead">光るオリオンに触れるか、下のボタンで。約3分、いっしょに乗ります。</p>
-    <div class="t-line t5"><button id="board" class="btn btn-primary" type="button">オリオンに乗る <span aria-hidden="true">›</span></button></div>
-  </section>
-
-  <!-- 乗っているあいだ：計器 -->
-  <section id="hud" class="hud" hidden aria-label="オリオンの計器">
-    <div class="hud-head mono">REPLAY 2026-04 · NASA 航路データ · 再現視点</div>
-    <div id="hud-day" class="hud-day mono"></div>
-    <dl class="hud-grid">
-      <div><dt>地球から</dt><dd id="hud-earth" class="mono">—</dd></div>
-      <div><dt>月の表面から</dt><dd id="hud-moon" class="mono">—</dd></div>
-      <div><dt>速さ</dt><dd id="hud-speed" class="mono">—</dd></div>
-      <div><dt>地球まで光で</dt><dd id="hud-light" class="mono">—</dd></div>
-    </dl>
-  </section>
-
-  <!-- はじめて乗ったとき一度だけ：縦にはじくと時間が進む・戻る（絵だけ） -->
-  <div id="flick-hint" class="flick-hint" aria-hidden="true"><svg viewBox="0 0 48 72"><rect x="14" y="4" width="20" height="40" rx="10"/><path d="M24 14v12"/><path d="M24 52v16M18 58l6-6 6 6M18 62l6 6 6-6"/></svg></div>
-  <!-- 月面の観測：照準（飾り。読み上げは下のカードで） -->
-  <div id="reticle" class="reticle" aria-hidden="true"><span id="reticle-name" class="reticle-name mono"></span></div>
-
-  <aside id="photo" class="photo" hidden>
-    <p class="photo-k mono">📷 NASA</p>
-    <p id="photo-text" class="photo-text"></p>
-    <a id="photo-link" class="photo-link" href="#" target="_blank" rel="noopener" aria-label="NASA のページで写真を見る">NASA ↗</a>
-  </aside>
-
-  <!-- 画面の下：字幕・タイムライン・操作・出典を、重ならないように縦に積む -->
-  <div class="dock">
-    <section id="obs" class="obs" hidden aria-live="polite" aria-label="月面の観測">
-      <p class="obs-head"><span class="obs-tag mono">地名 · IAU</span><span id="obs-name" class="obs-name"></span></p>
-      <p id="obs-log" class="obs-log mono"></p>
-      <div class="obs-top">
-        <p id="obs-lead" class="obs-lead"></p>
-        <figure id="obs-zoom" class="obs-zoom" hidden><img id="obs-zoom-img" alt="" width="112" height="112" loading="lazy"><figcaption id="obs-zoom-cap" class="mono"></figcaption></figure>
-      </div>
-      <details id="obs-more" class="obs-more">
-        <summary>由来 · 概要 · 研究</summary>
-        <div class="obs-body">
-          <dl class="obs-dl">
-            <dt>由来</dt><dd id="obs-origin"></dd>
-            <dt>概要</dt><dd><ul id="obs-facts" class="obs-facts"></ul></dd>
-            <dt id="obs-research-k" hidden>研究</dt><dd id="obs-research-v" hidden><ul id="obs-research" class="obs-facts"></ul></dd>
-          </dl>
-        </div>
-      </details>
-      <p class="obs-links"><a id="obs-usgs" class="obs-link" href="#" target="_blank" rel="noopener" aria-label="USGS の地名のページ">USGS ↗</a><a id="obs-link" class="obs-link" href="#" target="_blank" rel="noopener" aria-label="NASA の写真と説明">📷 NASA ↗</a></p>
+  <!-- 第1章：ARTEMIS II（縦にスワイプ・ホイール・↓ で次へ） -->
+  <main id="hero" class="hero" aria-roledescription="スライド" aria-label="ARTEMIS II">
+    <section class="slide" data-i="0" aria-label="アルテミス2号">
+      <p class="kicker mono">NASA · 2026.04.01 — 04.10（米国東部時間）</p>
+      <h1 class="h-title mono">ARTEMIS II</h1>
+      <p class="h-lead">4人を乗せて、月の裏側へ。<br>そして、地球へ。</p>
+      <ul class="h-facts mono"><li>有人</li><li>月フライバイ</li><li>約10日</li></ul>
     </section>
-    <p id="caption" class="caption" aria-live="polite" hidden></p>
-    <nav id="controls" class="controls" hidden aria-label="操作">
-      <div class="timeline" aria-hidden="true">
-        <div id="tl-fill" class="tl-fill"></div>
-        <span class="tl-mark" style="left:0%">4/2 出発</span>
-        <span class="tl-mark" id="tl-moon">4/7 月の裏側</span>
-        <span class="tl-mark" style="left:100%">4/11 帰還</span>
-      </div>
-      <div class="ctl-row">
-        <div class="seg" role="group" aria-label="見る場所">
-          <button type="button" class="chip icon-chip" data-view="window" aria-pressed="true" aria-label="窓から見る" title="窓から"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="4"/><path d="M12 5v14M4 12h16" opacity=".5"/></svg></button>
-          <button type="button" class="chip icon-chip" data-view="earth" aria-pressed="false" aria-label="地球から見上げる" title="地球から"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20a9 9 0 0 1 18 0"/><path d="M12 11V3M9 6l3-3 3 3"/></svg></button>
-          <button type="button" class="chip icon-chip" data-view="route" aria-pressed="false" aria-label="航路を見る" title="航路"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.5"/><circle cx="20" cy="12" r="1.6"/><path d="M7.5 12c4-5 9-5 11 0-2 5-7 5-11 0z"/></svg></button>
-        </div>
-        <div id="look" class="look" role="group" aria-label="窓の向き">
-          <button type="button" class="icon-btn" data-look="earth" aria-pressed="false" aria-label="地球のほうを見る" title="地球のほうを見る">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17"/></svg>
-          </button>
-          <button type="button" class="icon-btn" data-look="moon" aria-pressed="false" aria-label="月のほうを見る" title="月のほうを見る">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3.8a8.5 8.5 0 1 0 4.7 12.6A7 7 0 0 1 15.5 3.8z"/></svg>
-          </button>
-        </div>
-        <div class="buttons">
-          <button id="prev" class="icon-btn big" type="button" aria-label="前の場面へ戻る" title="戻る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M18 5 9 12l9 7z"/></svg></button>
-          <button id="pause" class="icon-btn big" type="button" aria-label="一時停止" title="一時停止" aria-pressed="false"><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5l12 7-12 7z"/></svg></button>
-          <button id="skip" class="icon-btn big" type="button" aria-label="次の場面へ進む" title="進む"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 5v14M6 5l9 7-9 7z"/></svg></button>
-          <button id="leave" class="icon-btn big" type="button" aria-label="降りる（はじめの画面へ）" title="降りる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"/></svg></button>
-        </div>
-      </div>
-    </nav>
-    <details class="note">
-      <summary>出典・注意（非公式ファンメイド作品）</summary>
-      <p>
-        通り道は、NASA が公開した飛行の軌道データ（<a href="https://www.nasa.gov/missions/artemis/artemis-2/track-nasas-artemis-ii-mission-in-real-time/" target="_blank" rel="noopener">Artemis II エフェメリス</a>）から。月・太陽の位置と地球の向きは、その時刻から計算しています。月の表面は NASA の <a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">CGI Moon Kit</a>（NASA's Scientific Visualization Studio）。観測のカードの拡大図も、その 16K の地図から切り出し、明るさの幅を少し広げたものです。日付・時刻・写真の説明は NASA の発表から。
-        窓の外は、NASA の写真を参考にした「〜のような眺め」で、写真そのものではありません。見ている向きは、航路の上に置いた仮の観測の視点で、乗員の窓の向き・宇宙船の姿勢を再現したものではありません（姿勢のデータはありません）。月の向きは IAU のモデル（Archinal ほか 2011）、月面の地名の位置は <a href="https://planetarynames.wr.usgs.gov/" target="_blank" rel="noopener">USGS / IAU Gazetteer of Planetary Nomenclature</a> から。長い道のりは時間を縮めて見せています（宇宙船が速くなったのではありません）。縦にはじく（PC はホイール）と、時間が進む・戻ります。オリオンの姿は、公式の文章と NASA の写真を参考にした再現モデルです。写真は NASA のページでご覧ください。
-        ※非公式ファンメイド作品です。NASA などの宇宙機関とは関係ありません。
-      </p>
-    </details>
-  </div>
+    <section class="slide" data-i="1" aria-label="目的">
+      <p class="kicker mono">PURPOSE</p>
+      <h2 class="h-big">月のまわりでの、<br>人を乗せた試験飛行。</h2>
+      <ul class="h-chips"><li>生命維持</li><li>手動での操縦</li><li>通信・光通信</li><li>月の観測</li><li>再突入</li></ul>
+      <p class="h-src">NASA「Artemis II Priorities and Objectives」</p>
+    </section>
+    <section class="slide" data-i="2" aria-label="乗員">
+      <p class="kicker mono">CREW · 4</p>
+      <ol class="crew">
+        <li><span class="c-role mono">COMMANDER</span><span class="c-name">Reid Wiseman</span><span class="c-ag mono">NASA</span></li>
+        <li><span class="c-role mono">PILOT</span><span class="c-name">Victor Glover</span><span class="c-ag mono">NASA</span></li>
+        <li><span class="c-role mono">MISSION SPECIALIST</span><span class="c-name">Christina Koch</span><span class="c-ag mono">NASA</span></li>
+        <li><span class="c-role mono">MISSION SPECIALIST</span><span class="c-name">Jeremy Hansen</span><span class="c-ag mono">CSA</span></li>
+      </ol>
+      <p class="h-src">NASA「Our Artemis Crew」</p>
+    </section>
+    <section class="slide" data-i="3" aria-label="記録">
+      <p class="kicker mono">RECORD</p>
+      <p class="h-count mono"><span id="count">0</span><small> mi</small></p>
+      <p class="h-lead">人類が、地球からいちばん遠くへ。</p>
+      <p class="h-sub mono">約40万6,800 km · アポロ13号（1970）の記録をこえて</p>
+      <p class="h-src">NASA · 2026-04-06</p>
+    </section>
+    <section class="slide" data-i="4" aria-label="月の旅へ">
+      <p class="kicker mono">ORION</p>
+      <h2 class="h-big">月の旅へ。</h2>
+      <p class="h-sub mono">NASA：主要目標を達成（飛行後の発表）</p>
+      <button id="launch" class="btn btn-primary" type="button">オリオン、出発 <span aria-hidden="true">›</span></button>
+    </section>
+    <nav class="dots" aria-label="スライド"><button type="button" data-go="0" aria-label="1"></button><button type="button" data-go="1" aria-label="2"></button><button type="button" data-go="2" aria-label="3"></button><button type="button" data-go="3" aria-label="4"></button><button type="button" data-go="4" aria-label="5"></button></nav>
+    <button id="next" class="next" type="button" aria-label="次へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+  </main>
 
-  <!-- 帰ってきたとき：暗くなって、事実 → ひとこと → エンドクレジット（2026-10-11 オーナー：映画のエンディングのように） -->
-  <section id="ending" class="ending" hidden aria-live="polite">
-    <div class="end-a">
-      <p class="e-line e1 mono">2026年4月10日 午後8時07分（米国東部夏時間）</p>
-      <p class="e-line e2">太平洋に着水。</p>
-      <p class="e-line e3">地球からいちばん遠いところで、約40万6,800 km（252,756 マイル）。</p>
-      <p class="e-line ending-main">地球に、帰ってきました。</p>
-      <p class="e-line ending-sub">あなたもまた、よい旅を。</p>
-    </div>
-    <div class="end-b" aria-label="クレジット">
-      <div class="roll">
-        <p class="c-title">アルテミス2号に乗ってみる</p>
-        <div class="c-log">
-          <p class="c-log-k">観測の記録 · NASA の観測計画 → NASA の写真</p>
-          <ul id="c-log" class="mono"></ul>
+  <!-- 第2章：月の地名マップ -->
+  <section id="map" class="map" hidden aria-label="月の地名マップ">
+    <div id="labels" class="labels"></div>
+    <aside id="card" class="card" hidden aria-live="polite">
+      <button id="card-close" class="card-close" type="button" aria-label="閉じる">×</button>
+      <p class="card-head"><span id="card-tag" class="card-tag mono"></span><span id="card-art" class="card-art mono" hidden>ARTEMIS II</span></p>
+      <h3 id="card-name" class="card-name"></h3>
+      <p id="card-meta" class="card-meta mono"></p>
+      <p id="card-why" class="card-why"></p>
+      <figure id="card-compare" class="compare" hidden>
+        <div class="cmp-row">
+          <div class="cmp" data-k="orientale"><img src="../../assets/moon/orientale-relief-1400km-320.webp" alt="オリエンターレ盆地の標高の陰影図（幅1,400 km）" width="160" height="160" loading="lazy"><span>オリエンターレ盆地 · 若い</span></div>
+          <div class="cmp" data-k="hertzsprung"><img src="../../assets/moon/hertzsprung-relief-1400km-320.webp" alt="ヘルツシュプルング盆地の標高の陰影図（幅1,400 km）" width="160" height="160" loading="lazy"><span>ヘルツシュプルング盆地 · 古い</span></div>
         </div>
-        <dl>
-          <dt>通り道</dt><dd>NASA「Artemis II エフェメリス」（NASA/JSC/FOD/FDO）</dd>
-          <dt>月の表面</dt><dd>NASA's Scientific Visualization Studio「CGI Moon Kit」</dd>
-          <dt>地球</dt><dd>NASA Blue Marble・Black Marble</dd>
-          <dt>日時・写真の説明</dt><dd>NASA の発表</dd>
-          <dt>月と太陽の位置</dt><dd>Astronomy Engine（Don Cross）</dd>
-          <dt>3D</dt><dd>three.js</dd>
-          <dt>オリオンの姿</dt><dd>公式の文章と NASA の写真を参考にした再現モデル</dd>
-          <dt>窓の外</dt><dd>NASA の写真を参考にした「〜のような眺め」</dd>
-        </dl>
-        <p class="c-note">VOYASCOPE は非公式のファンメイド作品です。<br>NASA・ESA などの宇宙機関とは関係ありません。</p>
-        <p class="c-end mono">VOYASCOPE</p>
-      </div>
+        <figcaption class="mono">同じ縮尺 · 幅1,400 km · 標高の陰影（CGI Moon Kit · NASA SVS）· 若い・古いは NASA の観測計画</figcaption>
+      </figure>
+      <figure id="card-zoom" class="zoom" hidden><img id="card-zoom-img" alt="" width="112" height="112" loading="lazy"><figcaption id="card-zoom-cap" class="mono"></figcaption></figure>
+      <dl id="card-dl" class="card-dl"></dl>
+      <p id="card-links" class="card-links"></p>
+    </aside>
+    <aside id="tip" class="tip" hidden aria-live="polite">
+      <p class="tip-k mono">MOON TIPS <span id="tip-n"></span></p>
+      <p id="tip-text" class="tip-text"></p>
+      <p class="tip-src"><a id="tip-src" href="#" target="_blank" rel="noopener">NASA ↗</a></p>
+      <div class="tip-nav"><button id="tip-prev" type="button" aria-label="前の豆知識">‹</button><button id="tip-next" type="button" aria-label="次の豆知識">›</button><button id="tip-close" type="button" aria-label="閉じる">×</button></div>
+    </aside>
+    <nav class="mapbar" aria-label="操作">
+      <button type="button" class="pill" id="b-route"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M3 15c3-9 15-9 18-3" stroke-dasharray="2 2.5"/></svg><span>航路</span></button>
+      <button type="button" class="pill" id="b-tips"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z"/></svg><span>豆知識</span></button>
+      <button type="button" class="pill" id="b-photo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l1.5-3h5L16 7"/></svg><span>撮影</span></button>
+      <button type="button" class="pill pill-home" id="b-home"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c3 3 3 13 0 16M12 4c-3 3-3 13 0 16"/></svg><span>地球へ</span></button>
+    </nav>
+    <p class="map-hint mono" id="map-hint">ドラッグで回す · 地名をタッチ</p>
+  </section>
+
+  <!-- 第3章：撮影モード（地球の入り・地球の出・日食） -->
+  <section id="photo" class="photo" hidden aria-label="撮影モード">
+    <div class="ph-top">
+      <p class="kicker mono"><span id="ph-n">1/3</span> · ORION の窓から（再現の眺め）</p>
+      <h2 id="ph-title" class="ph-title"></h2>
+      <p id="ph-meta" class="ph-meta mono"></p>
     </div>
-    <div class="ending-actions">
-      <a id="to-far" class="btn btn-primary" href="../../?from=artemis2">遠くを見る部屋へ <span aria-hidden="true">›</span></a>
-      <button id="again" class="btn" type="button">もう一度乗る</button>
+    <div class="ph-nav">
+      <button id="ph-prev" class="round" type="button" aria-label="前の場面"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <a id="ph-link" class="pill" href="#" target="_blank" rel="noopener">📷 NASA の写真 ↗</a>
+      <button id="ph-next" class="round" type="button" aria-label="次の場面"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <button id="ph-back" class="pill ph-back" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span>月の地図</span></button>
+  </section>
+
+  <!-- 地球へ戻る：月から離れて、暗くなって、余韻 -->
+  <section id="leave" class="leave" hidden aria-live="polite">
+    <div class="leave-actions">
+      <a class="btn btn-primary" href="../../?from=artemis2">遠くを見る部屋へ <span aria-hidden="true">›</span></a>
+      <a class="btn" href="../../">地球のまわりへ</a>
+      <button id="again" class="btn" type="button">もう一度</button>
     </div>
   </section>
 
-  <script type="module" src="tour.js"></script>
+  <!-- 出典・注意 -->
+  <dialog id="info" class="info">
+    <form method="dialog"><button class="card-close" aria-label="閉じる">×</button></form>
+    <h3>出典・注意</h3>
+    <dl>
+      <dt>アルテミス2号の通り道</dt><dd>NASA「<a href="https://www.nasa.gov/missions/artemis/artemis-2/track-nasas-artemis-ii-mission-in-real-time/" target="_blank" rel="noopener">Artemis II Ephemeris</a>」（NASA/JSC/FOD/FDO）。月と太陽の位置は Astronomy Engine（Don Cross）、月の向きは IAU のモデル（Archinal ほか 2011）で計算</dd>
+      <dt>月の表面・標高</dt><dd>NASA's Scientific Visualization Studio「<a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">CGI Moon Kit</a>」。拡大図・陰影図はその地図から切り出し、明るさの幅を少し広げたもの</dd>
+      <dt>月の地名</dt><dd>USGS / IAU「<a href="https://planetarynames.wr.usgs.gov/" target="_blank" rel="noopener">Gazetteer of Planetary Nomenclature</a>」（輪郭はおおよそ）。日本語名は JAXA の表記を確認できたものだけ</dd>
+      <dt>ミッション・乗員・観測計画</dt><dd>NASA の発表・NASA の観測計画（Lunar Targeting Plan）・NASA の写真の説明文。月の豆知識は NASA「Moon Facts」</dd>
+      <dt>地球</dt><dd>NASA Blue Marble・Black Marble</dd>
+      <dt>オリオンの姿</dt><dd>公式の文章と NASA の写真を参考にした再現モデル</dd>
+      <dt>3D</dt><dd>three.js</dd>
+    </dl>
+    <p>窓からの眺めは、航路の上に置いた仮の視点から計算した「〜のような眺め」で、写真ではありません。乗員の窓の向き・宇宙船の姿勢を再現したものではありません。<br>VOYASCOPE は非公式のファンメイド作品です。NASA・CSA・JAXA などの宇宙機関とは関係ありません。</p>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
 </body>
 </html>
