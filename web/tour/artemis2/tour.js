@@ -6,6 +6,7 @@
 // - three.js は遠くを見る部屋と同じ r128 の部品だけの版（vendor/three-r128.min.js）。スプライト・線などは ShaderMaterial で作る
 import * as THREE from "../../vendor/three-r128.min.js";
 import { moonAxesAt, observe, gate, TARGETS, OBSERVE_WINDOWS, OBS_LOG } from "./lunar.js";
+import { MISSION, RESULTS } from "./mission.js";
 
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const smoothstep = (x, a, b) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
@@ -564,7 +565,9 @@ const NASA_FLYBY_PHOTOS = "https://www.nasa.gov/news-release/nasas-artemis-ii-cr
 const PHOTOS = {
   earthset: { text: "地球の入り · 4/7 7:41（日本時間）· Orion の窓から", url: "https://science.nasa.gov/earth/earth-observatory/earthset-from-the-lunar-far-side/" },
   farside: { text: "Vavilov · Hertzsprung 盆地のふち · 400 mm", url: NASA_FLYBY_PHOTOS },
-  earthrise: { text: "地球の出 · 4/7 8:22（日本時間）· Orion の窓から", url: NASA_FLYBY_PHOTOS },
+  // アポロ8号：https://science.nasa.gov/earth/advancing-earth-observation-at-nasa-since-release-of-earthrise-photo/
+  //   （1968 年の「Earthrise」のあとに「This year, the astronauts of the Artemis II mission captured their own poignant images of home.」）
+  earthrise: { text: "地球の出 · 4/7 8:22（日本時間）· Orion の窓から · NASA はアポロ8号の「Earthrise」（1968）と並べて紹介", url: NASA_FLYBY_PHOTOS },
   eclipse: { text: "日食 · 皆既 約54分 · 左はしの光は金星", url: NASA_FLYBY_PHOTOS },
 };
 let shownPhoto = null;
@@ -978,6 +981,55 @@ function obsWorld(s) {
   const o = observe(tg, moonAx, toData(s.craft), toData(s.moon), traj.sun);
   return s.moon.clone().addScaledVector(dir3(o.n), R_M);
 }
+// カードの中身：地形（targetCard）とミッション（MISSION）で同じ形
+function targetCard(tg) {
+  return {
+    tag: "地名 · IAU",
+    name: tg.ja ? `${tg.ja}（${tg.en}）` : tg.en,
+    log: `NASA 観測計画 ${tg.log.planned ? "✓" : "—"} · NASA の写真 ${tg.log.photographed ? "✓" : "—"}`,
+    lead: tg.facts[0], // 1行目は、いつも出す
+    summary: "由来 · 概要 · 研究",
+    rows: [{ k: "由来", text: tg.origin }, { k: "概要", items: tg.facts.slice(1) }, ...(tg.research?.length ? [{ k: "研究", items: tg.research }] : [])],
+    zoom: tg.zoom,
+    links: [
+      { href: tg.usgs, text: "USGS ↗", aria: "USGS の地名のページ" },
+      { href: tg.link, text: "📷 NASA ↗", aria: "NASA の写真と説明" },
+    ],
+  };
+}
+function fillCard(c) {
+  $("#obs-tag").textContent = c.tag;
+  $("#obs-name").textContent = c.name;
+  $("#obs-log").textContent = c.log;
+  $("#obs-lead").textContent = c.lead;
+  $("#obs-sum").textContent = c.summary;
+  $("#obs-more").open = false;
+  body.classList.remove("reading");
+  const dl = $("#obs-dl");
+  dl.replaceChildren();
+  for (const r of c.rows) {
+    const dd = document.createElement("dd");
+    if (r.items) {
+      const ul = Object.assign(document.createElement("ul"), { className: "obs-facts" });
+      ul.replaceChildren(...r.items.map((f) => Object.assign(document.createElement("li"), { textContent: f })));
+      dd.append(ul);
+    } else dd.textContent = r.text;
+    dl.append(Object.assign(document.createElement("dt"), { textContent: r.k }), dd);
+  }
+  $("#obs-zoom").hidden = !c.zoom;
+  if (c.zoom) {
+    $("#obs-zoom-img").src = `../../assets/moon/${c.zoom.file}`;
+    $("#obs-zoom-img").alt = c.zoom.alt;
+    $("#obs-zoom-cap").textContent = c.zoom.caption;
+  }
+  $("#obs-links").replaceChildren(
+    ...c.links.map((l, i) => {
+      const a = Object.assign(document.createElement("a"), { className: "obs-link", href: l.href, target: "_blank", rel: "noopener", textContent: l.text });
+      a.setAttribute("aria-label", l.aria);
+      return a;
+    }),
+  );
+}
 // 観測の場面の画角：はじめは月ぜんたい（景色）、見つける・知るでは望遠
 const obsFov = (seg, u) => {
   const [a, b] = obsTarget(seg).fov, k = innerWidth < innerHeight ? 1 : 0.85;
@@ -990,32 +1042,15 @@ function observePhase(seg, u, s, sv) {
   if (seg.observe && mode === "ride") phase = u < 0.3 ? "scenery" : u < 0.58 ? "discover" : "reveal";
   // 位置を指さない地形（FALLBACK）：情報のカードだけ
   if (seg.info && mode === "ride") phase = u > 0.12 && u < 0.94 ? "info" : "none";
+  // 乗ってすぐ、外からオリオンを見せるあいだ：ミッションのカード（何をしに行ったか）
+  if (autoOutside && mode === "ride" && ride > 3.5) phase = "mission"; // はじめの約3秒は、オリオンの姿だけ
   const key = `${phase}:${seg.observe ?? seg.info ?? ""}`;
   if (key !== observeState) {
     observeState = key;
     body.classList.toggle("quiet", phase === "scenery" || phase === "discover");
-    if (phase === "reveal" || phase === "info") {
-      const tg = obsTarget(seg);
-      $("#obs-name").textContent = tg.ja ? `${tg.ja}（${tg.en}）` : tg.en;
-      $("#obs-log").textContent = `NASA 観測計画 ${tg.log.planned ? "✓" : "—"} · NASA の写真 ${tg.log.photographed ? "✓" : "—"}`;
-      $("#obs-lead").textContent = tg.facts[0];
-      $("#obs-more").open = false;
-      body.classList.remove("reading");
-      $("#obs-origin").textContent = tg.origin;
-      const li = (f) => Object.assign(document.createElement("li"), { textContent: f });
-      $("#obs-facts").replaceChildren(...tg.facts.slice(1).map(li)); // 1行目は、上にいつも出している
-      $("#obs-research").replaceChildren(...(tg.research ?? []).map(li));
-      $("#obs-research-k").hidden = $("#obs-research-v").hidden = !tg.research?.length;
-      $("#obs-zoom").hidden = !tg.zoom;
-      if (tg.zoom) {
-        $("#obs-zoom-img").src = `../../assets/moon/${tg.zoom.file}`;
-        $("#obs-zoom-img").alt = tg.zoom.alt;
-        $("#obs-zoom-cap").textContent = tg.zoom.caption;
-      }
-      $("#obs-link").href = tg.link;
-      $("#obs-usgs").href = tg.usgs;
-    }
-    card.hidden = !(phase === "reveal" || phase === "info");
+    if (phase === "reveal" || phase === "info") fillCard(targetCard(obsTarget(seg)));
+    if (phase === "mission") fillCard(MISSION);
+    card.hidden = !(phase === "reveal" || phase === "info" || phase === "mission");
     if (card.hidden) {
       $("#obs-more").open = false;
       body.classList.remove("reading");
@@ -1080,7 +1115,8 @@ function frame(now) {
         autoOutside = false;
         dip(() => setView("window", { auto: true }));
       }
-      setCinema(autoOutside || dipping || !!seg.warp || ride > RIDE_SEC - END_CINEMA_SEC);
+      // 止めているあいだは帯を出さず、操作（つづける）が見えるように
+      setCinema(!paused && (autoOutside || dipping || !!seg.warp || ride > RIDE_SEC - END_CINEMA_SEC));
       warpFx(seg, u, t);
       const s = place(t);
       placeOrion(s);
@@ -1141,6 +1177,9 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 
+// エンドクレジットの「ミッションの結果」（NASA の飛行後の発表）
+$("#c-result-k").textContent = RESULTS.head;
+$("#c-result").replaceChildren(...RESULTS.items.map((x) => Object.assign(document.createElement("li"), { textContent: x })));
 // エンドクレジットの「観測の記録」
 $("#c-log").replaceChildren(...OBS_LOG.map((x) => Object.assign(document.createElement("li"), { textContent: `${x.name}  計画 ${x.planned ? "✓" : "—"} · 写真 ${x.photographed ? "✓" : "—"}` })));
 

@@ -127,3 +127,15 @@ test("観測の記録：どれも NASA の観測計画にあり、NASA の写真
   for (const x of OBS_LOG) assert.ok(typeof x.planned === "boolean" && typeof x.photographed === "boolean" && x.name, JSON.stringify(x));
   for (const t of TARGETS) assert.ok(t.log && t.link, `${t.id} の写真のリンク`);
 });
+
+test("ミッションのカードと結果：事実はどれも出典つき、乗員は名前・役割・所属だけ", async () => {
+  const { MISSION, RESULTS } = await import("../web/tour/artemis2/mission.js");
+  const crew = MISSION.rows.find((r) => r.k === "乗員").items;
+  assert.equal(crew.length, 4);
+  for (const c of crew) assert.match(c, /^(Commander|Pilot|Mission Specialist) · [A-Z][a-z]+ [A-Z][a-z]+（(NASA|CSA)）$/);
+  for (const r of MISSION.rows) for (const x of r.items) assert.match(x, /（(NASA|CSA)）$/);
+  assert.match(MISSION.lead, /（NASA）$/);
+  for (const l of MISSION.links) assert.match(l.href, /^https:\/\/www\.nasa\.gov\//);
+  assert.match(RESULTS.head, /NASA/);
+  assert.ok(RESULTS.items.length >= 5 && RESULTS.items.every((x) => x.endsWith("✓")));
+});

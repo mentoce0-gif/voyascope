@@ -65,23 +65,19 @@
   <!-- 画面の下：字幕・タイムライン・操作・出典を、重ならないように縦に積む -->
   <div class="dock">
     <section id="obs" class="obs" hidden aria-live="polite" aria-label="月面の観測">
-      <p class="obs-head"><span class="obs-tag mono">地名 · IAU</span><span id="obs-name" class="obs-name"></span></p>
+      <p class="obs-head"><span id="obs-tag" class="obs-tag mono">地名 · IAU</span><span id="obs-name" class="obs-name"></span></p>
       <p id="obs-log" class="obs-log mono"></p>
       <div class="obs-top">
         <p id="obs-lead" class="obs-lead"></p>
         <figure id="obs-zoom" class="obs-zoom" hidden><img id="obs-zoom-img" alt="" width="112" height="112" loading="lazy"><figcaption id="obs-zoom-cap" class="mono"></figcaption></figure>
       </div>
       <details id="obs-more" class="obs-more">
-        <summary>由来 · 概要 · 研究</summary>
+        <summary id="obs-sum">由来 · 概要 · 研究</summary>
         <div class="obs-body">
-          <dl class="obs-dl">
-            <dt>由来</dt><dd id="obs-origin"></dd>
-            <dt>概要</dt><dd><ul id="obs-facts" class="obs-facts"></ul></dd>
-            <dt id="obs-research-k" hidden>研究</dt><dd id="obs-research-v" hidden><ul id="obs-research" class="obs-facts"></ul></dd>
-          </dl>
+          <dl id="obs-dl" class="obs-dl"></dl>
         </div>
       </details>
-      <p class="obs-links"><a id="obs-usgs" class="obs-link" href="#" target="_blank" rel="noopener" aria-label="USGS の地名のページ">USGS ↗</a><a id="obs-link" class="obs-link" href="#" target="_blank" rel="noopener" aria-label="NASA の写真と説明">📷 NASA ↗</a></p>
+      <p id="obs-links" class="obs-links"></p>
     </section>
     <p id="caption" class="caption" aria-live="polite" hidden></p>
     <nav id="controls" class="controls" hidden aria-label="操作">
@@ -138,6 +134,10 @@
         <div class="c-log">
           <p class="c-log-k">観測の記録 · NASA の観測計画 → NASA の写真</p>
           <ul id="c-log" class="mono"></ul>
+        </div>
+        <div class="c-log">
+          <p id="c-result-k" class="c-log-k"></p>
+          <ul id="c-result" class="mono"></ul>
         </div>
         <dl>
           <dt>通り道</dt><dd>NASA「Artemis II エフェメリス」（NASA/JSC/FOD/FDO）</dd>
