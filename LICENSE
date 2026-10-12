@@ -1,9 +1,30 @@
-MIT License
+VOYASCOPE
+Copyright (c) 2026 151Me. All rights reserved.
 
-Copyright (c) 2026 151Me
+【日本語】
+このリポジトリのプログラム（コード）の著作権は 151Me にあります。
+ソースコードは、見て学べるように公開していますが、使ってよいという許可（ライセンス）は出していません。
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+1. 作者の許可なく、次のことはできません。
+   - プログラムの全部または一部を、コピー・改変して、ほかのサイトやアプリで公開・配布すること
+   - このサイトをまねたサイト（コピーサイト）を作ること
+   - 商用で使うこと
+2. GitHub の利用規約で認められていること（GitHub の上で見ること・フォークすること）は、その範囲でできます。
+3. 2026年10月XX日より前に MIT License で公開した版は、その版に限り MIT License の条件のままです。
+4. 次のものは、この LICENSE ではなく、それぞれの条件に従います。
+   - VOYASCOPE が書いた文章：CONTENT_LICENSE.md
+   - web/vendor/ のライブラリ：それぞれのライセンス（web/vendor/README.md、THIRD_PARTY_NOTICES.txt）
+   - データ・画像・地名など、出典のあるもの：それぞれの提供元の条件
+5. 事実（数値・日付など）には著作権がありません。VOYASCOPE が言っているから正しい、ではなく、
+   書いてある出典（一次情報）で確かめてください。
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+【English】
+The program code in this repository is copyright (c) 2026 151Me. All rights reserved.
+The source code is published for reading and learning only; no license to use it is granted.
+Without the author's permission, you may not copy, modify, publish, distribute, or use the code,
+in whole or in part, including to build a copy of this site, or for commercial purposes.
+Viewing and forking on GitHub are permitted only as provided by the GitHub Terms of Service.
+Versions published under the MIT License before October XX, 2026 remain under the MIT License.
+Text written by VOYASCOPE, third-party libraries in web/vendor/, and sourced data and images
+are covered by their own terms (see CONTENT_LICENSE.md and web/vendor/README.md).
+Facts are not copyrightable; please verify them against the cited primary sources.
