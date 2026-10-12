@@ -10,7 +10,7 @@ Copyright (c) 2026 151Me. All rights reserved.
    - このサイトをまねたサイト（コピーサイト）を作ること
    - 商用で使うこと
 2. GitHub の利用規約で認められていること（GitHub の上で見ること・フォークすること）は、その範囲でできます。
-3. 2026年10月XX日より前に MIT License で公開した版は、その版に限り MIT License の条件のままです。
+3. 2026年10月12日より前に MIT License で公開した版は、その版に限り MIT License の条件のままです。
 4. 次のものは、この LICENSE ではなく、それぞれの条件に従います。
    - VOYASCOPE が書いた文章：CONTENT_LICENSE.md
    - web/vendor/ のライブラリ：それぞれのライセンス（web/vendor/README.md、THIRD_PARTY_NOTICES.txt）
@@ -24,7 +24,7 @@ The source code is published for reading and learning only; no license to use it
 Without the author's permission, you may not copy, modify, publish, distribute, or use the code,
 in whole or in part, including to build a copy of this site, or for commercial purposes.
 Viewing and forking on GitHub are permitted only as provided by the GitHub Terms of Service.
-Versions published under the MIT License before October XX, 2026 remain under the MIT License.
+Versions published under the MIT License before October 12, 2026 remain under the MIT License.
 Text written by VOYASCOPE, third-party libraries in web/vendor/, and sourced data and images
 are covered by their own terms (see CONTENT_LICENSE.md and web/vendor/README.md).
 Facts are not copyrightable; please verify them against the cited primary sources.
