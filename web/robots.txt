@@ -1,0 +1,32 @@
+# VOYASCOPE の robots.txt（2026-10-12 オーナー：AI の検索・引用は許可、学習は断る）
+# 各社の説明（2026-10-12 に Claude Code が公式ページで確認）
+#   OpenAI    https://developers.openai.com/api/docs/bots  OAI-SearchBot（検索）と GPTBot（学習）は別々に設定できる
+#   Anthropic https://support.claude.com/en/articles/8896518  ClaudeBot（学習）・Claude-SearchBot（検索）・Claude-User（質問されたとき）
+#   Perplexity https://docs.perplexity.ai/guides/bots  PerplexityBot（検索。学習には使わない）
+#   Apple     https://support.apple.com/en-us/119829  Applebot-Extended（学習に使うかどうか。Applebot の検索はそのまま）
+#   Common Crawl https://commoncrawl.org/ccbot  CCBot（公開データセット。学習に広く使われる）
+#   Google    https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers
+#             Google-Extended は Gemini の学習と、Gemini アプリの回答の裏づけ（grounding）の両方を決める。Google 検索には影響しない
+# robots.txt は「お願い」で、守らない相手は止められない
+
+# 学習には使わないでほしい
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+# それ以外（検索・AI の検索と引用：OAI-SearchBot・ChatGPT-User・Claude-SearchBot・Claude-User・PerplexityBot・Googlebot・Bingbot など）は許可
+User-agent: *
+Allow: /
+
+Sitemap: https://voyascope.org/sitemap.xml
