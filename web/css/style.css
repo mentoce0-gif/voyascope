@@ -97,6 +97,9 @@ body { overflow: hidden; }
   transition: opacity 0.6s ease;
 }
 #boot.leaving { opacity: 0; pointer-events: none; }
+/* ツアーから戻るとき：起動画面の中身は出さず、暗いまま（部屋が開いたら消す） */
+.from-tour #boot { background: #000; }
+.from-tour #boot > * { visibility: hidden; }
 .hero-bg {
   position: absolute;
   inset: 0;

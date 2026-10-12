@@ -303,6 +303,65 @@ orionTag.textContent = "ORION";
 orionTag.setAttribute("aria-label", "オリオン（アルテミス2号のミッション）");
 orionTag.addEventListener("click", () => selectOrion());
 labelsEl.append(orionTag);
+// 最接近の高さのものさし（航路を見るとき）：月の直径と、月面からオリオンまでを、同じ線の上に並べる
+//   NASA「4,067 miles above the lunar surface at their closest approach」（https://www.nasa.gov/blogs/missions/2026/04/11/artemis-ii-astronauts-back-in-houston-reunite-with-families/。C22 で照合）
+//   NASA Moon Facts「With a radius of about 1,080 miles (1,740 kilometers)」（https://science.nasa.gov/moon/facts/）→ 直径 約3,480 km。6,545 ÷ 3,480 ≒ 1.9
+//   線の位置と長さは軌道データ（最接近の点）から。表示の数字は NASA の値
+const RULER = (() => {
+  const near = trackPts.reduce((a, b) => (b.dist < a.dist ? b : a));
+  const dir = near.local.clone().normalize();
+  const mk = (a, b, rgb) => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(new Float32Array([a.x, a.y, a.z, b.x, b.y, b.z]), 3));
+    const m = new THREE.LineSegments(
+      g,
+      new THREE.ShaderMaterial({
+        uniforms: { k: { value: 0 } },
+        vertexShader: `void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+        fragmentShader: `uniform float k; void main(){ gl_FragColor = vec4(${rgb}, 0.95 * k); }`,
+        transparent: true,
+        depthTest: false,
+        depthWrite: false,
+      }),
+    );
+    m.renderOrder = 5;
+    moon.add(m);
+    return m;
+  };
+  const top = dir.clone().multiplyScalar(R_M), bottom = dir.clone().multiplyScalar(-R_M);
+  const lines = [mk(bottom, top, "0.37, 0.95, 0.76"), mk(top, near.local, "1.0, 0.71, 0.28")];
+  const tag = (cls, html) => {
+    const el = document.createElement("div");
+    el.className = `ruler-tag ${cls} off`;
+    el.innerHTML = html;
+    labelsEl.append(el);
+    return el;
+  };
+  return {
+    lines,
+    tags: [
+      { el: tag("dia", "月の直径<b>約3,480 km</b>"), at: new THREE.Vector3() },
+      { el: tag("alt", "最接近 · 月面から<b>6,545 km</b><small>月の直径の 約1.9倍 · NASA</small>"), at: top.clone().add(near.local).multiplyScalar(0.5) },
+    ],
+  };
+})();
+function placeRuler(dt) {
+  const on = chapter === "map" && (routeView || selected?.orion);
+  for (const l of RULER.lines) l.material.uniforms.k.value = clamp(l.material.uniforms.k.value + (on ? dt : -dt * 2), 0, 1);
+  for (const t of RULER.tags) {
+    const sp = moon.localToWorld(tmpV.copy(t.at)).project(camera);
+    const vis = on && sp.z < 1 && Math.abs(sp.x) < 0.95 && Math.abs(sp.y) < 0.95;
+    t.el.classList.toggle("off", !vis);
+    if (!vis) continue;
+    const x = ((sp.x + 1) / 2) * innerWidth, y = ((1 - sp.y) / 2) * innerHeight;
+    if (t.el.classList.contains("dia")) {
+      // 直径：月の左がわに（月の見かけの半径だけずらす）
+      const c = moon.getWorldPosition(tmpN), edge = c.clone().addScaledVector(tmpV.setFromMatrixColumn(camera.matrixWorld, 0), R_M).project(camera);
+      const rpx = ((edge.x - c.project(camera).x) / 2) * innerWidth;
+      t.el.style.transform = `translate(${x - rpx - 12}px, ${y - 14}px) translateX(-100%)`;
+    } else t.el.style.transform = `translate(${x + 10}px, ${y - 10}px)`;
+  }
+}
 
 // カメラの位置：月の体の座標の緯度・経度と距離（ドラッグで回す。ゆっくり自動で回る）
 const cam = { lat: 8, lon: -35, dist: 3.4, toLat: 8, toLon: -35, toDist: 3.4, auto: true };
@@ -348,6 +407,7 @@ function mapFrame(dt) {
   moon.localToWorld(orionMark.position.copy(tp.local));
   orionMark.scale.setScalar(camera.position.distanceTo(orionMark.position) * 0.035);
   placeLabels();
+  placeRuler(dt);
 }
 // 地名を画面に置く（こちらを向いていないもの・重なるものは隠す。アルテミス2号に関係するもの・海を優先）
 const tmpV = new THREE.Vector3(), tmpN = new THREE.Vector3();
@@ -467,22 +527,36 @@ function closeCard() {
 }
 $("#card-close").addEventListener("click", closeCard);
 
-// ---------- 月の豆知識（NASA「Moon Facts」https://science.nasa.gov/moon/facts/ の原文から） ----------
+// ---------- 月の豆知識（NASA の原文から。C28 で照合：voyascope-research の research/verification/2026-10-12-c28.md） ----------
+// NASA「Moon Facts」https://science.nasa.gov/moon/facts/
 //   「The Moon likely formed after a Mars-sized body collided with Earth several billion years ago. The resulting debris from both Earth and the impactor accumulated to form our natural satellite」
-//   「The Earth and Moon are tidally locked. … Humans didn't see the lunar far side until a Soviet spacecraft flew past in 1959.」
+//   「The Moon is rotating at the same rate that it revolves around Earth (called synchronous rotation), so the same hemisphere faces Earth all the time.」
+//   「Humans didn't see the lunar far side until a Soviet spacecraft flew past in 1959.」
 //   「The dark features, called maria (Latin for seas), are impact basins that were filled with lava between 4.2 and 1.2 billion years ago.」
+//   「the gravity on the surface of the Moon is one-sixth of Earth's」
+//   「The temperature on the Moon reaches about 260 degrees Fahrenheit (127 degrees Celsius) when in full Sun, but in darkness, the temperatures plummet to about -280 degrees Fahrenheit (-173 degrees Celsius).」
+// NASA SVS「The Moon From the Other Side」https://svs.gsfc.nasa.gov/vis/a000000/a004200/a004253/G2015-013_ViewOtherSide.html
+//   「The far side of the Moon has fewer of the smooth, dark spots, called maria, that cover the side that faces Earth. Instead, the far side is covered with craters of all sizes.」
+// NASA「Laser Beams Reflected Between Earth and Moon Boost Science」https://www.nasa.gov/missions/laser-beams-reflected-between-earth-and-moon-boost-science
+//   「the Earth and Moon are slowly drifting apart at the rate that fingernails grow, or 1.5 inches (3.8 centimeters) per year」
+//   「Two were delivered by Apollo 11 and 14 crews … Soviet robotic rovers called Lunokhod 1 and 2 … carry two additional reflectors」
+//   （Moon Facts には「about an inch farther away each year」とある。測った値を書いている、こちらの記事を使う）
 const NASA_MOON = "https://science.nasa.gov/moon/facts/";
 const TIPS = [
-  "月は、もとは地球の一部だった？ 火星くらいの天体が地球にぶつかり、地球とその天体のかけらが集まって月ができた、と考えられています。",
-  "月は、いつも同じ面を地球に向けています。人が月の裏側を初めて見たのは1959年、ソ連の探査機が通りすぎたときでした。",
-  "暗く見える「海」は、水ではありません。42億〜12億年前に、溶岩で満たされた盆地です。",
+  { text: "月は、もとは地球の一部だった？ 火星くらいの天体が地球にぶつかり、地球とその天体のかけらが集まって月ができた、と考えられています。", src: NASA_MOON },
+  { text: "月は、自転と、地球のまわりを回る速さが同じ。だから、いつも同じ面を地球に向けています。人が裏側を初めて見たのは1959年、ソ連の探査機が通りすぎたときでした。", src: NASA_MOON },
+  { text: "月の裏側には、暗い「海」が少なく、大小のクレーターでおおわれています。アルテミス2号が回ったのは、この裏側です。", src: "https://svs.gsfc.nasa.gov/vis/a000000/a004200/a004253/G2015-013_ViewOtherSide.html" },
+  { text: "暗く見える「海」は、水ではありません。42億〜12億年前に、溶岩で満たされた盆地です。", src: NASA_MOON },
+  { text: "月は、1年に約3.8cm、地球から離れています。爪がのびるのと同じくらいの速さです（アポロなどが月に置いた反射板に、レーザーを当てて測っています）。", src: "https://www.nasa.gov/missions/laser-beams-reflected-between-earth-and-moon-boost-science" },
+  { text: "月の重力は、地球の6分の1。月面を歩く宇宙飛行士が、はずむように見えるのはそのためです。", src: NASA_MOON },
+  { text: "月面の温度は、日なたで約127℃、暗いところでは約−173℃まで下がります。", src: NASA_MOON },
 ];
 let tipI = 0;
 function showTip(i) {
   tipI = (i + TIPS.length) % TIPS.length;
   $("#tip-n").textContent = `${tipI + 1}/${TIPS.length}`;
-  $("#tip-text").textContent = TIPS[tipI];
-  $("#tip-src").href = NASA_MOON;
+  $("#tip-text").textContent = TIPS[tipI].text;
+  $("#tip-src").href = TIPS[tipI].src;
   $("#tip").hidden = false;
 }
 $("#b-tips").addEventListener("click", () => ($("#tip").hidden ? showTip(tipI) : ($("#tip").hidden = true)));
