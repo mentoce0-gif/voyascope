@@ -87,8 +87,8 @@ const num = (t, k) => {
   const m = t.match(new RegExp(`${k} (-?[\\d.]+)`));
   return m ? Number(m[1]) : null;
 };
-// 輪郭の点を減らす：輪を等間隔に間引いて、多くても 48 点に（地図の飾りの線なので十分）
-function thin(pts, max = 48) {
+// 輪郭の点を減らす：輪を等間隔に間引いて、多くても 32 点に（地図の飾りの線なので十分。読み込みの上限に合わせて 48 → 32。2026-10-12）
+function thin(pts, max = 32) {
   if (pts.length <= max) return pts;
   const step = pts.length / max;
   const out = [];
