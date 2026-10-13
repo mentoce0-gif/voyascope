@@ -2,45 +2,45 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-13T00:40:10.970Z",
+  "fetched_at": "2026-10-13T14:12:25.335Z",
   "days_ahead": 45,
   "launches": [
     {
-      "id": "bf2c3027-a314-403e-a416-2bfd5d165ad1",
-      "net": "2026-10-13T10:33:44.000Z",
-      "precision": "sec",
-      "window_end": null,
+      "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",
+      "net": "2026-10-14T11:40:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-10-14T12:19:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-12T21:26:29Z",
+      "updated": "2026-10-13T01:07:00Z",
       "rocket": {
-        "name": "Falcon 9",
-        "full_name": "Falcon 9 Block 5"
+        "name": "Zhuque-2E",
+        "full_name": "Zhuque-2E"
       },
       "provider": {
-        "name": "SpaceX",
-        "ja": "スペースX"
+        "name": "LandSpace",
+        "ja": null
       },
       "mission": {
-        "name": "Dragon CRS-2 SpX-35",
-        "placeholder": false,
-        "type": "Resupply",
-        "type_ja": "物資の補給",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
       },
       "site": {
-        "location_id": 12,
-        "name": "Cape Canaveral SFS, FL, USA",
-        "ja": "ケープカナベラル宇宙軍基地",
-        "short": "ケープカナベラル",
-        "pad": "Space Launch Complex 40",
-        "country": "USA",
-        "country_ja": "アメリカ",
+        "location_id": 17,
+        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
+        "ja": "酒泉衛星発射センター",
+        "short": "酒泉",
+        "pad": "Launch Area 96A",
+        "country": "CHN",
+        "country_ja": "中国",
         "position": {
-          "lat": 28.56194122,
-          "lng": -80.57735736
+          "lat": 40.91491,
+          "lng": 100.245488
         }
       }
     },
@@ -80,6 +80,45 @@
         "position": {
           "lat": 34.632,
           "lng": -120.611
+        }
+      }
+    },
+    {
+      "id": "3b430f81-0ff1-4d85-8a1a-cef0de326198",
+      "net": "2026-10-19T10:30:00.000Z",
+      "precision": "min",
+      "window_end": "2026-10-19T12:13:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-13T12:48:40Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "Bandwagon 5 (Dedicated Mid-Inclination Rideshare)",
+        "placeholder": false,
+        "type": "Dedicated Rideshare",
+        "type_ja": "相乗り（複数の衛星）",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 12,
+        "name": "Cape Canaveral SFS, FL, USA",
+        "ja": "ケープカナベラル宇宙軍基地",
+        "short": "ケープカナベラル",
+        "pad": "Space Launch Complex 40",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 28.56194122,
+          "lng": -80.57735736
         }
       }
     },
