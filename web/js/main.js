@@ -12,6 +12,7 @@ import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa,
 import { findVisiblePasses, observerOf, dir8 } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
 import { upcomingEvents, eventsListHtml, eventPanelHtml, nextChipHtml, bigCountdown, whenShort, hmJst, eventSpan } from "./events.js";
+import { launchProgress, launchFlowHtml, beaconTag, hms } from "./launch-plan.js";
 import {
   worldLaunches,
   dataState,
@@ -742,6 +743,15 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       return;
     }
     if (selectedEvent && !detailPanel.hidden) {
+      // 打ち上げの日：計画の流れの経過を毎秒書き換える。段階が変わったら・流れが始まった／終わったら描き直す
+      const lp = launchProgress(selectedEvent, clock.now());
+      const flowKey = lp ? lp.key + (lp.separated ? "s" : "") : "";
+      if (flowKey !== (detailBody.dataset.flow ?? "")) return renderDetail();
+      if (lp) {
+        const e = detailBody.querySelector('[data-live="elapsed"]');
+        if (e) e.textContent = hms(lp.elapsed);
+        return;
+      }
       // 予定：打ち上げまでの残り時間を毎秒書き換える。時刻を過ぎたら描き直して残り時間を消す
       const n = detailBody.querySelector('[data-live="countdown"]');
       if (!n) return;
@@ -765,7 +775,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       return;
     }
     if (selectedEvent) {
-      detailBody.innerHTML = eventPanelHtml(selectedEvent, clock.now());
+      const lp = launchProgress(selectedEvent, clock.now());
+      detailBody.innerHTML = eventPanelHtml(selectedEvent, clock.now(), { flowHtml: lp && launchFlowHtml(lp) });
+      detailBody.dataset.flow = lp ? lp.key + (lp.separated ? "s" : "") : "";
       // 流星群は「しくみ」の図（母天体の通り道と、放射点のある星座）を、出典の前に足す
       if (selectedEvent.kind === "meteor") detailBody.querySelector(".event-h")?.insertAdjacentHTML("beforebegin", meteorStoryHtml(selectedEvent, clock.now()));
       return;
@@ -1067,6 +1079,14 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       sub: `${dir8(p.startAz)}から${dir8(p.endAz)}へ・計算：公開の軌道データから`,
     };
   };
+  // 打ち上げの日：射場のピンをビーコンにして、名前を「MMX 打ち上げから 0:12:34（計画）」に（毎秒）
+  function updateBeacons(now) {
+    for (const s of sites) {
+      const lp = s.shown && launchProgress(s.ev, new Date(now));
+      s.el.classList.toggle("beacon", !!lp);
+      if (lp) s.el.querySelector(".tag").textContent = beaconTag(lp);
+    }
+  }
   function renderEvents() {
     const now = clock.now();
     eventsAt = now.getTime();
@@ -1093,7 +1113,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     const ids = new Set(upcoming.map((ev) => ev.id));
     for (const s of sites) {
       s.shown = ids.has(s.ev.id);
-      s.el.querySelector(".tag").textContent = `${s.ev.site.label} ${whenShort(s.ev, now)[0]}`;
+      if (!launchProgress(s.ev, now)) s.el.querySelector(".tag").textContent = `${s.ev.site.label} ${whenShort(s.ev, now)[0]}`;
     }
 
     // 世界の打ち上げ（参考）：公式の予定と同じものは除く。データの古さは実際の今で判断する
@@ -1343,6 +1363,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       }
       updateDetailLive();
       declutterPins();
+      updateBeacons(now);
       // 予定と「次の出来事」：観測時刻で30秒ごと（早送りや時刻の移動にもついていく）
       if (Math.abs(now - eventsAt) > 30000) renderEvents();
       // 通過の予報は10分ごと、または次の通過が終わったら作り直す
