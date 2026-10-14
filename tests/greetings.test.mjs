@@ -64,3 +64,34 @@ test("文面：事実と出典だけ。名前などはエスケープする", ()
   const [r] = pendingGreetings({ craft: [iss([team()])] }, new Date("2026-10-09T00:00:00Z"));
   assert.match(greetingHtml(r), /おかえりなさい、Crew-12.*2026年10月8日、4人が国際宇宙ステーションから地球に帰ってきました。/s);
 });
+
+const milestone = (over = {}) => ({
+  id: "perseverance-distance-record",
+  kind: "milestone",
+  title: { ja: "パーサヴィアランスが、火星で走った距離の記録を更新", en: "Perseverance record" },
+  summary: { value: "走った距離が 45.22 km になった", source: src },
+  when: { value: { date: "2026-10-11" }, source: src },
+  status: { value: "done", source: src },
+  greeting: { name: "パーサヴィアランス", until: "2026-10-25", image: { src: "assets/news/x.webp", alt: "<絵>", credit: "イメージ" } },
+  ...over,
+});
+
+test("節目：出来事の日から until まで。終わっていないもの・greeting なしは出さない", () => {
+  assert.deepEqual(keys({ events: [milestone()] }, "2026-10-10T00:00:00Z"), []);
+  assert.deepEqual(keys({ events: [milestone()] }, "2026-10-14T00:00:00Z"), ["milestone:perseverance-distance-record"]);
+  assert.deepEqual(keys({ events: [milestone()] }, "2026-10-25T15:00:00Z"), []); // 10/26 0:00 JST
+  const now = "2026-10-14T00:00:00Z";
+  assert.deepEqual(keys({ events: [milestone({ status: undefined })] }, now), []);
+  assert.deepEqual(keys({ events: [milestone({ greeting: undefined })] }, now), []);
+});
+
+test("節目の文面：絵（alt はエスケープ）・日付・一言・出典・出来事へのボタン", () => {
+  const [g] = pendingGreetings({ events: [milestone()] }, new Date("2026-10-14T00:00:00Z"));
+  const html = greetingHtml(g);
+  assert.match(html, /<img src="assets\/news\/x.webp" alt="&lt;絵&gt;"/);
+  assert.match(html, /2026年10月11日、走った距離が 45.22 km になった/);
+  assert.match(html, /出典：<a href="https:\/\/example.org\/news"/);
+  assert.match(html, /data-greet-event="perseverance-distance-record"/);
+  const plain = greetingHtml(pendingGreetings({ events: [milestone({ greeting: { until: "2026-10-25" } })] }, new Date("2026-10-14T00:00:00Z"))[0]);
+  assert.doesNotMatch(plain, /<img/);
+});

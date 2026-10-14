@@ -1,6 +1,6 @@
-// 「いってらっしゃい」（打ち上げ）と「おかえり」（帰還）のお知らせ。
+// 「いってらっしゃい」（打ち上げ）・「おかえり」（帰還）・節目（記録など）のお知らせ。
 // データの更新のあと、最初に開いたときに1回だけ出す。出してよいものには、curation で greeting を付けてある
-// （打ち上げの成功・無事の帰還を公式で確かめたときだけ。schema/common.schema.json の greeting）
+// （打ち上げの成功・無事の帰還・節目を公式で確かめたときだけ。schema/common.schema.json の greeting）
 import { esc, plainDateJa } from "./format.js";
 import { eventSpan, jstDay, hmJst } from "./events.js";
 
@@ -22,9 +22,9 @@ export function pendingGreetings({ events = [], craft = [] }, now, seen = new Se
   for (const ev of events) {
     const g = ev.greeting;
     const span = eventSpan(ev);
-    if (!g || ev.kind !== "launch" || ev.status?.value !== "done" || !span) continue;
+    if (!g || !["launch", "milestone"].includes(ev.kind) || ev.status?.value !== "done" || !span) continue;
     if (span.start > now.getTime() || today > g.until) continue;
-    list.push({ key: `launch:${ev.id}`, type: "launch", name: g.name, ev, at: span.start });
+    list.push({ key: `${ev.kind}:${ev.id}`, type: ev.kind, name: g.name, ev, at: span.start });
   }
   for (const c of craft) {
     for (const t of c.crewData?.teams ?? []) {
@@ -61,7 +61,25 @@ function returnHtml({ name, team, place }) {
     <p class="k">出典：<a href="${esc(team.return_date.source)}" target="_blank" rel="noopener noreferrer">${esc(host(team.return_date.source))}</a></p>`;
 }
 
-export const greetingHtml = (g) => `<section class="greet greet-${g.type}">${g.type === "launch" ? launchHtml(g) : returnHtml(g)}</section>`;
+// 節目（記録など）：絵があれば上に大きく。文は出典の一言（summary）だけ
+function milestoneHtml({ ev }) {
+  const img = ev.greeting.image;
+  const src = ev.summary?.source ?? ev.when.source;
+  const day = ev.when.value.date ? `${plainDateJa(ev.when.value.date)}、` : "";
+  return `${
+    img
+      ? `<figure class="greet-hero"><img src="${esc(img.src)}" alt="${esc(img.alt)}" width="720" height="900" loading="lazy" decoding="async"><figcaption class="k">${esc(img.credit)}</figcaption></figure>`
+      : ""
+  }
+    <p class="greet-kicker mono">MILESTONE</p>
+    <h2 class="greet-title">${esc(ev.title.ja)}</h2>
+    ${ev.summary?.value ? `<p>${day}${esc(ev.summary.value)}</p>` : ""}
+    <p class="k">出典：<a href="${esc(src)}" target="_blank" rel="noopener noreferrer">${esc(host(src))}</a></p>
+    <div class="greet-actions"><button type="button" class="btn" data-greet-event="${esc(ev.id)}">出来事を見る</button></div>`;
+}
+
+const HTML = { launch: launchHtml, return: returnHtml, milestone: milestoneHtml };
+export const greetingHtml = (g) => `<section class="greet greet-${g.type}">${HTML[g.type](g)}</section>`;
 
 // 見たお知らせの記録（このブラウザだけ。使えなければ、開くたびに出る）
 export function loadSeen() {

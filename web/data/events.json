@@ -324,6 +324,51 @@
       "updated_at": "2026-10-01"
     },
     {
+      "id": "perseverance-distance-record",
+      "kind": "milestone",
+      "regions": [
+        "world"
+      ],
+      "title": {
+        "ja": "パーサヴィアランスが、火星で走った距離の記録を更新",
+        "en": "Perseverance sets off-world record for total distance driven"
+      },
+      "summary": {
+        "value": "走った距離が 45.22 km になり、オポチュニティの 45.16 km を超えた。地球の外で、いちばん長く走った探査車になった",
+        "source": "https://www.jpl.nasa.gov/news/nasas-perseverance-sets-off-world-record-for-total-distance-driven/",
+        "as_of": "2026-10-14"
+      },
+      "when": {
+        "value": {
+          "date": "2026-10-11"
+        },
+        "source": "https://www.jpl.nasa.gov/news/nasas-perseverance-sets-off-world-record-for-total-distance-driven/",
+        "as_of": "2026-10-14",
+        "note": "NASA の発表は 10月11日（ミッションの 2,006 ソル目）。日付は米国のもの"
+      },
+      "status": {
+        "value": "done",
+        "source": "https://www.jpl.nasa.gov/news/nasas-perseverance-sets-off-world-record-for-total-distance-driven/",
+        "as_of": "2026-10-14"
+      },
+      "links": [
+        {
+          "label": "NASA JPL「NASA's Perseverance Sets Off-World Record for Total Distance Driven」",
+          "url": "https://www.jpl.nasa.gov/news/nasas-perseverance-sets-off-world-record-for-total-distance-driven/"
+        }
+      ],
+      "greeting": {
+        "name": "パーサヴィアランス",
+        "until": "2026-10-25",
+        "image": {
+          "src": "assets/news/perseverance-distance-record.webp",
+          "alt": "夕暮れの火星の地面を、轍を残して地平線へ進むパーサヴィアランス。上に「不屈」の文字",
+          "credit": "イメージ（空と地面は再現・演出）。探査車の3Dモデル：NASA/JPL"
+        }
+      },
+      "updated_at": "2026-10-14"
+    },
+    {
       "id": "voyager-1-one-light-day",
       "kind": "milestone",
       "regions": [

@@ -221,13 +221,14 @@
   },
   "dependentSchemas": {
     "greeting": {
-      "$comment": "「いってらっしゃい」は、打ち上げが公式に終わった（status が done）ものだけ",
+      "$comment": "お知らせは、打ち上げ（「いってらっしゃい」）か節目で、公式に終わった（status が done）ものだけ。打ち上げは呼びかける名前が要る。絵は節目のときだけ",
       "required": ["status"],
       "properties": {
-        "kind": { "const": "launch" },
-        "greeting": { "required": ["name"] },
+        "kind": { "enum": ["launch", "milestone"] },
         "status": { "required": ["value"], "properties": { "value": { "const": "done" } } }
-      }
+      },
+      "if": { "properties": { "kind": { "const": "launch" } } },
+      "then": { "properties": { "greeting": { "required": ["name"], "not": { "required": ["image"] } } } }
     },
     "radiant": { "properties": { "kind": { "const": "meteor" } } }
   },

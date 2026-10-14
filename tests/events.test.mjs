@@ -166,7 +166,7 @@ test("詳細：出典を項目ごとに、打ち上げは残り時間と射場",
   assert.match(after, /公式の発表で確かめてください/);
 });
 
-test("curation/events：すべて日時が読めて、2026-10-01 にはまだ先", () => {
+test("curation/events：すべて日時が読めて、終わったもの（done）のほかは 2026-10-01 にはまだ先", () => {
   const now = at("2026-10-01T00:00:00Z");
   const all = readdirSync("curation/events")
     .filter((f) => f.endsWith(".json"))
@@ -176,7 +176,7 @@ test("curation/events：すべて日時が読めて、2026-10-01 にはまだ先
     assert.ok(eventSpan(e), `${e.id} の日時が読めない`);
     assert.ok(whenText(e, now).length > 0);
   }
-  assert.equal(upcomingEvents(all, now).length, all.length);
+  assert.equal(upcomingEvents(all, now).length, all.filter((e) => e.status?.value !== "done").length);
   // web/data/events.json と同じ中身
   const web = JSON.parse(readFileSync("web/data/events.json", "utf8")).events;
   assert.deepEqual(web.map((e) => e.id).sort(), all.map((e) => e.id).sort());

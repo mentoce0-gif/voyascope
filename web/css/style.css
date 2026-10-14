@@ -1159,6 +1159,11 @@ dialog.greeting[open] { animation: greet-in 0.45s ease-out; }
 .greet-return .greet-kicker { color: var(--amber); }
 .greet-return .greet-title { color: var(--mint); }
 .greet-actions { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+/* 節目のお知らせの絵（4:5）。カードの上いっぱいに置く */
+.greet-hero { margin: -6px -4px 12px; }
+.greet-hero img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; border-radius: 10px; background: var(--navy-900); }
+.greet-hero figcaption { margin-top: 6px; font-size: 0.68rem; }
+.greet-milestone .greet-title { font-size: 1.1rem; line-height: 1.5; }
 .greet-foot { margin-top: 12px; }
 @keyframes greet-in {
   from { opacity: 0; transform: translateY(8px) scale(0.98); }

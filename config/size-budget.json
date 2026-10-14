@@ -33,6 +33,12 @@
       ]
     },
     {
+      "id": "news",
+      "label": "お知らせの絵（節目のお知らせを出すときだけ読む。web/assets/news/）",
+      "max_kb": 150,
+      "files": ["assets/news/*"]
+    },
+    {
       "id": "far",
       "label": "遠くを見る部屋を開いたときに読むもの（部屋の部品・3D の旅と探査機の模型・three.js r128・天体の位置の計算・探査機のカード・Horizons の距離の表）",
       "max_kb": 230,
