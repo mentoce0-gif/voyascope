@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-14T04:54:22.698Z",
+  "fetched_at": "2026-10-14T11:52:47.970Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "dfcabb3c-078b-4f5b-a47c-0161f248cee9",
-      "net": "2026-10-14T11:40:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-10-14T12:19:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-13T01:07:00Z",
-      "rocket": {
-        "name": "Zhuque-2E",
-        "full_name": "Zhuque-2E"
-      },
-      "provider": {
-        "name": "LandSpace",
-        "ja": null
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 17,
-        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
-        "ja": "酒泉衛星発射センター",
-        "short": "酒泉",
-        "pad": "Launch Area 96A",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 40.91491,
-          "lng": 100.245488
-        }
-      }
-    },
     {
       "id": "df88cfbf-f504-4e11-8370-e33dd6280b5b",
       "net": "2026-10-15T23:44:00.000Z",
@@ -52,7 +13,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-08T15:48:47Z",
+      "updated": "2026-10-14T05:48:36Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
