@@ -15,7 +15,7 @@
   .cap { position: absolute; left: 22px; right: 22px; bottom: 54px; transition: none; }
   .cap .k { font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .14em; color: var(--mint); }
   .cap .t { font-size: 26px; font-weight: 700; margin-top: 6px; line-height: 1.35; }
-  .note { position: absolute; left: 22px; bottom: 20px; font-size: 11px; color: var(--dim); }
+  .note { position: absolute; left: 22px; right: 22px; bottom: 16px; font-size: 10px; line-height: 1.5; color: var(--dim); }
   .tag { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font-size: 12px; font-weight: 700; color: var(--mint); text-shadow: 0 0 8px var(--navy); }
   .tag.amber { color: var(--amber); }
 </style>
@@ -25,7 +25,7 @@
   <div class="brand">VOYASCOPE</div>
   <div class="badge">試作・模式図</div>
   <div class="cap"><div class="k" id="capk"></div><div class="t" id="capt"></div></div>
-  <div class="note">軌道の形・MMX の位置はイメージです（大きさ・距離は実際の比ではありません）</div>
+  <div class="note">模式図：地球と火星の位置は計算。到着日は仮（打ち上げ330日後）。火星のまわりは簡略化。大きさは実際の比ではありません</div>
   <div class="tag" id="tag-tane">種子島</div>
   <div class="tag" id="tag-mmx">MMX（およその位置）</div>
   <div class="tag" id="tag-mars">火星</div>
@@ -71,9 +71,11 @@ const V = (x, y, z) => new THREE.Vector3(x, y, z);
 }
 
 // ---------- 太陽系（模式。大きさ・距離は実際の比ではない） ----------
-const rE = 10, rM = 15.24, thE = ((205) * Math.PI / 180);
-const onOrbit = (r, th) => V(r * Math.cos(th), 0, -r * Math.sin(th));
-const earthPos = onOrbit(rE, thE), marsPos = onOrbit(rM, thE + Math.PI);
+// 打ち上げ日の地球と、約1年弱後（仮に330日後）の火星の位置（astronomy-engine）と、その2点を結ぶ軌道（ランベルトの解）。
+// 計算は scratchpad の route.mjs。1 AU = 10。黄道面を水平に
+const RT = await (await fetch("route.json")).json();
+const AU = 10, P = (v) => V(v[0] * AU, v[2] * AU, -v[1] * AU);
+const earthPos = P(RT.earth), marsPos = P(RT.mars);
 
 // 太陽
 const sun = new THREE.Mesh(new THREE.SphereGeometry(0.9, 48, 32), new THREE.MeshStandardMaterial({ color: 0xffe2a8, emissive: 0xffc96b, emissiveIntensity: 2.2 }));
@@ -101,8 +103,15 @@ const ring = (r, color, a) => {
     fragmentShader: `uniform vec3 uC; uniform float uA; void main(){ gl_FragColor = vec4(uC,uA); }` });
   scene.add(new THREE.LineSegments(g, m));
 };
-ring(rE, 0x5b8fd6, 0.28);
-ring(rM, 0xd98a5b, 0.28);
+const orbitLine = (pts, color, a) => {
+  const p = []; for (let i = 0; i < pts.length - 1; i++) p.push(...P(pts[i]).toArray(), ...P(pts[i + 1]).toArray());
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(p, 3));
+  scene.add(new THREE.LineSegments(g, new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uC: { value: new THREE.Color(color) }, uA: { value: a } },
+    vertexShader: `void main(){ gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
+    fragmentShader: `uniform vec3 uC; uniform float uA; void main(){ gl_FragColor = vec4(uC,uA); }` })));
+};
+orbitLine(RT.earthOrbit, 0x5b8fd6, 0.3);
+orbitLine(RT.marsOrbit, 0xd98a5b, 0.3);
 
 // 光
 scene.add(new THREE.AmbientLight(0x6d86b8, 0.28));
@@ -140,7 +149,7 @@ const marsTex = (() => {
 })();
 mars.add(new THREE.Mesh(new THREE.SphereGeometry(RM, 64, 48), new THREE.MeshStandardMaterial({ map: marsTex, roughness: 0.95 })));
 const mAtm = glow(0xff9a6b, 1.15, marsPos); mAtm.uniforms.uA.value = 0.3;
-const phobosR = 0.95, phobosAng = 2.2;
+const phobosR = RM * 9376 / 3390, phobosAng = 2.2;
 const phobosPos = marsPos.clone().add(V(Math.cos(phobosAng) * phobosR, 0.04, -Math.sin(phobosAng) * phobosR));
 const phobos = (() => {
   const g = new THREE.DodecahedronGeometry(0.075, 2); const p = g.attributes.position;
@@ -150,7 +159,7 @@ const phobos = (() => {
 })();
 const phobosOrbit = (() => {
   const n = 160, p = [];
-  for (let i = 0; i < n; i++) { const a0 = i / n * Math.PI * 2, a1 = (i + 1) / n * Math.PI * 2; p.push(...marsPos.clone().add(V(Math.cos(a0) * phobosR, 0.04, -Math.sin(a0) * phobosR)).toArray(), ...marsPos.clone().add(V(Math.cos(a1) * phobosR, 0.04, -Math.sin(a1) * phobosR)).toArray()); }
+  for (let i = 0; i < n; i++) { const a0 = i / n * Math.PI * 2, a1 = (i + 1) / n * Math.PI * 2; p.push(...marsPos.clone().add(V(Math.cos(a0) * phobosR, 0, -Math.sin(a0) * phobosR)).toArray(), ...marsPos.clone().add(V(Math.cos(a1) * phobosR, 0, -Math.sin(a1) * phobosR)).toArray()); }
   const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(p, 3));
   const m = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uA: { value: 0.0 } },
     vertexShader: `void main(){ gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
@@ -159,38 +168,62 @@ const phobosOrbit = (() => {
 })();
 const phobosGlow = glow(0xffb547, 0.4, phobosPos); phobosGlow.uniforms.uA.value = 0;
 
-// ---------- 航路（模式）：種子島 → 地球を離れる → ホーマン型の弧 → 火星 → フォボスのまわり ----------
-const a = (rE + rM) / 2, e = (rM - rE) / (rM + rE);
-const transfer = (nu) => onOrbit(a * (1 - e * e) / (1 + e * Math.cos(nu)), thE + nu);
-const path = [];
-// 1. 種子島から外へ（地球のそばはゆるい曲線）
-const nu0 = 0.07, start = transfer(nu0);
-const c1 = pinWorld.clone().add(pinWorld.clone().sub(earthPos).normalize().multiplyScalar(1.6));
-const c2 = start.clone().add(transfer(nu0 - 0.02).sub(transfer(nu0 + 0.02)).normalize().multiplyScalar(1.2));
+// ---------- 航路 ----------
+// ① 種子島から東へ上がり、地球のまわりを回る（打上げ計画書：1回目の燃焼 → 約53分の慣性飛行 → 2回目の燃焼 → 約1時間11分後に分離。地球のそばは大きさを誇張）
+// ② 太陽のまわりを約220度回って火星へ（1年弱）③ 火星を回る軌道に入り、段階的にフォボスへ（形は簡略化）④ フォボスのまわり（擬周回軌道 QSO のイメージ）
 const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return p0.clone().multiplyScalar(u * u * u).add(p1.clone().multiplyScalar(3 * u * u * t)).add(p2.clone().multiplyScalar(3 * u * t * t)).add(p3.clone().multiplyScalar(t * t * t)); };
-for (let i = 0; i <= 200; i++) path.push(bez(pinWorld, c1, c2, start, i / 200));
-// 2. 弧
-const nu1 = Math.PI - 0.1;
-for (let i = 1; i <= 1200; i++) path.push(transfer(nu0 + (nu1 - nu0) * i / 1200));
-// 3. 火星に寄って、フォボスの軌道へ
-const end = path[path.length - 1];
-const d1 = end.clone().add(transfer(nu1).sub(transfer(nu1 - 0.02)).normalize().multiplyScalar(0.9));
-const qsoIn = phobosPos.clone().add(phobosPos.clone().sub(marsPos).normalize().multiplyScalar(0.22));
-const d2 = qsoIn.clone().add(V(0.35, 0.05, 0.35));
-for (let i = 1; i <= 220; i++) path.push(bez(end, d1, d2, qsoIn, i / 220));
-// 4. フォボスのまわりを1周（擬周回軌道のイメージ）
-const toP = qsoIn.clone().sub(phobosPos), r0 = toP.length(), a0 = Math.atan2(-toP.z, toP.x);
-for (let i = 1; i <= 160; i++) { const t = i / 160, an = a0 - t * Math.PI * 2; path.push(phobosPos.clone().add(V(Math.cos(an) * r0 * 1.15, 0.0, -Math.sin(an) * r0 * 0.85))); }
+const path = [];
+const nW = pinWorld.clone().sub(earthPos).normalize();
+const northW = earth.localToWorld(V(0, RE, 0)).sub(earthPos).normalize();
+const eastW = northW.clone().cross(nW).normalize().negate();
+const axis = nW.clone().cross(eastW).normalize();
+const ROT = 1.55 * Math.PI; // 地球のまわりの角度（約1時間11分ぶん。誇張なし）
+for (let i = 0; i <= 260; i++) {
+  const t = i / 260, ang = t * ROT;
+  const alt = RE * (1.0 + 0.32 * Math.min(1, t * 6) + 0.25 * Math.max(0, t - 0.8) / 0.2);
+  path.push(earthPos.clone().add(nW.clone().applyAxisAngle(axis, ang).multiplyScalar(alt)));
+}
+const sepPt = path[path.length - 1].clone();
+const sepDir = path[path.length - 1].clone().sub(path[path.length - 2]).normalize();
+const tr = RT.transfer.map(P);
+let k0 = tr.findIndex((p) => p.distanceTo(earthPos) > 2.2);
+const join = tr[k0], joinDir = tr[k0 + 1].clone().sub(tr[k0]).normalize();
+for (let i = 1; i <= 160; i++) path.push(bez(sepPt, sepPt.clone().add(sepDir.clone().multiplyScalar(0.9)), join.clone().sub(joinDir.clone().multiplyScalar(0.9)), join, i / 160));
+const sStartArcIdx = path.length;
+let k1 = tr.length - 1; while (tr[k1].distanceTo(marsPos) < 2.6) k1--;
+for (let k = k0 + 1; k <= k1; k++) {
+  const a = tr[k - 1], b = tr[k];
+  for (let j = 1; j <= 6; j++) path.push(a.clone().lerp(b, j / 6));
+}
+const end = path[path.length - 1].clone(), endDir = end.clone().sub(path[path.length - 7]).normalize();
+// 火星のそば：大きな楕円で1周 → 少し小さく → フォボスの軌道の高さへ
+const mUp = V(0, 1, 0), mx = endDir.clone().cross(mUp).normalize(), mz = mUp.clone().cross(mx).normalize();
+const ell = (a, b, th, cx = 0) => marsPos.clone().add(mx.clone().multiplyScalar(Math.cos(th) * a + cx)).add(mz.clone().multiplyScalar(Math.sin(th) * b));
+const capStart = ell(2.0, 1.1, -0.35, 1.3);
+for (let i = 1; i <= 160; i++) path.push(bez(end, end.clone().add(endDir.clone().multiplyScalar(0.8)), capStart.clone().add(V(0, 0, 0)).sub(mz.clone().multiplyScalar(-0.5)), capStart, i / 160));
+for (let i = 1; i <= 300; i++) { const t = i / 300, th = -0.35 + t * Math.PI * 2; path.push(ell(lerp(2.0, 1.45, t), lerp(1.1, 1.0, t), th, lerp(1.3, 0.55, t))); }
+for (let i = 1; i <= 220; i++) { const t = i / 220, th = -0.35 + t * Math.PI * 1.6; path.push(ell(lerp(1.45, phobosR, t), lerp(1.0, phobosR, t), th, lerp(0.55, 0, t))); }
+// フォボスの位置を、この到着点のすこし先に置き直す
+const arriveTh = -0.35 + Math.PI * 1.6 + 0.35;
+phobosPos.copy(ell(phobosR, phobosR, arriveTh)); phobos.position.copy(phobosPos);
+const qsoIn = path[path.length - 1].clone();
+const toPh = phobosPos.clone().sub(qsoIn);
+for (let i = 1; i <= 120; i++) path.push(bez(qsoIn, qsoIn.clone().add(toPh.clone().multiplyScalar(0.4)), phobosPos.clone().add(V(0.1, 0.0, 0.1)), phobosPos.clone().add(mx.clone().multiplyScalar(0.12)), i / 120));
+const qa = phobosPos.clone().add(mx.clone().multiplyScalar(0.12));
+for (let i = 1; i <= 200; i++) { const an = i / 200 * Math.PI * 2; const tng = phobosPos.clone().sub(marsPos).normalize(), rad = tng.clone().cross(mUp).normalize();
+  path.push(phobosPos.clone().add(rad.clone().multiplyScalar(Math.cos(an) * -0.12)).add(tng.clone().multiplyScalar(Math.sin(an) * 0.22)).add(mx.clone().multiplyScalar(0))); }
+const start = join;
+billboards.find((b) => b.material === phobosGlow).position.copy(phobosPos);
 
 // 弧の長さで、点を等間隔に並べ直す
 const cum = [0]; for (let i = 1; i < path.length; i++) cum.push(cum[i - 1] + path[i].distanceTo(path[i - 1]));
 const L = cum[cum.length - 1];
 const at = (s) => { const d = s * L; let lo = 0, hi = cum.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cum[m] < d) lo = m; else hi = m; } const t = (d - cum[lo]) / Math.max(1e-9, cum[hi] - cum[lo]); return path[lo].clone().lerp(path[hi], t); };
 const sOf = (target) => { let best = 0, bd = 1e9; for (let i = 0; i < path.length; i++) { const d = path[i].distanceToSquared(target); if (d < bd) { bd = d; best = i; } } return cum[best] / L; };
-const sStartArc = sOf(start), sEndArc = sOf(end), sQso = sOf(qsoIn);
+const sEndArc = sOf(end), sQso = sOf(qsoIn);
 // 地球のそばは細かく、遠くは粗く（どこでも点線に見えるように）
 const dots = [], ss = [];
-for (let d = 0; d < L; ) { const s = d / L; const p = at(s); dots.push(...p.toArray()); ss.push(s); const nearE = p.distanceTo(earthPos), nearP = p.distanceTo(phobosPos); d += Math.min(0.11, 0.02 + 0.05 * Math.min(nearE, nearP * 1.6)); }
+for (let d = 0; d < L; ) { const s = d / L; const p = at(s); dots.push(...p.toArray()); ss.push(s); const nearE = p.distanceTo(earthPos), nearP = p.distanceTo(phobosPos); d += Math.min(0.12, 0.012 + 0.05 * Math.min(nearE * 0.6, nearP * 1.2, p.distanceTo(marsPos) * 0.8)); }
 const dg = new THREE.BufferGeometry();
 dg.setAttribute("position", new THREE.Float32BufferAttribute(dots, 3));
 dg.setAttribute("aS", new THREE.Float32BufferAttribute(ss, 1));
@@ -228,7 +261,7 @@ const pinGlow = glow(0x5ef2c2, 0.12, pinWorld);
 const pinRing = ringGlow(0x5ef2c2, pinWorld); pinGlow.depthTest = false; pinRing.depthTest = false;
 
 // ---------- MMX（アプリの模型） ----------
-const sMMX = 0.16;
+const sMMX = sOf(tr[Math.max(k0 + 4, 25)]); // およそ現在（試作では打ち上げ50日後あたり）
 const mmx = MODELS.mmx(THREE, makeKit(THREE));
 const mmxHolder = new THREE.Group(); mmxHolder.add(mmx); scene.add(mmxHolder);
 const mmxPos = at(sMMX), mmxDir = at(sMMX + 0.002).sub(mmxPos).normalize();
@@ -242,15 +275,17 @@ route.uniforms.uMMX.value = sMMX;
 // ---------- カメラの流れ（12秒） ----------
 const camAt = {
   near: { pos: pinWorld.clone().add(faceDir.clone().multiplyScalar(2.8)).add(sideways.clone().multiplyScalar(-0.9)).add(V(0, 0.3, 0)), look: pinWorld.clone().lerp(earthPos, 0.6).add(V(0, -0.45, 0)).add(sideways.clone().multiplyScalar(0.25)) },
-  mid: { pos: mmxPos.clone().add(mmxDir.clone().multiplyScalar(1.3)).add(V(0, 0.45, 0)).add(outward.clone().multiplyScalar(0.8)), look: mmxPos.clone().lerp(earthPos, 0.12) },
-  wide: { pos: earthPos.clone().lerp(marsPos, 0.5).add(V(0, 40, 0)).add(earthPos.clone().normalize().multiplyScalar(22)), look: earthPos.clone().lerp(marsPos, 0.5).add(earthPos.clone().normalize().multiplyScalar(4.5)) },
-  mars: { pos: marsPos.clone().add(marsPos.clone().normalize().multiplyScalar(-2.2)).add(V(0, 2.4, 0)).add(V(-marsPos.z, 0, marsPos.x).normalize().multiplyScalar(2.0)), look: marsPos.clone().lerp(phobosPos, 0.35) },
+  mid: { pos: mmxPos.clone().add(mmxDir.clone().cross(V(0, 1, 0)).normalize().multiplyScalar(1.5)).add(V(0, 0.55, 0)).add(mmxDir.clone().multiplyScalar(0.5)), look: mmxPos.clone().add(mmxDir.clone().multiplyScalar(-0.25)).add(V(0, -0.35, 0)) },
+  wide: { pos: V(0, 56, 0).add(earthPos.clone().lerp(marsPos, 0.5).multiplyScalar(-0.2)).add(V(0, 0, 16)), look: earthPos.clone().lerp(marsPos, 0.5).multiplyScalar(-0.2).add(V(0, 0, 2)) },
+  mars: { pos: marsPos.clone().add(V(0, 3.0, 0)).add(mz.clone().multiplyScalar(-3.2)).add(mx.clone().multiplyScalar(1.2)), look: marsPos.clone().lerp(phobosPos, 0.3) },
 };
 const mixCam = (A, B, t) => ({ pos: A.pos.clone().lerp(B.pos, t), look: A.look.clone().lerp(B.look, t) });
 const caps = [
-  [0, "2026.10.20", "種子島から"],
-  [3.2, "NOW", "MMX は、いまこのあたり"],
-  [6.4, "2027年度", "火星、そしてフォボスへ"],
+  [0, "2026.10.20 4:41", "種子島から"],
+  [1.7, "+1時間11分", "地球を回って、火星へ向かう軌道へ"],
+  [3.4, "NOW（イメージ）", "MMX は、いまこのあたり"],
+  [6.2, "1年弱", "太陽のまわりを大きく回って、火星へ"],
+  [9.4, "2027年度", "火星を回る軌道へ。そしてフォボスへ"],
 ];
 const tags = { tane: document.getElementById("tag-tane"), mmx: document.getElementById("tag-mmx"), mars: document.getElementById("tag-mars"), phobos: document.getElementById("tag-phobos") };
 const place = (el, p, alpha, dy = -14) => { const v = p.clone().project(camera); const vis = v.z < 1 && alpha > 0.01; el.style.opacity = vis ? alpha : 0; el.style.left = `${(v.x + 1) / 2 * W}px`; el.style.top = `${(1 - v.y) / 2 * H + dy}px`; };
