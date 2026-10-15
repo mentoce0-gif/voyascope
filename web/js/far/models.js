@@ -73,6 +73,7 @@ export function makeKit(T) {
     foilSilver:mat('foil-silver',0xc9d0d4,.85,.3,{bumpMap:foil,bumpScale:.006}),
     copper:mat('copper',0xc4682f,.6,.42),
     solarThin:mat('solar-thin-film',0xffffff,.5,.38,{map:cellsThin}),
+    osr:mat('mirror-tile',0xdfe6ea,1,.08,{envMapIntensity:1.1}),
     graphite:mat('graphite',0x2c313b,.4,.55),
     olive:mat('radiator-olive',0x56695f,.35,.5),
     goldMLI:mat('foil-gold-bright',0xe0b03e,.85,.26,{bumpMap:foil,bumpScale:.014,envMapIntensity:.8}),
@@ -347,7 +348,17 @@ function mmx(T,K){
   B('goldMLI',[0,ey,0],[1.5,.8,1.4],[0,0,0],explore);
   // 星を見て向きを知るカメラ（スタートラッカー）と、小さなアンテナ（目安）
   for(const x of [-.4,-.15])C('black',[x,ey+.47,-.6],.07,.14,[-.5,0,0],explore,12);
-  B('black',[0,.94,0],[1.44,.03,1.34],[0,0,0],explore);              // フォボスに向く面
+  // フォボスに向く面：鏡のような反射板が並び、すきまに金色の断熱材（写真から）
+  B('goldMLI',[0,.945,0],[1.46,.03,1.36],[0,0,0],explore);
+  for(let x=0;x<4;x++)for(let z=0;z<4;z++)if(!((x===0||x===3)&&(z===0||z===3)))B('osr',[(x-1.5)*.34,.928,(z-1.5)*.31],[.3,.012,.27],[0,0,0],explore);
+  // ロボットアーム（底の面に折りたたむ。先に白い板と、金の帯の入った筒が2本）
+  {const arm=group('robot-arm',[-.45,.9,-.45],[0,PI/4,0],explore);
+   C('black',[0,-.06,0],.12,.14,[0,0,0],arm,14);
+   rod('black',[0,-.1,0],[.62,-.16,0],.055,arm,10);ball('black',[.62,-.16,0],[.08,.08,.08],arm);
+   rod('black',[.62,-.16,0],[.1,-.24,0],.05,arm,10);
+   const head=group('sampler-head',[.05,-.3,0],[0,0,0],arm);
+   B('white',[0,0,0],[.36,.03,.22],[0,0,0],head);
+   for(const z of [-.06,.06]){C('silver',[.02,-.07,z],.05,.12,[0,0,0],head,12);ring('gold',[.02,-.12,z],.05,.02,[PI/2,0,0],head);}}
   B('foilSilver',[0,ey+.05,.705],[.9,.5,.02],[0,0,0],explore);        // 放熱面
   B('black',[-.6,ey-.1,-.705],[.25,.35,.03],[0,0,0],explore);
   // ローバ（IDEFIX）を側面に抱える（位置は目安）
@@ -405,7 +416,7 @@ function mmx(T,K){
      else if(f===2)B('goldMLI',[u*1.2,ey+v*.6,-.708],[w*.8,h*.8,.012],[tilt,tilt*.6,0],explore);
      else B('goldMLI',[-.758,ey+v*.6,u*1.0],[.012,h*.8,w*.8],[0,tilt,tilt*.6],explore);}}
   // 大きなアンテナの皿と、小さな皿
-  const hga=b.dish(.78,[.25,ry+.34,1.18],[PI/2-.25,0,0],ret,'silver');
+  const hga=b.dish(.78,[.25,ry+.34,1.18],[PI/2-.25,0,0],ret,'graphite');
   rod('silver',[.25,ry+.3,.86],[.25,ry+.32,1.08],.07,ret,12);B('black',[.25,ry+.3,.9],[.3,.3,.08],[0,0,0],ret);
   b.dish(.2,[-.6,ry-.25,.86],[PI/2,0,0],ret,'white');
   // 姿勢を変える小さな噴射口（四隅）
