@@ -9,7 +9,7 @@ const REF = {
   parker: [NASA+'mission/parker-solar-probe/', NASA+'resource/parker-solar-probe-3d-model/'],
   bepi: ['https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury','https://www.esa.int/ESA_Multimedia/Images/2018/10/BepiColombo_arrival_at_Mercury_timeline','https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet','https://mio.isas.jaxa.jp/mission/'],
   rover: [NASA+'mission/mars-2020-perseverance/',NASA+'3d-resources/mars-2020-perseverance-rover/'],
-  mmx: ['https://www.mmx.jaxa.jp/','https://www.mmx.jaxa.jp/gallery/'],
+  mmx: ['https://www.mmx.jaxa.jp/','https://www.mmx.jaxa.jp/gallery/','https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf','https://mmx-news.isas.jaxa.jp/?p=1998'],
   haya: ['https://www.isas.jaxa.jp/missions/spacecraft/current/hayabusa2','https://www.hayabusa2.jaxa.jp/'],
   juno: [NASA+'mission/juno/',NASA+'resource/juno-3d-model/'],
   nh: [NASA+'mission/new-horizons/',NASA+'resource/new-horizons-3d-model/'],
@@ -43,6 +43,13 @@ export function makeKit(T) {
     }
     c.fillStyle='#395472'; for(let y=0;y<128;y+=16)c.fillRect(0,y,128,.6);
   },true);
+  // 薄膜の太陽電池（紫がかった灰色に、銀の細い格子）
+  const cellsThin=texture(c=>{
+    c.fillStyle='#2b2a3a';c.fillRect(0,0,128,128);
+    for(let x=0;x<128;x+=8)for(let y=0;y<128;y+=16){c.fillStyle=(x+y)%32?'#353248':'#2f2d40';c.fillRect(x+.6,y+.6,7,15);}
+    c.fillStyle='#8f93a3';for(let y=0;y<128;y+=16)c.fillRect(0,y,128,.7);
+    c.fillStyle='#6d7080';for(let x=0;x<128;x+=32)c.fillRect(x,0,.6,128);
+  },true);
   // A tiny procedural reflection field, not an image asset or another light.
   const faces=Array.from({length:6},(_,i)=>{
     const c=document.createElement('canvas');c.width=c.height=64;
@@ -63,7 +70,11 @@ export function makeKit(T) {
     navy:mat('deep-navy',0x143057,.42,.45),
     solar:mat('solar-cells',0xffffff,.62,.3,{map:cells}),
     mirror:mat('gold-mirror',0xe7b94f,1,.12,{envMapIntensity:1.25}),
-    textures:{foil,cells,env}
+    foilSilver:mat('foil-silver',0xc9d0d4,.85,.3,{bumpMap:foil,bumpScale:.006}),
+    copper:mat('copper',0xc4682f,.6,.42),
+    solarThin:mat('solar-thin-film',0xffffff,.5,.38,{map:cellsThin}),
+    goldMLI:mat('foil-gold-bright',0xe0b03e,.85,.26,{bumpMap:foil,bumpScale:.014,envMapIntensity:.8}),
+    textures:{foil,cells,cellsThin,env}
   };
 }
 
@@ -94,13 +105,13 @@ function builder(T,K) {
     put(geo('torus',()=>new T.TorusGeometry(1,.025,6,40)),m,p,[r,r,t/.025],rot,par);
   }
   function ball(m,p,s,par=content){put(geo('sphere',()=>new T.SphereGeometry(1,16,10)),m,p,s,[0,0,0],par);}
-  function panel(w,h,p,rot=[0,0,0],par=content,nx=8,ny=6){
+  function panel(w,h,p,rot=[0,0,0],par=content,nx=8,ny=6,cell='solar'){
     const g=group('solar-array',p,rot,par);
     B('silver',[0,0,0],[w+.06,.045,h+.06],[0,0,0],g);
     B('black',[0,-.03,0],[w,.035,h],[0,0,0],g);
     // Distinct cell tiles, instanced in a single draw per panel.
     for(let x=0;x<nx;x++)for(let y=0;y<ny;y++)
-      B('solar',[(x+.5-nx/2)*w/nx,.03,(y+.5-ny/2)*h/ny],[w/nx*.955,.008,h/ny*.96],[0,0,0],g);
+      B(cell,[(x+.5-nx/2)*w/nx,.03,(y+.5-ny/2)*h/ny],[w/nx*.955,.008,h/ny*.96],[0,0,0],g);
     for(const x of [-w/2,w/2])B('silver',[x,.045,0],[.018,.018,h],[0,0,0],g);
     for(const z of [-h/2,h/2])B('silver',[0,.045,z],[w,.018,.018],[0,0,0],g);
     return g;
@@ -325,33 +336,112 @@ function perseverance(T,K){
 }
 
 function mmx(T,K){
-  const b=builder(T,K),{B,C,rod,group,panel}=b;
-  const outbound=group('outbound',[0,-1.32,0]),explore=group('explore'),ret=group('return',[0,1.03,0]);
-  C('silver',[0,0,0],.8,1.15,[0,0,0],outbound,24);
-  C('gold',[0,.43,0],.88,.2,[0,0,0],outbound,12);
-  for(let i=0;i<8;i++){const a=i*TAU/8;rod('silver',[Math.sin(a)*.85,-.5,Math.cos(a)*.85],[Math.sin(a)*.85,.5,Math.cos(a)*.85],.025,outbound);}
-  C('black',[0,-.7,0],.24,.38,[0,0,0],outbound,24,.4);
-  B('gold',[0,0,0],[2.1,1.3,1.7],[0,0,0],explore);
-  for(let x of [-1.07,1.07])B('white',[x,0,0],[.04,1.16,1.5],[0,0,0],explore);
+  // 単位はメートルの目安（finish でいちばん長い辺を 2 にそろえる）。+Y が上。下から 探査モジュール（脚）・復路モジュール（太陽電池パドル・アンテナ）・往路モジュール（推進）。
+  // 公表された事実：3モジュール構成、着陸脚4本、太陽電池パドルの端から端まで約9 m、本体 約3.4×3.9×4.9 m。形は公式の写真・構成図を見て独自に組み立てた（なぞっていない）
+  const b=builder(T,K),{B,C,rod,group,panel,ring,ball}=b;
+  const explore=group('explore'),ret=group('return'),outbound=group('outbound');
+  // ---------- 探査モジュール（y 0.95〜1.75） ----------
+  const ey=1.35;
+  B('goldMLI',[0,ey,0],[1.5,.8,1.4],[0,0,0],explore);
+  // 星を見て向きを知るカメラ（スタートラッカー）と、小さなアンテナ（目安）
+  for(const x of [-.4,-.15])C('black',[x,ey+.47,-.6],.07,.14,[-.5,0,0],explore,12);
+  B('black',[0,.94,0],[1.44,.03,1.34],[0,0,0],explore);              // フォボスに向く面
+  B('foilSilver',[0,ey+.05,.705],[.9,.5,.02],[0,0,0],explore);        // 放熱面
+  B('black',[-.6,ey-.1,-.705],[.25,.35,.03],[0,0,0],explore);
+  // ローバ（IDEFIX）を側面に抱える（位置は目安）
+  const rover=group('rover',[-.86,ey-.05,.15],[0,0,0],explore);
+  B('silver',[0,0,0],[.22,.34,.5],[0,0,0],rover);B('solar',[-.12,0,0],[.02,.3,.46],[0,0,0],rover);
+  for(const z of [-.2,.2])for(const y of [-.15,.15])C('black',[-.06,y,z],.06,.04,[0,0,PI/2],rover,12);
+  // 観測機器・サンプラ（目安）
+  B('copper',[.5,ey+.1,-.73],[.3,.26,.08],[0,0,0],explore);
+  for(const [x,z] of [[.35,.3],[-.25,-.35],[.1,-.1]])C('black',[x,.86,z],.07,.16,[0,0,0],explore,16);
+  C('silver',[.45,.82,-.25],.05,.3,[0,0,0],explore,12);
+  // 着陸脚4本（写真から）：各面の真ん中、フォボスに向く面のふちから出る。太い主の支柱（付け根の近くに関節、蛇腹2か所）と、
+  // その両わきからのV字の2本が、丸い足に集まる。足は胴体の幅の約1.4倍下、端から端で約1.75倍（写真の比の目安）
+  const lerp3=(p,q,t)=>[p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t,p[2]+(q[2]-p[2])*t];
+  for(let i=0;i<4;i++){
+    const a=i*PI/2,ca=Math.cos(a),sa=Math.sin(a),tx=-sa,tz=ca,half=i%2?.7:.75;
+    const foot=[ca*1.5,-.9,sa*1.5];
+    const base=[ca*(half-.08),.97,sa*(half-.08)];
+    const seg=(t0,t1,r)=>rod('black',lerp3(base,foot,t0),lerp3(base,foot,t1),r,explore,12);
+    seg(0,.2,.088);
+    B('black',lerp3(base,foot,.24),[.21,.21,.21],[0,a,0],explore);                 // 関節
+    seg(.28,.42,.088);
+    for(let k=0;k<8;k++)seg(.42+k*.026,.42+(k+.55)*.026,k%2?.09:.115);             // 蛇腹（長い）
+    seg(.63,.78,.088);
+    for(let k=0;k<4;k++)seg(.78+k*.024,.78+(k+.55)*.024,k%2?.09:.11);              // 蛇腹（短い）
+    seg(.875,1,.088);
+    for(const s of [-1,1]){const b2=[ca*(half-.04)+tx*s*.55,.97,sa*(half-.04)+tz*s*.55];rod('black',b2,lerp3(base,foot,.97),.062,explore,10);}
+    // 丸い足（放射状の筋）
+    const fp=group('footpad',[foot[0],foot[1]-.07,foot[2]],[0,0,0],explore);
+    C('silver',[0,-.02,0],.3,.04,[0,0,0],fp,28);
+    C('silver',[0,.03,0],.19,.07,[0,0,0],fp,24,.55);
+    for(let k=0;k<12;k++){const t=k*TAU/12;B('silver',[Math.cos(t)*.18,.01,Math.sin(t)*.18],[.23,.03,.014],[0,-t,0],fp);}
+    C('black',[0,.1,0],.11,.07,[0,0,0],fp,16);
+  }
+  // ---------- 復路モジュール（y 1.75〜3.05） ----------
+  const ry=2.4;
+  B('goldMLI',[0,ry,0],[1.9,1.3,1.7],[0,0,0],ret);
+  B('foilSilver',[0,ry,-.86],[1.4,1.0,.02],[0,0,0],ret);
+  B('white',[.96,ry-.25,.3],[.02,.5,.7],[0,0,0],ret);
+  B('black',[-.5,ry+.5,.86],[.6,.22,.02],[0,0,0],ret);
+  // 側面の機器・放熱面（目安）
+  B('black',[-.98,ry+.2,-.35],[.08,.5,.6],[0,0,0],ret);B('white',[-.97,ry-.3,.45],[.04,.45,.5],[0,0,0],ret);
+  B('foilSilver',[.6,ry+.68,-.4],[.5,.08,.6],[0,0,0],ret);C('black',[-.45,ry+.72,.35],.14,.14,[0,0,0],ret,16);
+  B('copper',[.55,ry-.45,-.87],[.32,.25,.06],[0,0,0],ret);
+  for(const z of [-.5,.1,.6])rod('silver',[-.95,ry-.6,z],[-.95,ry+.6,z],.012,ret,6);
+  // 帰りのエンジン（往路モジュールの陰。切り離すと見える。数・位置は目安）
+  for(const x of [-.32,.32])C('mirror',[x,ry+.72,0],.14,.24,[PI,0,0],ret,16,.35);
+  // 断熱材のしわ（少し傾けた当て布で、照り返しにむらを出す）
+  {let sd=7;const rr=()=>((sd=(sd*16807)%2147483647)/2147483647);
+   for(let k=0;k<14;k++){const f=k%4,u=rr()-.5,v=rr()-.5,w=.25+rr()*.35,h=.2+rr()*.3,tilt=(rr()-.5)*.35;
+     if(f===0)B('goldMLI',[u*1.5,ry+v*1.0,.858],[w,h,.012],[tilt,tilt*.6,0],ret);
+     else if(f===1)B('goldMLI',[.958,ry+v*1.0,u*1.3],[.012,h,w],[0,tilt,tilt*.6],ret);
+     else if(f===2)B('goldMLI',[u*1.2,ey+v*.6,-.708],[w*.8,h*.8,.012],[tilt,tilt*.6,0],explore);
+     else B('goldMLI',[-.758,ey+v*.6,u*1.0],[.012,h*.8,w*.8],[0,tilt,tilt*.6],explore);}}
+  // 大きなアンテナの皿と、小さな皿
+  const hga=b.dish(.78,[.25,ry+.34,1.18],[PI/2-.25,0,0],ret,'silver');
+  rod('silver',[.25,ry+.3,.86],[.25,ry+.32,1.08],.07,ret,12);B('black',[.25,ry+.3,.9],[.3,.3,.08],[0,0,0],ret);
+  b.dish(.2,[-.6,ry-.25,.86],[PI/2,0,0],ret,'white');
+  // 姿勢を変える小さな噴射口（四隅）
+  for(const x of [-.95,.95])for(const z of [-.85,.85])for(const y of [ry-.66,ry+.66]){
+    C('gold',[x*1.02,y,z*1.02],.05,.12,[y>ry?0:PI,0,0],ret,10,.4);
+  }
+  // 太陽電池パドル：片側3枚。つけ根の腕から、細長く伸びる
   for(const s of [-1,1]){
-    rod('silver',[s*1.05,.24,0],[s*1.8,.24,0],.055,explore);
-    for(let i=0;i<3;i++)panel(1.12,2.1,[s*(2.15+i*1.22),.24,0],[0,0,s*.06],explore,8,12);
-    for(let z of [-.68,.68]){
-      rod('silver',[s*.85,-.3,z],[s*1.52,-1.05,z*1.9],.047,explore);
-      rod('silver',[s*.83,.1,z],[s*1.52,-1.05,z*1.9],.025,explore);
-      C('black',[s*1.52,-1.08,z*1.9],.18,.06,[0,0,0],explore,16);
+    rod('silver',[s*.95,ry+.25,0],[s*1.42,ry,0],.035,ret,8);rod('silver',[s*.95,ry-.25,0],[s*1.42,ry,0],.035,ret,8);rod('silver',[s*.95,ry,0],[s*1.42,ry,0],.045,ret,10);
+    B('silver',[s*1.42,ry,0],[.08,.3,.12],[0,0,0],ret);
+    for(let k=0;k<3;k++){
+      const x=s*(1.5+.53+k*1.08);
+      panel(1.02,1.5,[x,ry,0],[PI/2,0,0],ret,6,9,'solarThin');
+      if(k<2)B('silver',[s*(1.5+1.07+k*1.08),ry,0],[.06,1.4,.04],[0,0,0],ret);
     }
   }
-  B('gold',[0,.03,0],[1.55,.78,1.35],[0,0,0],ret);
-  b.dish(.73,[0,.12,.71],[PI/2,0,0],ret,'black');
-  b.dish(.35,[.35,-.24,.97],[PI/2,0,0],outbound,'black');
-  C('gold',[.4,.62,-.18],.28,.36,[0,0,0],ret,24,.6);
-  B('white',[-.57,.52,-.18],[.2,.3,.38],[0,0,0],ret);
-  rod('silver',[-.46,.5,-.38],[-.46,1.2,-.5],.025,ret);
-  C('black',[-.46,1.19,-.5],.09,.12,[0,0,0],ret);
-  for(let x of [-.72,.72])for(let z of [-.53,.53])B('black',[x,.45,z],[.15,.12,.18],[0,0,0],ret);
-  C('silver',[.65,-.85,.43],.12,.5,[0,0,0],explore);
-  return b.finish(REF.mmx,['写真の三段構成を基本形で再構成。翼の展開角、脚・裏面の計器、固定具は近似。6面図は使用していない。'],[.38,-.5,.05],{parts:{outbound,explore,return:ret}});
+  // ---------- 往路モジュール（y 3.05〜4.45） ----------
+  const oy=3.68;
+  C('goldMLI',[0,oy,0],.95,1.2,[0,0,0],outbound,14);
+  C('goldMLI',[0,oy+.66,0],.8,.12,[0,0,0],outbound,14);
+  // 縦長のタンク（銀色の断熱材）と、横のふくらみ
+  for(const t of [.3,PI+.3]){C('foilSilver',[Math.cos(t)*.86,oy,Math.sin(t)*.86],.3,1.05,[0,0,0],outbound,16);
+    ball('foilSilver',[Math.cos(t)*.86,oy+.52,Math.sin(t)*.86],[.3,.12,.3],outbound);ball('foilSilver',[Math.cos(t)*.86,oy-.52,Math.sin(t)*.86],[.3,.12,.3],outbound);}
+  for(const t of [PI/2+.2,-PI/2+.2]){B('goldMLI',[Math.cos(t)*1.0,oy-.2,Math.sin(t)*1.0],[.55,.55,.45],[0,-t,0],outbound);
+    B('foilSilver',[Math.cos(t)*1.28,oy-.32,Math.sin(t)*1.28],[.5,.16,.2],[0,-t,0],outbound);}
+  // ロケットとつなぐ輪と、主エンジンの噴射口
+  C('silver',[0,oy+.82,0],.62,.2,[0,0,0],outbound,32);
+  C('copper',[0,oy+.9,0],.56,.03,[0,0,0],outbound,32);
+  ring('silver',[0,oy+.93,0],.64,.02,[PI/2,0,0],outbound);
+  // 主エンジンの噴射口（4つ。少し外へ開く）
+  for(let i=0;i<4;i++){const t=PI/4+i*PI/2,ct=Math.cos(t),st=Math.sin(t);C('mirror',[ct*.8,oy+.92,st*.8],.22,.46,[PI-st*.18,0,ct*.18],outbound,20,.3);
+    C('black',[ct*.76,oy+.66,st*.76],.09,.12,[0,0,0],outbound,12);}
+  // 横向きの小さな噴射口
+  for(const t of [PI/2+.2,-PI/2+.2])for(const dy of [-.45,.05]){const ct=Math.cos(t),st=Math.sin(t);C('mirror',[ct*1.32,oy+dy,st*1.32],.07,.18,[0,0,0],outbound,12,.35);}
+  // モジュールのあいだの輪
+  C('silver',[0,3.06,0],.7,.05,[0,0,0],outbound,32);
+  C('silver',[0,1.76,0],.62,.04,[0,0,0],ret,32);
+  return b.finish(REF.mmx,[
+    '公式の写真・構成図（JAXA MMX 公式サイトのギャラリー、プレスキット）を見て、独自に組み立てた。図面・3Dデータはなぞっていない。',
+    '寸法は公表値（太陽電池パドルの端から端まで約9 m、本体 約3.4×3.9×4.9 m）の比の目安。各モジュールの大きさ、脚の付け根、アンテナ・噴射口・観測機器・ローバの位置は近似。'
+  ],[.3,-.6,.05],{parts:{outbound,explore,return:ret}});
 }
 
 function hayabusa2(T,K){
