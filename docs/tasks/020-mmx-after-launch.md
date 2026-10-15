@@ -8,7 +8,7 @@
 - 地球の画面のビーコンは自動で動く（`web/js/launch-plan.js`、PR #37）。打ち上げから分離の予定の30分後まで、種子島のピンが光り、予定の詳細に計画の流れを出す
 - **延期になったら**：`curation/events/mmx-launch.json` の `when`（と `status`）を公式の発表で直す → `npm run sync:web` → `node scripts/build-summaries.mjs`。
   ビーコンは `LAUNCH_PLANS["mmx-launch"].forAt` と予定の日時がずれると出ない。新しい日の計画（打上げ計画書やお知らせ）が出たら、`forAt` と `steps` の時刻を公式の値で直す（推測で時刻をずらさない）。テストの `forAt` の確認（`tests/launch-plan.test.mjs`）も合わせて通す
-- 10/17〜21 は大きな変更をしない。出来事の記録（日時・状態）だけ直す
+- 打ち上げの前後も作業は止めない（2026-10-15 オーナー）。当日は出来事の記録（日時・状態）を公式の発表どおりに直すのを先に
 
 ## 打ち上げのあと（成功の発表を確かめてから）
 
