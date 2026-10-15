@@ -2,18 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-15T17:01:57.384Z",
+  "fetched_at": "2026-10-15T21:23:35.511Z",
   "days_ahead": 45,
   "launches": [
     {
       "id": "df88cfbf-f504-4e11-8370-e33dd6280b5b",
-      "net": "2026-10-15T23:57:05.000Z",
+      "net": "2026-10-16T00:01:05.000Z",
       "precision": "sec",
       "window_end": "2026-10-16T03:44:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-15T15:36:15Z",
+      "updated": "2026-10-15T21:07:01Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -158,6 +158,162 @@
         "position": {
           "lat": 34.632,
           "lng": -120.611
+        }
+      }
+    },
+    {
+      "id": "c6f8b6b0-6bae-460a-99bb-c12a3d29effd",
+      "net": "2026-10-21T03:35:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-10-21T03:50:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-15T21:06:22Z",
+      "rocket": {
+        "name": "Ceres-1S",
+        "full_name": "Ceres-1S"
+      },
+      "provider": {
+        "name": "Galactic Energy",
+        "ja": null
+      },
+      "mission": {
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
+      },
+      "site": {
+        "location_id": 185,
+        "name": "Haiyang Oriental Spaceport",
+        "ja": null,
+        "short": null,
+        "pad": "Rizhao offshore launch location",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 35.391667,
+          "lng": 119.598667
+        }
+      }
+    },
+    {
+      "id": "7766f3bb-674c-4c71-b986-963bd633fcfe",
+      "net": "2026-10-21T05:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-10-21T08:45:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-15T17:54:06Z",
+      "rocket": {
+        "name": "Electron",
+        "full_name": "Electron"
+      },
+      "provider": {
+        "name": "Rocket Lab",
+        "ja": "ロケットラボ"
+      },
+      "mission": {
+        "name": "We're Not Hawking Around (3x HawkEye 360)",
+        "placeholder": false,
+        "type": "Earth Science",
+        "type_ja": "地球観測",
+        "orbit": "Sun-Synchronous Orbit",
+        "orbit_ja": "太陽同期軌道"
+      },
+      "site": {
+        "location_id": 10,
+        "name": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
+        "ja": "マヒア半島の発射場",
+        "short": "マヒア",
+        "pad": "Unknown Pad",
+        "country": "NZL",
+        "country_ja": "ニュージーランド",
+        "position": {
+          "lat": -39.260881,
+          "lng": 177.865826
+        }
+      }
+    },
+    {
+      "id": "6b95bcc8-1f88-4539-84fe-f63630138766",
+      "net": "2026-10-22T02:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-10-22T05:00:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-15T21:06:29Z",
+      "rocket": {
+        "name": "Long March 8A",
+        "full_name": "Long March 8A"
+      },
+      "provider": {
+        "name": "China Aerospace Science and Technology Corporation",
+        "ja": "中国航天科技集団（CASC）"
+      },
+      "mission": {
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
+      },
+      "site": {
+        "location_id": 8,
+        "name": "Wenchang Space Launch Site, People's Republic of China",
+        "ja": "文昌宇宙発射場",
+        "short": "文昌",
+        "pad": "Commercial LC-1",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 19.597275,
+          "lng": 110.930753
+        }
+      }
+    },
+    {
+      "id": "3621085f-deae-4f89-bd54-c0f96ee44421",
+      "net": "2026-10-23T18:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-10-23T21:00:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-15T21:06:36Z",
+      "rocket": {
+        "name": "Long March 4B",
+        "full_name": "Long March 4B"
+      },
+      "provider": {
+        "name": "China Aerospace Science and Technology Corporation",
+        "ja": "中国航天科技集団（CASC）"
+      },
+      "mission": {
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
+      },
+      "site": {
+        "location_id": 17,
+        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
+        "ja": "酒泉衛星発射センター",
+        "short": "酒泉",
+        "pad": "Launch Area 94 (SLS-2 / 603)",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 40.960482,
+          "lng": 100.298059
         }
       }
     },
