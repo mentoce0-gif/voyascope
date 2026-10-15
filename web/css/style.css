@@ -1018,13 +1018,13 @@ body { overflow: hidden; }
 }
 /* 打ち上げの日：射場のピンがビーコンになる（計画の時刻のあいだ。位置は描かない） */
 .site-marker.beacon .diamond { background: var(--c); }
-.site-marker.beacon::before, .site-marker.beacon::after { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid var(--c); animation: beacon 2.4s ease-out infinite; pointer-events: none; }
+.site-marker.beacon::before, .site-marker.beacon::after { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; box-sizing: border-box; border-radius: 50%; border: 2px solid var(--c); animation: beacon 2.4s ease-out infinite; pointer-events: none; }
 .site-marker.beacon::after { animation-delay: 1.2s; }
 .site-marker.beacon .tag { color: var(--c); font-weight: 700; }
 @keyframes beacon { from { transform: scale(1); opacity: 0.9; } to { transform: scale(4.2); opacity: 0; } }
 /* 打ち上げの前の1週間：ビーコンより静かに（輪は1つ・ゆっくり） */
 .site-marker.soon .diamond { background: color-mix(in srgb, var(--c) 45%, transparent); }
-.site-marker.soon::before { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid var(--c); animation: beacon 3.6s ease-out infinite; pointer-events: none; }
+.site-marker.soon::before { content: ""; position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; box-sizing: border-box; border-radius: 50%; border: 2px solid var(--c); animation: beacon 3.6s ease-out infinite; pointer-events: none; }
 .site-marker.soon .tag { color: var(--c); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) { .site-marker.beacon::before, .site-marker.beacon::after, .site-marker.soon::before { animation: none; opacity: 0.5; transform: scale(2); } }
 .launch-flow { list-style: none; margin: 10px 0 6px; padding: 0; display: grid; gap: 6px; font-size: 13px; }
