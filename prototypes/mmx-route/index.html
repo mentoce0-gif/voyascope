@@ -53,23 +53,39 @@ const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a
 const lerp = (a, b, t) => a + (b - a) * t;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
-// ---------- 星 ----------
+// ---------- 星空（模擬：明るさ・色のちがう星と、天の川の帯。実在の星の位置ではない） ----------
+const sky = new THREE.Group(); scene.add(sky);
 {
-  const n = 2200, p = new Float32Array(n * 3), s = new Float32Array(n);
   let seed = 7; const rnd = () => ((seed = (1664525 * seed + 1013904223) >>> 0) / 4294967296);
+  const bandN = V(0.62, 0.2, 0.76).normalize(); // 天の川の帯の向き（見た目のため）
+  const n = 9000, p = new Float32Array(n * 3), sz = new Float32Array(n), col = new Float32Array(n * 3);
+  const palette = [[0.75, 0.85, 1.0], [0.92, 0.95, 1.0], [1.0, 1.0, 0.98], [1.0, 0.93, 0.8], [1.0, 0.82, 0.62]];
   for (let i = 0; i < n; i++) {
-    const u = rnd() * 2 - 1, th = rnd() * Math.PI * 2, r = 160;
-    p.set([r * Math.sqrt(1 - u * u) * Math.cos(th), r * u, r * Math.sqrt(1 - u * u) * Math.sin(th)], i * 3);
-    s[i] = 0.4 + rnd() * 1.4;
+    let v;
+    if (i < n * 0.45) { // 天の川の帯に寄せる
+      const a = V(rnd() * 2 - 1, rnd() * 2 - 1, rnd() * 2 - 1).normalize();
+      const off = (rnd() + rnd() + rnd() - 1.5) * 0.18;
+      v = a.sub(bandN.clone().multiplyScalar(a.dot(bandN))).normalize().add(bandN.clone().multiplyScalar(off)).normalize();
+    } else { const u = rnd() * 2 - 1, th = rnd() * Math.PI * 2; v = V(Math.sqrt(1 - u * u) * Math.cos(th), u, Math.sqrt(1 - u * u) * Math.sin(th)); }
+    p.set(v.multiplyScalar(150).toArray(), i * 3);
+    const m = Math.pow(rnd(), 6); // 明るい星は少なく
+    sz[i] = 1.0 + m * 3.6;
+    const c = palette[Math.floor(rnd() * palette.length)]; col.set(c, i * 3);
   }
   const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.BufferAttribute(p, 3));
-  g.setAttribute("aSize", new THREE.BufferAttribute(s, 1));
-  scene.add(new THREE.Points(g, new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false,
-    vertexShader: `attribute float aSize; void main(){ gl_PointSize = aSize * 2.0; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
-    fragmentShader: `void main(){ float d = length(gl_PointCoord-.5); gl_FragColor = vec4(vec3(.8,.9,1.), smoothstep(.5,.0,d)*.7); }`,
-  })));
+  g.setAttribute("position", new THREE.BufferAttribute(p, 3)); g.setAttribute("aSize", new THREE.BufferAttribute(sz, 1)); g.setAttribute("aCol", new THREE.BufferAttribute(col, 3));
+  sky.add(new THREE.Points(g, new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uPx: { value: devicePixelRatio } },
+    vertexShader: `attribute float aSize; attribute vec3 aCol; uniform float uPx; varying vec3 vC; varying float vB; void main(){ vC = aCol; vB = clamp(aSize / 2.2, .25, 1.); gl_PointSize = aSize * uPx; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+    fragmentShader: `varying vec3 vC; varying float vB; void main(){ float d = length(gl_PointCoord-.5)*2.; gl_FragColor = vec4(vC, smoothstep(1.,.0,d) * (.5 + .5 * vB)); }` })));
+  // 天の川のぼんやりした光（雲のようなむら）
+  sky.add(new THREE.Mesh(new THREE.SphereGeometry(155, 48, 32), new THREE.ShaderMaterial({ side: THREE.BackSide, transparent: true, depthWrite: false, uniforms: { uN: { value: bandN } },
+    vertexShader: `varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+    fragmentShader: `uniform vec3 uN; varying vec3 vP;
+      float h(vec3 p){ p = fract(p * .3183099 + .1); p *= 17.; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+      float nz(vec3 x){ vec3 i = floor(x), f = fract(x); f = f*f*(3.-2.*f);
+        return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z); }
+      void main(){ float b = exp(-pow(dot(vP, uN) * 3.6, 2.)); float m = nz(vP * 6.) * .6 + nz(vP * 14.) * .4; float dust = smoothstep(.55, .75, nz(vP * 9. + 3.));
+        vec3 c = mix(vec3(.23,.27,.45), vec3(.55,.48,.42), m); gl_FragColor = vec4(c, b * (.16 + .22 * m) * (1. - .7 * dust * b)); }` })));
 }
 
 // ワープの星の筋（遠くを見る部屋と同じ考え方：速いほど星が後ろへ流れる）
@@ -234,7 +250,7 @@ const cum = [0]; for (let i = 1; i < path.length; i++) cum.push(cum[i - 1] + pat
 const L = cum[cum.length - 1];
 const at = (s) => { const d = s * L; let lo = 0, hi = cum.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cum[m] < d) lo = m; else hi = m; } const t = (d - cum[lo]) / Math.max(1e-9, cum[hi] - cum[lo]); return path[lo].clone().lerp(path[hi], t); };
 const sOf = (target) => { let best = 0, bd = 1e9; for (let i = 0; i < path.length; i++) { const d = path[i].distanceToSquared(target); if (d < bd) { bd = d; best = i; } } return cum[best] / L; };
-const sEndArc = sOf(end), sQso = sOf(qsoIn), sCap = sOf(capStart);
+const sEndArc = sOf(end), sQso = sOf(qsoIn), sCap = sOf(capStart), sSep = sOf(sepPt);
 // 地球のそばは細かく、遠くは粗く（どこでも点線に見えるように）
 const dots = [], ss = [];
 for (let d = 0; d < L; ) { const s = d / L; const p = at(s); dots.push(...p.toArray()); ss.push(s); const nearE = p.distanceTo(earthPos), nearP = p.distanceTo(phobosPos); d += Math.min(0.12, 0.012 + 0.05 * Math.min(nearE * 0.6, nearP * 1.2, p.distanceTo(marsPos) * 0.8)); }
@@ -243,9 +259,9 @@ dg.setAttribute("position", new THREE.Float32BufferAttribute(dots, 3));
 dg.setAttribute("aS", new THREE.Float32BufferAttribute(ss, 1));
 const route = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-  uniforms: { uReveal: { value: 0 }, uMMX: { value: 0.16 }, uFront: { value: 0.16 }, uTime: { value: 0 }, uPx: { value: devicePixelRatio } },
+  uniforms: { uReveal: { value: 0 }, uMMX: { value: 0.16 }, uFront: { value: 0.16 }, uTime: { value: 0 }, uPx: { value: devicePixelRatio }, uPulse: { value: -1 } },
   vertexShader: `
-    attribute float aS; uniform float uReveal, uMMX, uFront, uTime, uPx; varying vec3 vC; varying float vA;
+    attribute float aS; uniform float uReveal, uMMX, uFront, uTime, uPx, uPulse; varying vec3 vC; varying float vA;
     void main(){
       vec4 mv = modelViewMatrix*vec4(position,1.);
       float past = step(aS, uMMX) * step(aS, uReveal);           // 通ってきた道
@@ -255,7 +271,11 @@ const route = new THREE.ShaderMaterial({
       vec3 mint = vec3(.37,.95,.76), amber = vec3(1.,.71,.28);
       vC = mint * past + mix(vec3(.55,.68,.8), mint, lit) * ahead * (1. - head) + amber * head;
       vA = past * .95 + ahead * (.2 + .65 * lit + .9 * head);
-      float sz = (past > .5 ? 2.2 : 1.7) + head * 4.;
+      // 監視モード：数秒に一度、実績 → MMX → 計画航路へ光が流れる（実績は緑、計画は琥珀）
+      float pulse = exp(-pow((aS - uPulse) * 45., 2.)) + .45 * exp(-pow((aS - uPulse + .04) * 18., 2.)) * step(aS, uPulse);
+      vC = mix(vC, step(aS, uMMX) * vec3(.75,1.,.9) + step(uMMX, aS) * vec3(1.,.78,.4), min(1., pulse));
+      vA = min(1., vA + pulse);
+      float sz = (past > .5 ? 2.2 : 1.7) + head * 4. + pulse * 3.;
       gl_PointSize = clamp(sz * uPx * 18. / -mv.z, 1.7 * uPx, 9. * uPx);
       gl_Position = projectionMatrix*mv;
     }`,
@@ -269,18 +289,19 @@ scene.add(new THREE.Points(dg, route));
   const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(lp, 3)); lg.setAttribute("aS", new THREE.Float32BufferAttribute(ls, 1));
   for (const w of [0, 1, 2]) {
     const m = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: route.uniforms,
-      vertexShader: `attribute float aS; uniform float uReveal, uMMX, uFront; varying float vLit, vHead, vPast; void main(){
+      vertexShader: `attribute float aS; uniform float uReveal, uMMX, uFront, uPulse; varying float vLit, vHead, vPast, vPulse, vPlan; void main(){ vPulse = exp(-pow((aS - uPulse) * 70., 2.)) + .4 * exp(-pow((aS - uPulse + .03) * 25., 2.)) * step(aS, uPulse); vPlan = step(uMMX, aS);
         vPast = step(aS, uMMX) * step(aS, uReveal); vLit = step(uMMX, aS) * step(aS, uFront); vHead = vLit * exp(-(uFront - aS) * 40.);
         vec3 p = position + vec3(0., ${(w * 0.012).toFixed(3)}, 0.);
         gl_Position = projectionMatrix*modelViewMatrix*vec4(p,1.); }`,
-      fragmentShader: `varying float vLit, vHead, vPast; void main(){ vec3 c = mix(vec3(.37,.95,.76), vec3(1.,.74,.32), vHead); gl_FragColor = vec4(c, .12 + .55 * vPast + (.75 * vLit + .4 * vHead) ${w ? "* .5" : ""}); }` });
+      fragmentShader: `varying float vLit, vHead, vPast, vPulse, vPlan; void main(){ vec3 c = mix(vec3(.37,.95,.76), vec3(1.,.74,.32), max(vHead, vPulse * vPlan)); gl_FragColor = vec4(c, .12 + .55 * vPast + (.75 * vLit + .4 * vHead + vPulse) ${w ? "* .5" : ""}); }` });
     scene.add(new THREE.LineSegments(lg, m));
   }
 }
 
 // 種子島のピン（光る輪）
 const pinGlow = glow(0x5ef2c2, 0.12, pinWorld);
-const pinRing = ringGlow(0x5ef2c2, pinWorld); pinGlow.depthTest = false; pinRing.depthTest = false;
+const pinRing = ringGlow(0x5ef2c2, pinWorld);
+for (const b of billboards.slice(-2)) b.position.copy(earthPos.clone().add(pinWorld.clone().sub(earthPos).multiplyScalar(1.06))); // 地表の少し上に（地球の裏からは透けない）
 
 // ---------- MMX（アプリの模型） ----------
 const sMMX = sOf(tr[Math.max(k0 + 4, 25)]); // およそ現在（試作では打ち上げ50日後あたり）
@@ -304,67 +325,106 @@ const camAt = {
 const mixCam = (A, B, t) => ({ pos: A.pos.clone().lerp(B.pos, t), look: A.look.clone().lerp(B.look, t) });
 const caps = [
   [0, "2026.10.20 4:41", "種子島から"],
-  [1.7, "+1時間11分", "地球を回って、火星へ向かう軌道へ"],
-  [3.4, "NOW（イメージ）", "MMX は、いまこのあたり"],
-  [5.6, "1年弱", "太陽のまわりを大きく回って、火星へ"],
-  [10.0, "2027年度", "火星を回る軌道へ。そしてフォボスへ"],
+  [2.0, "+1時間11分", "地球を回って、火星へ向かう軌道へ"],
+  [5.3, "NOW（イメージ）", "MMX は、いまこのあたり"],
+  [7.4, "1年弱", "太陽のまわりを大きく回って、火星へ"],
+  [11.8, "2027年度", "火星を回る軌道へ。そしてフォボスへ"],
 ];
 const tags = { tane: document.getElementById("tag-tane"), mmx: document.getElementById("tag-mmx"), mars: document.getElementById("tag-mars"), phobos: document.getElementById("tag-phobos") };
 const place = (el, p, alpha, dy = -14) => { const v = p.clone().project(camera); const vis = v.z < 1 && alpha > 0.01; el.style.opacity = vis ? alpha : 0; el.style.left = `${(v.x + 1) / 2 * W}px`; el.style.top = `${(1 - v.y) / 2 * H + dy}px`; };
 
 function renderAt(t) {
-  // カメラ：地球 → MMX → 光の筋の先端を追う（ワープ）→ 火星を回る軌道を見る
+  route.uniforms.uPulse.value = -1; comet.uniforms.uA.value = 0; mmxHolder.scale.setScalar(0.22); mmxGlow.uniforms.uS.value = 0.7; phobosGlow.uniforms.uS.value = 0.4;
+  // カメラ：地球 → 光の点に沿って MMX まで → MMX → 光の筋の先端を追う（ワープ）→ 火星を回る軌道を見る
   const fTo = (x) => Math.min(1, Math.max(0, x));
-  const front = t < 5.2 ? sMMX : t < 9.8 ? lerp(sMMX, sCap, fTo((t - 5.2) / 4.6) ** 1.15) : lerp(sCap, 1, smooth(9.8, 12.6, t));
-  const chase = () => {
-    const f = Math.min(front, sCap), head = at(f), back = at(Math.max(0, f - 0.006));
-    const dir = head.clone().sub(back).normalize(), side = dir.clone().cross(V(0, 1, 0)).normalize();
-    const back2 = at(Math.max(0, f - 0.016)); return { pos: back2.clone().add(V(0, 0.42, 0)).add(side.multiplyScalar(0.1)), look: at(Math.min(1, f + 0.02)).add(V(0, -0.06, 0)) };
+  const ease = (x) => x * x * (3 - 2 * x);
+  // 地球から MMX までの光の点：地球を回る部分（2.0〜3.9秒）と、その先（3.9〜5.3秒）
+  const ride = t < 3.9 ? lerp(0.002, sSep, ease(fTo((t - 1.9) / 2.0)) ** 0.9) : lerp(sSep, sMMX - 1.4 / L, ease(fTo((t - 3.9) / 1.4)));
+  const front = t < 7.0 ? sMMX : t < 11.6 ? lerp(sMMX, sCap, fTo((t - 7.0) / 4.6) ** 1.15) : lerp(sCap, 1, smooth(11.6, 14.4, t));
+  // 先端の少し後ろ・少し上から、先を見る（back・up は世界の長さ）
+  const chaseAt = (f, back, up, ahead, radial = 0) => {
+    const head = at(f), b = at(Math.max(0, f - back / L)), dir = head.clone().sub(b).normalize();
+    const upDir = V(0, 1, 0).lerp(b.clone().sub(earthPos).normalize(), radial).normalize(); // 地球のそばでは、地表から外向きにずらす
+    const side = dir.clone().cross(upDir).normalize();
+    return { pos: b.clone().add(upDir.clone().multiplyScalar(up)).add(side.multiplyScalar(up * 0.25)), look: at(Math.min(1, f + ahead / L)).add(upDir.multiplyScalar(-up * 0.15)) };
   };
+  const k = smooth(3.4, 4.6, t); // 地球を離れるほど、カメラを引く
+  const ride1 = () => chaseAt(ride, lerp(0.5, 1.1, k), lerp(0.35, 0.38, k), lerp(0.6, 1.4, k), 1 - k);
+  const chase2 = () => chaseAt(Math.min(front, sCap), 1.2, 0.42, 1.5);
   let c;
-  if (t < 2.6) c = camAt.near;
-  else if (t < 4.4) c = mixCam(camAt.near, camAt.mid, smooth(2.6, 4.4, t));
-  else if (t < 5.2) c = camAt.mid;
-  else if (t < 9.4) c = mixCam(camAt.mid, chase(), smooth(5.2, 6.0, t));
-  else c = mixCam(chase(), camAt.mars, smooth(9.4, 10.9, t));
-  const warp = smooth(5.7, 6.6, t) * (1 - smooth(8.8, 9.8, t));
+  if (t < 2.0) c = camAt.near;
+  else if (t < 5.0) c = mixCam(camAt.near, ride1(), smooth(2.0, 2.9, t));
+  else if (t < 7.0) c = mixCam(ride1(), camAt.mid, smooth(5.0, 6.0, t));
+  else if (t < 11.2) c = mixCam(camAt.mid, chase2(), smooth(7.0, 7.8, t));
+  else c = mixCam(chase2(), camAt.mars, smooth(11.2, 12.7, t));
+  const warp = smooth(7.5, 8.4, t) * (1 - smooth(10.6, 11.6, t));
   camera.fov = 42 + 22 * warp; camera.updateProjectionMatrix();
-  const drift = V(Math.sin(t * 0.3) * 0.05, 0, Math.cos(t * 0.27) * 0.05).add(V(Math.sin(t * 37) * 0.012, Math.cos(t * 41) * 0.012, 0).multiplyScalar(warp));
+  const drift = V(Math.sin(t * 0.3) * 0.03, 0, Math.cos(t * 0.27) * 0.03).add(V(Math.sin(t * 37) * 0.012, Math.cos(t * 41) * 0.012, 0).multiplyScalar(warp));
   camera.position.copy(c.pos).add(drift); camera.lookAt(c.look);
   document.getElementById("vig").style.opacity = warp * 0.9;
   const fwd = c.look.clone().sub(c.pos).normalize();
   streak.uniforms.uDir.value.copy(fwd).multiplyScalar(-1); streak.uniforms.uLen.value = warp * 14; streak.uniforms.uA.value = warp * 0.55; streak.uniforms.uC.value.copy(camera.position);
   // 道
-  route.uniforms.uReveal.value = lerp(0, sMMX, smooth(0.6, 4.2, t));
+  route.uniforms.uReveal.value = t < 1.9 ? lerp(0, 0.002, smooth(0.6, 1.9, t)) : ride;
   route.uniforms.uFront.value = front;
   // ピンの輪（3.6秒ごと）
-  const ph = (t % 1.8) / 1.8; pinRing.uniforms.uS.value = 0.06 + ph * 0.32; pinRing.uniforms.uA.value = (1 - ph) * 0.9 * (1 - smooth(4, 6, t) * 0.6);
+  const ph = (t % 1.8) / 1.8; pinRing.uniforms.uS.value = 0.06 + ph * 0.32; pinRing.uniforms.uA.value = (1 - ph) * 0.9 * (1 - smooth(2.4, 3.4, t) * 0.7);
   pinGlow.uniforms.uA.value = 0.9;
   // MMX
-  mmxHolder.visible = t > 3.0;
+  mmxHolder.visible = t > 3.6;
   mmx.rotation.y = 0.6 + t * 0.25;
   sunLight.target.position.copy(mmxPos);
-  mmxGlow.uniforms.uA.value = smooth(3.2, 4.2, t) * (0.55 + 0.25 * Math.sin(t * 3.5));
+  mmxGlow.uniforms.uA.value = smooth(4.4, 5.4, t) * (0.55 + 0.25 * Math.sin(t * 3.5));
   // フォボス
-  const arrive = smooth(12.2, 12.8, t);
-  phobosOrbit.uniforms.uA.value = 0.12 + 0.25 * smooth(10.5, 12.2, t);
+  const arrive = smooth(14.0, 14.6, t);
+  phobosOrbit.uniforms.uA.value = 0.12 + 0.25 * smooth(12.3, 14.0, t);
   phobosGlow.uniforms.uA.value = arrive * (0.7 + 0.3 * Math.sin(t * 4)); phobosGlow.uniforms.uS.value = 0.25 + arrive * 0.35;
   earthMesh.rotation.y = t * 0.03;
   for (const b of billboards) { b.quaternion.copy(camera.quaternion); b.scale.setScalar(b.material.uniforms.uS.value); }
+  sky.position.copy(camera.position);
   renderer.render(scene, camera);
   // 文字
   const cap = [...caps].reverse().find((x) => t >= x[0]);
   document.getElementById("capk").textContent = cap[1]; document.getElementById("capt").textContent = cap[2];
   const capFade = Math.min(smooth(cap[0], cap[0] + 0.5, t), 1);
   document.querySelector(".cap").style.opacity = capFade;
-  place(tags.tane, pinWorld, 1 - smooth(3.0, 4.0, t));
-  place(tags.mmx, mmxPos, smooth(3.6, 4.4, t) * (1 - smooth(5.2, 5.8, t)), -100);
-  place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), smooth(10.2, 10.9, t), 34);
-  place(tags.phobos, phobosPos, smooth(12.2, 12.7, t), -18);
+  place(tags.tane, pinWorld, 1 - smooth(2.3, 3.0, t));
+  place(tags.mmx, mmxPos, smooth(5.4, 6.0, t) * (1 - smooth(7.0, 7.5, t)), -100);
+  place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), smooth(12.0, 12.7, t), 34);
+  place(tags.phobos, phobosPos, smooth(14.0, 14.5, t), -18);
 }
 window.renderAt = renderAt;
+
+// ---------- MMX 監視モード（オープニングのあと、ずっと見ている状態） ----------
+// 実績（通ってきた道）・MMX・計画航路を見渡し、数秒に一度（5秒ごと）光を流す
+const comet = glow(0xffffff, 1.1, V(0, 0, 0)); comet.uniforms.uA.value = 0;
+const watchCenter = earthPos.clone().add(marsPos).add(mmxPos).multiplyScalar(1 / 3);
+const watchCam = { pos: watchCenter.clone().add(V(0, 50, 0)).add(watchCenter.clone().normalize().multiplyScalar(18)), look: watchCenter.clone().add(watchCenter.clone().normalize().multiplyScalar(-1.5)) };
+function watchAt(t) {
+  camera.fov = 42; camera.updateProjectionMatrix();
+  camera.position.copy(watchCam.pos).add(V(Math.sin(t * 0.2) * 0.6, 0, Math.cos(t * 0.17) * 0.6)); camera.lookAt(watchCam.look);
+  document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
+  route.uniforms.uReveal.value = sMMX; route.uniforms.uFront.value = sMMX;
+  const PERIOD = 5, RUN = 3.2, ph = t % PERIOD;
+  route.uniforms.uPulse.value = ph < RUN ? -0.05 + (ph / RUN) * 1.1 : -1;
+  mmxHolder.visible = true; mmxHolder.scale.setScalar(0.9); mmx.rotation.y = 0.6 + t * 0.25;
+  // 光が MMX を通るとき、MMX の灯りが強まる
+  const pass = Math.exp(-Math.pow((route.uniforms.uPulse.value - sMMX) * 30, 2));
+  const up = route.uniforms.uPulse.value;
+  if (up >= 0 && up <= 1) { billboards.find((b) => b.material === comet).position.copy(at(up)); comet.uniforms.uC.value.set(up < sMMX ? 0x9ff7d8 : 0xffc76b); comet.uniforms.uA.value = 0.95; comet.uniforms.uS.value = 1.6; } else comet.uniforms.uA.value = 0;
+  mmxGlow.uniforms.uS.value = 2.4; mmxGlow.uniforms.uA.value = 0.55 + 0.45 * pass;
+  pinRing.uniforms.uA.value = 0; pinGlow.uniforms.uA.value = 0.6;
+  phobosOrbit.uniforms.uA.value = 0.2; phobosGlow.uniforms.uA.value = Math.exp(-Math.pow((route.uniforms.uPulse.value - 1) * 20, 2)); phobosGlow.uniforms.uS.value = 1.2;
+  for (const b of billboards) { b.quaternion.copy(camera.quaternion); b.scale.setScalar(b.material.uniforms.uS.value); }
+  sky.position.copy(camera.position);
+  renderer.render(scene, camera);
+  document.getElementById("capk").textContent = "NOW（イメージ）"; document.getElementById("capt").textContent = "MMX は、いまこのあたり";
+  document.querySelector(".cap").style.opacity = 1;
+  place(tags.tane, pinWorld, 0); place(tags.mmx, mmxPos, 1, -26); place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 1, 30); place(tags.phobos, phobosPos, 0);
+}
+window.watchAt = watchAt;
 window.ready = loadTex("../../web/assets/earth/day-2048.jpg").then((tex) => { earthMat.map = tex; earthMat.needsUpdate = true; return document.fonts.ready; }).then(() => { renderAt(0); return true; });
-if (!navigator.webdriver) { const t0 = performance.now(); const loop = () => { renderAt(((performance.now() - t0) / 1000) % 14); requestAnimationFrame(loop); }; window.ready.then(loop); }
+if (!navigator.webdriver) { const t0 = performance.now(); const watch = location.hash === "#watch"; const loop = () => { const t = (performance.now() - t0) / 1000; watch ? watchAt(t) : t < 16 ? renderAt(t) : watchAt(t - 16); requestAnimationFrame(loop); }; window.ready.then(loop); }
 </script>
 </body>
 </html>
