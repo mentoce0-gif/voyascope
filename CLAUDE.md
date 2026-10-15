@@ -8,9 +8,9 @@ VOYASCOPE は、地球のまわりを飛ぶ衛星・宇宙船・宇宙飛行士�
 対象は中高生。非公式のファンメイド作品。
 
 - 作者（オーナー）：151Me。個人・本業あり・稼働は週数時間
-- 方針：サーバを持たない。GitHub Pages ＋ GitHub Actions ＋ ブラウザ内計算で完結させる
+- 方針：サーバを持たない。静的なファイルの配信（Cloudflare）＋ GitHub Actions ＋ ブラウザ内計算で完結させる
 - 2026-10-04 に公開のリポジトリを作り直した（履歴から、個人のメールアドレスと、公開前の画像・調査の記録を外すため）。前のリポジトリは `voyascope-archive`（非公開。PR #1〜#36 のやりとり）、調査の記録（`research/`）は `voyascope-research`（非公開）
-- リポジトリは public（2026-09-30 オーナーが公開）。いまは GitHub Pages で仮公開（https://mentoce0-gif.github.io/voyascope/）。のちに Cloudflare Pages に移す
+- リポジトリは public（2026-09-30 オーナーが公開）。公開先は **https://voyascope.org**（Cloudflare・Workers の静的アセット。`.github/workflows/deploy.yml`）。GitHub Pages（https://mentoce0-gif.github.io/voyascope/）は「移りました」の案内だけ（2026-10-15、M9 ②）
 
 ## 最優先ルール
 
