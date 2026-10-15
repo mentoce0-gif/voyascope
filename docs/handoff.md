@@ -8,8 +8,8 @@
 
 | 名前 | 場所 | メモ |
 |---|---|---|
-| 本番 | https://voyascope.org | Cloudflare（Workers の静的アセット）。`.github/workflows/deploy.yml`・`wrangler.jsonc`・`web/_headers`。鍵は GitHub の Secrets（`CLOUDFLARE_API_TOKEN`・`CLOUDFLARE_ACCOUNT_ID`） |
-| 仮の公開（並べて確かめ中） | https://mentoce0-gif.github.io/voyascope/ | GitHub Pages（`pages.yml`）。切り替えたら「新しい場所」の案内だけにする（M9 ②） |
+| 本番 | https://voyascope.org | **2026-10-15 に正式に切り替え（M9 ②）**。Cloudflare（Workers の静的アセット）。`.github/workflows/deploy.yml`・`wrangler.jsonc`・`web/_headers`。鍵は GitHub の Secrets（`CLOUDFLARE_API_TOKEN`・`CLOUDFLARE_ACCOUNT_ID`） |
+| もとの公開先 | https://mentoce0-gif.github.io/voyascope/ | GitHub Pages。いまは「voyascope.org に移りました」の案内だけ（`pages-moved/`・`pages.yml`。同じ道の voyascope.org へ3秒で移る） |
 | MMX の予告ページ | https://voyascope.org/mmx/ | `web/mmx/`。noindex、アプリからはまだリンクしない。紹介のメールに添えた |
 | X（旧 Twitter） | https://x.com/voyascope （@voyascope） | オーナーのアカウント（作者として発信）。プロフィールは「VOYASCOPE をつくっている人。本業のかたわら…※非公式ファンメイド作品」（2026-10-08 案C）。開発記録の投稿文は Claude Code が下書き（X の重み付きで280以内、非公式ファンメイドの一文を入れる） |
 | 公開のリポジトリ | `mentoce0-gif/voyascope` | 2026-10-04 に作り直した（PR は #1 から振り直し） |
@@ -23,9 +23,7 @@
    - 10/17〜10/21 は大きな変更をしない。出来事の記録（日時・状態）だけ直す
    - 打ち上げのあと：出来事を `done`＋「いってらっしゃい」（タスク017）→ カードの状態 → 「一言でわかる」を作り直す → Horizons（MMX は登録済み、spkid −239）の軌道が実際の追跡か確かめて「いまどこ」→ ① 概要のヒーロー（10/22〜）
    - X の投稿の下書き：`voyascope-research` の `research/outreach/2026-10-12-x-mmx-drafts.md`（本番はオーナーが「私口調」で）
-2. **M9 ② Cloudflare への切り替え**（**10/16 までにマージ**。10/17 から変更を止める。**10/15 時点で未着手**：`og:url`・`og:image` はまだ github.io）→ [`m9-plan.md`](m9-plan.md)
-   - README・`CLAUDE.md`（公開先と「サーバを持たない」の方針の書き直し）・`og:url` / `og:image` を https://voyascope.org に。GitHub Pages には案内だけを置く
-   - データの更新でコミットしない形にする（Actions から直接公開）
+2. **M9 ② Cloudflare への切り替え**：住所をそろえる（`og:url`・`og:image`・canonical・README・CLAUDE.md を voyascope.org に）と、GitHub Pages を案内だけにするのは **10/15 に済み**。残り：**データの更新でコミットしない形**（Actions から直接公開）は **10/22 以降**（凍結期間を避ける）→ [`m9-plan.md`](m9-plan.md)
 3. **出来事のあとの手直し**：11/18 ボイジャー1号が地球から1光日、11/21 ベピコロンボが水星を回る軌道へ、12/9〜10「みお」と MPO の分離。11/15〜11/22 は大きな変更をしない
 4. **M9 ③ 公式ページの見張り**（10/22 から）
 5. **アルテミス2号のページ**（[タスク019](tasks/019-artemis2-tour.md)、`web/tour/artemis2/`）：10/12 に作り直した（オーナー：Apple の製品ページのように）

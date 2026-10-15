@@ -1,21 +1,15 @@
 name: pages
 
-# web/ を GitHub Pages に公開する。
-# - main に web/ の変更が入ったとき
-# - 軌道データ・運用状況・打ち上げ予定の自動更新（update-orbits）と、探査機の距離の自動更新（update-horizons）が終わったとき
-#   （Actions がコミットしたプッシュでは、ほかのワークフローが動かないため）
+# GitHub Pages には「voyascope.org に移りました」の案内だけを置く（2026-10-15、M9 ②）。
+# 本番は https://voyascope.org（Cloudflare。deploy.yml）。
+# pages-moved/ の index.html と 404.html（どの道で来ても、同じ道の voyascope.org へ3秒で移る）。
+# - pages-moved/ かこのファイルを変えたとき
 # - 手動（Actions の画面から）
-#
-# 2026-09-30 オーナー方針：微修正を重ねたあと Cloudflare Pages に移す。それまでの仮の公開先。
-# 移したら、このワークフローは消すか手動だけにする。
 
 on:
   push:
     branches: [main]
-    paths: ["web/**", ".github/workflows/pages.yml"]
-  workflow_run:
-    workflows: [update-orbits, update-horizons]
-    types: [completed]
+    paths: ["pages-moved/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -29,10 +23,6 @@ concurrency:
 
 jobs:
   deploy:
-    # 自動更新が「失敗」で終わっても公開し直す。失敗は、軌道データをコミットしたあとで
-    # 運用状況・打ち上げ予定の取得の失敗を知らせるためのことがあり、公開を止めると軌道データまで古くなるため
-    # （何もコミットされていなければ、同じ中身を公開し直すだけ）
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -45,6 +35,6 @@ jobs:
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: web
+          path: pages-moved
       - id: deployment
         uses: actions/deploy-pages@v4

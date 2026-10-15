@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VOYASCOPE は voyascope.org に移りました</title>
+  <meta name="robots" content="noindex">
+  <link rel="canonical" href="https://voyascope.org/">
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #07142b; color: #eef6f3; font: 16px/1.8 "Zen Kaku Gothic New", system-ui, sans-serif; text-align: center; padding: 16px; box-sizing: border-box; }
+    .brand { font: 700 14px "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.3em; }
+    a { color: #5ef2c2; font-size: 1.2rem; font-weight: 700; }
+    .small { color: #9fb3c8; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand">VOYASCOPE</p>
+    <p>VOYASCOPE は、新しい場所に移りました。</p>
+    <p><a id="go" href="https://voyascope.org/">https://voyascope.org/</a></p>
+    <p class="small">数秒で移動します。ブックマークを新しい場所に変えてください。<br>※非公式のファンメイド作品です。</p>
+  </main>
+  <script>
+    // GitHub Pages では /voyascope/ の下にあるので、そのあとの道（例：/voyascope/tour/artemis2/）を引き継ぐ
+    var rest = location.pathname.replace(/^\/voyascope\/?/, "");
+    var to = "https://voyascope.org/" + rest + location.search + location.hash;
+    document.getElementById("go").href = to;
+    document.getElementById("go").textContent = to;
+    setTimeout(function () { location.replace(to); }, 3000);
+  </script>
+</body>
+</html>

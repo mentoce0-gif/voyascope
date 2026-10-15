@@ -6,6 +6,7 @@
 
 ## 2026-10-15
 
+- M9 ② 公開先を https://voyascope.org に正式に切り替えた：共有のカードの住所と画像（og:url・og:image）・canonical・README・CLAUDE.md を voyascope.org に。アルテミス2号のページにも共有のカードの設定。GitHub Pages は「voyascope.org に移りました」の案内だけ（同じ道へ3秒で移る）。sitemap から MMX 予告（noindex）を外した。データの更新でコミットしない形は 10/22 以降。
 - 引き継ぎメモを今の状態に書き直し、MMX の打ち上げのあとの段取りを [タスク020](tasks/020-mmx-after-launch.md) にまとめた。MMX の打ち上げ日時は JAXA のお知らせで変わっていない（10/20 4:41:03）。
 
 ## 2026-10-13

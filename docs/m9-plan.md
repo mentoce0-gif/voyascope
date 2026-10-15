@@ -3,6 +3,7 @@
 > 2026-10-04 Claude Code 案。2026-10-04 オーナー「OK」。
 > **2026-10-04：① 済み**（公開のリポジトリを作り直した。前のリポジトリは `voyascope-archive`、調査の記録は `voyascope-research`。どちらも非公開）。
 > **2026-10-04：② の公開を始めた → https://voyascope.org**（GitHub Pages と並べて確かめ中）。
+> **2026-10-15：② の切り替え**（住所を voyascope.org にそろえ、GitHub Pages は「移りました」の案内だけに）。残りは「データの更新でコミットしない形」（10/22 以降）。
 > **独自ドメインは `voyascope.org`**（2026-10-04 オーナー。Cloudflare で買った）。② は Workers の静的アセットで準備した（`wrangler.jsonc`・`web/_headers`・`.github/workflows/deploy.yml`）。
 > きっかけ：M7 v0 が終わった（2026-10-04）。ロードマップの M9 に「ページの構成が固まった目安を M7 v0 の完了とし、そのときに Claude Code が移行の段取りを提案する」とある。
 > あわせて、公開前の画像と調査の記録を「完全に削除できるなら GitHub から消そう」→ リポジトリの作り直しを M9 と一緒にやる（2026-10-04 オーナー「M9かな」）。
