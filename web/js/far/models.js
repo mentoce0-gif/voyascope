@@ -73,6 +73,8 @@ export function makeKit(T) {
     foilSilver:mat('foil-silver',0xc9d0d4,.85,.3,{bumpMap:foil,bumpScale:.006}),
     copper:mat('copper',0xc4682f,.6,.42),
     solarThin:mat('solar-thin-film',0xffffff,.5,.38,{map:cellsThin}),
+    graphite:mat('graphite',0x2c313b,.4,.55),
+    olive:mat('radiator-olive',0x56695f,.35,.5),
     goldMLI:mat('foil-gold-bright',0xe0b03e,.85,.26,{bumpMap:foil,bumpScale:.014,envMapIntensity:.8}),
     textures:{foil,cells,cellsThin,env}
   };
@@ -105,10 +107,10 @@ function builder(T,K) {
     put(geo('torus',()=>new T.TorusGeometry(1,.025,6,40)),m,p,[r,r,t/.025],rot,par);
   }
   function ball(m,p,s,par=content){put(geo('sphere',()=>new T.SphereGeometry(1,16,10)),m,p,s,[0,0,0],par);}
-  function panel(w,h,p,rot=[0,0,0],par=content,nx=8,ny=6,cell='solar'){
+  function panel(w,h,p,rot=[0,0,0],par=content,nx=8,ny=6,cell='solar',back='black'){
     const g=group('solar-array',p,rot,par);
     B('silver',[0,0,0],[w+.06,.045,h+.06],[0,0,0],g);
-    B('black',[0,-.03,0],[w,.035,h],[0,0,0],g);
+    B(back,[0,-.03,0],[w,.035,h],[0,0,0],g);
     // Distinct cell tiles, instanced in a single draw per panel.
     for(let x=0;x<nx;x++)for(let y=0;y<ny;y++)
       B(cell,[(x+.5-nx/2)*w/nx,.03,(y+.5-ny/2)*h/ny],[w/nx*.955,.008,h/ny*.96],[0,0,0],g);
@@ -382,7 +384,10 @@ function mmx(T,K){
   // ---------- 復路モジュール（y 1.75〜3.05） ----------
   const ry=2.4;
   B('goldMLI',[0,ry,0],[1.9,1.3,1.7],[0,0,0],ret);
-  B('foilSilver',[0,ry,-.86],[1.4,1.0,.02],[0,0,0],ret);
+  B('olive',[-.2,ry+.1,-.86],[1.2,.85,.02],[0,0,0],ret);                 // 暗い緑がかった灰色の板（放熱面とみられる）
+  // 金色のふちの円筒に、黄色がかったドーム（写真で目立つ装置。何の装置かは確かめていないので形だけ）
+  C('goldMLI',[.55,ry-.36,-1.0],.34,.3,[PI/2,0,0],ret,28);ring('gold',[.55,ry-.36,-1.15],.34,.04,[0,0,0],ret);
+  ball('mirror',[.55,ry-.36,-1.14],[.3,.3,.13],ret);
   B('white',[.96,ry-.25,.3],[.02,.5,.7],[0,0,0],ret);
   B('black',[-.5,ry+.5,.86],[.6,.22,.02],[0,0,0],ret);
   // 側面の機器・放熱面（目安）
@@ -413,7 +418,7 @@ function mmx(T,K){
     B('silver',[s*1.42,ry,0],[.08,.3,.12],[0,0,0],ret);
     for(let k=0;k<3;k++){
       const x=s*(1.5+.53+k*1.08);
-      panel(1.02,1.5,[x,ry,0],[PI/2,0,0],ret,6,9,'solarThin');
+      panel(1.02,1.5,[x,ry,0],[PI/2,0,0],ret,6,9,'solarThin','graphite');
       if(k<2)B('silver',[s*(1.5+1.07+k*1.08),ry,0],[.06,1.4,.04],[0,0,0],ret);
     }
   }
