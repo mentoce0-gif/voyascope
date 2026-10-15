@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { launchProgress, beaconTag, launchFlowHtml, hms, AFTER_MS, LAUNCH_PLANS } from "../web/js/launch-plan.js";
+import { launchProgress, beaconTag, launchFlowHtml, hms, AFTER_MS, LAUNCH_PLANS, launchSoon, soonTag, SOON_MS } from "../web/js/launch-plan.js";
 import { eventPanelHtml } from "../web/js/events.js";
 
 const mmx = JSON.parse(readFileSync(new URL("../curation/events/mmx-launch.json", import.meta.url)));
@@ -49,4 +49,15 @@ test("予定の詳細：計画の流れがあれば残り時間の代わりに�
   assert.match(html, /jaxa20260820-1_01\.pdf/);
   assert.match(html, /class="now"><span class="mono">0:10:40<\/span>慣性飛行/);
   assert.doesNotMatch(html, /予定の時刻を過ぎました<\/span><span class="small">結果は/);
+});
+
+test("打ち上げの前の1週間は光らせる（延期・日付だけ・時刻を過ぎたら光らせない）", () => {
+  assert.equal(launchSoon(mmx, at(-SOON_MS - 1000)), false);
+  assert.equal(launchSoon(mmx, at(-SOON_MS)), true);
+  assert.equal(launchSoon(mmx, at(-1000)), true);
+  assert.equal(launchSoon(mmx, at(0)), false);
+  assert.equal(launchSoon({ ...mmx, status: { value: "postponed" } }, at(-3600000)), false);
+  assert.equal(launchSoon({ ...mmx, when: { ...mmx.when, value: { date: "2026-10-20" } } }, at(-3600000)), false);
+  assert.equal(soonTag(mmx, at(-(4 * 86400000 + 12 * 3600000 + 60000))), "MMX 打ち上げまで あと4日12時間");
+  assert.equal(soonTag(mmx, at(-(3 * 3600000 + 12 * 60000 + 30000))), "MMX 打ち上げまで あと3時間12分");
 });

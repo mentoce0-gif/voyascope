@@ -2,7 +2,7 @@
 // 位置は描かない。打ち上がったか・分離できたかは、公式の発表を確かめてから記録する（2026-10-05 オーナー確認）
 // 計画の時刻は、その打ち上げの日時のときだけのもの（日がずれると、1回目の燃焼のあとの計画が変わる）。
 // 予定の日時（events.json の when.at）が forAt と同じときだけ使う
-import { eventSpan, statusOf } from "./events.js";
+import { eventSpan, statusOf, countdownText } from "./events.js";
 
 const S = (h, m, s) => ((h * 60 + m) * 60 + s) * 1000;
 
@@ -46,6 +46,18 @@ export function launchProgress(ev, now) {
   });
   return { plan, elapsed, current, separated: elapsed >= sep, key: `${current}` };
 }
+
+// 打ち上げの前の1週間：射場のピンをゆっくり光らせて、名前を「MMX 打ち上げまで あと4日12時間」に（2026-10-15 オーナー）
+// 日時（時刻まで）が公表されている予定だけ。延期・日付だけの予定・打ち上げの時刻を過ぎたら光らせない
+export const SOON_MS = 7 * 86400000;
+export function launchSoon(ev, now) {
+  if (ev?.kind !== "launch" || statusOf(ev) !== "scheduled") return false;
+  const span = eventSpan(ev);
+  if (span?.precision !== "at") return false;
+  const ms = span.start - now.getTime();
+  return ms > 0 && ms <= SOON_MS;
+}
+export const soonTag = (ev, now) => `${LAUNCH_PLANS[ev.id]?.craft ?? ev.site.label} 打ち上げまで ${countdownText(ev, now)}`;
 
 // 射場のピンの名前（ビーコンのあいだ）
 export function beaconTag(p) {

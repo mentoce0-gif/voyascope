@@ -12,7 +12,7 @@ import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa,
 import { findVisiblePasses, observerOf, dir8 } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
 import { upcomingEvents, eventsListHtml, eventPanelHtml, nextChipHtml, bigCountdown, whenShort, hmJst, eventSpan } from "./events.js";
-import { launchProgress, launchFlowHtml, beaconTag, hms } from "./launch-plan.js";
+import { launchProgress, launchFlowHtml, beaconTag, hms, launchSoon, soonTag } from "./launch-plan.js";
 import {
   worldLaunches,
   dataState,
@@ -1080,11 +1080,16 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     };
   };
   // 打ち上げの日：射場のピンをビーコンにして、名前を「MMX 打ち上げから 0:12:34（計画）」に（毎秒）
+  // 打ち上げの前の1週間は、ゆっくり光らせて「MMX 打ち上げまで あと4日12時間」
   function updateBeacons(now) {
     for (const s of sites) {
-      const lp = s.shown && launchProgress(s.ev, new Date(now));
+      const d = new Date(now);
+      const lp = s.shown && launchProgress(s.ev, d);
+      const soon = !lp && s.shown && launchSoon(s.ev, d);
       s.el.classList.toggle("beacon", !!lp);
+      s.el.classList.toggle("soon", soon);
       if (lp) s.el.querySelector(".tag").textContent = beaconTag(lp);
+      else if (soon) s.el.querySelector(".tag").textContent = soonTag(s.ev, d);
     }
   }
   function renderEvents() {
@@ -1113,7 +1118,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     const ids = new Set(upcoming.map((ev) => ev.id));
     for (const s of sites) {
       s.shown = ids.has(s.ev.id);
-      if (!launchProgress(s.ev, now)) s.el.querySelector(".tag").textContent = `${s.ev.site.label} ${whenShort(s.ev, now)[0]}`;
+      if (!launchProgress(s.ev, now) && !launchSoon(s.ev, now)) s.el.querySelector(".tag").textContent = `${s.ev.site.label} ${whenShort(s.ev, now)[0]}`;
     }
 
     // 世界の打ち上げ（参考）：公式の予定と同じものは除く。データの古さは実際の今で判断する
