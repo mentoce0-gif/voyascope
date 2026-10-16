@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>VOYASCOPE — 入口の見直し（試作）</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#07142b">
+  <link rel="icon" href="../../web/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+  <style>
+    /* 色と文字は web/css/style.css と同じ（navy / amber / mint） */
+    :root {
+      --navy-900: #050e1f; --navy-800: #07142b; --navy-700: #0c2140; --navy-600: #143057;
+      --mint: #5ef2c2; --mint-dim: rgba(94,242,194,.55); --mint-faint: rgba(94,242,194,.16);
+      --amber: #ffb547; --amber-dim: rgba(255,181,71,.6);
+      --text: #d9f4ea; --text-dim: #8fb3a8;
+      --font-body: "Zen Kaku Gothic New", system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, monospace;
+      --gutter: 16px;
+      --tab-h: 64px;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--navy-800); color: var(--text); font-family: var(--font-body); line-height: 1.7; -webkit-text-size-adjust: 100%; padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom)); }
+    a { color: var(--mint); }
+    .mono { font-family: var(--font-mono); }
+    :focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+    /* 試作の注記（どのサイトの考え方を参考にしたか）。?clean で消える */
+    .note { display: inline-block; font: 11px/1.4 var(--font-mono); color: var(--amber); border: 1px dashed var(--amber-dim); padding: 2px 8px; border-radius: 3px; background: rgba(5,14,31,.7); }
+    .clean .note, .clean .proto-bar { display: none; }
+    .proto-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 30; font-size: 12px; text-align: center; padding: 4px var(--gutter); background: var(--amber); color: var(--navy-900); }
+
+    /* ---------- ① ヒーロー：本物の値1つ＋ボタン1つ ---------- */
+    .hero { position: relative; min-height: 100svh; display: grid; align-content: end; padding: 72px var(--gutter) calc(32px + var(--tab-h)); overflow: hidden; }
+    .hero-bg { position: absolute; inset: 0; background: radial-gradient(120% 70% at 70% 30%, transparent 30%, var(--navy-800) 78%), url("../../web/assets/earth/hero-1600.webp") 62% 30% / cover no-repeat; }
+    .hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(7,20,43,.15), rgba(7,20,43,.92) 72%); }
+    .hero-inner { position: relative; max-width: 1080px; width: 100%; margin: 0 auto; }
+    .hero .note { margin-bottom: 14px; }
+    .eyebrow { font: 700 12px/1 var(--font-mono); letter-spacing: .14em; color: var(--mint); display: flex; align-items: center; gap: 8px; margin: 0 0 14px; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 10px var(--mint); animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 50% { opacity: .35; } }
+    .hero h1 { font-size: clamp(22px, 5.9vw, 54px); line-height: 1.35; margin: 0 0 18px; font-weight: 700; letter-spacing: .02em; }
+    .hero h1 .val { font-family: var(--font-mono); color: var(--amber); font-weight: 700; white-space: nowrap; }
+    .readout { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 26px; padding: 0; list-style: none; font-family: var(--font-mono); font-size: 14px; color: var(--text-dim); }
+    .readout b { color: var(--text); font-weight: 400; font-size: 18px; margin-left: 6px; }
+    .cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+    .cta { display: inline-flex; align-items: center; gap: 14px; min-height: 56px; padding: 0 28px; border-radius: 4px; background: var(--mint); color: var(--navy-900); font-weight: 700; font-size: 18px; text-decoration: none; box-shadow: 0 0 24px rgba(94,242,194,.35); transition: transform .15s, box-shadow .15s; }
+    .cta:hover { transform: translateY(-1px); box-shadow: 0 0 36px rgba(94,242,194,.55); }
+    .cta .chev { font-family: var(--font-mono); font-size: 22px; }
+    .sub-link { color: var(--text-dim); font-size: 14px; }
+    .hero-meta { margin: 22px 0 0; font-size: 11px; color: var(--text-dim); }
+    .scroll-hint { position: absolute; left: 50%; bottom: calc(var(--tab-h) + 10px); transform: translateX(-50%); font: 11px var(--font-mono); color: var(--text-dim); letter-spacing: .2em; }
+
+    /* ---------- ② 次の出来事：すりガラスは、ここ1か所だけ ---------- */
+    .next { position: relative; padding: 56px var(--gutter); max-width: 1080px; margin: 0 auto; }
+    .glass { background: rgba(12,33,64,.55); border: 1px solid rgba(94,242,194,.2); border-radius: 10px; padding: 20px; -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); box-shadow: 0 10px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06); }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .glass { background: var(--navy-700); } }
+    @media (prefers-reduced-transparency: reduce) { .glass { background: var(--navy-700); backdrop-filter: none; -webkit-backdrop-filter: none; } }
+    .next-wrap { position: relative; }
+    .next-wrap::before { content: ""; position: absolute; inset: -40px -10% auto; height: 260px; background: radial-gradient(closest-side, rgba(255,181,71,.22), transparent), radial-gradient(closest-side at 80% 60%, rgba(94,242,194,.18), transparent); filter: blur(10px); pointer-events: none; }
+    .sec-label { font: 700 12px/1 var(--font-mono); letter-spacing: .14em; color: var(--mint); margin: 0 0 14px; }
+    .count-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+    .count-title { margin: 0; font-size: 18px; }
+    .count { font: 700 clamp(26px, 7vw, 48px)/1.1 var(--font-mono); color: var(--amber); margin: 10px 0 4px; letter-spacing: .02em; }
+    .count .pre { font-size: .5em; color: var(--text); margin-right: .4em; }
+    .count small { font-size: .45em; color: var(--text-dim); margin: 0 .4em 0 .1em; }
+    .src { font-size: 12px; color: var(--text-dim); }
+    .ev-list { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid rgba(94,242,194,.14); }
+    .ev-list li { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(94,242,194,.1); font-size: 14px; }
+    .ev-list .d { font-family: var(--font-mono); color: var(--mint); font-size: 13px; }
+
+    /* ---------- ③ スクロールで進むページの「型」（MMX の概要の見本） ---------- */
+    .story { position: relative; }
+    .story-stage { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; overflow: hidden; pointer-events: none; }
+    .stage-svg { width: min(92vw, 640px); height: auto; }
+    .stage-svg .orbit { fill: none; stroke: rgba(94,242,194,.25); stroke-width: 1; }
+    .stage-svg .path { fill: none; stroke: var(--amber); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+    .stage-svg text { font: 12px var(--font-mono); fill: var(--text-dim); }
+    .steps { position: relative; margin-top: -100svh; }
+    .step { min-height: 100svh; display: grid; align-items: end; padding: 0 var(--gutter) calc(var(--tab-h) + 48px); }
+    .step-card { max-width: 440px; margin: 0 auto; width: 100%; opacity: .25; transform: translateY(16px); transition: opacity .4s, transform .4s; }
+    .step.on .step-card { opacity: 1; transform: none; }
+    .step-card .k { font: 700 12px var(--font-mono); color: var(--amber); letter-spacing: .1em; }
+    .step-card h3 { margin: 6px 0 8px; font-size: 22px; line-height: 1.4; }
+    .step-card p { margin: 0 0 8px; font-size: 15px; }
+    .story .note { position: sticky; top: 36px; z-index: 2; margin-left: var(--gutter); }
+
+    /* ---------- ④ フッター：信頼の情報を1か所に ---------- */
+    .foot { border-top: 1px solid rgba(94,242,194,.18); background: var(--navy-900); padding: 40px var(--gutter) 28px; }
+    .foot-inner { max-width: 1080px; margin: 0 auto; }
+    .foot .note { margin-bottom: 18px; }
+    .trust { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 0 0 28px; }
+    .trust div { border-left: 2px solid var(--mint-dim); padding: 2px 0 2px 12px; font-size: 13px; color: var(--text-dim); }
+    .trust b { display: block; color: var(--text); font-size: 14px; margin-bottom: 2px; }
+    .foot-links { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0 0 22px; padding: 0; list-style: none; font-size: 14px; }
+    .foot-brand { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; color: var(--text-dim); }
+    .foot-brand img { height: 18px; width: auto; opacity: .85; }
+
+    /* ---------- ⑤ スマホの下のタブ（部屋の行き来） ---------- */
+    .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; height: calc(var(--tab-h) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(5,14,31,.94); border-top: 1px solid rgba(94,242,194,.18); }
+    .tabs a { display: grid; place-items: center; align-content: center; gap: 3px; text-decoration: none; color: var(--text-dim); font-size: 11px; }
+    .tabs a[aria-current="page"] { color: var(--mint); }
+    .tabs a[aria-current="page"] svg { filter: drop-shadow(0 0 6px var(--mint-dim)); }
+    .tabs svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+    .tabs .note { position: absolute; right: 8px; top: -26px; }
+    /* PC では上の帯（いまの部屋の帯と同じ位置） */
+    @media (min-width: 900px) {
+      :root { --tab-h: 0px; }
+      body { padding-bottom: 0; }
+      .tabs { top: 0; bottom: auto; height: 52px; padding: 0 24px; grid-template-columns: auto repeat(4, auto) 1fr; justify-content: start; gap: 4px; border-top: 0; border-bottom: 1px solid rgba(94,242,194,.14); background: rgba(5,14,31,.6); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+      .tabs::before { content: ""; width: 132px; height: 22px; background: url("../../web/assets/brand/logo-600.webp") left center / contain no-repeat; margin-right: 24px; align-self: center; }
+      .tabs a { grid-auto-flow: column; gap: 8px; padding: 0 14px; font-size: 14px; }
+      .tabs svg { width: 18px; height: 18px; }
+      .tabs .note { right: 24px; top: 15px; }
+      .proto-bar { top: auto; bottom: 0; }
+      .hero { padding-top: 120px; padding-bottom: 72px; }
+      .scroll-hint { bottom: 18px; }
+      .step { align-items: center; justify-items: end; padding-right: max(var(--gutter), calc((100vw - 1080px) / 2)); }
+      .step-card { margin: 0; }
+      .story .note { top: 64px; }
+      .story-stage { justify-items: start; padding-left: max(var(--gutter), calc((100vw - 1080px) / 2)); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .live-dot { animation: none; }
+      .step-card { transition: none; opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <p class="proto-bar">試作（本番ではありません）。外のサイトは「考え方の参考」だけで、コードや素材は使っていません。<a href="?clean" style="color:inherit">注記を消す</a></p>
+
+  <!-- ① ヒーロー -->
+  <section class="hero" aria-label="いまの宇宙">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <span class="note">① ヒーロー：本物の値1つ＋ボタン1つ（参考の考え方：supahero.io・cta.gallery）</span>
+      <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span>LIVE · <span id="clock">--:--:--</span> JST</p>
+      <h1>いま、国際宇宙ステーションは<br><span class="val" id="iss-where">計算中…</span><span style="white-space:nowrap">の上空。</span></h1>
+      <ul class="readout" aria-label="ISS のいまの値">
+        <li>高度<b id="iss-alt">---</b> km</li>
+        <li>速さ<b id="iss-spd">--.-</b> km/秒</li>
+        <li>1周<b id="iss-per">--</b> 分</li>
+      </ul>
+      <div class="cta-row">
+        <a class="cta" href="../../web/">観測を開始<span class="chev" aria-hidden="true">›</span></a>
+        <a class="sub-link" href="../../web/missions/">文字で読む（一言でわかる一覧）</a>
+      </div>
+      <p class="hero-meta">位置はブラウザの中で計算（軌道データ：CelesTrak・<span id="iss-epoch">--</span>）。地球の画像：NASA Blue Marble・Black Marble をもとに作成。※非公式ファンメイド作品です</p>
+    </div>
+    <span class="scroll-hint" aria-hidden="true">SCROLL ↓</span>
+  </section>
+
+  <!-- ② 次の出来事 -->
+  <section class="next" aria-labelledby="next-label">
+    <div class="next-wrap">
+      <span class="note" style="margin-bottom:12px">② すりガラスはこの1か所だけ。重い端末・透明度を下げる設定では普通の背景に（参考：glass.samasante.com）</span>
+      <div class="glass">
+        <p class="sec-label" id="next-label">NEXT · 次の出来事</p>
+        <div class="count-head">
+          <h2 class="count-title" id="next-title">読み込み中…</h2>
+          <span class="src" id="next-src"></span>
+        </div>
+        <p class="count mono" id="next-count" aria-live="off">--</p>
+        <ul class="ev-list" id="ev-list"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ スクロールで進む型 -->
+  <section class="story" aria-label="MMX の旅（見本）">
+    <span class="note">③ スクロールで進むページの「型」。MMX ① 概要の見本（参考の考え方：scrolltide.co）</span>
+    <div class="story-stage" aria-hidden="true">
+      <svg class="stage-svg" viewBox="-320 -220 640 440">
+        <circle class="orbit" r="110"></circle>
+        <circle class="orbit" r="180"></circle>
+        <circle r="16" fill="#ffb547" opacity=".9"></circle>
+        <circle id="st-earth" cx="110" cy="0" r="7" fill="#5ef2c2"></circle>
+        <text x="122" y="22">地球</text>
+        <circle id="st-mars" cx="-127" cy="-127" r="6" fill="#ff7a6b"></circle>
+        <text x="-176" y="-140">火星</text>
+        <!-- 形は説明用の模式図（実際の航路ではない） -->
+        <path id="st-path" class="path" pathLength="1" d="M110 0 C 120 120, -60 190, -150 100 S -150 -110, -127 -127"></path>
+        <text x="-300" y="208" style="font-size:10px">模式図（実際の航路・位置ではありません）</text>
+      </svg>
+    </div>
+    <div class="steps">
+      <div class="step" data-p="0">
+        <div class="step-card glass" style="backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(7,20,43,.86)">
+          <span class="k">01 · 目的</span>
+          <h3>火星の衛星フォボスの砂を、地球へ。</h3>
+          <p>火星の衛星フォボスを観測し、表面の砂や岩石を地球に持ち帰る。</p>
+          <p class="src">出典：<a href="https://www.mmx.jaxa.jp/">MMX プロジェクトサイト（JAXA）</a></p>
+        </div>
+      </div>
+      <div class="step" data-p="0.15">
+        <div class="step-card glass" style="backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(7,20,43,.86)">
+          <span class="k">02 · 出発</span>
+          <h3>種子島から、<span class="mono">2026.10.20 04:41:03</span>（予定）</h3>
+          <p>日本時間。延期になったら、ここも公式の発表どおりに直す。</p>
+          <p class="src">出典：<a href="https://www.jaxa.jp/press/2026/08/20260820-1_j.html">JAXA プレスリリース</a></p>
+        </div>
+      </div>
+      <div class="step" data-p="1">
+        <div class="step-card glass" style="backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(7,20,43,.86)">
+          <span class="k">03 · 火星へ</span>
+          <h3>往路は1年弱。火星圏の到着は2027年度。</h3>
+          <p>到着の日付は、まだ公式に出ていない。</p>
+          <p class="src">出典：<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf">MMX プレスキット（JAXA）</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ④ フッター -->
+  <footer class="foot">
+    <div class="foot-inner">
+      <span class="note">④ 信頼の情報を、どのページでも同じ形で一番下に（参考：footer.design）</span>
+      <div class="trust">
+        <div><b>非公式ファンメイド作品</b>JAXA・NASA などの宇宙機関・運用者とは関係ありません。</div>
+        <div><b>事実は一次情報で確かめて</b>載せている値には、すべて出典（公式ページ）を付けています。</div>
+        <div><b>データ</b>軌道：CelesTrak／探査機の距離：JPL Horizons／打ち上げ（参考）：Launch Library 2</div>
+      </div>
+      <ul class="foot-links">
+        <li><a href="../../web/missions/">一言でわかる一覧</a></li>
+        <li><a href="https://x.com/voyascope">X（@voyascope）</a></li>
+        <li><a href="https://github.com/mentoce0-gif/voyascope">GitHub</a></li>
+        <li><a href="https://github.com/mentoce0-gif/voyascope/blob/main/CONTENT_LICENSE.md">ライセンス</a></li>
+      </ul>
+      <div class="foot-brand">
+        <img src="../../web/assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104">
+        <span>コード：All rights reserved ／ 文章：CC BY 4.0</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ⑤ 部屋のタブ（スマホは下、PC は上） -->
+  <nav class="tabs" aria-label="部屋">
+    <span class="note">⑤ 部屋をタブに（参考：navbar.gallery）</span>
+    <a href="../../web/" aria-current="page"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-20 12 12)"/></svg>地球のまわり</a>
+    <a href="../../web/#far"><svg viewBox="0 0 24 24"><circle cx="5" cy="17" r="2"/><circle cx="19" cy="6" r="1.5"/><path d="M7 15.5 17.5 7" stroke-dasharray="2 2.5"/></svg>遠くを見る</a>
+    <a href="../../web/#launch"><svg viewBox="0 0 24 24"><path d="M12 3c3 2.5 4 6 4 9l-2 4h-4l-2-4c0-3 1-6.5 4-9Z"/><path d="M10 19.5h4M12 16v5"/></svg>これから行く</a>
+    <a href="../../web/missions/"><svg viewBox="0 0 24 24"><path d="M5 5h14M5 10h14M5 15h9M5 20h6"/></svg>一言でわかる</a>
+  </nav>
+
+  <script type="module">
+    import { satrecFromOrbit, positionAt, periodMinutes } from "../../web/js/orbit.js";
+    if (/[?&]clean\b/.test(location.search)) document.documentElement.classList.add("clean");
+
+    const $ = (id) => document.getElementById(id);
+    const jst = (d, o) => new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", ...o }).format(d);
+    const fmtLat = (v) => `${v >= 0 ? "北緯" : "南緯"}${Math.abs(v).toFixed(1)}°`;
+    const fmtLng = (v) => `${v >= 0 ? "東経" : "西経"}${Math.abs(v).toFixed(1)}°`;
+
+    // ① ISS のいま（本番と同じ web/data・web/js/orbit.js で計算）
+    let satrec = null;
+    try {
+      const orbit = await (await fetch("../../web/data/orbits/iss.json")).json();
+      satrec = satrecFromOrbit(orbit);
+      $("iss-epoch").textContent = jst(new Date(orbit.fetched_at), { month: "numeric", day: "numeric" }) + " 取得";
+      $("iss-per").textContent = Math.round(periodMinutes(satrec));
+    } catch { $("iss-where").textContent = "（データを読めません）"; }
+
+    // ② 次の出来事（web/data/events.json。日時が公表されたものだけ）
+    let next = null;
+    try {
+      const { events } = await (await fetch("../../web/data/events.json")).json();
+      const startOf = (e) => { const v = e.when?.value || {}; return v.at ? new Date(v.at) : v.date ? new Date(v.date + "T00:00:00+09:00") : v.from ? new Date(v.from + "T00:00:00+09:00") : null; };
+      const up = events.map((e) => ({ e, t: startOf(e) })).filter((x) => x.t && x.t > new Date()).sort((a, b) => a.t - b.t);
+      next = up.find((x) => x.e.when.value.at) || null;
+      if (next) {
+        $("next-title").textContent = next.e.title.ja;
+        const host = new URL(next.e.when.source).hostname.replace(/^www\./, "");
+        $("next-src").innerHTML = `出典：<a href="${next.e.when.source}">${host}</a>`;
+      } else { $("next-title").textContent = "時刻まで公表された予定はいまありません"; }
+      $("ev-list").innerHTML = up.slice(0, 4).map(({ e, t }) =>
+        `<li><span class="d">${jst(t, { month: "2-digit", day: "2-digit" })}</span><span>${e.title.ja}</span></li>`).join("");
+    } catch { $("next-title").textContent = "（データを読めません）"; }
+
+    function tick() {
+      const now = new Date();
+      $("clock").textContent = jst(now, { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+      if (satrec) {
+        const p = positionAt(satrec, now);
+        if (p) {
+          $("iss-where").textContent = `${fmtLat(p.lat)} ${fmtLng(p.lng)}`;
+          $("iss-alt").textContent = Math.round(p.altKm);
+          $("iss-spd").textContent = p.speedKmS.toFixed(2);
+        }
+      }
+      if (next) {
+        let s = Math.max(0, Math.floor((next.t - now) / 1000));
+        const d = Math.floor(s / 86400); s %= 86400;
+        const h = Math.floor(s / 3600); s %= 3600;
+        const m = Math.floor(s / 60); s %= 60;
+        const p2 = (n) => String(n).padStart(2, "0");
+        $("next-count").innerHTML = `<span class="pre">あと</span>${d}<small>日</small>${p2(h)}<small>時間</small>${p2(m)}<small>分</small>${p2(s)}<small>秒</small>`;
+      }
+    }
+    tick(); setInterval(tick, 1000);
+
+    // ③ スクロールで進む型：見えているカードに合わせて、航路の線をのばす
+    const path = $("st-path");
+    const io = new IntersectionObserver((ents) => {
+      for (const en of ents) {
+        if (!en.isIntersecting) continue;
+        document.querySelectorAll(".step").forEach((s) => s.classList.toggle("on", s === en.target));
+        const p = Number(en.target.dataset.p);
+        path.style.transition = matchMedia("(prefers-reduced-motion: reduce)").matches ? "none" : "stroke-dashoffset 1.2s ease";
+        path.style.strokeDashoffset = String(1 - p);
+      }
+    }, { threshold: 0.6 });
+    document.querySelectorAll(".step").forEach((s) => io.observe(s));
+  </script>
+</body>
+</html>
