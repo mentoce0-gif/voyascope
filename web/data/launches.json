@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-16T11:25:12.379Z",
+  "fetched_at": "2026-10-16T16:40:17.534Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -13,7 +13,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-13T17:28:28Z",
+      "updated": "2026-10-16T12:08:39Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -52,7 +52,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-10T06:02:48Z",
+      "updated": "2026-10-16T11:53:14Z",
       "rocket": {
         "name": "H3-24",
         "full_name": "H3-24"
@@ -91,7 +91,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-12T15:16:05Z",
+      "updated": "2026-10-16T16:02:43Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -202,13 +202,13 @@
     },
     {
       "id": "6b95bcc8-1f88-4539-84fe-f63630138766",
-      "net": "2026-10-22T02:00:00.000Z",
+      "net": "2026-10-22T02:57:00.000Z",
       "precision": "hour",
-      "window_end": "2026-10-22T05:00:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-10-15T21:06:29Z",
+      "window_end": "2026-10-22T03:15:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-16T11:48:38Z",
       "rocket": {
         "name": "Long March 8A",
         "full_name": "Long March 8A"
@@ -286,7 +286,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-13T15:55:00Z",
+      "updated": "2026-10-16T16:02:46Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
