@@ -630,6 +630,11 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
     K.gold.roughness = 0.36;
     K.white.roughness = 0.62;
     K.solar.roughness = 0.26;
+    // MMX の質感（2026-10-16）：金の断熱材のしわは控えめに、銀の放熱面・鏡の板は補助光の色を映しすぎないように
+    if (K.goldMLI) { K.goldMLI.bumpScale = 0.007; K.goldMLI.roughness = 0.33; }
+    if (K.foilSilver) K.foilSilver.roughness = 0.42;
+    if (K.osr) K.osr.envMapIntensity = 0.6;
+    if (K.solarThin) K.solarThin.roughness = 0.3;
   }
   function holdModel(g, R) {
     const holder = new THREE.Group();

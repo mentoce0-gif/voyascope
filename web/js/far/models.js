@@ -76,7 +76,7 @@ export function makeKit(T) {
     osr:mat('mirror-tile',0xdfe6ea,1,.08,{envMapIntensity:1.1}),
     graphite:mat('graphite',0x2c313b,.4,.55),
     olive:mat('radiator-olive',0x56695f,.35,.5),
-    goldMLI:mat('foil-gold-bright',0xe0b03e,.85,.26,{bumpMap:foil,bumpScale:.014,envMapIntensity:.8}),
+    goldMLI:mat('foil-gold-bright',0xdcab3c,.85,.3,{bumpMap:foil,bumpScale:.009,envMapIntensity:.75}),
     textures:{foil,cells,cellsThin,env}
   };
 }
