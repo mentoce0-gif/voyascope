@@ -372,18 +372,25 @@ function renderAt(t) {
   else if (t < 7.0) c = mixCam(ride1(), camAt.mid, smooth(5.0, 6.0, t));
   else if (t < 11.2) c = mixCam(camAt.mid, chase2(), smooth(7.0, 7.8, t));
   else c = mixCam(chase2(), camAt.mars, smooth(11.2, 12.7, t));
-  const warp = 0; // ワープの演出（星の筋・ふちの色・視野の広がり・揺れ）はやめた（2026-10-16 オーナー）。カメラは光の先端を追うだけ
+  // ワープ（2026-10-16 オーナーの参考動画から）：星の筋はまっすぐ、進む先の1点から放射。曲がる感じは「放射の中心が曲がる方へずれる」と「機体ごと傾く」で出す
+  const warp = smooth(7.5, 8.4, t) * (1 - smooth(10.6, 11.6, t));
   camera.fov = 42 + 22 * warp; camera.updateProjectionMatrix();
   const drift = V(Math.sin(t * 0.3) * 0.03, 0, Math.cos(t * 0.27) * 0.03).add(V(Math.sin(t * 37) * 0.012, Math.cos(t * 41) * 0.012, 0).multiplyScalar(warp));
   camera.position.copy(c.pos).add(drift); camera.lookAt(c.look);
+  // 進む向き（少し先の航路の向き）と、曲がり具合
+  const fW = Math.min(front, sCap);
+  const heading = at(Math.min(1, fW + 0.01)).sub(at(fW)).normalize();
+  const turnV = at(Math.min(1, fW + 0.03)).sub(at(Math.min(1, fW + 0.015))).normalize().sub(heading);
+  // 曲がる側へ傾ける（カメラの右が曲がる側なら右へ傾く）
+  { const right = V(1, 0, 0).applyQuaternion(camera.quaternion), upv = V(0, 1, 0).applyQuaternion(camera.quaternion);
+    const side = turnV.dot(right);
+    camera.rotateZ(-Math.max(-0.45, Math.min(0.45, side * 9)) * warp); }
   document.getElementById("vig").style.opacity = warp * 0.9;
   const fwd = c.look.clone().sub(c.pos).normalize();
-  // 曲がるとき：星は曲がる向きと反対へ流れて見えるので、筋（星が通ってきた跡）の尾は曲がる側へたなびく
-  { const f = Math.min(front, sCap), a0 = at(Math.max(0, f - 0.012)), a1 = at(f), a2 = at(Math.min(1, f + 0.012));
-    const d0 = a1.clone().sub(a0).normalize(), d1 = a2.clone().sub(a1).normalize();
-    const turn = d1.sub(d0); turn.sub(fwd.clone().multiplyScalar(turn.dot(fwd)));
-    streak.uniforms.uBend.value.copy(turn).multiplyScalar(18); }
-  streak.uniforms.uDir.value.copy(fwd).multiplyScalar(-1); streak.uniforms.uLen.value = warp * 14; streak.uniforms.uA.value = warp * 0.55; streak.uniforms.uC.value.copy(camera.position);
+    streak.uniforms.uBend.value.set(0, 0, 0);
+  // 筋は「これから向かう向き」の反対へまっすぐ伸びる。向かう先がカメラの正面からずれると、放射の中心が画面の中でずれる
+  const ahead = at(Math.min(1, fW + 0.04)).sub(camera.position).normalize();
+  streak.uniforms.uDir.value.copy(ahead).multiplyScalar(-1); streak.uniforms.uLen.value = warp * 14; streak.uniforms.uA.value = warp * 0.55; streak.uniforms.uC.value.copy(camera.position);
   // 道
   route.uniforms.uReveal.value = t < 1.9 ? lerp(0, 0.002, smooth(0.6, 1.9, t)) : ride;
   route.uniforms.uFront.value = front;
