@@ -372,7 +372,7 @@ function renderAt(t) {
   else if (t < 7.0) c = mixCam(ride1(), camAt.mid, smooth(5.0, 6.0, t));
   else if (t < 11.2) c = mixCam(camAt.mid, chase2(), smooth(7.0, 7.8, t));
   else c = mixCam(chase2(), camAt.mars, smooth(11.2, 12.7, t));
-  const warp = smooth(7.5, 8.4, t) * (1 - smooth(10.6, 11.6, t));
+  const warp = 0; // ワープの演出（星の筋・ふちの色・視野の広がり・揺れ）はやめた（2026-10-16 オーナー）。カメラは光の先端を追うだけ
   camera.fov = 42 + 22 * warp; camera.updateProjectionMatrix();
   const drift = V(Math.sin(t * 0.3) * 0.03, 0, Math.cos(t * 0.27) * 0.03).add(V(Math.sin(t * 37) * 0.012, Math.cos(t * 41) * 0.012, 0).multiplyScalar(warp));
   camera.position.copy(c.pos).add(drift); camera.lookAt(c.look);
