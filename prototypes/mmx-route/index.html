@@ -378,11 +378,11 @@ function renderAt(t) {
   camera.position.copy(c.pos).add(drift); camera.lookAt(c.look);
   document.getElementById("vig").style.opacity = warp * 0.9;
   const fwd = c.look.clone().sub(c.pos).normalize();
-  // 曲がるとき：航路の曲がりに合わせて、星の筋を外側へ弧にする（曲がる向きが分かるように）
+  // 曲がるとき：星は曲がる向きと反対へ流れて見えるので、筋（星が通ってきた跡）の尾は曲がる側へたなびく
   { const f = Math.min(front, sCap), a0 = at(Math.max(0, f - 0.012)), a1 = at(f), a2 = at(Math.min(1, f + 0.012));
     const d0 = a1.clone().sub(a0).normalize(), d1 = a2.clone().sub(a1).normalize();
     const turn = d1.sub(d0); turn.sub(fwd.clone().multiplyScalar(turn.dot(fwd)));
-    streak.uniforms.uBend.value.copy(turn).multiplyScalar(-18); }
+    streak.uniforms.uBend.value.copy(turn).multiplyScalar(18); }
   streak.uniforms.uDir.value.copy(fwd).multiplyScalar(-1); streak.uniforms.uLen.value = warp * 14; streak.uniforms.uA.value = warp * 0.55; streak.uniforms.uC.value.copy(camera.position);
   // 道
   route.uniforms.uReveal.value = t < 1.9 ? lerp(0, 0.002, smooth(0.6, 1.9, t)) : ride;
