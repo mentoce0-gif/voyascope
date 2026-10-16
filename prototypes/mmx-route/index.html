@@ -144,8 +144,12 @@ orbitLine(RT.earthOrbit, 0x5b8fd6, 0.3);
 orbitLine(RT.marsOrbit, 0xd98a5b, 0.3);
 
 // 光
-scene.add(new THREE.AmbientLight(0x6d86b8, 0.28));
-const sunLight = new THREE.DirectionalLight(0xfff1dc, 2.6); sunLight.position.set(0, 0, 0); scene.add(sunLight); scene.add(sunLight.target);
+// 宇宙の光：太陽からの強い主光（影をつくる）・弱く冷たい環境光・輪郭を浮かせる後ろからの青白い光
+scene.add(new THREE.AmbientLight(0x6d86b8, 0.12));
+scene.add(new THREE.HemisphereLight(0x9fb6e0, 0x1a1410, 0.18));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const sunLight = new THREE.DirectionalLight(0xfff1dc, 3.0); sunLight.position.set(0, 0, 0); scene.add(sunLight); scene.add(sunLight.target);
+const rimLight = new THREE.DirectionalLight(0x9cc2ff, 0.9); scene.add(rimLight); scene.add(rimLight.target);
 
 // 地球（アプリの昼の地図）
 const earth = new THREE.Group(); earth.position.copy(earthPos); scene.add(earth);
@@ -313,12 +317,21 @@ mmxHolder.scale.setScalar(0.22);
 mmxHolder.lookAt(mmxPos.clone().add(mmxDir));
 mmx.rotation.set(0.3, 0.6, 0.15);
 const mmxGlow = glow(0x5ef2c2, 0.7, mmxPos); mmxGlow.uniforms.uA.value = 0.0;
+// MMX の影：太陽の光が MMX 自身に落とす影（まわりだけを測る）
+// 模型を小さく置くので、しわの凹凸も同じ割合で弱める（そのままだとざらついて見える）
+const bumpDone = new Set();
+mmx.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; const m = o.material; if (m.bumpMap && !bumpDone.has(m)) { m.bumpScale *= 0.3; bumpDone.add(m); } } });
+{ sunLight.castShadow = true; sunLight.shadow.mapSize.set(1024, 1024); sunLight.shadow.bias = -0.0004; sunLight.shadow.normalBias = 0.004;
+  const sun2m = mmxPos.clone().normalize(); sunLight.position.copy(mmxPos).addScaledVector(sun2m, -2); sunLight.target.position.copy(mmxPos);
+  const sc = sunLight.shadow.camera; sc.left = sc.bottom = -0.35; sc.right = sc.top = 0.35; sc.near = 0.5; sc.far = 4; sc.updateProjectionMatrix(); }
 route.uniforms.uMMX.value = sMMX;
 
 // ---------- カメラの流れ（12秒） ----------
 const camAt = {
   near: { pos: pinWorld.clone().add(faceDir.clone().multiplyScalar(2.8)).add(sideways.clone().multiplyScalar(-0.9)).add(V(0, 0.3, 0)), look: pinWorld.clone().lerp(earthPos, 0.6).add(V(0, -0.45, 0)).add(sideways.clone().multiplyScalar(0.25)) },
-  mid: { pos: mmxPos.clone().add(mmxDir.clone().cross(V(0, 1, 0)).normalize().multiplyScalar(1.5)).add(V(0, 0.55, 0)).add(mmxDir.clone().multiplyScalar(0.5)), look: mmxPos.clone().add(mmxDir.clone().multiplyScalar(-0.25)).add(V(0, -0.35, 0)) },
+  // 太陽の側から、少し上から見る（MMX の日の当たる面が見える）
+  mid: (() => { const side = mmxDir.clone().cross(V(0, 1, 0)).normalize(); if (side.dot(mmxPos.clone().negate()) < 0) side.negate();
+    return { pos: mmxPos.clone().add(side.multiplyScalar(1.05)).add(V(0, 0.32, 0)).add(mmxDir.clone().multiplyScalar(0.3)), look: mmxPos.clone().add(V(0, -0.1, 0)) }; })(),
   wide: { pos: V(0, 56, 0).add(earthPos.clone().lerp(marsPos, 0.5).multiplyScalar(-0.2)).add(V(0, 0, 16)), look: earthPos.clone().lerp(marsPos, 0.5).multiplyScalar(-0.2).add(V(0, 0, 2)) },
   mars: { pos: marsPos.clone().add(V(0, 3.0, 0)).add(mz.clone().multiplyScalar(-3.2)).add(mx.clone().multiplyScalar(1.2)), look: marsPos.clone().lerp(phobosPos, 0.3) },
 };
@@ -374,7 +387,7 @@ function renderAt(t) {
   mmxHolder.visible = t > 3.6;
   mmx.rotation.y = 0.6 + t * 0.25;
   sunLight.target.position.copy(mmxPos);
-  mmxGlow.uniforms.uA.value = smooth(4.4, 5.4, t) * (0.55 + 0.25 * Math.sin(t * 3.5));
+  mmxGlow.uniforms.uA.value = smooth(4.4, 5.4, t) * (0.55 + 0.25 * Math.sin(t * 3.5)) * Math.min(1, camera.position.distanceTo(mmxPos) / 6);
   // フォボス
   const arrive = smooth(14.0, 14.6, t);
   phobosOrbit.uniforms.uA.value = 0.12 + 0.25 * smooth(12.3, 14.0, t);
@@ -382,6 +395,7 @@ function renderAt(t) {
   earthMesh.rotation.y = t * 0.03;
   for (const b of billboards) { b.quaternion.copy(camera.quaternion); b.scale.setScalar(b.material.uniforms.uS.value); }
   sky.position.copy(camera.position);
+  rimLight.target.position.copy(mmxPos); rimLight.position.copy(mmxPos).add(mmxPos.clone().sub(camera.position).normalize().add(V(0, 0.6, 0)).multiplyScalar(2));
   renderer.render(scene, camera);
   // 文字
   const cap = [...caps].reverse().find((x) => t >= x[0]);
@@ -389,7 +403,7 @@ function renderAt(t) {
   const capFade = Math.min(smooth(cap[0], cap[0] + 0.5, t), 1);
   document.querySelector(".cap").style.opacity = capFade;
   place(tags.tane, pinWorld, 1 - smooth(2.3, 3.0, t));
-  place(tags.mmx, mmxPos, smooth(5.4, 6.0, t) * (1 - smooth(7.0, 7.5, t)), -100);
+  place(tags.mmx, mmxPos, smooth(5.4, 6.0, t) * (1 - smooth(7.0, 7.5, t)), -185);
   place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), smooth(12.0, 12.7, t), 34);
   place(tags.phobos, phobosPos, smooth(14.0, 14.5, t), -18);
 }
@@ -417,6 +431,7 @@ function watchAt(t) {
   phobosOrbit.uniforms.uA.value = 0.2; phobosGlow.uniforms.uA.value = Math.exp(-Math.pow((route.uniforms.uPulse.value - 1) * 20, 2)); phobosGlow.uniforms.uS.value = 1.2;
   for (const b of billboards) { b.quaternion.copy(camera.quaternion); b.scale.setScalar(b.material.uniforms.uS.value); }
   sky.position.copy(camera.position);
+  rimLight.target.position.copy(mmxPos); rimLight.position.copy(mmxPos).add(mmxPos.clone().sub(camera.position).normalize().add(V(0, 0.6, 0)).multiplyScalar(2));
   renderer.render(scene, camera);
   document.getElementById("capk").textContent = "NOW（イメージ）"; document.getElementById("capt").textContent = "MMX は、いまこのあたり";
   document.querySelector(".cap").style.opacity = 1;
