@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-17T10:44:36.772Z",
+  "fetched_at": "2026-10-17T15:35:11.931Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -240,14 +240,53 @@
       }
     },
     {
-      "id": "3621085f-deae-4f89-bd54-c0f96ee44421",
-      "net": "2026-10-23T18:00:00.000Z",
+      "id": "9648124f-8568-46d2-86d7-4b4d6f12187f",
+      "net": "2026-10-23T10:15:00.000Z",
       "precision": "hour",
-      "window_end": "2026-10-23T21:00:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-10-15T21:06:36Z",
+      "window_end": "2026-10-23T10:28:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-17T14:12:16Z",
+      "rocket": {
+        "name": "Long March 6A",
+        "full_name": "Long March 6A"
+      },
+      "provider": {
+        "name": "China Aerospace Science and Technology Corporation",
+        "ja": "中国航天科技集団（CASC）"
+      },
+      "mission": {
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
+      },
+      "site": {
+        "location_id": 19,
+        "name": "Taiyuan Satellite Launch Center, People's Republic of China",
+        "ja": "太原衛星発射センター",
+        "short": "太原",
+        "pad": "Launch Complex 9A",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 38.8583,
+          "lng": 111.5802
+        }
+      }
+    },
+    {
+      "id": "3621085f-deae-4f89-bd54-c0f96ee44421",
+      "net": "2026-10-23T19:25:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-10-23T19:39:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-17T13:59:34Z",
       "rocket": {
         "name": "Long March 4B",
         "full_name": "Long March 4B"
