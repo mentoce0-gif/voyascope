@@ -3,17 +3,17 @@
   "id": "qzs-2",
   "source": "https://sys.qzss.go.jp/dod/constellation.html",
   "source_label": "みちびきウェブサイト「衛星運用状況」",
-  "page_updated": "2026-10-13",
-  "fetched_at": "2026-10-17T04:26:29.109Z",
+  "page_updated": "2026-10-17",
+  "fetched_at": "2026-10-17T10:44:36.195Z",
   "name": "QZS02",
   "svn": "002",
   "services": [
     {
       "service": "PNT",
       "signals": "L1C/A, L1C, L2C, L5",
-      "state": "in-operation",
-      "ok": true,
-      "naqu": null
+      "state": "outage",
+      "ok": false,
+      "naqu": "2026256"
     },
     {
       "service": "SLAS",
