@@ -4,15 +4,15 @@
   "norad_id": 57800,
   "name": "XRISM",
   "format": "omm",
-  "epoch": "2026-10-17T10:38:13.185Z",
+  "epoch": "2026-10-17T10:38:13.186Z",
   "source": "https://celestrak.org/NORAD/elements/gp.php?CATNR=57800&FORMAT=JSON",
-  "fetched_at": "2026-10-17T20:37:07.233Z",
+  "fetched_at": "2026-10-18T04:34:34.423Z",
   "omm": {
     "OBJECT_NAME": "XRISM",
     "OBJECT_ID": "2023-137A",
-    "EPOCH": "2026-10-17T10:38:13.185888",
+    "EPOCH": "2026-10-17T10:38:13.186752",
     "MEAN_MOTION": 15.13342471,
-    "ECCENTRICITY": 0.000751,
+    "ECCENTRICITY": 0.00075096,
     "INCLINATION": 31.0026,
     "RA_OF_ASC_NODE": 287.1295,
     "ARG_OF_PERICENTER": 120.5571,
@@ -22,7 +22,7 @@
     "NORAD_CAT_ID": 57800,
     "ELEMENT_SET_NO": 999,
     "REV_AT_EPOCH": 17139,
-    "BSTAR": 0.00024413,
+    "BSTAR": 0.00024413365,
     "MEAN_MOTION_DOT": 0.00004562,
     "MEAN_MOTION_DDOT": 0
   }
