@@ -273,7 +273,7 @@ const at = (e1, e2, u, ox, oy, s) => ({
 });
 
 
-// ---------- しくみの図（平面）：母天体の通り道を地球が横切る → りゅう座の方向から降ってくる ----------
+// ---------- しくみの図（平面）：母天体の通り道のそばを地球が通る → 放射点のある星座の方向から降ってくる ----------
 const AU_DEG = Math.PI / 180;
 
 // 彗星の軌道の上の点（太陽中心・黄道座標、au）。ν は真近点角（度）
@@ -298,9 +298,30 @@ export function earthPoint(date) {
   const r = 1.00014 - 0.01671 * Math.cos(g);
   return { x: r * Math.cos(lam), y: r * Math.sin(lam), z: 0 };
 }
+// 極大・見ごろの日（日本時間の正午）。図の「地球がちりのそばを通る日」に使う
+export function peakDate(ev, fallback) {
+  const v = ev.when?.value;
+  if (v?.at) return new Date(v.at);
+  const ymd = v?.date ?? v?.from;
+  return ymd ? new Date(`${ymd}T03:00:00Z`) : fallback;
+}
+// 極大の日の地球に、いちばん近い彗星の通り道の上の点（りゅう座流星群は黄道を横切る点のそば、オリオン座流星群は黄道の北）
+export function nearestOrbitPoint(o, earth) {
+  let best = null;
+  for (let nu = -179.5; nu < 180; nu += 0.5) {
+    const p = orbitPoint(o, nu);
+    const d = Math.hypot(p.x - earth.x, p.y - earth.y, p.z - earth.z);
+    if (!best || d < best.d) best = { p, d };
+  }
+  return best;
+}
+// 遠日点の距離のことば（いちばん遠いとき、どの惑星の軌道のあたりか）
+const farText = (ad) => (ad < 7 ? "木星の軌道のあたり" : ad < 12 ? "土星の軌道のあたり" : ad < 24 ? "天王星の軌道のあたり" : ad < 32 ? "海王星の軌道のあたり" : "海王星の軌道より外");
 
 const host = (url) => new URL(url).hostname.replace(/^www\./, "");
-const src = (url, label) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label ?? host(url))}</a>`;
+// 出典のホストの呼び名（なければホスト名）
+const HOST_LABEL = { "ta3.sk": "IAU 流星データセンター" };
+const src = (url, label) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label ?? HOST_LABEL[host(url)] ?? host(url))}</a>`;
 
 // 太陽を北（黄道の北極）から見た図。地球の軌道のまわり（約1.8 au まで）を拡大する
 export function orbitSvg(ev, date) {
@@ -328,19 +349,18 @@ export function orbitSvg(ev, date) {
     cur.pts.push(P(p).join(" "));
   }
   const pathOf = (segs) => segs.map((pts) => `M${pts.join("L")}`).join("");
-  // 黄道を横切る点（降交点：北から南へ）。地球の軌道のすぐそば
-  const node = orbitPoint(o, -o.w);
-  const node2 = orbitPoint(o, 180 - o.w);
-  const desc = Math.hypot(node.x, node.y) < Math.hypot(node2.x, node2.y) ? node : node2;
+  // 極大の日の地球にいちばん近い通り道の点（○）
+  const peak = peakDate(ev, date);
+  const near = nearestOrbitPoint(o, earthPoint(peak)).p;
   const earth = earthPoint(date);
   const [ex, ey] = P(earth);
-  const [nx, ny] = P(desc);
+  const [nx, ny] = P(near);
   const [qx, qy] = P(orbitPoint(o, 0));
   // 地球の進む向き（反時計回り）
   const ang = Math.atan2(earth.y, earth.x) + Math.PI / 2;
   const ax = (Number(ex) + 18 * Math.cos(ang)).toFixed(1);
   const ay = (Number(ey) - 18 * Math.sin(ang)).toFixed(1);
-  return `<svg class="story-svg" viewBox="0 0 260 230" role="img" aria-label="太陽を北から見た図：地球の通り道と、彗星の通り道（ちりの帯）が交わるところを、地球が10月上旬に通る">
+  return `<svg class="story-svg" viewBox="0 0 260 230" role="img" aria-label="太陽を北から見た図：地球の通り道と、彗星の通り道（ちりの帯）が近づくところを、地球が${peak.getMonth() + 1}月${peak.getDate()}日ごろに通る">
     <defs><marker id="st-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5ef2c2"/></marker></defs>
     <path d="${pathOf(north)}" class="story-dust"/>
     <path d="${pathOf(south)}" class="story-dust south"/>
@@ -358,30 +378,45 @@ export function orbitSvg(ev, date) {
   </svg>`;
 }
 
-// 星の名前を、重ならないように点の左上・右下などに置く（星の番号）
-const LABEL_LEFT = new Set([1]);
-const LABEL_UP = new Set([2, 3, 4, 5]);
-const LABEL_DOWN_EXTRA = new Set([0, 1]); // ラスタバン・エルタニンは放射点の下に寄せる
-// りゅう座のあたりの星の図（空を見上げた向き：上が北、左が東）。中心は放射点
+// 星の名前を、重ならないように点の左上・右下などに置く（流星群ごと、星の番号）。hide は名前を出さない（点が近すぎる）
+const LABELS = {
+  "draconids-2026": { center: { ra: 250, dec: 60 }, left: [1], up: [2, 3, 4, 5], down: [0, 1] }, // ラスタバン・エルタニンは放射点の下に寄せる
+  "orionids-2026": { left: [0, 3], up: [0, 1, 2], hide: [5] },
+};
+// 放射点のある星座のあたりの星の図（空を見上げた向き：上が北、左が東）
 export function constellationSvg(ev) {
   const stars = ev.constellation.stars.value;
   const rad = ev.radiant.value;
-  const c0 = { ra: 250 * AU_DEG, dec: 60 * AU_DEG }; // 図の中心（りゅう座のあたり）
-  const SCALE = 330; // 1 ラジアンの長さ（px）
+  const lb = LABELS[ev.id] ?? {};
+  const LABEL_LEFT = new Set(lb.left);
+  const LABEL_UP = new Set(lb.up);
+  const LABEL_DOWN_EXTRA = new Set(lb.down);
+  const HIDE = new Set(lb.hide);
+  // 図の中心：決めていなければ、星と放射点の範囲のまんなか
+  const all = [...stars, rad];
+  const mid = (k) => (Math.min(...all.map((s) => s[k])) + Math.max(...all.map((s) => s[k]))) / 2;
+  const cc = lb.center ?? { ra: mid("ra"), dec: mid("dec") };
+  const c0 = { ra: cc.ra * AU_DEG, dec: cc.dec * AU_DEG };
+  // 1 ラジアンの長さ（px）。決めた中心がなければ、図（名前の分の余白を残す）に収まるように縮める
+  const span = (k) => (Math.max(...all.map((s) => s[k])) - Math.min(...all.map((s) => s[k]))) * AU_DEG;
+  const SCALE = lb.center ? 330 : Math.min(330, 140 / span("dec"), 200 / (span("ra") * Math.cos(c0.dec)));
+  const CY = lb.center ? 110 : 95;
   const proj = ({ ra, dec }) => {
     const a = ra * AU_DEG;
     const d = dec * AU_DEG;
     const cosc = Math.sin(c0.dec) * Math.sin(d) + Math.cos(c0.dec) * Math.cos(d) * Math.cos(a - c0.ra);
     const x = (Math.cos(d) * Math.sin(a - c0.ra)) / cosc;
     const y = (Math.cos(c0.dec) * Math.sin(d) - Math.sin(c0.dec) * Math.cos(d) * Math.cos(a - c0.ra)) / cosc;
-    return [(150 - x * SCALE).toFixed(1), (110 - y * SCALE).toFixed(1)]; // 東が左
+    return [(150 - x * SCALE).toFixed(1), (CY - y * SCALE).toFixed(1)]; // 東が左
   };
   const pts = stars.map(proj);
   const lines = (ev.constellation.lines ?? []).map(([i, j]) => `<path d="M${pts[i].join(" ")}L${pts[j].join(" ")}" class="story-line"/>`).join("");
   const dots = stars
     .map((s, i) => {
       const r = Math.max(1.4, 4.4 - s.mag).toFixed(1);
-      return `<circle cx="${pts[i][0]}" cy="${pts[i][1]}" r="${r}" class="story-star"/><text x="${(Number(pts[i][0]) + (LABEL_LEFT.has(i) ? -5 : 5)).toFixed(1)}" y="${(Number(pts[i][1]) + (LABEL_UP.has(i) ? -5 : LABEL_DOWN_EXTRA.has(i) ? 16 : 11)).toFixed(1)}" class="story-label small star${LABEL_LEFT.has(i) ? " left" : ""}">${esc(s.name)}</text>`;
+      const dot = `<circle cx="${pts[i][0]}" cy="${pts[i][1]}" r="${r}" class="story-star"/>`;
+      if (HIDE.has(i)) return dot;
+      return `${dot}<text x="${(Number(pts[i][0]) + (LABEL_LEFT.has(i) ? -5 : 5)).toFixed(1)}" y="${(Number(pts[i][1]) + (LABEL_UP.has(i) ? -5 : LABEL_DOWN_EXTRA.has(i) ? 16 : 11)).toFixed(1)}" class="story-label small star${LABEL_LEFT.has(i) ? " left" : ""}">${esc(s.name)}</text>`;
     })
     .join("");
   const [rx, ry] = proj(rad);
@@ -395,7 +430,7 @@ export function constellationSvg(ev) {
     ${rays}${lines}${dots}
     <circle cx="${rx}" cy="${ry}" r="5" class="story-radiant"/>
     <text x="${(Number(rx) + 14).toFixed(1)}" y="${(Number(ry) - 12).toFixed(1)}" class="story-label radiant left-start">放射点</text>
-    <text x="150" y="14" class="story-label small">北 ↑</text><text x="14" y="113" class="story-label small">← 東</text>
+    <text x="${lb.center ? 150 : 270}" y="14" class="story-label small">北 ↑</text><text x="14" y="113" class="story-label small">← 東</text>
   </svg>`;
 }
 
@@ -405,23 +440,24 @@ export function meteorStoryHtml(ev, date) {
   const k = ev.constellation;
   if (!o?.value && !k?.stars?.value) return "";
   const moid = ev.parent?.moid?.value;
+  const peak = peakDate(ev, date);
   return `<section class="meteor-story">
     <h3 class="event-h">しくみ：どうして${esc(k?.name ?? "その星座")}から降ってくるの？</h3>
     ${
       o?.value
         ? `<figure class="story-fig">${orbitSvg(ev, date)}
       <figcaption>① 太陽を北から見た図。<span class="story-key comet">─</span> ${esc(ev.parent.name.value.replace(/（.*）/, ""))}の通り道と、そのまわりのちり（<span class="story-key dust">■</span>イメージ）。点線は黄道（地球の通り道の面）より南。<br>
-      ○のところで、地球が10月上旬に通り道のそばを横切ります。${moid ? `いちばん近いところの距離は約${(moid * 149.6).toFixed(1)}百万km（${moid} au）。` : ""}<br>
-      <span class="k">軌道：${src(o.source, "NASA JPL 小天体データベース")}（${esc(o.note ?? "")}）。彗星はこの先、太陽から約${(o.value.q * (1 + o.value.e) / (1 - o.value.e)).toFixed(1)} au（木星の軌道のあたり）まで遠ざかります。ちりの帯の太さ・濃さはイメージ。</span></figcaption></figure>`
+      ○のところで、地球が${peak.getMonth() + 1}月${peak.getDate()}日ごろに通り道のそばを通ります。${moid ? `いちばん近いところの距離は約${(moid * 149.6).toFixed(1)}百万km（${moid} au）。` : ""}<br>
+      <span class="k">軌道：${src(o.source, "NASA JPL 小天体データベース")}（${esc(o.note ?? "")}）。${((ad) => `彗星は、太陽からいちばん遠いとき約${ad.toFixed(1)} au（${farText(ad)}）まで離れます。`)((o.value.q * (1 + o.value.e)) / (1 - o.value.e))}ちりの帯の太さ・濃さはイメージ。</span></figcaption></figure>`
         : ""
     }
     ${
       k?.stars?.value
         ? `<figure class="story-fig">${constellationSvg(ev)}
       <figcaption>② 地上から見ると、ちりはほぼ平行に飛び込んでくるので、空の一点（放射点）から流れ出すように見えます。その点が${esc(k.name)}にあります。<br>
-      <span class="k">星の位置：${src(k.stars.source, "IAU 星名一覧")}（J2000）。線は${esc(k.name)}の頭の一部（イメージ）。放射点：${src(ev.radiant.source)}。</span></figcaption></figure>`
+      <span class="k">星の位置：${src(k.stars.source, "IAU 星名一覧")}（J2000）。線は${esc(k.name)}の形の一部（イメージ）。放射点：${src(ev.radiant.source)}。</span></figcaption></figure>`
         : ""
     }
-    <p class="small">ちりは彗星の通り道に沿って広がっていて、地球がそこを横切ると、まとめて大気に飛び込みます。りゅう座は「ちりが来る向き」で、彗星がいまそこにあるわけではありません。<span class="k">（説明：${src("https://www.nao.ac.jp/astro/basic/meteor-shower.html", "国立天文台 流星群とは")}）</span></p>
+    <p class="small">ちりは彗星の通り道に沿って広がっていて、地球がそこを横切ると、まとめて大気に飛び込みます。${esc(k?.name ?? "星座")}は「ちりが来る向き」で、彗星がいまそこにあるわけではありません。<span class="k">（説明：${src("https://www.nao.ac.jp/astro/basic/meteor-shower.html", "国立天文台 流星群とは")}）</span></p>
   </section>`;
 }

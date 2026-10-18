@@ -324,6 +324,186 @@
       "updated_at": "2026-10-01"
     },
     {
+      "id": "orionids-2026",
+      "kind": "meteor",
+      "regions": [
+        "world"
+      ],
+      "title": {
+        "ja": "オリオン座流星群",
+        "en": "Orionids"
+      },
+      "summary": {
+        "value": "ハレー彗星（1P/Halley）が母天体の流星群",
+        "source": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html",
+        "as_of": "2026-10-18",
+        "note": "国立天文台「主な流星群」"
+      },
+      "when": {
+        "value": {
+          "date": "2026-10-22"
+        },
+        "source": "https://www.nao.ac.jp/astro/sky/2026/10.html",
+        "as_of": "2026-10-18",
+        "note": "国立天文台「ほしぞら情報」2026年10月：22日このころ極大（IMO の予報から）"
+      },
+      "when_label": "極大",
+      "active": {
+        "value": {
+          "from": "2026-10-02",
+          "to": "2026-11-07"
+        },
+        "source": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html",
+        "as_of": "2026-10-18",
+        "note": "国立天文台の表「流星出現期間」10月2日 - 11月7日（毎年の目安）"
+      },
+      "rate": {
+        "value": "天の川が見えるような暗い空で、見ごろの夜半から明け方に1時間に5〜10個ほど。明け方に月が沈んだあとは条件がよい",
+        "source": "https://www.nao.ac.jp/astro/sky/2026/10.html",
+        "as_of": "2026-10-18",
+        "note": "国立天文台「ほしぞら情報」2026年10月。街明かりの中や見ごろでない時期には数分の1になることがある"
+      },
+      "radiant": {
+        "value": {
+          "ra": 96.3,
+          "dec": 15.7
+        },
+        "source": "https://www.ta3.sk/IAUC22DB/MDC2022/Roje/pojedynczy_obiekt.php?kodstrumienia=00008",
+        "as_of": "2026-10-18",
+        "note": "IAU 流星データセンター（00008 ORI）。Jenniskens 2023 の値（太陽黄経 209.5° のとき）"
+      },
+      "parent": {
+        "name": {
+          "value": "ハレー彗星（1P/Halley）",
+          "source": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html",
+          "as_of": "2026-10-18",
+          "note": "国立天文台「主な流星群」"
+        },
+        "orbit": {
+          "value": {
+            "e": 0.9679359956953211,
+            "a": 17.92863504856923,
+            "q": 0.5748638313743413,
+            "i": 162.1905300439129,
+            "om": 59.09894720612437,
+            "w": 112.2414314637764,
+            "tp": 2446469.9736161465,
+            "epoch": 2439875.5
+          },
+          "source": "https://ssd-api.jpl.nasa.gov/sbdb.api?sstr=1P&full-prec=1",
+          "as_of": "2026-10-18",
+          "note": "JPL SBDB（解 2025-11-21・元期 1968-02-21 TDB）。角度は度、a・q は au、tp・epoch はユリウス日"
+        }
+      },
+      "constellation": {
+        "name": "オリオン座",
+        "stars": {
+          "value": [
+            {
+              "name": "ベテルギウス（α）",
+              "ra": 88.792939,
+              "dec": 7.407064,
+              "mag": 0.45
+            },
+            {
+              "name": "ベラトリックス（γ）",
+              "ra": 81.282764,
+              "dec": 6.349703,
+              "mag": 1.64
+            },
+            {
+              "name": "メイサ（λ）",
+              "ra": 83.784486,
+              "dec": 9.934156,
+              "mag": 3.39
+            },
+            {
+              "name": "ミンタカ（δ）",
+              "ra": 83.001667,
+              "dec": -0.299095,
+              "mag": 2.25
+            },
+            {
+              "name": "アルニラム（ε）",
+              "ra": 84.053389,
+              "dec": -1.201919,
+              "mag": 1.69
+            },
+            {
+              "name": "アルニタク（ζ）",
+              "ra": 85.189694,
+              "dec": -1.942574,
+              "mag": 1.74
+            },
+            {
+              "name": "サイフ（κ）",
+              "ra": 86.93912,
+              "dec": -9.669605,
+              "mag": 2.07
+            },
+            {
+              "name": "リゲル（β）",
+              "ra": 78.634467,
+              "dec": -8.201638,
+              "mag": 0.18
+            }
+          ],
+          "source": "https://iauarchive.eso.org/public/themes/naming_stars/",
+          "as_of": "2026-10-18",
+          "note": "IAU の星名一覧（J2000）。名前の読みは VOYASCOPE"
+        },
+        "lines": [
+          [
+            2,
+            0
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            3,
+            7
+          ]
+        ]
+      },
+      "links": [
+        {
+          "label": "国立天文台 ほしぞら情報（2026年10月）",
+          "url": "https://www.nao.ac.jp/astro/sky/2026/10.html"
+        },
+        {
+          "label": "国立天文台 主な流星群",
+          "url": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html"
+        },
+        {
+          "label": "米国流星協会 流星群カレンダー（英語）",
+          "url": "https://www.amsmeteors.org/calendar/"
+        }
+      ],
+      "updated_at": "2026-10-18"
+    },
+    {
       "id": "voyager-1-one-light-day",
       "kind": "milestone",
       "regions": [
