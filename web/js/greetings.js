@@ -39,27 +39,34 @@ export function pendingGreetings({ events = [], craft = [] }, now, seen = new Se
   return list.filter((g) => !seen.has(g.key)).sort((a, b) => b.at - a.at);
 }
 
+// 計器の読み取りのような並び（左に英字の項目名、右に値）
+const readout = (rows) => `<dl class="greet-read">${rows.filter(([, v]) => v).map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
+const dotted = (day) => day.replace(/-/g, ".");
+
 function launchHtml({ name, ev }) {
   const span = eventSpan(ev);
-  const day = plainDateJa(jstDay(new Date(span.start)));
-  const when = span.precision === "at" ? `${day} ${hmJst(new Date(span.start))}（日本時間）` : day;
-  const vehicle = ev.vehicle?.value ? `${esc(ev.vehicle.value)}で` : "";
+  const at = new Date(span.start);
+  const when = span.precision === "at" ? `${dotted(jstDay(at))} ${hmJst(at)} JST` : dotted(jstDay(at));
+  const say = `${plainDateJa(jstDay(at))}${span.precision === "at" ? ` ${hmJst(at)}（日本時間）` : ""}、${ev.vehicle?.value ? `${esc(ev.vehicle.value)}で` : ""}打ち上げられました。`;
+  const now = ev.id === "mmx-launch" ? `<a class="btn greet-go" href="mmx/now/">いまどこを見る</a>` : "";
   return `
-    <p class="greet-kicker mono">BON VOYAGE</p>
-    <h2 class="greet-title">いってらっしゃい、${esc(name)}</h2>
-    <p>${when}、${vehicle}打ち上げられました。</p>
-    <p class="k">出典：<a href="${esc(ev.status.source)}" target="_blank" rel="noopener noreferrer">${esc(host(ev.status.source))}</a></p>
-    <div class="greet-actions"><button type="button" class="btn" data-greet-event="${esc(ev.id)}">予定を見る</button></div>`;
+    <p class="greet-kicker"><i aria-hidden="true"></i>BON VOYAGE</p>
+    <h2 class="greet-title"><span class="gt-pre">いってらっしゃい、</span><span class="gt-name">${esc(name)}</span></h2>
+    <p class="greet-say">${say}</p>
+    ${readout([["LAUNCH", esc(when)], ["VEHICLE", esc(ev.vehicle?.value ?? "")], ["SITE", esc(ev.site?.label ?? "")]])}
+    <p class="greet-src">出典：<a href="${esc(ev.status.source)}" target="_blank" rel="noopener noreferrer">${esc(host(ev.status.source))}</a></p>
+    <div class="greet-actions">${now}<button type="button" class="btn" data-greet-event="${esc(ev.id)}">予定を見る</button></div>`;
 }
 
 function returnHtml({ name, team, place }) {
   const n = team.crew?.length;
   const who = n ? `${n}人が` : "";
   return `
-    <p class="greet-kicker mono">WELCOME HOME</p>
-    <h2 class="greet-title">おかえりなさい、${esc(name)}</h2>
-    <p>${plainDateJa(team.return_date.value)}、${who}${esc(place)}から地球に帰ってきました。</p>
-    <p class="k">出典：<a href="${esc(team.return_date.source)}" target="_blank" rel="noopener noreferrer">${esc(host(team.return_date.source))}</a></p>`;
+    <p class="greet-kicker"><i aria-hidden="true"></i>WELCOME HOME</p>
+    <h2 class="greet-title"><span class="gt-pre">おかえりなさい、</span><span class="gt-name">${esc(name)}</span></h2>
+    <p class="greet-say">${plainDateJa(team.return_date.value)}、${who}${esc(place)}から地球に帰ってきました。</p>
+    ${readout([["RETURN", esc(dotted(team.return_date.value))], ["FROM", esc(place)], ["CREW", n ? `${n}人` : ""]])}
+    <p class="greet-src">出典：<a href="${esc(team.return_date.source)}" target="_blank" rel="noopener noreferrer">${esc(host(team.return_date.source))}</a></p>`;
 }
 
 export const greetingHtml = (g) => `<section class="greet greet-${g.type}">${g.type === "launch" ? launchHtml(g) : returnHtml(g)}</section>`;
