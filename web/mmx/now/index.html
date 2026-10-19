@@ -216,7 +216,7 @@ const sideways = V(-outward.z, 0, outward.x); // 公転の向き
 const faceDir = outward.clone().multiplyScalar(0.55).add(sideways.clone().multiplyScalar(0.8)).add(V(0, 0.25, 0)).normalize();
 const pinLocal = ll(30.40, 130.98);
 earth.quaternion.setFromUnitVectors(pinLocal.clone().normalize(), faceDir);
-earth.rotateOnAxis(pinLocal.clone().normalize(), 0.3);
+earth.rotateOnAxis(pinLocal.clone().normalize(), 0.3 + Math.PI); // 航路が種子島から東（太平洋側）へ出ていくように、地図の向きを合わせる（2026-10-19 オーナー）
 earth.updateMatrixWorld(true);
 const pinWorld = earth.localToWorld(pinLocal.clone());
 
@@ -259,7 +259,7 @@ const bez = (p0, p1, p2, p3, t) => { const u = 1 - t; return p0.clone().multiply
 const path = [];
 const nW = pinWorld.clone().sub(earthPos).normalize();
 const northW = earth.localToWorld(V(0, RE, 0)).sub(earthPos).normalize();
-const eastW = northW.clone().cross(nW).normalize().negate();
+const eastW = northW.clone().cross(nW).normalize(); // 地図の東
 const axis = nW.clone().cross(eastW).normalize();
 const ROT = 1.55 * Math.PI; // 地球のまわりの角度（約1時間11分ぶん。誇張なし）
 for (let i = 0; i <= 260; i++) {
@@ -501,7 +501,7 @@ function renderAt(t) {
   const arrive = smooth(14.0, 14.6, t);
   phobosOrbit.uniforms.uA.value = 0.12 + 0.25 * smooth(12.3, 14.0, t);
   phobosGlow.uniforms.uA.value = arrive * (0.7 + 0.3 * Math.sin(t * 4)); phobosGlow.uniforms.uS.value = 0.25 + arrive * 0.35;
-  earthMesh.rotation.y = t * 0.03;
+  // 地球の模様は回さない（回すと種子島の印と地図がずれる。2026-10-19 オーナー）
   for (const b of billboards) { b.quaternion.copy(camera.quaternion); b.scale.setScalar(b.material.uniforms.uS.value); }
   sky.position.copy(camera.position);
   rimLight.target.position.copy(mmxPos); rimLight.position.copy(mmxPos).add(mmxPos.clone().sub(camera.position).normalize().add(V(0, 0.6, 0)).multiplyScalar(2));
@@ -533,11 +533,11 @@ const watchCam = { get pos() { return watchCenter.clone().add(V(0, watchH(), wat
 function padAt(t) {
   camera.fov = 42; camera.updateProjectionMatrix();
   const n = pinWorld.clone().sub(earthPos).normalize();
-  const tan = eastW.clone().applyAxisAngle(n, 0.6 + t * 0.06);
-  const target = pinWorld.clone().add(n.clone().multiplyScalar(0.07));
-  const back = W / H < 0.7 ? 0.62 : 0.45;
-  camera.position.copy(target).add(tan.clone().multiplyScalar(back)).add(n.clone().multiplyScalar(0.1));
-  camera.up.copy(n); camera.lookAt(target.clone().add(n.clone().multiplyScalar(-0.06)));
+  // 南の空から、北を上にして見下ろす（九州・種子島の地図が見えるように。左右にゆっくり振る）
+  const south = northW.clone().negate().applyAxisAngle(n, 0.35 * Math.sin(t * 0.12));
+  const back = W / H < 0.7 ? 1 : 0.75;
+  camera.position.copy(pinWorld).add(south.clone().multiplyScalar(0.75 * back)).add(n.clone().multiplyScalar(0.9 * back));
+  camera.up.copy(n); camera.lookAt(pinWorld.clone().add(south.clone().multiplyScalar(0.12 * back)).add(n.clone().multiplyScalar(0.02)));
   document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
   route.uniforms.uReveal.value = 0; route.uniforms.uFront.value = 0; route.uniforms.uPulse.value = -1; comet.uniforms.uA.value = 0;
   mmxHolder.visible = false; h3.visible = true; padLight.visible = true; mmxGlow.uniforms.uA.value = 0;
