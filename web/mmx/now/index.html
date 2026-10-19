@@ -489,6 +489,11 @@ const LAUNCH_S = 3.6; // 発射の演出の長さ（秒）
 document.body.classList.toggle("pre", PRE);
 // 噴射の光（発射のときだけ）
 const flame = glow(0xffb547, 0.05, pinWorld); flame.uniforms.uA.value = 0; const flameBoard = billboards[billboards.length - 1];
+// 打ち上げの日（打ち上げを確かめたあと〜MMX の分離の予定の30分後）：H3 の第2段＋MMX を、計画の時刻で地球を回る道の上に（2026-10-20 オーナー）
+const SEP_MS = 4272000, COAST_AFTER = 30 * 60000;
+const coastNow = () => FLYING && Date.now() - PH.launchAt < SEP_MS + COAST_AFTER;
+const coastGlow = glow(0x5ef2c2, 0.25, pinWorld); coastGlow.uniforms.uA.value = 0; const coastBoard = billboards[billboards.length - 1];
+const coastRing = ringGlow(0x5ef2c2, pinWorld); coastRing.uniforms.uA.value = 0; const coastRingBoard = billboards[billboards.length - 1];
 // ---------- H3 の拡大の窓（打ち上げ前）：同じ場面を、ロケットのそばのカメラで小さな画面に描き、楕円に切り抜いて重ねる ----------
 const insetCam = new THREE.PerspectiveCamera(30, 5 / 7, 0.0005, 500);
 const insetRT = new THREE.WebGLRenderTarget(2, 2); insetRT.texture.encoding = THREE.sRGBEncoding;
@@ -676,6 +681,35 @@ function padAt(t, lt = -1) {
 }
 window.padAt = padAt;
 
+function coastAt(t) {
+  pinLift(false);
+  const el = Date.now() - PH.launchAt, f = Math.min(1, Math.max(0, el / SEP_MS));
+  const s = sSep * f, pos = at(s);
+  camera.fov = 42; camera.updateProjectionMatrix();
+  // 地球と、地球を回る道の全体が入る距離から
+  const fit = 1.7 / (Math.tan(21 * Math.PI / 180) * Math.min(1, W / H));
+  // 地球を回る道の面を、ほぼ真上から見る（MMX が地球の裏に隠れないように）。種子島を下に
+  const dir = axis.clone().add(nW.clone().multiplyScalar(-0.25)).normalize().applyAxisAngle(nW, Math.sin(t * 0.1) * 0.1);
+  camera.position.copy(earthPos).add(dir.multiplyScalar(fit)); camera.up.copy(nW.clone().negate()); camera.lookAt(earthPos.clone().add(nW.clone().multiplyScalar(0.55)));
+  document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
+  route.uniforms.uReveal.value = s; route.uniforms.uFront.value = s; route.uniforms.uPulse.value = -1; comet.uniforms.uA.value = 0;
+  mmxHolder.visible = false; h3.visible = false; padLight.visible = false; flame.uniforms.uA.value = 0; mmxGlow.uniforms.uA.value = 0;
+  coastBoard.position.copy(pos); coastRingBoard.position.copy(pos);
+  coastGlow.uniforms.uA.value = 0.9; coastGlow.uniforms.uS.value = 0.22 + 0.04 * Math.sin(t * 3);
+  const ph = (t % 2.4) / 2.4; coastRing.uniforms.uS.value = 0.08 + ph * 0.35; coastRing.uniforms.uA.value = (1 - ph) * 0.8;
+  pinRing.uniforms.uA.value = 0; pinGlow.uniforms.uA.value = 0.5; pinGlow.uniforms.uS.value = 0.1; phobosGlow.uniforms.uA.value = 0;
+  for (const b of billboards) { b.quaternion.copy(camera.quaternion); b.scale.setScalar(b.material.uniforms.uS.value); }
+  sky.position.copy(camera.position);
+  renderer.render(scene, camera);
+  camera.up.set(0, 1, 0);
+  coastGlow.uniforms.uA.value = 0; coastRing.uniforms.uA.value = 0; // ほかの場面では出さない
+  watchCaption();
+  document.querySelector(".cap").style.opacity = 1;
+  place(tags.tane, pinWorld, 1, 22); place(tagH3, pos, 1, -22); tagH3.style.left = `${Math.min(W - 70, Math.max(70, parseFloat(tagH3.style.left)))}px`; /* 画面の端で切れないように */ place(tags.mmx, pos, 0); place(tags.mars, marsPos, 0); place(tags.phobos, phobosPos, 0);
+}
+window.coastAt = coastAt;
+if (coastNow()) { tagH3.textContent = "H3＋MMX（計画）"; document.querySelector(".circ.live small").innerHTML = "ライブ中継<br>YouTube（JAXA）"; }
+
 function watchAt(t) {
   pinLift(false);
   camera.fov = 42; camera.updateProjectionMatrix();
@@ -706,7 +740,13 @@ let capCache = "";
 function watchCaption() {
   const now = Date.now();
   let k, t, sub = "";
-  if (PH.phase === "flying") { k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり"; sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>`; }
+  const lpc = coastNow() && EV ? launchProgress(EV, new Date(now)) : null;
+  if (lpc) {
+    k = `打ち上げから <b>+${hms(lpc.elapsed)}</b>`;
+    t = lpc.separated ? "MMX の分離の予定の時刻を<wbr>過ぎました" : `計画では：<wbr>${lpc.plan.steps[lpc.current].label.replace(/(\S*-\S*)/g, '<span class="nw">$1</span>')}`;
+    sub = lpc.separated ? "分離は、<wbr>JAXA の発表で確かめます" : "打ち上げは JAXA の中継で確認。<wbr>分離は 5:52ごろの予定。<wbr>位置は計画の時刻の模式";
+  }
+  else if (PH.phase === "flying") { k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり"; sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>`; }
   else if (PH.phase === "postponed") { k = "延期"; t = "MMX は、<wbr>種子島で<wbr>待っています"; sub = "新しい日時は JAXA の発表で"; }
   else if (now >= PH.launchAt) {
     // 予定の時刻からの経過と、計画ではいま何をしているか（JAXA 打上げ計画書［10月改訂版］の表2）。打ち上がったかは公式の発表で確かめるまで描かない
@@ -727,13 +767,13 @@ window.ready = loadTex("../../assets/earth/day-2048.jpg").then((tex) => { earthM
 const SEEN = "voyascope.mmx-now.seen";
 const seen = (() => { try { return localStorage.getItem(SEEN) === "1"; } catch { return false; } })();
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-let t0 = performance.now(), opening = !PRE && !(seen || reduce || location.hash === "#watch");
+let t0 = performance.now(), opening = !PRE && !coastNow() && !(seen || reduce || location.hash === "#watch");
 let launching = false, fromLaunch = false;
 const OPEN_FROM_LAUNCH = 1.9; // 発射のあとは、航路のオープニングの「光の点に乗る」ところから
 const skipBtn = document.getElementById("skip"), replayBtn = document.getElementById("replay"), links = document.getElementById("links");
 const sync = () => {
   const busy = opening || launching; document.body.classList.toggle("launching", launching);
-  skipBtn.hidden = !busy; replayBtn.hidden = PRE || busy; links.hidden = !PRE || busy;
+  const showLinks = PRE || coastNow(); document.body.classList.toggle("pre", showLinks); skipBtn.hidden = !busy; replayBtn.hidden = PRE || busy; links.hidden = !showLinks || busy;
   bubbleEl.hidden = !PRE || opening; leaderEl.toggleAttribute("hidden", !PRE || busy); measureBubble(); // SVG には hidden のプロパティがないので属性で
 };
 const endOpening = () => { opening = false; launching = false; fromLaunch = false; t0 = performance.now(); sync(); try { localStorage.setItem(SEEN, "1"); } catch {} };
@@ -748,7 +788,7 @@ addEventListener("touchend", (e) => { if (sy != null && sy - e.changedTouches[0]
 addEventListener("wheel", (e) => { if (e.deltaY > 30) launch(); }, { passive: true });
 addEventListener("keydown", (e) => { if (e.key === "ArrowUp") launch(); });
 sync();
-const idle = (t) => (PRE ? padAt(t) : watchAt(t));
+const idle = (t) => (PRE ? padAt(t) : coastNow() ? coastAt(t) : watchAt(t));
 window.idleAt = idle;
 window.launchAt = (lt) => { launching = true; fromLaunch = true; sync(); padAt(0, lt); };
 window.openAt = (t) => { opening = true; launching = false; sync(); renderAt(t); };

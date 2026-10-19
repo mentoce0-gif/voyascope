@@ -4,7 +4,10 @@ import { readFileSync } from "node:fs";
 import { launchProgress, beaconTag, launchFlowHtml, hms, AFTER_MS, LAUNCH_PLANS, launchSoon, soonTag, SOON_MS } from "../web/js/launch-plan.js";
 import { eventPanelHtml } from "../web/js/events.js";
 
-const mmx = JSON.parse(readFileSync(new URL("../curation/events/mmx-launch.json", import.meta.url)));
+// 打ち上げ前の形で試す（本物のカードは 2026-10-20 に打ち上げ済み〈done〉になった）
+const scheduled = ({ status, ...c }) => c;
+const card = JSON.parse(readFileSync(new URL("../curation/events/mmx-launch.json", import.meta.url)));
+const mmx = scheduled(card);
 const T0 = Date.parse("2026-10-19T19:41:03Z"); // 2026-10-20 4:41:03（日本時間）
 const at = (ms) => new Date(T0 + ms);
 const S = (h, m, s) => ((h * 60 + m) * 60 + s) * 1000;
@@ -64,4 +67,11 @@ test("打ち上げの前の1週間は光らせる（延期・日付だけ・時�
   assert.equal(launchSoon({ ...mmx, when: { ...mmx.when, value: { date: "2026-10-20" } } }, at(-3600000)), false);
   assert.equal(soonTag(mmx, at(-(4 * 86400000 + 12 * 3600000 + 60000))), "MMX 打ち上げまで あと4日12時間");
   assert.equal(soonTag(mmx, at(-(3 * 3600000 + 12 * 60000 + 30000))), "MMX 打ち上げまで あと3時間12分");
+});
+
+test("打ち上げを確かめたあと（done）も、分離の予定の30分後までは計画の流れを出す", () => {
+  assert.equal(card.status.value, "done");
+  assert.equal(launchProgress(card, at(S(0, 30, 0))).plan.steps[launchProgress(card, at(S(0, 30, 0))).current].label, "慣性飛行");
+  assert.equal(launchProgress(card, at(S(1, 11, 12) + AFTER_MS)), null);
+  assert.equal(launchProgress({ ...card, status: { value: "postponed" } }, at(S(0, 30, 0))), null);
 });

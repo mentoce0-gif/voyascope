@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { mmxPhase, transferProgress, untilText } from "../web/mmx/now/state.js";
 
-const mmx = JSON.parse(readFileSync(new URL("../curation/events/mmx-launch.json", import.meta.url)));
+// 打ち上げ前の形で試す（本物のカードは 2026-10-20 に打ち上げ済み〈done〉になった）
+const scheduled = ({ status, ...c }) => c;
+const card = JSON.parse(readFileSync(new URL("../curation/events/mmx-launch.json", import.meta.url)));
+const mmx = scheduled(card);
 const T0 = Date.parse(mmx.when.value.at);
 const at = (ms) => new Date(T0 + ms);
 
@@ -34,4 +37,8 @@ test("いまどこ：残り時間のことば", () => {
 test("いまどこ：航路の表（route.json）は、カードの打ち上げ日時で計算したもの（日時が変わったら作り直す）", () => {
   const route = JSON.parse(readFileSync(new URL("../web/mmx/now/route.json", import.meta.url)));
   assert.equal(Date.parse(route.launch), T0);
+});
+
+test("いまどこ：本物のカードは打ち上げ済み（JAXA の中継で確認）→ 飛行中", () => {
+  assert.equal(mmxPhase(card, at(30 * 60000)).phase, "flying");
 });

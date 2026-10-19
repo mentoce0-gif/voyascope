@@ -146,7 +146,7 @@ test("PC の右の列：予定の説明（出典つき）も出す。出典の�
 });
 
 test("詳細：出典を項目ごとに、打ち上げは残り時間と射場", () => {
-  const card = JSON.parse(readFileSync("curation/events/mmx-launch.json", "utf8"));
+  const { status: _done, ...card } = JSON.parse(readFileSync("curation/events/mmx-launch.json", "utf8")); // 打ち上げ前の形で（本物は 2026-10-20 に done）
   const html = eventPanelHtml(card, at("2026-10-01T09:20:00Z"));
   assert.match(html, /打ち上げの予定/);
   assert.match(html, /data-live="countdown"/);
@@ -176,7 +176,7 @@ test("curation/events：すべて日時が読めて、2026-10-01 にはまだ先
     assert.ok(eventSpan(e), `${e.id} の日時が読めない`);
     assert.ok(whenText(e, now).length > 0);
   }
-  assert.equal(upcomingEvents(all, now).length, all.length);
+  assert.equal(upcomingEvents(all, now).length, all.filter((e) => e.status?.value !== "done").length); // 終わったもの（done）は出さない
   // web/data/events.json と同じ中身
   const web = JSON.parse(readFileSync("web/data/events.json", "utf8")).events;
   assert.deepEqual(web.map((e) => e.id).sort(), all.map((e) => e.id).sort());
