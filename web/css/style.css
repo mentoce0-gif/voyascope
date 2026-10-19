@@ -1211,6 +1211,8 @@ dialog.greeting[open] { animation: greet-in 0.45s ease-out; }
 .view-switch button[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); font-weight: 700; }
 .view-switch button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .view-switch .vs-short { display: none; }
+/* 列の「遠くを見る」と MMX のアイコンは、スマホだけ（PC は上の部屋の帯から） */
+.view-switch .vs-far, .mmx-open { display: none; }
 /* 遠くを見る部屋への入口：ほかの部屋へ行くボタンなので、表示切替（ミント）と分けてアンバーにする */
 .far-open {
   appearance: none;
@@ -1391,6 +1393,41 @@ dialog.greeting[open] { animation: greet-in 0.45s ease-out; }
   .far-open { position: absolute; z-index: 19; right: 12px; top: calc(var(--top-h) + var(--switch-h) + 8px); min-height: 40px; }
   .view-switch button { padding: 6px 10px; font-size: 0.8rem; }
   .view-switch button::after { content: ""; position: absolute; inset: -7px -1px; }
+  /* 表示切替は横一列。指でスワイプすると、真ん中に止まったものに切り替わる（2026-10-19 オーナー） */
+  .view-switch {
+    left: 12px; right: 12px; max-width: none;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  }
+  .view-switch::-webkit-scrollbar { display: none; }
+  .view-switch::before, .view-switch::after { content: ""; flex: 0 0 calc(50% - 32px); }
+  .view-switch button { scroll-snap-align: center; flex: 0 0 auto; transition: background 0.2s, color 0.2s; }
+  .view-switch .vs-long { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  .view-switch .vs-short { display: none !important; }
+  .view-switch .vs-far { display: inline-flex; align-items: center; gap: 4px; color: var(--amber); font-weight: 700; border: 1px solid var(--amber-dim); background: rgba(255, 181, 71, 0.1); }
+  .view-switch .vs-far .chev { font-size: 1rem; line-height: 1; }
+  .view-switch .vs-far[aria-busy="true"] { opacity: 0.75; cursor: progress; }
+  /* 「遠くを見る」の入口は列に入れたので、もとのボタンは出さない。その場所に MMX のアイコン */
+  .far-open { display: none; }
+  .mmx-open:not([hidden]) {
+    display: inline-flex; flex-direction: column; align-items: center; gap: 1px;
+    position: absolute; z-index: 19; right: 12px; top: calc(var(--top-h) + var(--switch-h) + 8px);
+    min-width: 52px; min-height: 52px; padding: 5px 6px 4px;
+    border: 1px solid var(--amber-dim); border-radius: 14px; background: rgba(5, 14, 31, 0.72); backdrop-filter: blur(4px);
+    color: var(--amber); font: inherit; font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; cursor: pointer;
+  }
+  .mmx-open svg { width: 30px; height: 30px; }
+  .mmx-open .mi-body { fill: #dcab3c; }
+  .mmx-open .mi-panel { fill: #3a3954; stroke: #a8acc0; stroke-width: 0.8; }
+  .mmx-open .mi-line { stroke: #dfe8ee; stroke-width: 1.4; stroke-linecap: round; fill: none; }
+  .mmx-open .mi-foot { stroke: #dfe8ee; stroke-width: 2; stroke-linecap: round; }
+  .mmx-open.soon { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0.6); animation: mmx-pulse 3.6s ease-out infinite; border-color: var(--mint-dim); }
+  .mmx-open:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  @keyframes mmx-pulse { 0% { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0.55); } 70%, 100% { box-shadow: 0 0 0 14px rgba(94, 242, 194, 0); } }
+  /* 「遠くを見る」へ入るとき：地球へぐにゅっと寄る */
+  #globe.dive { animation: globe-dive 0.75s cubic-bezier(.55, -0.25, .7, .2) forwards; }
+  @keyframes globe-dive { 0% { transform: scale(1); filter: none; } 35% { transform: scale(0.94, 1.03); } 100% { transform: scale(2.6); filter: blur(3px) brightness(1.6); opacity: 0; } }
   /* つまみ：スクロールしても上に残る。押すと広げる／縮める、下へ引くと閉じる */
   .sheet-handle {
     position: sticky;

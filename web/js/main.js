@@ -646,6 +646,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     viewMode = mode;
     saveView(mode);
     for (const b of viewSwitch.querySelectorAll("[data-view]")) b.setAttribute("aria-pressed", String(b.dataset.view === mode));
+    centerView(mode);
     if (!fromList) {
       // 表示切替は表示の組み合わせのひな形なので、凡例（スマホは一覧のタブ）で消したものも全部に戻す。
       // 一覧も合わせる：打ち上げ予定のみ → 予定タブ。ほかは家族のタブ・予定タブから「すべて」へ（観測タブはそのまま）
@@ -675,11 +676,48 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     if (next) globe.pointOfView({ lat: next.p.lat, lng: next.p.lng }, 900);
   }
   viewSwitch.addEventListener("click", (e) => {
+    if (e.target.closest("[data-far]")) return diveToFar();
     const b = e.target.closest("[data-view]");
     if (!b) return;
     setView(b.dataset.view);
     lookForView(b.dataset.view);
   });
+  // スマホ：表示切替は横一列。指でスワイプして離すと、真ん中に止まったものに切り替わる（2026-10-19 オーナー）。
+  // 列の最後の「遠くを見る」で止まったら、地球へ寄ってから部屋を開く
+  let viewScrollByCode = false, viewScrollTimer = 0;
+  function centerView(mode, smooth = true) {
+    if (!isNarrow()) return;
+    const b = viewSwitch.querySelector(`[data-view="${mode}"]`);
+    if (!b) return;
+    const max = viewSwitch.scrollWidth - viewSwitch.clientWidth;
+    const left = Math.min(max, Math.max(0, b.offsetLeft + b.offsetWidth / 2 - viewSwitch.clientWidth / 2));
+    if (Math.abs(viewSwitch.scrollLeft - left) < 2) return;
+    viewScrollByCode = true;
+    viewSwitch.scrollTo({ left, behavior: smooth && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto" });
+  }
+  function centeredItem() {
+    const mid = viewSwitch.scrollLeft + viewSwitch.clientWidth / 2;
+    let best = null, bd = Infinity;
+    for (const b of viewSwitch.querySelectorAll("button")) {
+      const d = Math.abs(b.offsetLeft + b.offsetWidth / 2 - mid);
+      if (d < bd) [best, bd] = [b, d];
+    }
+    return best;
+  }
+  viewSwitch.addEventListener("scroll", () => {
+    if (!isNarrow()) return;
+    clearTimeout(viewScrollTimer);
+    viewScrollTimer = setTimeout(() => {
+      if (viewScrollByCode) return void (viewScrollByCode = false);
+      const b = centeredItem();
+      if (!b) return;
+      if (b.hasAttribute("data-far")) return diveToFar();
+      if (b.dataset.view !== viewMode) {
+        setView(b.dataset.view);
+        lookForView(b.dataset.view);
+      }
+    }, 160);
+  }, { passive: true });
   // ---------- 部屋の帯（PC）：地球のまわり・遠くを見る・これから行く（2026-10-04 オーナー：イメージ図の A 案） ----------
   // 「これから行く」＝打ち上げ予定のみの表示（射場のピン）と一覧の「予定」。「地球のまわり」に戻ると「すべて」。
   // 「遠くを見る」は、下の「遠くを見る部屋」のところで開く。PC では、地球の上の「遠くを見る」と「打ち上げ予定のみ」は帯と同じなので出さない（style.css）
@@ -1179,7 +1217,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   const farBtn = $("#far-open");
   const farLabel = farBtn.querySelector(".far-open-label");
   const farNav = roomNav.querySelector('[data-room="far"]');
-  const farOpeners = [farBtn, farNav];
+  const farChip = viewSwitch.querySelector("[data-far]");
+  const farOpeners = [farBtn, farNav, farChip];
   let farOpener = farBtn; // 閉じたら、押したボタンにフォーカスを戻す
   let far = null;
   let farLoading = null;
@@ -1200,7 +1239,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       far = await loadFar();
     } catch (e) {
       console.error(e);
-      const label = opener === farBtn ? farLabel : farNav;
+      const label = opener === farBtn ? farLabel : opener === farChip ? farChip.querySelector(".vs-long") : farNav;
       label.textContent = "読み込めませんでした";
       setTimeout(() => (label.textContent = "遠くを見る"), 4000);
       return;
@@ -1212,8 +1251,25 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     far.open();
     if (entry === "pushed") history.pushState({ far: true }, "", "#far");
   }
+  // スマホの列の「遠くを見る」：地球へぐにゅっと寄ってから部屋を開く（動きを減らす設定ではすぐ開く）
+  async function diveToFar() {
+    if (roomOpen || farChip.getAttribute("aria-busy") === "true") return;
+    loadFar().catch(() => {});
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce) {
+      globeEl.classList.add("dive");
+      await new Promise((r) => setTimeout(r, 700));
+    }
+    await openFar("pushed", farChip);
+    if (!roomOpen) resetDive(); // 読み込めなかったときは、地球を戻す
+  }
+  function resetDive() {
+    globeEl.classList.remove("dive");
+    centerView(viewMode, false);
+  }
   function onFarClosed() {
     roomOpen = false;
+    resetDive();
     globe.resumeAnimation();
     if (location.hash === "#far") history.back();
     farOpener.focus();
@@ -1233,6 +1289,22 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     history.replaceState(null, "", location.pathname);
     openFar("pushed").finally(() => dispatchEvent(new Event("voyascope:tour-return")));
   }
+
+  // ---------- スマホ：MMX のアイコン（これまで「遠くを見る」があった場所。2026-10-19 オーナー） ----------
+  // 押すと MMX の打ち上げの予定を開く。打ち上げの前の1週間・当日の計画の流れのあいだは、ゆっくり光る
+  const mmxBtn = $("#mmx-open");
+  const mmxEv = events.find((ev) => ev.id === "mmx-launch");
+  if (mmxEv) {
+    mmxBtn.hidden = false;
+    mmxBtn.addEventListener("click", () => selectEvent(mmxEv));
+    const updateMmx = () => {
+      const now = clock.now();
+      mmxBtn.classList.toggle("soon", !!(launchSoon(mmxEv, now) || launchProgress(mmxEv, now)));
+    };
+    updateMmx();
+    setInterval(updateMmx, 30000);
+  }
+  centerView(viewMode, false);
 
   // ---------- このアプリについて ----------
   const about = $("#about");
