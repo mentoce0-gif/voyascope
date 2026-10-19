@@ -7,19 +7,25 @@ import { eventSpan, statusOf, countdownText } from "./events.js";
 const S = (h, m, s) => ((h * 60 + m) * 60 + s) * 1000;
 
 export const LAUNCH_PLANS = {
-  // JAXA 打上げ計画書（10月20日に打ち上げた場合）https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf
-  //   照合：voyascope-research の research/verification/2026-10-06-c19.md（打ち上げの約1時間11分12秒後に、火星遷移軌道で MMX を分離）
+  // JAXA 2026年度ロケット打上げ計画書［2026年10月改訂版］の表2「ロケットの飛行計画」（10月20日に打ち上げた場合）
+  //   https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf
+  //   照合：voyascope-research の research/verification/2026-10-06-c19.md、C33（2026-10-19：11の事象の時刻と高度を改訂版で確認）
   "mmx-launch": {
     forAt: "2026-10-19T19:41:03Z",
-    source: "https://www.jaxa.jp/press/2026/08/files/jaxa20260820-1_01.pdf",
-    sourceLabel: "JAXA 打上げ計画書（10月20日に打ち上げた場合）",
+    source: "https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf",
+    sourceLabel: "JAXA 打上げ計画書［2026年10月改訂版］",
     craft: "MMX",
     steps: [
-      { t: S(0, 0, 0), label: "打ち上げ" },
+      { t: S(0, 0, 0), label: "打ち上げ（リフトオフ）" },
+      { t: S(0, 1, 56), label: "固体ロケットブースタ（SRB-3）の1組目（2本）を分離" },
+      { t: S(0, 1, 58), label: "SRB-3 の2組目（2本）を分離" },
+      { t: S(0, 3, 17), label: "フェアリング（MMX を包むカバー）を分離" },
+      { t: S(0, 4, 52), label: "第1段エンジンの燃焼停止" },
+      { t: S(0, 4, 59), label: "第1段と第2段を分離" },
       { t: S(0, 5, 12), label: "第2段エンジンの1回目の燃焼（〜0:10:40）" },
       { t: S(0, 10, 40), label: "慣性飛行" },
       { t: S(1, 3, 57), label: "第2段エンジンの2回目の燃焼（〜1:10:21）" },
-      { t: S(1, 11, 12), label: "MMX を分離（火星へ向かう軌道へ）", separation: true },
+      { t: S(1, 11, 12), label: "MMX を分離（火星へ向かう軌道へ。高度 約592km）", separation: true },
     ],
   },
 };

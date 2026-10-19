@@ -18,13 +18,17 @@ test("打ち上げ前・分離の予定の30分後より後は出さない", () 
   assert.equal(launchProgress(mmx, at(S(1, 11, 12) + AFTER_MS)), null);
 });
 
-test("段階：打ち上げ → 1回目の燃焼 → 慣性飛行 → 2回目の燃焼 → 分離", () => {
+test("段階：打ち上げ → SRB-3 分離（2組）→ フェアリング分離 → 第1段 → 1回目の燃焼 → 慣性飛行 → 2回目の燃焼 → 分離（改訂版の表2）", () => {
   assert.equal(launchProgress(mmx, at(0)).current, 0);
-  assert.equal(launchProgress(mmx, at(S(0, 6, 0))).current, 1);
-  assert.equal(launchProgress(mmx, at(S(0, 30, 0))).current, 2);
-  assert.equal(launchProgress(mmx, at(S(1, 5, 0))).current, 3);
+  assert.equal(launchProgress(mmx, at(S(0, 1, 57))).current, 1);
+  assert.equal(launchProgress(mmx, at(S(0, 2, 0))).current, 2);
+  assert.equal(launchProgress(mmx, at(S(0, 3, 17))).current, 3);
+  assert.equal(launchProgress(mmx, at(S(0, 4, 59))).current, 5);
+  assert.equal(launchProgress(mmx, at(S(0, 6, 0))).current, 6);
+  assert.equal(launchProgress(mmx, at(S(0, 30, 0))).current, 7);
+  assert.equal(launchProgress(mmx, at(S(1, 5, 0))).current, 8);
   const sep = launchProgress(mmx, at(S(1, 11, 12)));
-  assert.equal(sep.current, 4);
+  assert.equal(sep.current, 9);
   assert.equal(sep.separated, true);
   assert.equal(launchProgress(mmx, at(S(1, 11, 11))).separated, false);
 });
