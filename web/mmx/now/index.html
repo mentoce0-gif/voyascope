@@ -132,6 +132,7 @@
     <a class="btn back" href="../../" aria-label="地球の画面へ戻る" title="地球へ">←</a>
     <span class="brand">VOYASCOPE</span>
     <span class="spacer"></span>
+    <button type="button" class="btn" id="view-toggle" hidden>全体を見る</button>
     <button type="button" class="btn amber" id="replay" hidden>はじめから</button>
   </div>
   <div class="tm" id="tm" hidden aria-hidden="true">
@@ -165,6 +166,7 @@
   <div class="tag" id="tag-mmx">MMX</div>
   <div class="tag amber" id="tag-h3">H3ロケット10号機（MMX を搭載）</div>
   <div class="tag" id="tag-mars">火星</div>
+  <div class="tag" id="tag-earth">地球</div>
   <div class="tag amber" id="tag-phobos">フォボス</div>
 </div>
 <script type="module">
@@ -592,6 +594,7 @@ const tags = { tane: document.getElementById("tag-tane"), mmx: document.getEleme
 const place = (el, p, alpha, dy = -14) => { const v = p.clone().project(camera); const vis = v.z < 1 && alpha > 0.01; el.style.opacity = vis ? alpha : 0; el.style.left = `${(v.x + 1) / 2 * W}px`; el.style.top = `${(1 - v.y) / 2 * H + dy}px`; };
 
 function renderAt(t) {
+  tagEarth.style.opacity = 0;
   // オープニング：地球を回る道を進むあいだ（1.9〜4.1秒）は、計画の時刻を縮めて計器に出す
   hudAt(t >= 1.9 && t < 4.1 ? "launch" : "off", Math.min(1, (t - 1.9) / 2.0) * SEP_MS, false);
   pinLift(false);
@@ -795,6 +798,7 @@ filmBtn.addEventListener("click", () => (film ? filmGo(FILM_STEPS.length) : film
 window.filmGo = filmGo;
 
 function coastAt(t) {
+  tagEarth.style.opacity = 0;
   pinLift(false);
   const el = simEl() ?? Date.now() - PH.launchAt, f = Math.min(1, Math.max(0, el / SEP_MS));
   const s = sSep * f, pos = at(s);
@@ -851,8 +855,45 @@ function watchAt(t) {
   watchCaption();
   document.querySelector(".cap").style.opacity = 1;
   place(tags.tane, pinWorld, 0); place(tags.mmx, mmxPos, 1, -26); place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 1, 30); place(tags.phobos, phobosPos, 0);
+  tagEarth.style.opacity = 0;
 }
 window.watchAt = watchAt;
+// ---------- MMX を追う（2026-10-20 オーナー：しばらくは監視モードの「いまの位置」を主に）：MMX のそば・日の当たる側から。なぞって回す・寄せ引き ----------
+// 打ち上げから5日ほどは MMX を追う視点を最初に。そのあとは全体の図（火星との距離に関心が移るころ。2026-10-20 オーナー）。どちらもボタンで切り替えられる
+const TRACK_DAYS = 5;
+let track = FLYING && PH.days < TRACK_DAYS;
+const tagEarth = document.getElementById("tag-earth");
+function trackAt(t) {
+  pinLift(false);
+  hudAt("watch", Date.now() - PH.launchAt);
+  camera.fov = 42; camera.updateProjectionMatrix();
+  const side = mmxDir.clone().cross(V(0, 1, 0)).normalize(); if (side.dot(mmxPos.clone().negate()) < 0) side.negate();
+  const dir = side.clone().add(V(0, 0.38, 0)).add(mmxDir.clone().multiplyScalar(-0.6)).normalize().applyAxisAngle(V(0, 1, 0), Math.sin(t * 0.05) * 0.25 + view.yaw);
+  dir.applyAxisAngle(dir.clone().cross(V(0, 1, 0)).normalize(), view.pitch);
+  const dist = 1.25 * view.zoom / (0.55 + 0.45 * Math.min(1, W / H));
+  camera.position.copy(mmxPos).add(dir.multiplyScalar(dist)); camera.lookAt(mmxPos.clone().add(V(0, -0.08, 0)));
+  document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
+  route.uniforms.uReveal.value = sMMX; route.uniforms.uFront.value = sMMX;
+  const PERIOD = 5, RUN = 3.2, ph = t % PERIOD;
+  route.uniforms.uPulse.value = ph < RUN ? -0.05 + (ph / RUN) * 1.1 : -1;
+  const up = route.uniforms.uPulse.value;
+  if (up >= 0 && up <= 1) { billboards.find((b) => b.material === comet).position.copy(at(up)); comet.uniforms.uC.value.set(up < sMMX ? 0x9ff7d8 : 0xffc76b); comet.uniforms.uA.value = 0.95; comet.uniforms.uS.value = 0.5; } else comet.uniforms.uA.value = 0;
+  mmxHolder.visible = true; h3.visible = false; padLight.visible = false; mmxHolder.scale.setScalar(MMX_S); mmx.rotation.y = 0.6 + t * 0.12;
+  const pass = Math.exp(-Math.pow((up - sMMX) * 30, 2));
+  mmxGlow.uniforms.uS.value = 0.6; mmxGlow.uniforms.uA.value = 0.2 + 0.4 * pass;
+  pinRing.uniforms.uA.value = 0; pinGlow.uniforms.uA.value = 0.4; pinGlow.uniforms.uS.value = 0.08; place(tagH3, pinWorld, 0);
+  phobosOrbit.uniforms.uA.value = 0.2; phobosGlow.uniforms.uA.value = 0;
+  for (const b of billboards) { b.quaternion.copy(camera.quaternion); b.scale.setScalar(b.material.uniforms.uS.value); }
+  sky.position.copy(camera.position);
+  sunLight.target.position.copy(mmxPos);
+  rimLight.target.position.copy(mmxPos); rimLight.position.copy(mmxPos).add(mmxPos.clone().sub(camera.position).normalize().add(V(0, 0.6, 0)).multiplyScalar(2));
+  renderer.render(scene, camera);
+  watchCaption();
+  document.querySelector(".cap").style.opacity = 1;
+  place(tags.tane, pinWorld, 0); place(tags.mmx, mmxPos.clone().add(camera.up.clone().multiplyScalar(MMX_S * 0.75)), 1, -6); /* 模型の上に */ place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 1, 30); place(tags.phobos, phobosPos, 0);
+  place(tagEarth, earthPos.clone().add(V(0, -RE, 0)), 1, 22);
+}
+window.trackAt = trackAt;
 // 監視モードの文字：打ち上げ前・未確認・延期・飛行中
 let capCache = "";
 function watchCaption() {
@@ -892,9 +933,12 @@ let t0 = performance.now(), opening = !PRE && !coastNow() && !(seen || reduce ||
 let launching = false, fromLaunch = false;
 const OPEN_FROM_LAUNCH = 1.9; // 発射のあとは、航路のオープニングの「光の点に乗る」ところから
 const skipBtn = document.getElementById("skip"), replayBtn = document.getElementById("replay"), links = document.getElementById("links");
+const viewToggle = document.getElementById("view-toggle");
+viewToggle.textContent = track ? "全体を見る" : "MMX を追う";
+viewToggle.addEventListener("click", () => { track = !track; view.yaw = view.pitch = 0; view.zoom = 1; viewToggle.textContent = track ? "全体を見る" : "MMX を追う"; });
 const sync = () => {
   const busy = opening || launching; document.body.classList.toggle("launching", launching);
-  const showLinks = PRE || coastNow(); document.body.classList.toggle("pre", showLinks); skipBtn.hidden = !busy; replayBtn.hidden = PRE || busy; links.hidden = !showLinks || busy;
+  const showLinks = PRE || coastNow(); document.body.classList.toggle("pre", showLinks); skipBtn.hidden = !busy; replayBtn.hidden = PRE || busy; viewToggle.hidden = !FLYING || busy || coastNow(); links.hidden = !showLinks || busy;
   bubbleEl.hidden = !PRE || opening; leaderEl.toggleAttribute("hidden", !PRE || busy); measureBubble(); // SVG には hidden のプロパティがないので属性で
 };
 const endOpening = () => { opening = false; launching = false; fromLaunch = false; t0 = performance.now(); sync(); try { localStorage.setItem(SEEN, "1"); } catch {} };
@@ -909,7 +953,7 @@ addEventListener("touchend", (e) => { if (sy != null && sy - e.changedTouches[0]
 addEventListener("wheel", (e) => { if (e.deltaY > 30) launch(); }, { passive: true });
 addEventListener("keydown", (e) => { if (e.key === "ArrowUp") launch(); });
 sync();
-const idle = (t) => (PRE ? padAt(t) : coastNow() || film ? coastAt(t) : watchAt(t));
+const idle = (t) => (PRE ? padAt(t) : coastNow() || film ? coastAt(t) : track ? trackAt(t) : watchAt(t));
 window.idleAt = idle;
 window.launchAt = (lt) => { launching = true; fromLaunch = true; sync(); padAt(0, lt); };
 window.openAt = (t) => { opening = true; launching = false; sync(); renderAt(t); };
