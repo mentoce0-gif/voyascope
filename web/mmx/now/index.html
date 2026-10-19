@@ -41,7 +41,7 @@
   .link .ld { font-size: 12px; color: var(--dim); }
   .link.live { border-color: rgba(255,181,71,.7); background: rgba(40,24,6,.78); } .link.live .lk { color: var(--amber); }
   .link:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-  .skip { position: absolute; right: 14px; top: 66px; pointer-events: auto; min-height: 36px; min-width: 44px; justify-content: center; font-size: 16px; }
+  .skip { position: absolute; right: 14px; top: 14px; pointer-events: auto; min-height: 36px; min-width: 44px; justify-content: center; font-size: 16px; }
   .badge { white-space: nowrap; }
   @media (max-width: 420px) { .top .brand { display: none; } }
   /* 打ち上げ前（スマホの形。2026-10-19 オーナーのスケッチ）：上にことば → 真ん中に H3 の拡大の窓 → 地球の種子島 → 丸いリンク → X → ただし書き */
@@ -95,6 +95,29 @@
     .bubble { top: 178px; width: min(29vw, 110px); }
     .bubble .hint { bottom: -34px; font-size: 10px; }
   }
+  /* 計器の表示（テレメトリーふう。2026-10-20 オーナー）：経過時間・計画の速度と高度・事象の弧。値は打上げ計画書の表2の「計画」だけ（あいだを推測で埋めない） */
+  .tm { position: absolute; left: 18px; right: 18px; top: 64px; pointer-events: none; font-family: "JetBrains Mono", monospace; color: var(--text); text-shadow: 0 0 10px var(--navy); }
+  .tm-clock { font-size: 30px; font-weight: 700; letter-spacing: .04em; color: var(--text); line-height: 1; }
+  .tm-clock small { font-size: 12px; letter-spacing: .2em; color: var(--mint); margin-right: 8px; vertical-align: 6px; }
+  .tm-row { display: flex; align-items: flex-end; gap: 18px; margin-top: 8px; }
+  .tm-q { display: flex; align-items: flex-end; gap: 8px; }
+  .tm-k { font-size: 9px; letter-spacing: .16em; color: var(--dim); line-height: 1.25; }
+  .tm-k small { display: block; font-size: 9px; letter-spacing: .1em; }
+  .tm-v { font-size: 20px; font-weight: 700; padding-left: 8px; border-left: 1.5px solid var(--mint); line-height: 1; white-space: nowrap; }
+  .tm-plan { margin-left: auto; font-size: 9px; letter-spacing: .2em; color: var(--amber); border: 1px solid rgba(255,181,71,.6); padding: 2px 6px; border-radius: 3px; }
+  .tm-arc { display: block; width: 100%; height: 46px; margin-top: 6px; overflow: visible; }
+  .tm-arc .base { fill: none; stroke: rgba(217,244,234,.35); stroke-width: 1; }
+  .tm-arc .done { fill: none; stroke: var(--mint); stroke-width: 1.6; }
+  .tm-arc .tick { fill: var(--text); } .tm-arc .tick.past { fill: var(--mint); }
+  .tm-arc .dot { fill: none; stroke: var(--mint); stroke-width: 1.6; } .tm-arc .dot-in { fill: var(--mint); }
+  .tm-arc text { font-size: 8px; letter-spacing: .08em; fill: var(--text); } .tm-arc text.next { fill: var(--dim); }
+  .tm-meta { display: flex; gap: 14px; margin-top: 4px; font-size: 9px; letter-spacing: .16em; color: var(--dim); }
+  .tm-meta b { color: var(--text); font-weight: 700; margin-left: 4px; }
+  body.tm-on .cap { top: 226px; bottom: auto; }
+  body.tm-on .cap .k { display: none; }
+  body.tm-on .cap .t { font-size: 17px; } body.tm-on .cap .s { font-size: 12px; }
+  body.tm-watch .tm-row, body.tm-watch .tm-arc { display: none; }
+  body.tm-open .tm { top: auto; bottom: 92px; } /* オープニング：字幕（上）と重ならないよう下に */
   .warp-vignette { position: fixed; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
 </style>
 </head>
@@ -106,6 +129,16 @@
     <span class="brand">VOYASCOPE</span>
     <span class="spacer"></span>
     <button type="button" class="btn amber" id="replay" hidden>はじめから</button>
+  </div>
+  <div class="tm" id="tm" hidden aria-hidden="true">
+    <div class="tm-clock" id="tm-clock"></div>
+    <div class="tm-row">
+      <div class="tm-q"><span class="tm-k">VELOCITY<small>km/s</small></span><span class="tm-v" id="tm-vel">—</span></div>
+      <div class="tm-q"><span class="tm-k">ALTITUDE<small>km</small></span><span class="tm-v" id="tm-alt">—</span></div>
+      <span class="tm-plan">PLAN</span>
+    </div>
+    <svg class="tm-arc" id="tm-arc" viewBox="0 0 360 46" preserveAspectRatio="none"></svg>
+    <div class="tm-meta"><span>FLIGHT<b>F10</b></span><span>TYPE<b>H3-24L</b></span><span>PAYLOAD<b>MMX</b></span></div>
   </div>
   <div class="cap" aria-live="polite"><div class="k" id="capk"></div><div class="t" id="capt"></div><div class="s" id="caps"></div></div>
   <button type="button" class="btn skip" id="skip" hidden aria-label="とばす" title="とばす">⏩</button>
@@ -555,6 +588,8 @@ const tags = { tane: document.getElementById("tag-tane"), mmx: document.getEleme
 const place = (el, p, alpha, dy = -14) => { const v = p.clone().project(camera); const vis = v.z < 1 && alpha > 0.01; el.style.opacity = vis ? alpha : 0; el.style.left = `${(v.x + 1) / 2 * W}px`; el.style.top = `${(1 - v.y) / 2 * H + dy}px`; };
 
 function renderAt(t) {
+  // オープニング：地球を回る道を進むあいだ（1.9〜4.1秒）は、計画の時刻を縮めて計器に出す
+  hudAt(t >= 1.9 && t < 4.1 ? "launch" : "off", Math.min(1, (t - 1.9) / 2.0) * SEP_MS, false);
   pinLift(false);
   route.uniforms.uPulse.value = -1; comet.uniforms.uA.value = 0; mmxHolder.scale.setScalar(MMX_S); mmxGlow.uniforms.uS.value = 0.7; phobosGlow.uniforms.uS.value = 0.4;
   // カメラ：地球 → 光の点に沿って MMX まで → MMX → 光の筋の先端を追う（ワープ）→ 火星を回る軌道を見る
@@ -647,6 +682,7 @@ const watchH = () => { const half = Math.tan((42 / 2) * Math.PI / 180) * Math.mi
 const watchCam = { get pos() { return watchCenter.clone().add(V(0, watchH(), watchH() * 0.18)); }, get look() { return watchCenter.clone(); } };
 // ---------- 打ち上げ前：種子島に立つ H3 ロケットを、ゆっくり回りながら見る ----------
 function padAt(t, lt = -1) {
+  hudAt("off");
   pinLift(true);
   camera.fov = 42; camera.updateProjectionMatrix();
   const n = pinWorld.clone().sub(earthPos).normalize();
@@ -683,6 +719,35 @@ function padAt(t, lt = -1) {
   place(tags.mmx, pinWorld, 0); place(tags.mars, marsPos, 0); place(tags.phobos, phobosPos, 0);
 }
 window.padAt = padAt;
+
+// ---------- 計器の表示 ----------
+const tmEl = document.getElementById("tm"), tmArc = document.getElementById("tm-arc");
+const PLAN = EV ? (await import("../../js/launch-plan.js")).LAUNCH_PLANS["mmx-launch"] : null;
+const ARC = { x0: 4, y0: 40, cx: 180, cy: -6, x1: 356, y1: 40 };
+const arcPt = (u) => { const v = 1 - u; return [v * v * ARC.x0 + 2 * v * u * ARC.cx + u * u * ARC.x1, v * v * ARC.y0 + 2 * v * u * ARC.cy + u * u * ARC.y1]; };
+const arcU = (ms) => Math.sqrt(Math.min(1, Math.max(0, ms / SEP_MS))); // はじめの5分に事象が集まるので、平方根で広げる
+const pad2 = (n) => String(n).padStart(2, "0");
+const xClock = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(s / 86400); return `${d ? `${d}d ` : ""}${pad2(Math.floor(s % 86400 / 3600))}:${pad2(Math.floor(s % 3600 / 60))}:${pad2(s % 60)}`; };
+let tmKey = "";
+// mode：launch（打ち上げから分離まで。計画の値と弧）／watch（経過時間と機体の名前だけ）／off
+function hudAt(mode, ms, moveCap = true) {
+  tmEl.hidden = mode === "off"; document.body.classList.toggle("tm-on", mode === "launch" && moveCap); document.body.classList.toggle("tm-open", mode === "launch" && !moveCap); document.body.classList.toggle("tm-watch", mode === "watch");
+  if (mode === "off" || !PLAN) return;
+  document.getElementById("tm-clock").innerHTML = `<small>X+</small>${xClock(ms)}`;
+  if (mode !== "launch") return;
+  let cur = 0; PLAN.steps.forEach((st, i) => { if (st.t <= ms) cur = i; });
+  const st = PLAN.steps[cur], nx = PLAN.steps[cur + 1];
+  document.getElementById("tm-vel").textContent = st.vel ?? "—"; document.getElementById("tm-alt").textContent = st.alt ?? "—";
+  const u = arcU(Math.min(ms, SEP_MS)), key = `${cur}:${Math.round(u * 200)}`;
+  if (key === tmKey) return; tmKey = key;
+  const path = (a, b) => { let d = ""; for (let i = 0; i <= 40; i++) { const [x, y] = arcPt(a + (b - a) * i / 40); d += `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`; } return d; };
+  const [dx, dy] = arcPt(u);
+  const ticks = PLAN.steps.map((p, i) => { const [x, y] = arcPt(arcU(p.t)); return `<circle class="tick${i <= cur ? " past" : ""}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.6"/>`; }).join("");
+  const label = (p, cls, dyy) => { const [x, y] = arcPt(arcU(p.t)); const anchor = x > 300 ? "end" : x < 60 ? "start" : "middle"; return `<text class="${cls}" x="${x.toFixed(1)}" y="${(y + dyy).toFixed(1)}" text-anchor="${anchor}">${p.en}</text>`; };
+  tmArc.innerHTML = `<path class="base" d="${path(0, 1)}"/><path class="done" d="${path(0, u)}"/>${ticks}` +
+    `<circle class="dot" cx="${dx.toFixed(1)}" cy="${dy.toFixed(1)}" r="4.5"/><circle class="dot-in" cx="${dx.toFixed(1)}" cy="${dy.toFixed(1)}" r="1.8"/>` +
+    label(st, "cur", -8) + (nx ? label(nx, "next", 12) : "");
+}
 
 // 打ち上げの日の画面は、指でなぞると回せる・2本指で寄せ引き（2026-10-20 オーナー：文字と重なるときに動かせるように）
 const view = { yaw: 0, pitch: 0, zoom: 1 };
@@ -727,6 +792,7 @@ function coastAt(t) {
   camera.up.set(0, 1, 0);
   coastGlow.uniforms.uA.value = 0; coastRing.uniforms.uA.value = 0; // ほかの場面では出さない
   watchCaption();
+  hudAt("launch", Date.now() - PH.launchAt);
   document.querySelector(".cap").style.opacity = 1;
   place(tags.tane, pinWorld, 1, 22); place(tagH3, pos, 1, -22); tagH3.style.left = `${Math.min(W - 70, Math.max(70, parseFloat(tagH3.style.left)))}px`; /* 画面の端で切れないように */ place(tags.mmx, pos, 0); place(tags.mars, marsPos, 0); place(tags.phobos, phobosPos, 0);
 }
@@ -735,6 +801,7 @@ if (coastNow()) { tagH3.textContent = "H3＋MMX（計画）"; document.querySele
 
 function watchAt(t) {
   pinLift(false);
+  hudAt(FLYING ? "watch" : "off", Date.now() - PH.launchAt);
   camera.fov = 42; camera.updateProjectionMatrix();
   camera.position.copy(watchCam.pos).add(V(Math.sin(t * 0.2) * 0.6, 0, Math.cos(t * 0.17) * 0.6)); camera.lookAt(watchCam.look);
   document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
