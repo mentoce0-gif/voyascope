@@ -89,7 +89,7 @@ test("ちりの群れ：流れ星（光）は、放射点の側の半球の大�
   assert.deepEqual(a, b);
 });
 
-import { meteorWindow, orbitPoint, earthPoint, meteorStoryHtml } from "../web/js/meteors.js";
+import { meteorWindow, orbitPoint, earthPoint, meteorStoryHtml, peakDate, nearestOrbitPoint } from "../web/js/meteors.js";
 import { readFileSync } from "node:fs";
 
 test("出現期間（active）があれば、そのあいだ（日本時間）だけ。ちりも今夜の欄もこれに合わせる", () => {
@@ -118,4 +118,19 @@ test("しくみの図：21P の通り道が黄道を横切る点のそばを、�
   assert.match(html, /国立天文台 流星群とは/);
   assert.match(html, /イメージ/);
   assert.match(html, /彗星がいまそこにあるわけではありません/);
+});
+
+test("しくみの図：オリオン座流星群は、10月22日ごろの地球のそばを 1P/Halley の通り道が黄道の北で通る（JPL の軌道要素）", () => {
+  const card = JSON.parse(readFileSync("curation/events/orionids-2026.json", "utf8"));
+  const peak = peakDate(card);
+  assert.equal(peak.toISOString(), "2026-10-22T03:00:00.000Z");
+  const near = nearestOrbitPoint(card.parent.orbit.value, earthPoint(peak));
+  assert.ok(near.d < 0.2, `地球から ${near.d} au`);
+  assert.ok(near.p.z > 0, "黄道の北");
+  const html = meteorStoryHtml(card, new Date("2026-10-18T12:00:00Z"));
+  assert.match(html, /10月22日ごろ/);
+  assert.match(html, /海王星の軌道より外/);
+  assert.match(html, /IAU 流星データセンター/);
+  assert.match(html, /オリオン座は「ちりが来る向き」/);
+  assert.doesNotMatch(html, /りゅう座|いちばん近いところの距離/);
 });
