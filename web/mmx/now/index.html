@@ -492,6 +492,8 @@ document.body.classList.toggle("pre", PRE);
 const flame = glow(0xffb547, 0.05, pinWorld); flame.uniforms.uA.value = 0; const flameBoard = billboards[billboards.length - 1];
 // 打ち上げの日（打ち上げを確かめたあと〜MMX の分離の予定の30分後）：H3 の第2段＋MMX を、計画の時刻で地球を回る道の上に（2026-10-20 オーナー）
 const SEP_MS = 4272000, COAST_AFTER = 30 * 60000;
+// MMX の分離を確かめたか（カードの status の note。2026-10-20 JAXA の打上げライブ中継で確認）
+const SEP_SEEN = /分離を確認/.test(EV?.status?.note ?? "");
 const coastNow = () => FLYING && Date.now() - PH.launchAt < SEP_MS + COAST_AFTER;
 const coastGlow = glow(0x5ef2c2, 0.25, pinWorld); coastGlow.uniforms.uA.value = 0; const coastBoard = billboards[billboards.length - 1];
 const coastRing = ringGlow(0x5ef2c2, pinWorld); coastRing.uniforms.uA.value = 0; const coastRingBoard = billboards[billboards.length - 1];
@@ -764,11 +766,11 @@ function watchCaption() {
   const lpc = coastNow() && EV ? launchProgress(EV, new Date(now)) : null;
   if (lpc) {
     k = `打ち上げから <b>+${hms(lpc.elapsed)}</b>`;
-    t = lpc.separated ? "MMX の分離の予定の時刻を<wbr>過ぎました" : `計画では：<wbr>${lpc.plan.steps[lpc.current].label.replace(/(\S*-\S*)/g, '<span class="nw">$1</span>')}`;
+    t = lpc.separated ? (SEP_SEEN ? "MMX、<wbr>ロケットから分離。<wbr>火星へ" : "MMX の分離の予定の時刻を<wbr>過ぎました") : `計画では：<wbr>${lpc.plan.steps[lpc.current].label.replace(/(\S*-\S*)/g, '<span class="nw">$1</span>')}`;
     // 高さを ISS とくらべる（2026-10-20 オーナー。ISS は curation/spacecraft/iss.json：NASA「約400km」）
     const alt = lpc.plan.steps[lpc.current].alt, top = alt ? Number(alt.split("〜").pop()) : 0;
     const cmp = alt && ISS_KM ? `計画の高さ <b>約${alt}km</b>（ISS の約${(top / ISS_KM).toFixed(1)}倍）。<wbr>` : "";
-    sub = lpc.separated ? `${cmp}分離は、<wbr>JAXA の発表で確かめます` : `${cmp}打ち上げは JAXA の中継で確認。<wbr>分離は 5:52ごろの予定`;
+    sub = lpc.separated ? (SEP_SEEN ? `${cmp}分離は JAXA の中継で確認` : `${cmp}分離は、<wbr>JAXA の発表で確かめます`) : `${cmp}打ち上げは JAXA の中継で確認。<wbr>分離は 5:52ごろの予定`;
   }
   else if (PH.phase === "flying") { k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり"; sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>`; }
   else if (PH.phase === "postponed") { k = "延期"; t = "MMX は、<wbr>種子島で<wbr>待っています"; sub = "新しい日時は JAXA の発表で"; }

@@ -1154,16 +1154,35 @@ dialog.card::backdrop { background: rgba(3, 8, 18, 0.65); backdrop-filter: blur(
 #about-tle { white-space: pre-line; }
 
 /* いってらっしゃい・おかえり（更新のあと最初に開いたとき） */
-dialog.greeting { width: min(420px, calc(100vw - 2 * var(--gutter))); text-align: center; }
+dialog.greeting { width: min(400px, calc(100vw - 2 * var(--gutter))); text-align: center; padding: 0; overflow: hidden;
+  border: 1px solid var(--mint-dim); border-radius: 18px;
+  background: radial-gradient(120% 60% at 50% 0%, rgba(255, 181, 71, 0.16), transparent 60%), linear-gradient(180deg, #0a1830, #050e1f 70%);
+  box-shadow: 0 0 0 1px rgba(94, 242, 194, 0.08), 0 20px 60px rgba(0, 0, 0, 0.55); }
+dialog.greeting::backdrop { background: rgba(2, 8, 20, 0.72); backdrop-filter: blur(3px); }
+dialog.greeting .card-inner { padding: 22px 20px 16px; }
 dialog.greeting[open] { animation: greet-in 0.45s ease-out; }
-.greet { padding: 6px 4px 2px; }
-.greet + .greet { margin-top: 12px; padding-top: 14px; border-top: 1px solid var(--mint-dim); }
-.greet-kicker { margin: 0; font-size: 0.7rem; letter-spacing: 0.25em; color: var(--mint); }
-.greet-title { margin: 0.2rem 0 0.5rem; font-size: 1.35rem; color: var(--amber); }
-.greet-return .greet-kicker { color: var(--amber); }
-.greet-return .greet-title { color: var(--mint); }
-.greet-actions { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
-.greet-foot { margin-top: 12px; }
+/* 計器の字（JetBrains Mono）と、いまどこと同じアンバー・ミント（2026-10-20 オーナー） */
+.greet { padding: 4px 0 0; }
+.greet + .greet { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--mint-dim); }
+.greet-kicker { margin: 0; display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.32em; color: var(--mint); }
+.greet-kicker i { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 8px var(--mint); }
+.greet-title { margin: 0.5rem 0 0.35rem; line-height: 1.15; }
+.greet-title .gt-pre { display: block; font-size: 0.95rem; font-weight: 700; color: var(--text); letter-spacing: 0.08em; }
+.greet-title .gt-name { display: block; margin-top: 4px; font-family: var(--font-mono); font-size: clamp(2.2rem, 11vw, 2.8rem); font-weight: 700; letter-spacing: 0.12em; color: var(--amber); text-shadow: 0 0 18px rgba(255, 181, 71, 0.45); overflow-wrap: anywhere; }
+.greet-say { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } /* 読み上げ用の文。見た目は下の表 */
+.greet-read { margin: 14px 0 6px; padding: 10px 2px; border-top: 1px solid rgba(94, 242, 194, 0.25); border-bottom: 1px solid rgba(94, 242, 194, 0.25); text-align: left; display: grid; gap: 6px; }
+.greet-read div { display: grid; grid-template-columns: 5.6em 1fr; align-items: baseline; gap: 10px; }
+.greet-read dt { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.2em; color: var(--mint); opacity: 0.85; }
+.greet-read dd { margin: 0; font-size: 0.9rem; color: var(--text); word-break: keep-all; overflow-wrap: anywhere; }
+.greet-src { margin: 6px 0 0; font-size: 0.72rem; color: var(--dim, #8fb3a8); }
+.greet-src a { color: inherit; }
+.greet-return .greet-kicker { color: var(--amber); } .greet-return .greet-kicker i { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+.greet-return .gt-name { color: var(--mint); text-shadow: 0 0 18px rgba(94, 242, 194, 0.4); }
+.greet-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.greet-actions .btn { border-radius: 999px; }
+.greet-go { background: var(--amber); color: var(--navy-800, #050e1f); border-color: var(--amber); font-weight: 700; text-decoration: none; }
+.greet-foot { margin-top: 14px; font-size: 0.66rem; opacity: 0.75; word-break: keep-all; overflow-wrap: anywhere; text-wrap: balance; }
+dialog.greeting > .card-inner > .greet-actions .btn-primary { background: none; border-color: transparent; color: var(--dim, #8fb3a8); font-size: 0.8rem; text-decoration: underline; text-underline-offset: 3px; }
 @keyframes greet-in {
   from { opacity: 0; transform: translateY(8px) scale(0.98); }
   to { opacity: 1; transform: none; }

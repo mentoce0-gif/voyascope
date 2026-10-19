@@ -58,9 +58,9 @@ test("見たものは出さない。新しい順に並ぶ", () => {
 test("文面：事実と出典だけ。名前などはエスケープする", () => {
   const [g] = pendingGreetings({ events: [launch({ greeting: { name: "<b>X</b>", until: "2026-10-27" } })] }, new Date("2026-10-20T00:00:00Z"));
   const html = greetingHtml(g);
-  assert.match(html, /いってらっしゃい、&lt;b&gt;X&lt;\/b&gt;/);
+  assert.match(html, /いってらっしゃい、<\/span><span class="gt-name">&lt;b&gt;X&lt;\/b&gt;/);
   assert.match(html, /2026年10月20日 4:41（日本時間）、H3ロケット10号機で打ち上げられました。/);
   assert.match(html, /出典：<a href="https:\/\/example.org\/news"[^>]*>example.org<\/a>/);
   const [r] = pendingGreetings({ craft: [iss([team()])] }, new Date("2026-10-09T00:00:00Z"));
-  assert.match(greetingHtml(r), /おかえりなさい、Crew-12.*2026年10月8日、4人が国際宇宙ステーションから地球に帰ってきました。/s);
+  assert.match(greetingHtml(r), /おかえりなさい、<\/span><span class="gt-name">Crew-12.*2026年10月8日、4人が国際宇宙ステーションから地球に帰ってきました。/s);
 });

@@ -143,7 +143,13 @@ const PUBLISHERS = [
   ["qzss.go.jp", "内閣府"],
   ["jma.go.jp", "気象庁"],
 ];
+// ホストだけでは機関がわからない出典（動画など）
+const KNOWN_SOURCES = {
+  "https://www.youtube.com/watch?v=sZGyK9jfoy4": "JAXA（打上げライブ中継）",
+};
+export const knownSource = (url) => KNOWN_SOURCES[url] ?? "";
 export function publisherOf(url) {
+  if (KNOWN_SOURCES[url]) return KNOWN_SOURCES[url];
   let host;
   try {
     host = new URL(url).hostname;
