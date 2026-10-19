@@ -859,7 +859,9 @@ function watchAt(t) {
 }
 window.watchAt = watchAt;
 // ---------- MMX を追う（2026-10-20 オーナー：しばらくは監視モードの「いまの位置」を主に）：MMX のそば・日の当たる側から。なぞって回す・寄せ引き ----------
-let track = FLYING;
+// 打ち上げから5日ほどは MMX を追う視点を最初に。そのあとは全体の図（火星との距離に関心が移るころ。2026-10-20 オーナー）。どちらもボタンで切り替えられる
+const TRACK_DAYS = 5;
+let track = FLYING && PH.days < TRACK_DAYS;
 const tagEarth = document.getElementById("tag-earth");
 function trackAt(t) {
   pinLift(false);
@@ -932,6 +934,7 @@ let launching = false, fromLaunch = false;
 const OPEN_FROM_LAUNCH = 1.9; // 発射のあとは、航路のオープニングの「光の点に乗る」ところから
 const skipBtn = document.getElementById("skip"), replayBtn = document.getElementById("replay"), links = document.getElementById("links");
 const viewToggle = document.getElementById("view-toggle");
+viewToggle.textContent = track ? "全体を見る" : "MMX を追う";
 viewToggle.addEventListener("click", () => { track = !track; view.yaw = view.pitch = 0; view.zoom = 1; viewToggle.textContent = track ? "全体を見る" : "MMX を追う"; });
 const sync = () => {
   const busy = opening || launching; document.body.classList.toggle("launching", launching);
