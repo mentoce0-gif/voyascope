@@ -79,15 +79,28 @@
     </nav>
 
     <div class="globe-top">
-      <!-- 地球の上：表示切替（地球と一覧に出すもの）。押したものが光る -->
+      <!-- 地球の上：表示切替（地球と一覧に出すもの）。押したものが光る。見出しに「のみ」は付けない（2026-10-19 オーナー。読み上げは aria-label で「日本のみ」など） -->
       <div class="view-switch" id="view-switch" role="group" aria-label="地球と一覧に出すもの">
         <button type="button" data-view="all" aria-pressed="true"><span class="vs-long">すべて</span><span class="vs-short" aria-hidden="true">すべて</span></button>
-        <button type="button" data-view="japan" aria-pressed="false"><span class="vs-long">日本のみ</span><span class="vs-short" aria-hidden="true">日本</span></button>
-        <button type="button" data-view="craft" aria-pressed="false"><span class="vs-long">衛星のみ</span><span class="vs-short" aria-hidden="true">衛星</span></button>
-        <button type="button" data-view="launches" aria-pressed="false"><span class="vs-long">打ち上げ予定のみ</span><span class="vs-short" aria-hidden="true">打ち上げ</span></button>
+        <button type="button" data-view="japan" aria-pressed="false" aria-label="日本のみ"><span class="vs-long">日本</span><span class="vs-short" aria-hidden="true">日本</span></button>
+        <button type="button" data-view="craft" aria-pressed="false" aria-label="衛星のみ"><span class="vs-long">衛星</span><span class="vs-short" aria-hidden="true">衛星</span></button>
+        <button type="button" data-view="launches" aria-pressed="false" aria-label="打ち上げ予定のみ"><span class="vs-long">打ち上げ予定</span><span class="vs-short" aria-hidden="true">打ち上げ</span></button>
+        <!-- スマホ：列の最後に「遠くを見る」（琥珀色のまま）。選ぶと地球へ寄ってから部屋を開く（2026-10-19 オーナー） -->
+        <button type="button" data-far class="vs-far" aria-label="遠くを見る部屋へ（探査機までの距離と、光で届く時間）"><span class="vs-long">遠くを見る</span><span class="vs-short" aria-hidden="true">遠く</span><span class="chev" aria-hidden="true">›</span></button>
       </div>
       <!-- 遠くを見る部屋（M7 v0）への入口。部屋の部品（js/far/）は、押したときに読む -->
       <button type="button" id="far-open" class="far-open" aria-label="遠くを見る部屋へ（探査機までの距離と、光で届く時間）"><span class="far-open-label">遠くを見る</span><span class="chev" aria-hidden="true">›</span></button>
+      <!-- スマホ：これまで「遠くを見る」があった場所に MMX のアイコン（2026-10-19 オーナー）。押すと MMX の予定を開く。予定がなければ出さない -->
+      <button type="button" id="mmx-open" class="mmx-open" hidden aria-label="MMX の打ち上げの予定を開く">
+        <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
+          <rect x="2" y="15" width="10" height="7" rx="1" class="mi-panel"/><rect x="28" y="15" width="10" height="7" rx="1" class="mi-panel"/>
+          <path d="M12 18.5h4M24 18.5h4" class="mi-line"/>
+          <rect x="15" y="9" width="10" height="7" rx="1.2" class="mi-body"/><rect x="16" y="16" width="8" height="8" rx="1" class="mi-body"/>
+          <path d="M17 24l-5 9M23 24l5 9M18.5 24l-1 9M21.5 24l1 9" class="mi-line"/>
+          <path d="M10 33h4M26 33h4" class="mi-foot"/>
+        </svg>
+        <span class="mmx-open-label">MMX</span>
+      </button>
     </div>
 
     <!-- 地球の左上：いま表示しているもの -->
