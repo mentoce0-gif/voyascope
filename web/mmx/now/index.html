@@ -681,6 +681,23 @@ function padAt(t, lt = -1) {
 }
 window.padAt = padAt;
 
+// 打ち上げの日の画面は、指でなぞると回せる・2本指で寄せ引き（2026-10-20 オーナー：文字と重なるときに動かせるように）
+const view = { yaw: 0, pitch: 0, zoom: 1 };
+{
+  const pts = new Map(); let pinch0 = 0, zoom0 = 1;
+  const cv = renderer.domElement;
+  cv.addEventListener("pointerdown", (e) => { pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); zoom0 = view.zoom; } });
+  cv.addEventListener("pointermove", (e) => {
+    const p = pts.get(e.pointerId); if (!p || PRE) return;
+    if (pts.size === 1) { view.yaw -= (e.clientX - p.x) * 0.006; view.pitch = Math.max(-1.2, Math.min(1.2, view.pitch - (e.clientY - p.y) * 0.006)); }
+    p.x = e.clientX; p.y = e.clientY;
+    if (pts.size === 2 && pinch0 > 0) { const [a, b] = [...pts.values()]; view.zoom = Math.max(0.5, Math.min(2.2, zoom0 * pinch0 / Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)))); }
+  });
+  const up = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch0 = 0; };
+  cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+  cv.addEventListener("wheel", (e) => { if (!PRE) view.zoom = Math.max(0.5, Math.min(2.2, view.zoom * (1 + e.deltaY * 0.001))); }, { passive: true });
+}
+
 function coastAt(t) {
   pinLift(false);
   const el = Date.now() - PH.launchAt, f = Math.min(1, Math.max(0, el / SEP_MS));
@@ -689,8 +706,11 @@ function coastAt(t) {
   // 地球と、地球を回る道の全体が入る距離から
   const fit = 1.7 / (Math.tan(21 * Math.PI / 180) * Math.min(1, W / H));
   // 地球を回る道の面を、ほぼ真上から見る（MMX が地球の裏に隠れないように）。種子島を下に
-  const dir = axis.clone().add(nW.clone().multiplyScalar(-0.25)).normalize().applyAxisAngle(nW, Math.sin(t * 0.1) * 0.1);
-  camera.position.copy(earthPos).add(dir.multiplyScalar(fit)); camera.up.copy(nW.clone().negate()); camera.lookAt(earthPos.clone().add(nW.clone().multiplyScalar(0.55)));
+  const upV = nW.clone().negate();
+  const dir = axis.clone().add(nW.clone().multiplyScalar(-0.25)).normalize().applyAxisAngle(nW, Math.sin(t * 0.1) * 0.1 + view.yaw);
+  dir.applyAxisAngle(dir.clone().cross(upV).normalize(), view.pitch);
+  const look = earthPos.clone().add(nW.clone().multiplyScalar(0.2)); // 地球を画面の真ん中より少し下に
+  camera.position.copy(look).add(dir.multiplyScalar(fit * view.zoom)); camera.up.copy(upV); camera.lookAt(look);
   document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
   route.uniforms.uReveal.value = s; route.uniforms.uFront.value = s; route.uniforms.uPulse.value = -1; comet.uniforms.uA.value = 0;
   mmxHolder.visible = false; h3.visible = false; padLight.visible = false; flame.uniforms.uA.value = 0; mmxGlow.uniforms.uA.value = 0;
