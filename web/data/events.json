@@ -310,8 +310,8 @@
       },
       "links": [
         {
-          "label": "JAXA プレスリリース（MMX の打上げ）",
-          "url": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html"
+          "label": "JAXA プレスリリース（MMX の打上げ時刻・10月18日）",
+          "url": "https://www.jaxa.jp/press/2026/10/20261018-1_j.html"
         },
         {
           "label": "JAXA 打上げ計画書（PDF）",
@@ -322,7 +322,7 @@
           "url": "https://www.mmx.jaxa.jp/"
         }
       ],
-      "updated_at": "2026-10-01"
+      "updated_at": "2026-10-19"
     },
     {
       "id": "orionids-2026",
