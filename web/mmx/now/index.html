@@ -117,12 +117,23 @@
   body.tm-on.pre .cap { bottom: 296px; }
   body.tm-on .cap .k { display: none; }
   body.tm-on .cap .t { font-size: 17px; } body.tm-on .cap .s { font-size: 12px; }
-  body.tm-watch .tm-row { display: none; } /* 分離のあとの速度・高度は、Horizons を確かめるまで出さない */
   .tm-arc .gap { fill: none; stroke: var(--mint); stroke-width: 1.6; stroke-dasharray: 3 4; opacity: .8; }
   .tm-arc text.now { fill: var(--amber); font-weight: 700; } .tm-arc .dot.now { stroke: var(--amber); } .tm-arc .dot-in.now { fill: var(--amber); }
   body.tm-open .tm { top: auto; bottom: 92px; } /* オープニング：字幕（上）と重ならないよう下に */
   /* 撮影用（あとで消す） */
-  .film-btn { position: absolute; right: 14px; top: 64px; min-height: 36px; min-width: 44px; justify-content: center; font-size: 15px; pointer-events: auto; z-index: 2; }
+  .btn.replay { font-family: "JetBrains Mono", monospace; font-weight: 700; letter-spacing: .14em; font-size: 12px; gap: 7px; }
+  .btn.replay .ri { width: 14px; height: 11px; fill: currentColor; }
+  .btn.replay .nd { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 8px var(--mint); }
+  /* 打ち上げから○日 の下の公式のリンク（スマホの形。2026-10-20 オーナー） */
+  .nowlinks { position: absolute; left: 16px; right: 16px; bottom: 104px; max-width: 460px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; pointer-events: auto; }
+  .nl { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 54px; padding: 6px 4px; border: 1px solid rgba(94,242,194,.5); border-radius: 12px; background: rgba(5,14,31,.82); color: var(--text); text-decoration: none; backdrop-filter: blur(6px); text-align: center; }
+  .nl .ce { font-family: "JetBrains Mono", monospace; font-size: 12px; font-weight: 700; letter-spacing: .1em; white-space: nowrap; }
+  .nl small { font-size: 10px; color: var(--dim); white-space: nowrap; }
+  .nl.arc { border-color: rgba(255,181,71,.65); } .nl.arc .ce { color: var(--amber); }
+  .nl:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  body.nl-on .cap { bottom: 178px; }
+  .tm-est { display: none; }
+  body.tm-watch .tm-row { display: flex; } body.tm-watch .tm-alt-q, body.tm-watch .tm-plan { display: none; } body.tm-watch .tm-est { display: inline; }
   .film-hint { position: absolute; left: 0; right: 0; bottom: 216px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .2em; color: var(--amber); pointer-events: auto; animation: hint-up 1.6s ease-in-out infinite; }
   .film-hint b { font-size: 16px; }
   .warp-vignette { position: fixed; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
@@ -136,19 +147,24 @@
     <span class="brand">VOYASCOPE</span>
     <span class="spacer"></span>
     <button type="button" class="btn" id="view-toggle" hidden>全体を見る</button>
-    <button type="button" class="btn amber" id="replay" hidden>はじめから</button>
+    <button type="button" class="btn amber replay" id="replay" hidden>REPLAY</button>
   </div>
   <div class="tm" id="tm" hidden aria-hidden="true">
     <div class="tm-clock" id="tm-clock"></div>
     <div class="tm-row">
       <div class="tm-q"><span class="tm-k">VELOCITY<small>km/s</small></span><span class="tm-v" id="tm-vel">—</span></div>
-      <div class="tm-q"><span class="tm-k">ALTITUDE<small>km</small></span><span class="tm-v" id="tm-alt">—</span></div>
-      <span class="tm-plan">PLAN</span>
+      <div class="tm-q tm-alt-q"><span class="tm-k">ALTITUDE<small>km</small></span><span class="tm-v" id="tm-alt">—</span></div>
+      <span class="tm-plan">PLAN</span><span class="tm-plan tm-est" title="計画の軌道から計算した、太陽に対する速さ（推定）">EST · 対太陽</span>
     </div>
     <svg class="tm-arc" id="tm-arc" viewBox="0 0 360 46" preserveAspectRatio="none"></svg>
     <div class="tm-meta"><span>FLIGHT<b>F10</b></span><span>TYPE<b>H3-24L</b></span><span>PAYLOAD<b>MMX</b></span></div>
   </div>
   <div class="cap" aria-live="polite"><div class="k" id="capk"></div><div class="t" id="capt"></div><div class="s" id="caps"></div></div>
+  <nav class="nowlinks" id="nowlinks" hidden aria-label="公式のページ">
+    <a class="nl" href="https://www.mmx.jaxa.jp/mission/" target="_blank" rel="noopener" aria-label="MMX のミッション（JAXA）"><span class="ce">MISSION</span><small>ミッション</small></a>
+    <a class="nl arc" href="https://www.youtube.com/watch?v=sZGyK9jfoy4" target="_blank" rel="noopener" aria-label="打上げライブ中継のアーカイブ（JAXA の YouTube）"><span class="ce">ARCHIVE</span><small>公式配信アーカイブ</small></a>
+    <a class="nl" href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/" target="_blank" rel="noopener" aria-label="MMX×H3ロケット10号機 特設サイト（JAXA）"><span class="ce">SITE</span><small>特設サイト</small></a>
+  </nav>
   <button type="button" class="btn skip" id="skip" hidden aria-label="とばす" title="とばす">⏩</button>
   <!-- 打ち上げ前：H3 の拡大の窓（上にスワイプ・タップで、発射から航路へ）と、公式のリンク（2026-10-19 オーナー） -->
   <svg class="leader" id="leader" hidden aria-hidden="true"><line id="leader-line" x1="0" y1="0" x2="0" y2="0"/></svg>
@@ -164,7 +180,7 @@
       <a class="xbar xtag" href="https://x.com/search?q=%23MMX&amp;f=live" target="_blank" rel="noopener" aria-label="X で「#MMX」の新しい投稿を見る（X のページが開きます）"><span class="xm">𝕏</span><span class="xt"><span class="ce">#MMX</span><small>みんなの投稿</small></span></a>
     </div>
   </nav>
-  <div class="note" title="地球と火星の位置は計算。到着日は仮（打ち上げ330日後。公式は「往路1年弱」「火星圏到着 2027年度」）。地球のそばの道と火星のまわりは簡略化。大きさは実際の比ではありません。打ち上げのあとの位置は、公式の発表で打ち上げを確かめてから、計画の軌道の上を日数で進めた「およその位置」です">模式図<wbr>（位置は計算・到着日は仮・<wbr>大きさは実際の比ではない）。<wbr>打ち上げ後の位置は、<wbr>公式で確かめてから出す。<wbr>出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">ISS の高さ（NASA）</a>・<wbr><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。<wbr>MMX の形は、JAXA の<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">航行イメージ（計画書 図5）</a>（計画）にもとづく。<wbr>非公式のファンメイド作品</div>
+  <div class="note" title="地球と火星の位置は計算。到着日は仮（打ち上げ330日後。公式は「往路1年弱」「火星圏到着 2027年度」）。地球のそばの道と火星のまわりは簡略化。大きさは実際の比ではありません。打ち上げのあとの位置は、公式の発表で打ち上げを確かめてから、計画の軌道の上を日数で進めた「およその位置」です">模式図<wbr>（位置は計算・到着日は仮・<wbr>大きさは実際の比ではない）。<wbr>打ち上げ後の位置は、<wbr>公式で確かめてから出す。<wbr>出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">ISS の高さ（NASA）</a>・<wbr><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。<wbr>MMX の形は、JAXA の<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">航行イメージ（計画書 図5）</a>（計画）にもとづく。<wbr>速さ（EST）は、計画の軌道から計算した太陽に対する速さの推定。<wbr>非公式のファンメイド作品</div>
   <div class="tag" id="tag-tane">種子島</div>
   <div class="tag" id="tag-mmx">MMX</div>
   <div class="tag amber" id="tag-h3">H3ロケット10号機（MMX を搭載）</div>
@@ -744,7 +760,7 @@ function hudAt(mode, ms, moveCap = true) {
   tmEl.hidden = mode === "off"; document.body.classList.toggle("tm-on", mode === "launch" && moveCap); document.body.classList.toggle("tm-open", mode === "launch" && !moveCap); document.body.classList.toggle("tm-watch", mode === "watch");
   if (mode === "off" || !PLAN) return;
   document.getElementById("tm-clock").innerHTML = `<small>X+</small>${xClock(ms)}`;
-  if (mode === "watch") { watchArc(ms); return; }
+  if (mode === "watch") { const v = vEst(ms / 86400000); document.getElementById("tm-vel").textContent = v ? v.toFixed(1) : "—"; watchArc(ms); return; }
   let cur = 0; PLAN.steps.forEach((st, i) => { if (st.t <= ms) cur = i; });
   const st = PLAN.steps[cur], nx = PLAN.steps[cur + 1];
   document.getElementById("tm-vel").textContent = st.vel ?? "—"; document.getElementById("tm-alt").textContent = st.alt ?? "—";
@@ -761,6 +777,13 @@ function hudAt(mode, ms, moveCap = true) {
 
 // 監視モード：打ち上げから MMX の分離までの事象（左の8割）と、その先の「いま」（右端。あいだの時間は縮めて点線）まで（2026-10-20 オーナー）
 const SEP_U = 0.8;
+// 太陽に対する速さ（推定）：計画の軌道（route.json の2日ごとの点。到着日は仮）の点と点の間の距離から。km/s
+const AU_KM = 149597870.7;
+function vEst(days) {
+  const pts = RT.transfer, step = RT.tof / (pts.length - 1), i = Math.max(0, Math.min(pts.length - 2, Math.floor(days / step)));
+  const [a, b] = [pts[i], pts[i + 1]], d = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+  return (d * AU_KM) / (step * 86400);
+}
 function watchArc(ms) {
   const key = `w:${Math.floor(ms / 60000)}`;
   if (key === tmKey) return; tmKey = key;
@@ -797,15 +820,16 @@ const FILM_STEPS = [0, 116000, 312000, 3837000, SEP_MS]; // LIFTOFF・SRB-3 SEP 
 let film = null; // { i, from, to, t0 }
 let blendFrom = null, coastLook = V(0, 0, 0), filmIntro = 0; // 撮影の最後から「いま」へ、ゆっくりカメラを移す
 const simEl = () => { if (!film) return null; const k = Math.min(1, (performance.now() - film.t0) / 1600); const e = k * k * (3 - 2 * k); return film.from + (film.to - film.from) * e; };
-const filmBtn = document.createElement("button");
-filmBtn.type = "button"; filmBtn.className = "btn film-btn"; filmBtn.textContent = "⏪"; filmBtn.title = filmBtn.ariaLabel = "発射から分離までをふり返る（スワイプで進む）";
-filmBtn.hidden = !FLYING; document.querySelector(".hud").append(filmBtn);
+// 上の「REPLAY」（「はじめから」の代わり。2026-10-20 オーナー：撮影用から常設に）
+const filmBtn = document.getElementById("replay");
+const REPLAY_HTML = '<svg class="ri" viewBox="0 0 16 12" aria-hidden="true"><path d="M8 1 2 6l6 5zM15 1 9 6l6 5z"/></svg>REPLAY', NOW_HTML = '<i class="nd" aria-hidden="true"></i>NOW';
+filmBtn.innerHTML = REPLAY_HTML; filmBtn.setAttribute("aria-label", "打ち上げから MMX の分離までをふり返る（スワイプで進む）");
 const filmHint = document.createElement("div"); filmHint.className = "film-hint"; filmHint.hidden = true; filmHint.innerHTML = "スワイプで次へ <b>›</b>"; document.querySelector(".hud").append(filmHint);
 const filmGo = (i) => {
-  if (i >= FILM_STEPS.length) { if (film) blendFrom = { pos: camera.position.clone(), look: coastLook.clone(), up: camera.up.clone(), t0: performance.now() }; film = null; filmBtn.textContent = "⏪"; filmHint.hidden = true; capCache = ""; tmKey = ""; return; }
+  if (i >= FILM_STEPS.length) { if (film) blendFrom = { pos: camera.position.clone(), look: coastLook.clone(), up: camera.up.clone(), t0: performance.now() }; film = null; filmBtn.innerHTML = REPLAY_HTML; filmBtn.setAttribute("aria-label", "打ち上げから MMX の分離までをふり返る（スワイプで進む）"); filmHint.hidden = true; capCache = ""; tmKey = ""; nowLinksSync(); return; }
   const from = film ? simEl() : FILM_STEPS[0];
   if (i === 0) filmIntro = performance.now(); // 撮影のはじめは、種子島の正面から
-  film = { i, from, to: FILM_STEPS[i], t0: performance.now() }; tagH3.textContent = "H3＋MMX"; filmBtn.textContent = "×"; filmHint.hidden = false; capCache = ""; tmKey = "";
+  film = { i, from, to: FILM_STEPS[i], t0: performance.now() }; tagH3.textContent = "H3＋MMX"; filmBtn.innerHTML = NOW_HTML; filmBtn.setAttribute("aria-label", "いまの位置に戻る"); filmHint.hidden = false; capCache = ""; tmKey = ""; nowLinksSync();
 };
 filmBtn.addEventListener("click", () => (film ? filmGo(FILM_STEPS.length) : filmGo(0)));
 {
@@ -973,14 +997,15 @@ const skipBtn = document.getElementById("skip"), replayBtn = document.getElement
 const viewToggle = document.getElementById("view-toggle");
 viewToggle.textContent = track ? "全体を見る" : "MMX を追う";
 viewToggle.addEventListener("click", () => { track = !track; view.yaw = view.pitch = 0; view.zoom = 1; viewToggle.textContent = track ? "全体を見る" : "MMX を追う"; });
+const nowLinksEl = document.getElementById("nowlinks");
+function nowLinksSync() { const on = FLYING && !opening && !launching && !coastNow() && !film; nowLinksEl.hidden = !on; document.body.classList.toggle("nl-on", on); }
 const sync = () => {
   const busy = opening || launching; document.body.classList.toggle("launching", launching);
-  const showLinks = PRE || coastNow(); document.body.classList.toggle("pre", showLinks); skipBtn.hidden = !busy; replayBtn.hidden = PRE || busy; viewToggle.hidden = !FLYING || busy || coastNow(); links.hidden = !showLinks || busy;
+  const showLinks = PRE || coastNow(); document.body.classList.toggle("pre", showLinks); skipBtn.hidden = !busy; replayBtn.hidden = PRE || busy; viewToggle.hidden = !FLYING || busy || coastNow(); links.hidden = !showLinks || busy; nowLinksSync();
   bubbleEl.hidden = !PRE || opening; leaderEl.toggleAttribute("hidden", !PRE || busy); measureBubble(); // SVG には hidden のプロパティがないので属性で
 };
 const endOpening = () => { opening = false; launching = false; fromLaunch = false; t0 = performance.now(); sync(); try { localStorage.setItem(SEEN, "1"); } catch {} };
 skipBtn.addEventListener("click", endOpening);
-replayBtn.addEventListener("click", () => { opening = true; t0 = performance.now(); sync(); });
 // 発射から航路へ：窓をタップ、または上にスワイプ（2026-10-19 オーナー）
 const launch = () => { if (!PRE || launching || opening) return; launching = true; fromLaunch = true; t0 = performance.now(); sync(); };
 bubbleEl.addEventListener("click", launch);
