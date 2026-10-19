@@ -1212,7 +1212,23 @@ dialog.greeting[open] { animation: greet-in 0.45s ease-out; }
 .view-switch button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .view-switch .vs-short { display: none; }
 /* 列の「遠くを見る」と MMX のアイコンは、スマホだけ（PC は上の部屋の帯から） */
-.view-switch .vs-far, .mmx-open { display: none; }
+.view-switch .vs-far { display: none; }
+/* PC：「遠くを見る」の横に MMX のいまどこ（2026-10-19 オーナー：PC でも、画面を細くして中継の横で見られるように）。スマホは下の @media で形を変える */
+.mmx-open:not([hidden]) {
+  appearance: none; display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 12px 2px 6px; border: 1px solid var(--amber-dim); border-radius: 999px;
+  background: rgba(5, 14, 31, 0.72); backdrop-filter: blur(4px);
+  color: var(--amber); font: inherit; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; line-height: 1.5; white-space: nowrap; cursor: pointer;
+}
+.mmx-open svg { width: 26px; height: 26px; }
+.mmx-open .mi-body { fill: #dcab3c; }
+.mmx-open .mi-panel { fill: #3a3954; stroke: #a8acc0; stroke-width: 0.8; }
+.mmx-open .mi-line { stroke: #dfe8ee; stroke-width: 1.4; stroke-linecap: round; fill: none; }
+.mmx-open .mi-foot { stroke: #dfe8ee; stroke-width: 2; stroke-linecap: round; }
+.mmx-open:hover { background: rgba(255, 181, 71, 0.14); }
+.mmx-open:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.mmx-open.soon { animation: mmx-pulse 3.6s ease-out infinite; border-color: var(--mint-dim); }
+@keyframes mmx-pulse { 0% { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0.55); } 70%, 100% { box-shadow: 0 0 0 14px rgba(94, 242, 194, 0); } }
 /* 遠くを見る部屋への入口：ほかの部屋へ行くボタンなので、表示切替（ミント）と分けてアンバーにする */
 .far-open {
   appearance: none;
