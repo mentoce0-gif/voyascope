@@ -134,3 +134,9 @@ test("しくみの図：オリオン座流星群は、10月22日ごろの地球�
   assert.match(html, /オリオン座は「ちりが来る向き」/);
   assert.doesNotMatch(html, /りゅう座|いちばん近いところの距離/);
 });
+
+test("今夜の欄：放射点の出典は「IAU 流星データセンター」と出す（ホスト名 ta3.sk のままにしない）", () => {
+  const card = JSON.parse(readFileSync("curation/events/orionids-2026.json", "utf8"));
+  const html = meteorHtml(card, tokyo, "東京", new Date("2026-10-21T12:00:00Z"));
+  assert.match(html, /放射点の位置の<span>出典：<a [^>]*>IAU 流星データセンター</);
+});
