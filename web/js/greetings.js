@@ -48,7 +48,7 @@ function launchHtml({ name, ev }) {
   const at = new Date(span.start);
   const when = span.precision === "at" ? `${dotted(jstDay(at))} ${hmJst(at)} JST` : dotted(jstDay(at));
   const say = `${plainDateJa(jstDay(at))}${span.precision === "at" ? ` ${hmJst(at)}（日本時間）` : ""}、${ev.vehicle?.value ? `${esc(ev.vehicle.value)}で` : ""}打ち上げられました。`;
-  const now = ev.id === "mmx-launch" ? `<a class="btn greet-go" href="mmx/now/">いまどこを見る</a>` : "";
+  const now = ev.id === "mmx-launch" ? `<a class="btn greet-go" href="mmx/now/" aria-label="MMX はいまどこ？（航路の画面を開く）">いまどこ？</a>` : "";
   return `
     <p class="greet-kicker"><i aria-hidden="true"></i>BON VOYAGE</p>
     <h2 class="greet-title"><span class="gt-pre">いってらっしゃい、</span><span class="gt-name">${esc(name)}</span></h2>
