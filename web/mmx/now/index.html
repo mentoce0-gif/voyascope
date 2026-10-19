@@ -118,6 +118,10 @@
   body.tm-on .cap .t { font-size: 17px; } body.tm-on .cap .s { font-size: 12px; }
   body.tm-watch .tm-row, body.tm-watch .tm-arc { display: none; }
   body.tm-open .tm { top: auto; bottom: 92px; } /* オープニング：字幕（上）と重ならないよう下に */
+  /* 撮影用（あとで消す） */
+  .film-btn { position: absolute; right: 14px; top: 64px; min-height: 36px; min-width: 44px; justify-content: center; font-size: 15px; pointer-events: auto; z-index: 2; }
+  .film-hint { position: absolute; left: 0; right: 0; bottom: 300px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .2em; color: var(--amber); pointer-events: auto; animation: hint-up 1.6s ease-in-out infinite; }
+  .film-hint b { font-size: 16px; }
   .warp-vignette { position: fixed; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
 </style>
 </head>
@@ -756,7 +760,7 @@ const view = { yaw: 0, pitch: 0, zoom: 1 };
   const cv = renderer.domElement;
   cv.addEventListener("pointerdown", (e) => { pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y); zoom0 = view.zoom; } });
   cv.addEventListener("pointermove", (e) => {
-    const p = pts.get(e.pointerId); if (!p || PRE) return;
+    const p = pts.get(e.pointerId); if (!p || PRE || film) return;
     if (pts.size === 1) { view.yaw -= (e.clientX - p.x) * 0.006; view.pitch = Math.max(-1.2, Math.min(1.2, view.pitch - (e.clientY - p.y) * 0.006)); }
     p.x = e.clientX; p.y = e.clientY;
     if (pts.size === 2 && pinch0 > 0) { const [a, b] = [...pts.values()]; view.zoom = Math.max(0.5, Math.min(2.2, zoom0 * pinch0 / Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)))); }
@@ -766,9 +770,33 @@ const view = { yaw: 0, pitch: 0, zoom: 1 };
   cv.addEventListener("wheel", (e) => { if (!PRE) view.zoom = Math.max(0.5, Math.min(2.2, view.zoom * (1 + e.deltaY * 0.001))); }, { passive: true });
 }
 
+// ---------- 撮影用（2026-10-20 オーナー。撮り終えたら消す）：⏪ で、発射から MMX の分離までをスワイプで1つずつ ----------
+// 計画の時刻（打上げ計画書の表2）の事象へ、計器と道の上の印を進める。打ち上げ後（FLYING）だけ
+const FILM_STEPS = [0, 116000, 312000, 3837000, SEP_MS]; // LIFTOFF・SRB-3 SEP #1・SELI #1・SELI #2・MMX SEP
+let film = null; // { i, from, to, t0 }
+const simEl = () => { if (!film) return null; const k = Math.min(1, (performance.now() - film.t0) / 1600); const e = k * k * (3 - 2 * k); return film.from + (film.to - film.from) * e; };
+const filmBtn = document.createElement("button");
+filmBtn.type = "button"; filmBtn.className = "btn film-btn"; filmBtn.textContent = "⏪"; filmBtn.title = filmBtn.ariaLabel = "発射から分離までをふり返る（スワイプで進む）";
+filmBtn.hidden = !FLYING; document.querySelector(".hud").append(filmBtn);
+const filmHint = document.createElement("div"); filmHint.className = "film-hint"; filmHint.hidden = true; filmHint.innerHTML = "スワイプで次へ <b>›</b>"; document.querySelector(".hud").append(filmHint);
+const filmGo = (i) => {
+  if (i >= FILM_STEPS.length) { film = null; filmBtn.textContent = "⏪"; filmHint.hidden = true; capCache = ""; tmKey = ""; return; }
+  const from = film ? simEl() : FILM_STEPS[0];
+  film = { i, from, to: FILM_STEPS[i], t0: performance.now() }; tagH3.textContent = "H3＋MMX（計画）"; filmBtn.textContent = "×"; filmHint.hidden = false; capCache = ""; tmKey = "";
+};
+filmBtn.addEventListener("click", () => (film ? filmGo(FILM_STEPS.length) : filmGo(0)));
+{
+  let fx = null, fy = null;
+  addEventListener("touchstart", (e) => { if (film && e.touches.length === 1 && !e.target.closest("a,button")) { fx = e.touches[0].clientX; fy = e.touches[0].clientY; } }, { passive: true });
+  addEventListener("touchend", (e) => { if (fx == null) return; const dx = e.changedTouches[0].clientX - fx, dy = e.changedTouches[0].clientY - fy; fx = fy = null; if (Math.abs(dx) > 40 || Math.abs(dy) > 40) filmGo(film.i + 1); });
+  addEventListener("keydown", (e) => { if (film && (e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === " ")) filmGo(film.i + 1); });
+  filmHint.addEventListener("click", () => film && filmGo(film.i + 1));
+}
+window.filmGo = filmGo;
+
 function coastAt(t) {
   pinLift(false);
-  const el = Date.now() - PH.launchAt, f = Math.min(1, Math.max(0, el / SEP_MS));
+  const el = simEl() ?? Date.now() - PH.launchAt, f = Math.min(1, Math.max(0, el / SEP_MS));
   const s = sSep * f, pos = at(s);
   camera.fov = 42; camera.updateProjectionMatrix();
   // 地球と、地球を回る道の全体が入る距離から
@@ -792,7 +820,7 @@ function coastAt(t) {
   camera.up.set(0, 1, 0);
   coastGlow.uniforms.uA.value = 0; coastRing.uniforms.uA.value = 0; // ほかの場面では出さない
   watchCaption();
-  hudAt("launch", Date.now() - PH.launchAt);
+  hudAt("launch", el);
   document.querySelector(".cap").style.opacity = 1;
   place(tags.tane, pinWorld, 1, 22); place(tagH3, pos, 1, -22); tagH3.style.left = `${Math.min(W - 70, Math.max(70, parseFloat(tagH3.style.left)))}px`; /* 画面の端で切れないように */ place(tags.mmx, pos, 0); place(tags.mars, marsPos, 0); place(tags.phobos, phobosPos, 0);
 }
@@ -828,15 +856,15 @@ window.watchAt = watchAt;
 // 監視モードの文字：打ち上げ前・未確認・延期・飛行中
 let capCache = "";
 function watchCaption() {
-  const now = Date.now();
+  const now = simEl() != null ? PH.launchAt + simEl() : Date.now();
   let k, t, sub = "";
-  const lpc = coastNow() && EV ? launchProgress(EV, new Date(now)) : null;
+  const lpc = (coastNow() || film) && EV ? launchProgress(EV, new Date(now)) : null;
   if (lpc) {
     k = `打ち上げから <b>+${hms(lpc.elapsed)}</b>`;
     t = lpc.separated ? (SEP_SEEN ? "MMX、<wbr>ロケットから分離。<wbr>火星へ" : "MMX の分離の予定の時刻を<wbr>過ぎました") : `計画では：<wbr>${lpc.plan.steps[lpc.current].label.replace(/(\S*-\S*)/g, '<span class="nw">$1</span>')}`;
     // 高さを ISS とくらべる（2026-10-20 オーナー。ISS は curation/spacecraft/iss.json：NASA「約400km」）
     const alt = lpc.plan.steps[lpc.current].alt, top = alt ? Number(alt.split("〜").pop()) : 0;
-    const cmp = alt && ISS_KM ? `計画の高さ <b>約${alt}km</b>（ISS の約${(top / ISS_KM).toFixed(1)}倍）。<wbr>` : "";
+    const cmp = top > 0 && ISS_KM ? `計画の高さ <b>約${alt}km</b>（ISS の約${(top / ISS_KM).toFixed(1)}倍）。<wbr>` : "";
     sub = lpc.separated ? (SEP_SEEN ? `${cmp}分離は JAXA の中継で確認` : `${cmp}分離は、<wbr>JAXA の発表で確かめます`) : `${cmp}打ち上げは JAXA の中継で確認。<wbr>分離は 5:52ごろの予定`;
   }
   else if (PH.phase === "flying") { k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり"; sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>`; }
@@ -881,7 +909,7 @@ addEventListener("touchend", (e) => { if (sy != null && sy - e.changedTouches[0]
 addEventListener("wheel", (e) => { if (e.deltaY > 30) launch(); }, { passive: true });
 addEventListener("keydown", (e) => { if (e.key === "ArrowUp") launch(); });
 sync();
-const idle = (t) => (PRE ? padAt(t) : coastNow() ? coastAt(t) : watchAt(t));
+const idle = (t) => (PRE ? padAt(t) : coastNow() || film ? coastAt(t) : watchAt(t));
 window.idleAt = idle;
 window.launchAt = (lt) => { launching = true; fromLaunch = true; sync(); padAt(0, lt); };
 window.openAt = (t) => { opening = true; launching = false; sync(); renderAt(t); };
