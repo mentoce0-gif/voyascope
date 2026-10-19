@@ -79,12 +79,12 @@
     </nav>
 
     <div class="globe-top">
-      <!-- 地球の上：表示切替（地球と一覧に出すもの）。押したものが光る -->
+      <!-- 地球の上：表示切替（地球と一覧に出すもの）。押したものが光る。見出しに「のみ」は付けない（2026-10-19 オーナー。読み上げは aria-label で「日本のみ」など） -->
       <div class="view-switch" id="view-switch" role="group" aria-label="地球と一覧に出すもの">
         <button type="button" data-view="all" aria-pressed="true"><span class="vs-long">すべて</span><span class="vs-short" aria-hidden="true">すべて</span></button>
-        <button type="button" data-view="japan" aria-pressed="false"><span class="vs-long">日本のみ</span><span class="vs-short" aria-hidden="true">日本</span></button>
-        <button type="button" data-view="craft" aria-pressed="false"><span class="vs-long">衛星のみ</span><span class="vs-short" aria-hidden="true">衛星</span></button>
-        <button type="button" data-view="launches" aria-pressed="false"><span class="vs-long">打ち上げ予定のみ</span><span class="vs-short" aria-hidden="true">打ち上げ</span></button>
+        <button type="button" data-view="japan" aria-pressed="false" aria-label="日本のみ"><span class="vs-long">日本</span><span class="vs-short" aria-hidden="true">日本</span></button>
+        <button type="button" data-view="craft" aria-pressed="false" aria-label="衛星のみ"><span class="vs-long">衛星</span><span class="vs-short" aria-hidden="true">衛星</span></button>
+        <button type="button" data-view="launches" aria-pressed="false" aria-label="打ち上げ予定のみ"><span class="vs-long">打ち上げ予定</span><span class="vs-short" aria-hidden="true">打ち上げ</span></button>
         <!-- スマホ：列の最後に「遠くを見る」（琥珀色のまま）。選ぶと地球へ寄ってから部屋を開く（2026-10-19 オーナー） -->
         <button type="button" data-far class="vs-far" aria-label="遠くを見る部屋へ（探査機までの距離と、光で届く時間）"><span class="vs-long">遠くを見る</span><span class="vs-short" aria-hidden="true">遠く</span><span class="chev" aria-hidden="true">›</span></button>
       </div>
