@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>MMX いまどこ｜VOYASCOPE</title>
 <meta name="description" content="火星衛星探査機 MMX の、種子島から火星・フォボスまでの航路（模式図）と、いまどこ。非公式のファンメイド作品">
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
@@ -11,8 +11,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
 <style>
   :root { --navy: #050e1f; --mint: #5ef2c2; --amber: #ffb547; --text: #d9f4ea; --dim: #8fb3a8; }
-  html, body { margin: 0; height: 100%; background: var(--navy); overflow: hidden; }
-  canvas { display: block; }
+  html, body { margin: 0; height: 100%; background: var(--navy); overflow: hidden; overscroll-behavior: none; touch-action: none; }
+  /* スマホでピンチしても、ページが拡大されて星空の外（無地の紺）が角に出ないように（2026-10-19 オーナー） */
+  canvas { display: block; position: fixed; inset: 0; width: 100% !important; height: 100% !important; touch-action: none; }
+  .hud a, .hud button { touch-action: manipulation; }
   .hud { position: fixed; inset: 0; pointer-events: none; font-family: "Zen Kaku Gothic New", "IPAGothic", sans-serif; color: var(--text); }
   .brand { position: absolute; left: 22px; top: 20px; font-family: "JetBrains Mono", monospace; letter-spacing: .32em; font-size: 15px; color: var(--text); }
   .badge { position: absolute; right: 18px; top: 18px; font-size: 11px; color: var(--amber); border: 1px solid rgba(255,181,71,.5); padding: 4px 8px; border-radius: 999px; background: rgba(5,14,31,.6); }
@@ -39,7 +41,7 @@
   .link .ld { font-size: 12px; color: var(--dim); }
   .link.live { border-color: rgba(255,181,71,.7); background: rgba(40,24,6,.78); } .link.live .lk { color: var(--amber); }
   .link:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-  .skip { position: absolute; right: 14px; top: 66px; pointer-events: auto; min-height: 36px; font-size: 12px; }
+  .skip { position: absolute; right: 14px; top: 66px; pointer-events: auto; min-height: 36px; min-width: 44px; justify-content: center; font-size: 16px; }
   .badge { white-space: nowrap; }
   @media (max-width: 420px) { .top .brand { display: none; } }
   .warp-vignette { position: fixed; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
@@ -55,7 +57,7 @@
     <button type="button" class="btn amber" id="replay" hidden>計画の航路を見る</button>
   </div>
   <div class="cap" aria-live="polite"><div class="k" id="capk"></div><div class="t" id="capt"></div><div class="s" id="caps"></div></div>
-  <button type="button" class="btn skip" id="skip" hidden>とばす ›</button>
+  <button type="button" class="btn skip" id="skip" hidden aria-label="とばす" title="とばす">⏩</button>
   <!-- 打ち上げ前：ミッションと公式の中継へのリンク（2026-10-19 オーナー：わかりやすく） -->
   <nav class="links" id="links" hidden aria-label="公式のページ">
     <a class="link live" href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener"><span class="lk">打ち上げライブ中継（JAXA）</span><span class="ld">10/20 3:45ごろから（予定）</span></a>
@@ -74,7 +76,12 @@ import * as THREE from "../../vendor/three-r128.min.js";
 import { makeKit, MODELS } from "../../js/far/models.js";
 import { mmxPhase, transferProgress, untilText } from "./state.js";
 
-let W = innerWidth, H = innerHeight;
+// 大きさは、ピンチで変わる見える範囲（innerWidth）ではなく、ページの大きさで決める
+const vw = () => document.documentElement.clientWidth || innerWidth, vh = () => document.documentElement.clientHeight || innerHeight;
+let W = vw(), H = vh();
+// iOS は user-scalable=no を無視するので、ピンチの拡大を止める
+for (const ev of ["gesturestart", "gesturechange"]) document.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: !!navigator.webdriver });
 renderer.setPixelRatio(devicePixelRatio);
 renderer.setSize(W, H);
@@ -602,7 +609,7 @@ replayBtn.addEventListener("click", () => { opening = true; t0 = performance.now
 sync();
 const idle = (t) => (PRE ? padAt(t) : watchAt(t));
 window.idleAt = idle;
-addEventListener("resize", () => { W = innerWidth; H = innerHeight; renderer.setSize(W, H); camera.aspect = W / H; camera.updateProjectionMatrix(); });
+addEventListener("resize", () => { W = vw(); H = vh(); renderer.setSize(W, H); camera.aspect = W / H; camera.updateProjectionMatrix(); });
 if (!navigator.webdriver) { const loop = () => { const t = (performance.now() - t0) / 1000; if (opening && t >= 16) endOpening(); opening ? renderAt(t) : idle(reduce ? 0 : t); requestAnimationFrame(loop); }; window.ready.then(loop); }
 </script>
 </body>
