@@ -151,7 +151,7 @@ test("詳細：出典を項目ごとに、打ち上げは残り時間と射場",
   assert.match(html, /打ち上げの予定/);
   assert.match(html, /data-live="countdown"/);
   assert.match(html, /種子島宇宙センター/);
-  assert.match(html, /2026年11月7日（土）まで/);
+  assert.match(html, /2026年11月9日（月）まで/);
   assert.match(html, /JAXA プレスリリース（MMX の打上げ）<\/a> <span class="k">（日時・予備期間）/);
   assert.match(html, /打ち上がるまで、軌道は描きません/);
   // 予定の時刻を過ぎたら、残り時間の代わりに「公式の発表で確かめて」
