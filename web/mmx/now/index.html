@@ -397,11 +397,29 @@ const sepDir = path[path.length - 1].clone().sub(path[path.length - 2]).normaliz
 const tr = RT.transfer.map(P);
 let k0 = tr.findIndex((p) => p.distanceTo(earthPos) > 2.2);
 const join = tr[k0], joinDir = tr[k0 + 1].clone().sub(tr[k0]).normalize();
-for (let i = 1; i <= 160; i++) {
-  const q = bez(sepPt, sepPt.clone().add(sepDir.clone().multiplyScalar(0.9)), join.clone().sub(joinDir.clone().multiplyScalar(0.9)), join, i / 160);
-  const d = q.clone().sub(earthPos); if (d.length() < RE * 1.9) q.copy(earthPos).add(d.setLength(RE * 1.9)); // 地球の中を通らない
-  path.push(q);
+// 地球を回る道から、火星へ向かう道へ：同じ向きに回りつづけながら半径を広げる渦巻きでつなぐ（角ができないように。2026-10-20 オーナー：「鋭角に曲がるの？」）
+// 渦巻きは、向きが火星へ向かう道の向きとそろうところで終わり、そこから道に乗る
+let kJoin = k0;
+{
+  const jP = joinDir.clone().sub(axis.clone().multiplyScalar(joinDir.dot(axis))).normalize();
+  const uEnd = jP.clone().cross(axis).normalize(); // ここでの回る向き（axis×uEnd）が jP にそろう
+  const rel = join.clone().sub(earthPos), r0 = sepPt.distanceTo(earthPos), h0 = sepPt.clone().sub(earthPos).dot(axis);
+  const r1 = Math.max(r0 * 1.6, rel.dot(uEnd));
+  const u0 = nW.clone().applyAxisAngle(axis, ROT);
+  let phi = Math.atan2(axis.dot(u0.clone().cross(uEnd)), u0.dot(uEnd)); if (phi < Math.PI * 0.5) phi += Math.PI * 2;
+  const N = 260, h1 = rel.dot(axis);
+  for (let i = 1; i <= N; i++) {
+    const t = i / N, e = t * t * (3 - 2 * t);
+    const radial = nW.clone().applyAxisAngle(axis, ROT + phi * t);
+    path.push(earthPos.clone().add(radial.multiplyScalar(r0 + (r1 - r0) * e)).add(axis.clone().multiplyScalar(lerp(h0, h1, e))));
+  }
+  // 渦巻きの終わりから、その先の道の点へ、向きをそろえたまま乗る
+  const E = path[path.length - 1].clone(), eDir = E.clone().sub(path[path.length - 2]).normalize();
+  while (kJoin < tr.length - 2 && tr[kJoin].clone().sub(E).dot(joinDir) < 0.8) kJoin++;
+  const J = tr[kJoin], jD = tr[kJoin + 1].clone().sub(J).normalize(), L0 = E.distanceTo(J) * 0.4;
+  for (let i = 1; i <= 80; i++) path.push(bez(E, E.clone().add(eDir.clone().multiplyScalar(L0)), J.clone().sub(jD.clone().multiplyScalar(L0)), J, i / 80));
 }
+k0 = kJoin;
 const sStartArcIdx = path.length;
 let k1 = tr.length - 1; while (tr[k1].distanceTo(marsPos) < 2.6) k1--;
 for (let k = k0 + 1; k <= k1; k++) {
@@ -491,7 +509,7 @@ pinLift(false);
 
 // ---------- MMX（アプリの模型） ----------
 // いまどこ：打ち上げを公式で確かめるまでは種子島（推測で打ち上がったと描かない）。確かめたあとは、計画の軌道の上を日数で進める
-const sJoin = sOf(join);
+const sJoin = sOf(tr[k0]); // 渦巻きから火星へ向かう道に乗るところ
 const sMMX = (() => {
   if (!FLYING) return 0;
   const f = transferProgress(PH.days, RT.tof);              // 0〜1（打ち上げ〜火星に着く日〈仮〉）
