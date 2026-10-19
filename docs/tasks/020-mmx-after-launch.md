@@ -14,7 +14,7 @@
 
 1. **出来事**：`curation/events/mmx-launch.json` を `status: done`（出典つき）に。`greeting`（「いってらっしゃい、MMX」。タスク017）を付ける。期間（`greeting.until`）は目安1週間
 2. **カード**：`curation/probes/mmx.json` の `status`・`location`（「いまどこ」の文）・`updated_at` を公式の発表で直す → `npm run validate` → `npm run sync:web` → `node scripts/build-summaries.mjs`（「一言でわかる」ページも直る）
-3. **「いまどこ」**（オーナー：表示が毎日進む形）
+3. **「いまどこ」**（オーナー：表示が毎日進む形）。**ページは公開済み**（`web/mmx/now/`、2026-10-19）：1. でカードの `status` を `done` にすると、MMX が種子島から計画の軌道の上（打ち上げからの日数）へ自動で進む。延期で日時が変わったら `node scripts/build-mmx-route.mjs` で航路の表を作り直す（テストが食い違いを見る）。下の Horizons は、実際の追跡を確かめたら位置の出し方をそちらへ切り替えるため
    - Horizons に MMX が登録されている（"MMX (spacecraft)"、spkid −239。2026-10-13 に確認）。**打ち上げ前のデータは計画の軌道かもしれない**ので、打ち上げのあと、Horizons の説明（datasheet）で「実際の追跡にもとづく軌道か」「データの期間」を読んでから使う
    - `curation/probes/mmx.json` の `distance` を `method: "horizons"`・`horizons_id: "-239"`・`datasheet_quotes`（説明の原文）に。取得は `scripts/fetch-horizons.mjs` が週1回・1件ずつ（**JPL に了承をもらった取り方を変えない**）。1回で先の6週間ぶんを1日ごとにもらうので、表示は毎日進む
    - 遠くを見る部屋の停留所にする（模型はもうある）

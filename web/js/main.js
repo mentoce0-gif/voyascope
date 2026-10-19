@@ -1291,12 +1291,12 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   }
 
   // ---------- スマホ：MMX のアイコン（これまで「遠くを見る」があった場所。2026-10-19 オーナー） ----------
-  // 押すと MMX の打ち上げの予定を開く。打ち上げの前の1週間・当日の計画の流れのあいだは、ゆっくり光る
+  // 押すと MMX の「いまどこ」（mmx/now/。2026-10-19 オーナー）。打ち上げの前の1週間・当日の計画の流れのあいだは、ゆっくり光る
   const mmxBtn = $("#mmx-open");
   const mmxEv = events.find((ev) => ev.id === "mmx-launch");
   if (mmxEv) {
     mmxBtn.hidden = false;
-    mmxBtn.addEventListener("click", () => selectEvent(mmxEv));
+    mmxBtn.addEventListener("click", () => location.assign("mmx/now/"));
     const updateMmx = () => {
       const now = clock.now();
       mmxBtn.classList.toggle("soon", !!(launchSoon(mmxEv, now) || launchProgress(mmxEv, now)));
