@@ -143,7 +143,10 @@ function radiantWords({ samples, best }) {
   return parts.join("");
 }
 
-const credit = (url) => `<span class="k">出典：<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(new URL(url).hostname.replace(/^www\./, ""))}</a></span>`;
+// 出典のホストの呼び名（なければホスト名）
+const HOST_LABEL = { "ta3.sk": "IAU 流星データセンター" };
+const host = (url) => new URL(url).hostname.replace(/^www\./, "");
+const credit = (url) => `<span class="k">出典：<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(HOST_LABEL[host(url)] ?? host(url))}</a></span>`;
 
 export function meteorHtml(ev, observer, prefName, now) {
   const name = ev.title.ja;
@@ -318,9 +321,6 @@ export function nearestOrbitPoint(o, earth) {
 // 遠日点の距離のことば（いちばん遠いとき、どの惑星の軌道のあたりか）
 const farText = (ad) => (ad < 7 ? "木星の軌道のあたり" : ad < 12 ? "土星の軌道のあたり" : ad < 24 ? "天王星の軌道のあたり" : ad < 32 ? "海王星の軌道のあたり" : "海王星の軌道より外");
 
-const host = (url) => new URL(url).hostname.replace(/^www\./, "");
-// 出典のホストの呼び名（なければホスト名）
-const HOST_LABEL = { "ta3.sk": "IAU 流星データセンター" };
 const src = (url, label) => `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label ?? HOST_LABEL[host(url)] ?? host(url))}</a>`;
 
 // 太陽を北（黄道の北極）から見た図。地球の軌道のまわり（約1.8 au まで）を拡大する
