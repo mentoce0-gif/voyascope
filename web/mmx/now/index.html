@@ -64,10 +64,17 @@
   .circ small { display: block; font-size: 10px; font-weight: 400; color: var(--dim); margin-top: 3px; }
   .circ.live { margin-left: auto; width: 136px; height: 136px; font-size: 19px; border: 2px solid var(--amber); color: var(--amber); background: rgba(40,24,6,.82); box-shadow: 0 0 22px rgba(255,181,71,.25); }
   .circ.live small { color: var(--text); font-size: 11px; }
+  /* 丸の中の大きな字は計器の字（JetBrains Mono）の英字で折れないように。下に小さく日本語（2026-10-19 オーナー） */
+  .circ .ce { font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 700; letter-spacing: .08em; white-space: nowrap; }
+  .circ.live .ce { font-size: 24px; letter-spacing: .12em; display: inline-flex; align-items: center; gap: 6px; }
+  .circ .dot { width: 9px; height: 9px; border-radius: 50%; background: #ff5a4f; box-shadow: 0 0 8px #ff5a4f; animation: live-dot 1.6s ease-in-out infinite; }
+  @keyframes live-dot { 50% { opacity: .35; } }
+  .circ small { margin-top: 4px; }
   .circ:focus-visible, .xbar:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
   .xbar { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; border: 1px solid rgba(217,244,234,.45); border-radius: 12px; background: rgba(5,14,31,.82); color: var(--text); text-decoration: none; font-size: 14px; backdrop-filter: blur(6px); }
   .xbar .xm { font-size: 20px; font-weight: 700; font-family: "JetBrains Mono", monospace; }
   .xbar small { color: var(--dim); font-size: 11px; }
+  .xbar .ce { font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 700; letter-spacing: .08em; white-space: nowrap; }
   .warp-vignette { position: fixed; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
 </style>
 </head>
@@ -87,11 +94,11 @@
   <button type="button" class="bubble" id="bubble" hidden aria-label="発射から航路へ（上にスワイプ、またはタップ）"><span class="bl">H3ロケット10号機（H3-24L）＋ MMX</span><span class="hint"><b>↑</b>スワイプ・タップで発射</span></button>
   <nav class="links" id="links" hidden aria-label="公式のページ">
     <div class="circles">
-      <a class="circ" href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/" target="_blank" rel="noopener" aria-label="MMX×H3ロケット10号機 特設サイト（JAXA）">特設<br>サイト<small>JAXA</small></a>
-      <a class="circ" href="https://www.mmx.jaxa.jp/mission/" target="_blank" rel="noopener" aria-label="MMX のミッション（JAXA）">ミッ<br>ション<small>MMX</small></a>
-      <a class="circ live" href="https://www.youtube.com/watch?v=sZGyK9jfoy4" target="_blank" rel="noopener" aria-label="打ち上げライブ中継（JAXA の YouTube。10月20日 3時45分ごろから・予定）">ライブ<br>中継<small>YouTube（JAXA）<br>10/20 3:45ごろ〜</small></a>
+      <a class="circ" href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/" target="_blank" rel="noopener" aria-label="MMX×H3ロケット10号機 特設サイト（JAXA）"><span class="ce">SITE</span><small>特設サイト</small></a>
+      <a class="circ" href="https://www.mmx.jaxa.jp/mission/" target="_blank" rel="noopener" aria-label="MMX のミッション（JAXA）"><span class="ce">MISSION</span><small>ミッション</small></a>
+      <a class="circ live" href="https://www.youtube.com/watch?v=sZGyK9jfoy4" target="_blank" rel="noopener" aria-label="打ち上げライブ中継（JAXA の YouTube。10月20日 3時45分ごろから・予定）"><span class="ce"><i class="dot" aria-hidden="true"></i>LIVE</span><small>ライブ中継<br>YouTube（JAXA）<br>10/20 3:45ごろ〜</small></a>
     </div>
-    <a class="xbar" href="https://x.com/mmx_jaxa_jp" target="_blank" rel="noopener" aria-label="MMX 公式の X（@mmx_jaxa_jp）"><span class="xm">𝕏</span><span>MMX 公式の投稿 <small>@mmx_jaxa_jp</small></span></a>
+    <a class="xbar" href="https://x.com/mmx_jaxa_jp" target="_blank" rel="noopener" aria-label="MMX 公式の X（@mmx_jaxa_jp）"><span class="xm">𝕏</span><span class="ce">MMX OFFICIAL</span><small>公式の投稿 @mmx_jaxa_jp</small></a>
   </nav>
   <div class="note" title="地球と火星の位置は計算。到着日は仮（打ち上げ330日後。公式は「往路1年弱」「火星圏到着 2027年度」）。地球のそばの道と火星のまわりは簡略化。大きさは実際の比ではありません。打ち上げのあとの位置は、公式の発表で打ち上げを確かめてから、計画の軌道の上を日数で進めた「およその位置」です">模式図（地球・火星の位置は計算、到着日は仮、大きさは実際の比ではない）。打ち上げ後の位置は、公式で確かめてから計画の軌道で出す。出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。非公式のファンメイド作品</div>
   <div class="tag" id="tag-tane">種子島</div>
