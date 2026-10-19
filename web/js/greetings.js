@@ -2,12 +2,13 @@
 // データの更新のあと、最初に開いたときに1回だけ出す。出してよいものには、curation で greeting を付けてある
 // （打ち上げの成功・無事の帰還を公式で確かめたときだけ。schema/common.schema.json の greeting）
 import { esc, plainDateJa } from "./format.js";
-import { eventSpan, jstDay, hmJst } from "./events.js";
+import { eventSpan, jstDay, hmJst, knownSource } from "./events.js";
 
 const STORE_KEY = "voyascope.greeted";
 
 // 出典の URL から「www.jaxa.jp」のような短い名前
 const host = (url) => {
+  if (knownSource(url)) return knownSource(url); // 動画などは機関の名前で
   try {
     return new URL(url).hostname.replace(/^www\./, "");
   } catch {

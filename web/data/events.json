@@ -284,7 +284,7 @@
         "value": "done",
         "source": "https://www.youtube.com/watch?v=sZGyK9jfoy4",
         "as_of": "2026-10-20",
-        "note": "JAXA の打上げライブ中継で 4:41 の打ち上げを確認（オーナー）。分離は JAXA の発表で確かめる"
+        "note": "JAXA の打上げライブ中継で、4:41 の打ち上げと 5:52 ごろの MMX の分離を確認（オーナー）"
       },
       "window_end": {
         "value": "2026-11-09",
@@ -328,7 +328,11 @@
           "url": "https://www.mmx.jaxa.jp/"
         }
       ],
-      "updated_at": "2026-10-20"
+      "updated_at": "2026-10-20",
+      "greeting": {
+        "name": "MMX",
+        "until": "2026-10-27"
+      }
     },
     {
       "id": "orionids-2026",

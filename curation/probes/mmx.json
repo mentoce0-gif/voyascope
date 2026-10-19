@@ -5,7 +5,9 @@
     "en": "MMX (Martian Moons eXploration)"
   },
   "operator": {
-    "value": ["JAXA"],
+    "value": [
+      "JAXA"
+    ],
     "source": "https://www.mmx.jaxa.jp/",
     "as_of": "2026-10-03",
     "note": "NASA・CNES・DLR・ESA なども参加する国際的なプロジェクト"
@@ -13,18 +15,20 @@
   "launch_date": {
     "value": "2026-10-20",
     "source": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html",
-    "as_of": "2026-10-03",
-    "note": "予定。日本時間 4時41分03秒"
+    "as_of": "2026-10-20",
+    "note": "日本時間 4時41分03秒の予定どおり打ち上げ（JAXA の打上げライブ中継で確認）"
   },
   "status": {
-    "value": "not_launched",
-    "source": "https://www.jaxa.jp/about/president/presslec/202609_j.html",
-    "as_of": "2026-10-03"
+    "value": "operating",
+    "source": "https://www.youtube.com/watch?v=sZGyK9jfoy4",
+    "as_of": "2026-10-20",
+    "note": "2026-10-20 4:41 に打ち上げ、5:52 ごろ H3 ロケットから分離（JAXA の打上げライブ中継で確認）"
   },
   "location": {
-    "value": "種子島宇宙センターで、打ち上げに向けた準備（射場整備作業）をしている",
-    "source": "https://www.jaxa.jp/about/president/presslec/202609_j.html",
-    "as_of": "2026-10-03"
+    "value": "H3ロケット10号機から分離し、火星へ向かう軌道に入った",
+    "source": "https://www.youtube.com/watch?v=sZGyK9jfoy4",
+    "as_of": "2026-10-20",
+    "note": "JAXA の打上げライブ中継で確認。JAXA の打上げ結果のお知らせが出たら出典を差し替える"
   },
   "mission": {
     "value": "火星の衛星フォボスを観測し、表面の砂や岩石を地球に持ち帰る",
@@ -34,10 +38,18 @@
   "distance": {
     "method": "on_earth"
   },
-  "events": ["mmx-launch"],
-  "official_links": [
-    { "label": "MMX プロジェクトサイト", "url": "https://www.mmx.jaxa.jp/" },
-    { "label": "JAXA プレスリリース（MMX の打上げ）", "url": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html" }
+  "events": [
+    "mmx-launch"
   ],
-  "updated_at": "2026-10-03"
+  "official_links": [
+    {
+      "label": "MMX プロジェクトサイト",
+      "url": "https://www.mmx.jaxa.jp/"
+    },
+    {
+      "label": "JAXA プレスリリース（MMX の打上げ）",
+      "url": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html"
+    }
+  ],
+  "updated_at": "2026-10-20"
 }
