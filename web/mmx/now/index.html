@@ -123,7 +123,7 @@
       <a class="xbar xtag" href="https://x.com/search?q=%23MMX&amp;f=live" target="_blank" rel="noopener" aria-label="X で「#MMX」の新しい投稿を見る（X のページが開きます）"><span class="xm">𝕏</span><span class="xt"><span class="ce">#MMX</span><small>みんなの投稿</small></span></a>
     </div>
   </nav>
-  <div class="note" title="地球と火星の位置は計算。到着日は仮（打ち上げ330日後。公式は「往路1年弱」「火星圏到着 2027年度」）。地球のそばの道と火星のまわりは簡略化。大きさは実際の比ではありません。打ち上げのあとの位置は、公式の発表で打ち上げを確かめてから、計画の軌道の上を日数で進めた「およその位置」です">模式図<wbr>（位置は計算・到着日は仮・<wbr>大きさは実際の比ではない）。<wbr>打ち上げ後の位置は、<wbr>公式で確かめてから出す。<wbr>出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<wbr><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。<wbr>非公式のファンメイド作品</div>
+  <div class="note" title="地球と火星の位置は計算。到着日は仮（打ち上げ330日後。公式は「往路1年弱」「火星圏到着 2027年度」）。地球のそばの道と火星のまわりは簡略化。大きさは実際の比ではありません。打ち上げのあとの位置は、公式の発表で打ち上げを確かめてから、計画の軌道の上を日数で進めた「およその位置」です">模式図<wbr>（位置は計算・到着日は仮・<wbr>大きさは実際の比ではない）。<wbr>打ち上げ後の位置は、<wbr>公式で確かめてから出す。<wbr>出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">ISS の高さ（NASA）</a>・<wbr><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。<wbr>非公式のファンメイド作品</div>
   <div class="tag" id="tag-tane">種子島</div>
   <div class="tag" id="tag-mmx">MMX</div>
   <div class="tag amber" id="tag-h3">H3ロケット10号機（MMX を搭載）</div>
@@ -211,6 +211,7 @@ const streak = (() => {
 // 計算は scratchpad の route.mjs。1 AU = 10。黄道面を水平に
 const [RT, EVENTS] = await Promise.all([fetch("route.json").then((r) => r.json()), fetch("../../data/events.json", { cache: "no-cache" }).then((r) => r.json())]);
 const EV = EVENTS.events.find((e) => e.id === "mmx-launch");
+const ISS_KM = await fetch("../../data/cards/iss.json").then((r) => r.json()).then((c) => c.stats?.altitude_km?.value ?? 0).catch(() => 0);
 const NOW = new Date();
 const PH = EV ? mmxPhase(EV, NOW) : { phase: "before", launchAt: Date.parse(RT.launch) };
 const FLYING = PH.phase === "flying";
@@ -764,7 +765,10 @@ function watchCaption() {
   if (lpc) {
     k = `打ち上げから <b>+${hms(lpc.elapsed)}</b>`;
     t = lpc.separated ? "MMX の分離の予定の時刻を<wbr>過ぎました" : `計画では：<wbr>${lpc.plan.steps[lpc.current].label.replace(/(\S*-\S*)/g, '<span class="nw">$1</span>')}`;
-    sub = lpc.separated ? "分離は、<wbr>JAXA の発表で確かめます" : "打ち上げは JAXA の中継で確認。<wbr>分離は 5:52ごろの予定。<wbr>位置は計画の時刻の模式";
+    // 高さを ISS とくらべる（2026-10-20 オーナー。ISS は curation/spacecraft/iss.json：NASA「約400km」）
+    const alt = lpc.plan.steps[lpc.current].alt, top = alt ? Number(alt.split("〜").pop()) : 0;
+    const cmp = alt && ISS_KM ? `計画の高さ <b>約${alt}km</b>（ISS の約${(top / ISS_KM).toFixed(1)}倍）。<wbr>` : "";
+    sub = lpc.separated ? `${cmp}分離は、<wbr>JAXA の発表で確かめます` : `${cmp}打ち上げは JAXA の中継で確認。<wbr>分離は 5:52ごろの予定`;
   }
   else if (PH.phase === "flying") { k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり"; sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>`; }
   else if (PH.phase === "postponed") { k = "延期"; t = "MMX は、<wbr>種子島で<wbr>待っています"; sub = "新しい日時は JAXA の発表で"; }
