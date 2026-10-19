@@ -113,14 +113,15 @@
   .tm-arc text { font-size: 8px; letter-spacing: .08em; fill: var(--text); } .tm-arc text.next { fill: var(--dim); }
   .tm-meta { display: flex; gap: 14px; margin-top: 4px; font-size: 9px; letter-spacing: .16em; color: var(--dim); }
   .tm-meta b { color: var(--text); font-weight: 700; margin-left: 4px; }
-  body.tm-on .cap { top: 226px; bottom: auto; }
+  body.tm-on .cap { top: auto; bottom: 84px; } /* 説明は下に（計器と道の絵に重ならないように。2026-10-20 オーナー） */
+  body.tm-on.pre .cap { bottom: 296px; }
   body.tm-on .cap .k { display: none; }
   body.tm-on .cap .t { font-size: 17px; } body.tm-on .cap .s { font-size: 12px; }
   body.tm-watch .tm-row, body.tm-watch .tm-arc { display: none; }
   body.tm-open .tm { top: auto; bottom: 92px; } /* オープニング：字幕（上）と重ならないよう下に */
   /* 撮影用（あとで消す） */
   .film-btn { position: absolute; right: 14px; top: 64px; min-height: 36px; min-width: 44px; justify-content: center; font-size: 15px; pointer-events: auto; z-index: 2; }
-  .film-hint { position: absolute; left: 0; right: 0; bottom: 300px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .2em; color: var(--amber); pointer-events: auto; animation: hint-up 1.6s ease-in-out infinite; }
+  .film-hint { position: absolute; left: 0; right: 0; bottom: 196px; text-align: center; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .2em; color: var(--amber); pointer-events: auto; animation: hint-up 1.6s ease-in-out infinite; }
   .film-hint b { font-size: 16px; }
   .warp-vignette { position: fixed; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
 </style>
@@ -777,15 +778,16 @@ const view = { yaw: 0, pitch: 0, zoom: 1 };
 // 計画の時刻（打上げ計画書の表2）の事象へ、計器と道の上の印を進める。打ち上げ後（FLYING）だけ
 const FILM_STEPS = [0, 116000, 312000, 3837000, SEP_MS]; // LIFTOFF・SRB-3 SEP #1・SELI #1・SELI #2・MMX SEP
 let film = null; // { i, from, to, t0 }
+let blendFrom = null, coastLook = V(0, 0, 0); // 撮影の最後から「いま」へ、ゆっくりカメラを移す
 const simEl = () => { if (!film) return null; const k = Math.min(1, (performance.now() - film.t0) / 1600); const e = k * k * (3 - 2 * k); return film.from + (film.to - film.from) * e; };
 const filmBtn = document.createElement("button");
 filmBtn.type = "button"; filmBtn.className = "btn film-btn"; filmBtn.textContent = "⏪"; filmBtn.title = filmBtn.ariaLabel = "発射から分離までをふり返る（スワイプで進む）";
 filmBtn.hidden = !FLYING; document.querySelector(".hud").append(filmBtn);
 const filmHint = document.createElement("div"); filmHint.className = "film-hint"; filmHint.hidden = true; filmHint.innerHTML = "スワイプで次へ <b>›</b>"; document.querySelector(".hud").append(filmHint);
 const filmGo = (i) => {
-  if (i >= FILM_STEPS.length) { film = null; filmBtn.textContent = "⏪"; filmHint.hidden = true; capCache = ""; tmKey = ""; return; }
+  if (i >= FILM_STEPS.length) { if (film) blendFrom = { pos: camera.position.clone(), look: coastLook.clone(), up: camera.up.clone(), t0: performance.now() }; film = null; filmBtn.textContent = "⏪"; filmHint.hidden = true; capCache = ""; tmKey = ""; return; }
   const from = film ? simEl() : FILM_STEPS[0];
-  film = { i, from, to: FILM_STEPS[i], t0: performance.now() }; tagH3.textContent = "H3＋MMX（計画）"; filmBtn.textContent = "×"; filmHint.hidden = false; capCache = ""; tmKey = "";
+  film = { i, from, to: FILM_STEPS[i], t0: performance.now() }; tagH3.textContent = "H3＋MMX"; filmBtn.textContent = "×"; filmHint.hidden = false; capCache = ""; tmKey = "";
 };
 filmBtn.addEventListener("click", () => (film ? filmGo(FILM_STEPS.length) : filmGo(0)));
 {
@@ -810,7 +812,7 @@ function coastAt(t) {
   const dir = axis.clone().add(nW.clone().multiplyScalar(-0.25)).normalize().applyAxisAngle(nW, Math.sin(t * 0.1) * 0.1 + view.yaw);
   dir.applyAxisAngle(dir.clone().cross(upV).normalize(), view.pitch);
   const look = earthPos.clone().add(nW.clone().multiplyScalar(0.2)); // 地球を画面の真ん中より少し下に
-  camera.position.copy(look).add(dir.multiplyScalar(fit * view.zoom)); camera.up.copy(upV); camera.lookAt(look);
+  camera.position.copy(look).add(dir.multiplyScalar(fit * view.zoom)); camera.up.copy(upV); camera.lookAt(look); coastLook.copy(look);
   document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
   route.uniforms.uReveal.value = s; route.uniforms.uFront.value = s; route.uniforms.uPulse.value = -1; comet.uniforms.uA.value = 0;
   mmxHolder.visible = false; h3.visible = false; padLight.visible = false; flame.uniforms.uA.value = 0; mmxGlow.uniforms.uA.value = 0;
@@ -829,7 +831,7 @@ function coastAt(t) {
   place(tags.tane, pinWorld, 1, 22); place(tagH3, pos, 1, -22); tagH3.style.left = `${Math.min(W - 70, Math.max(70, parseFloat(tagH3.style.left)))}px`; /* 画面の端で切れないように */ place(tags.mmx, pos, 0); place(tags.mars, marsPos, 0); place(tags.phobos, phobosPos, 0);
 }
 window.coastAt = coastAt;
-if (coastNow()) { tagH3.textContent = "H3＋MMX（計画）"; document.querySelector(".circ.live small").innerHTML = "ライブ中継<br>YouTube（JAXA）"; }
+if (coastNow()) { tagH3.textContent = "H3＋MMX"; document.querySelector(".circ.live small").innerHTML = "ライブ中継<br>YouTube（JAXA）"; }
 
 function watchAt(t) {
   pinLift(false);
@@ -870,8 +872,15 @@ function trackAt(t) {
   const side = mmxDir.clone().cross(V(0, 1, 0)).normalize(); if (side.dot(mmxPos.clone().negate()) < 0) side.negate();
   const dir = side.clone().add(V(0, 0.38, 0)).add(mmxDir.clone().multiplyScalar(-0.6)).normalize().applyAxisAngle(V(0, 1, 0), Math.sin(t * 0.05) * 0.25 + view.yaw);
   dir.applyAxisAngle(dir.clone().cross(V(0, 1, 0)).normalize(), view.pitch);
-  const dist = 1.25 * view.zoom / (0.55 + 0.45 * Math.min(1, W / H));
-  camera.position.copy(mmxPos).add(dir.multiplyScalar(dist)); camera.lookAt(mmxPos.clone().add(V(0, -0.08, 0)));
+  // 地球が近いあいだは、地球まるごと入るように引く（2026-10-20 オーナー）。離れたら MMX に寄る
+  const dE = mmxPos.distanceTo(earthPos), wE = Math.max(0, Math.min(1, 1 - (dE - 2) / 4));
+  const look = mmxPos.clone().lerp(earthPos, 0.42 * wE).add(V(0, -0.08, 0));
+  const dist = (1.25 + wE * (dE * 1.15 + 1.2)) * view.zoom / (0.55 + 0.45 * Math.min(1, W / H));
+  camera.position.copy(look).add(dir.multiplyScalar(dist)); camera.up.set(0, 1, 0);
+  if (blendFrom) { const k0 = Math.min(1, (performance.now() - blendFrom.t0) / 2800), k = k0 * k0 * (3 - 2 * k0);
+    camera.position.lerpVectors(blendFrom.pos, camera.position.clone(), k); look.lerpVectors(blendFrom.look, look.clone(), k); camera.up.lerpVectors(blendFrom.up, V(0, 1, 0), k).normalize();
+    if (k0 >= 1) blendFrom = null; }
+  camera.lookAt(look);
   document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
   route.uniforms.uReveal.value = sMMX; route.uniforms.uFront.value = sMMX;
   const PERIOD = 5, RUN = 3.2, ph = t % PERIOD;
@@ -888,6 +897,7 @@ function trackAt(t) {
   sunLight.target.position.copy(mmxPos);
   rimLight.target.position.copy(mmxPos); rimLight.position.copy(mmxPos).add(mmxPos.clone().sub(camera.position).normalize().add(V(0, 0.6, 0)).multiplyScalar(2));
   renderer.render(scene, camera);
+  camera.up.set(0, 1, 0);
   watchCaption();
   document.querySelector(".cap").style.opacity = 1;
   place(tags.tane, pinWorld, 0); place(tags.mmx, mmxPos.clone().add(camera.up.clone().multiplyScalar(MMX_S * 0.75)), 1, -6); /* 模型の上に */ place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 1, 30); place(tags.phobos, phobosPos, 0);
@@ -902,11 +912,11 @@ function watchCaption() {
   const lpc = (coastNow() || film) && EV ? launchProgress(EV, new Date(now)) : null;
   if (lpc) {
     k = `打ち上げから <b>+${hms(lpc.elapsed)}</b>`;
-    t = lpc.separated ? (SEP_SEEN ? "MMX、<wbr>ロケットから分離。<wbr>火星へ" : "MMX の分離の予定の時刻を<wbr>過ぎました") : `計画では：<wbr>${lpc.plan.steps[lpc.current].label.replace(/(\S*-\S*)/g, '<span class="nw">$1</span>')}`;
+    t = lpc.separated ? (SEP_SEEN ? "MMX、<wbr>ロケットから分離。<wbr>火星へ" : "MMX の分離の予定の時刻を<wbr>過ぎました") : `${lpc.plan.steps[lpc.current].label.replace(/(\S*-\S*)/g, '<span class="nw">$1</span>')}`;
     // 高さを ISS とくらべる（2026-10-20 オーナー。ISS は curation/spacecraft/iss.json：NASA「約400km」）
     const alt = lpc.plan.steps[lpc.current].alt, top = alt ? Number(alt.split("〜").pop()) : 0;
     const cmp = top > 0 && ISS_KM ? `計画の高さ <b>約${alt}km</b>（ISS の約${(top / ISS_KM).toFixed(1)}倍）。<wbr>` : "";
-    sub = lpc.separated ? (SEP_SEEN ? `${cmp}分離は JAXA の中継で確認` : `${cmp}分離は、<wbr>JAXA の発表で確かめます`) : `${cmp}打ち上げは JAXA の中継で確認。<wbr>分離は 5:52ごろの予定`;
+    sub = lpc.separated ? (SEP_SEEN ? `${cmp}分離は JAXA の中継で確認` : `${cmp}分離は、<wbr>JAXA の発表で確かめます`) : (SEP_SEEN ? `${cmp}打ち上げ・分離は<wbr> JAXA の中継で確認` : `${cmp}打ち上げは JAXA の中継で確認。<wbr>分離は 5:52ごろの予定`);
   }
   else if (PH.phase === "flying") { k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり"; sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>`; }
   else if (PH.phase === "postponed") { k = "延期"; t = "MMX は、<wbr>種子島で<wbr>待っています"; sub = "新しい日時は JAXA の発表で"; }
