@@ -1392,11 +1392,12 @@ dialog.greeting[open] { animation: greet-in 0.45s ease-out; }
   /* 入口は表示切替の下の右。一覧・詳細のシートを広げたときは、シートの下に隠れる */
   .far-open { position: absolute; z-index: 19; right: 12px; top: calc(var(--top-h) + var(--switch-h) + 8px); min-height: 40px; }
   .view-switch button { padding: 6px 10px; font-size: 0.8rem; }
-  .view-switch button::after { content: ""; position: absolute; inset: -7px -1px; }
+  /* 押せる範囲を上下に広げる部分は、列の枠の中に収める（はみ出すと、列が縦にも少しスクロールして、ボタンが枠の線に重なる。2026-10-19 オーナー） */
+  .view-switch button::after { content: ""; position: absolute; inset: -3px -1px; }
   /* 表示切替は横一列。指でスワイプすると、真ん中に止まったものに切り替わる（2026-10-19 オーナー） */
   .view-switch {
     left: 12px; right: 12px; max-width: none;
-    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
+    overflow-x: auto; overflow-y: hidden; touch-action: pan-x; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
             mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
   }
