@@ -41,7 +41,9 @@ export const hms = (ms) => {
 // いま計画の流れのどこか。流れの外（打ち上げ前・分離の予定の30分後より後・日時が計画書と違う・延期など）は null
 export function launchProgress(ev, now) {
   const plan = LAUNCH_PLANS[ev?.id];
-  if (!plan || statusOf(ev) !== "scheduled" || ev.when?.value?.at !== plan.forAt) return null;
+  // 打ち上げを公式で確かめたあと（done）も、分離の予定の30分後までは計画の流れを出す
+  const st = statusOf(ev);
+  if (!plan || (st !== "scheduled" && st !== "done") || ev.when?.value?.at !== plan.forAt) return null;
   const span = eventSpan(ev);
   const elapsed = now.getTime() - span.start;
   const sep = plan.steps.find((s) => s.separation).t;
