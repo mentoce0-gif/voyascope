@@ -23,6 +23,7 @@
   .tag { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font-size: 12px; font-weight: 700; color: var(--mint); text-shadow: 0 0 8px var(--navy); }
   .tag.amber { color: var(--amber); }
   .top { position: absolute; left: 14px; right: 14px; top: 14px; display: flex; align-items: center; gap: 10px; pointer-events: auto; }
+  [hidden] { display: none !important; }
   .btn { white-space: nowrap; appearance: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 14px; border: 1px solid rgba(94,242,194,.55); border-radius: 999px; background: rgba(5,14,31,.72); color: var(--text); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; backdrop-filter: blur(4px); }
   .btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
   .btn.amber { border-color: rgba(255,181,71,.6); color: var(--amber); }
@@ -32,6 +33,12 @@
   .cap .s { font-size: 14px; margin-top: 6px; color: var(--dim); }
   .cap .s b { color: var(--mint); font-family: "JetBrains Mono", monospace; }
   .note a { color: var(--dim); }
+  .links { position: absolute; left: 16px; right: 16px; bottom: 218px; display: grid; gap: 8px; pointer-events: auto; }
+  .link { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; border: 1px solid rgba(94,242,194,.45); border-radius: 14px; background: rgba(5,14,31,.78); color: var(--text); text-decoration: none; backdrop-filter: blur(6px); }
+  .link .lk { font-weight: 700; font-size: 15px; } .link .lk::after { content: " ↗"; color: var(--dim); font-weight: 400; }
+  .link .ld { font-size: 12px; color: var(--dim); }
+  .link.live { border-color: rgba(255,181,71,.7); background: rgba(40,24,6,.78); } .link.live .lk { color: var(--amber); }
+  .link:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
   .skip { position: absolute; right: 14px; top: 66px; pointer-events: auto; min-height: 36px; font-size: 12px; }
   .badge { white-space: nowrap; }
   @media (max-width: 420px) { .top .brand { display: none; } }
@@ -45,14 +52,20 @@
     <a class="btn" href="../../" aria-label="地球の画面へ戻る">‹ 地球へ</a>
     <span class="brand">VOYASCOPE</span>
     <span class="spacer"></span>
-    <button type="button" class="btn amber" id="replay" hidden>はじめから</button>
-    <span class="badge">模式図</span>
+    <button type="button" class="btn amber" id="replay" hidden>計画の航路を見る</button>
   </div>
   <div class="cap" aria-live="polite"><div class="k" id="capk"></div><div class="t" id="capt"></div><div class="s" id="caps"></div></div>
-  <button type="button" class="btn skip" id="skip">とばす ›</button>
+  <button type="button" class="btn skip" id="skip" hidden>とばす ›</button>
+  <!-- 打ち上げ前：ミッションと公式の中継へのリンク（2026-10-19 オーナー：わかりやすく） -->
+  <nav class="links" id="links" hidden aria-label="公式のページ">
+    <a class="link live" href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener"><span class="lk">打ち上げライブ中継（JAXA）</span><span class="ld">10/20 3:45ごろから（予定）</span></a>
+    <a class="link" href="https://www.mmx.jaxa.jp/mission/" target="_blank" rel="noopener"><span class="lk">MMX のミッション（JAXA）</span><span class="ld">火星の衛星フォボスから、砂を持ち帰る</span></a>
+    <a class="link" href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/" target="_blank" rel="noopener"><span class="lk">MMX×H3ロケット10号機 特設サイト（JAXA）</span><span class="ld">打ち上げの予定・お知らせ</span></a>
+  </nav>
   <div class="note" title="地球と火星の位置は計算。到着日は仮（打ち上げ330日後。公式は「往路1年弱」「火星圏到着 2027年度」）。地球のそばの道と火星のまわりは簡略化。大きさは実際の比ではありません。打ち上げのあとの位置は、公式の発表で打ち上げを確かめてから、計画の軌道の上を日数で進めた「およその位置」です">模式図（地球・火星の位置は計算、到着日は仮、大きさは実際の比ではない）。打ち上げ後の位置は、公式で確かめてから計画の軌道で出す。出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。非公式のファンメイド作品</div>
   <div class="tag" id="tag-tane">種子島</div>
   <div class="tag" id="tag-mmx">MMX</div>
+  <div class="tag amber" id="tag-h3">H3ロケット10号機（MMX を搭載）</div>
   <div class="tag" id="tag-mars">火星</div>
   <div class="tag amber" id="tag-phobos">フォボス</div>
 </div>
@@ -244,7 +257,7 @@ const axis = nW.clone().cross(eastW).normalize();
 const ROT = 1.55 * Math.PI; // 地球のまわりの角度（約1時間11分ぶん。誇張なし）
 for (let i = 0; i <= 260; i++) {
   const t = i / 260, ang = t * ROT;
-  const alt = RE * (1.0 + 0.32 * Math.min(1, t * 6) + 0.25 * Math.max(0, t - 0.8) / 0.2);
+  const alt = RE * (1.0 + 0.9 * Math.min(1, t * 4) ** 0.7 + 0.35 * Math.max(0, t - 0.8) / 0.2); // 地球を貫いて見えないよう、すぐ半径の約1.9倍へ
   path.push(earthPos.clone().add(nW.clone().applyAxisAngle(axis, ang).multiplyScalar(alt)));
 }
 const sepPt = path[path.length - 1].clone();
@@ -252,7 +265,11 @@ const sepDir = path[path.length - 1].clone().sub(path[path.length - 2]).normaliz
 const tr = RT.transfer.map(P);
 let k0 = tr.findIndex((p) => p.distanceTo(earthPos) > 2.2);
 const join = tr[k0], joinDir = tr[k0 + 1].clone().sub(tr[k0]).normalize();
-for (let i = 1; i <= 160; i++) path.push(bez(sepPt, sepPt.clone().add(sepDir.clone().multiplyScalar(0.9)), join.clone().sub(joinDir.clone().multiplyScalar(0.9)), join, i / 160));
+for (let i = 1; i <= 160; i++) {
+  const q = bez(sepPt, sepPt.clone().add(sepDir.clone().multiplyScalar(0.9)), join.clone().sub(joinDir.clone().multiplyScalar(0.9)), join, i / 160);
+  const d = q.clone().sub(earthPos); if (d.length() < RE * 1.9) q.copy(earthPos).add(d.setLength(RE * 1.9)); // 地球の中を通らない
+  path.push(q);
+}
 const sStartArcIdx = path.length;
 let k1 = tr.length - 1; while (tr[k1].distanceTo(marsPos) < 2.6) k1--;
 for (let k = k0 + 1; k <= k1; k++) {
@@ -366,6 +383,33 @@ mmx.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = tru
   const sc = sunLight.shadow.camera; sc.left = sc.bottom = -1.6 * MMX_S; sc.right = sc.top = 1.6 * MMX_S; sc.near = 0.5; sc.far = 4; sc.updateProjectionMatrix(); }
 route.uniforms.uMMX.value = sMMX;
 
+// ---------- H3 ロケット（打ち上げ前：種子島に立つ。2026-10-19 オーナー） ----------
+// 自前の簡単な形（白い胴・フェアリング・固体ロケットブースター4本〈H3-24L〉）。ロゴ・文字は入れない。大きさは誇張
+const h3 = new THREE.Group();
+{
+  const mat = (c, r = 0.55, m = 0.1) => new THREE.MeshStandardMaterial({ color: c, roughness: r, metalness: m });
+  const white = mat(0xeef1f3), gray = mat(0x9aa1a8, 0.5, 0.3), dark = mat(0x2a2e34, 0.6, 0.4);
+  const cyl = (m, r, h, y, x = 0, z = 0, top = r) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(top, r, h, 28), m); o.position.set(x, y + h / 2, z); h3.add(o); return o; };
+  cyl(white, 0.026, 0.62, 0.04);                 // 1段目
+  cyl(dark, 0.0265, 0.02, 0.36);                 // 段のあいだ
+  cyl(white, 0.026, 0.14, 0.66);                 // 2段目
+  cyl(white, 0.031, 0.17, 0.80);                 // フェアリング（MMX が入っている）
+  cyl(white, 0.031, 0.09, 0.97, 0, 0, 0.004);    // フェアリングの先
+  cyl(gray, 0.024, 0.02, 0.645);
+  for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, x = Math.cos(a) * 0.04, z = Math.sin(a) * 0.04;
+    cyl(white, 0.012, 0.24, 0.03, x, z); cyl(white, 0.012, 0.03, 0.27, x, z, 0.002); cyl(dark, 0.009, 0.03, 0.0, x, z, 0.012); }
+  cyl(dark, 0.012, 0.04, 0.0, 0.008, 0, 0.016); cyl(dark, 0.012, 0.04, 0.0, -0.008, 0, 0.016); // 1段目のエンジン（2基）
+  h3.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+}
+h3.scale.setScalar(0.12);
+h3.position.copy(pinWorld);
+h3.quaternion.setFromUnitVectors(V(0, 1, 0), pinWorld.clone().sub(earthPos).normalize());
+scene.add(h3);
+// 発射場の明かり（打ち上げは夜明け前）：ロケットを横から照らす弱い光（three.js は部品を絞って同梱しているので、点光源の代わりに平行光）
+const padLight = new THREE.DirectionalLight(0xfff0d8, 0.9);
+padLight.position.copy(pinWorld.clone().add(pinWorld.clone().sub(earthPos).normalize().multiplyScalar(0.3)).add(eastW.clone().multiplyScalar(0.5)).add(northW.clone().multiplyScalar(0.3))); padLight.target.position.copy(pinWorld); scene.add(padLight, padLight.target);
+const PRE = !FLYING;
+
 // ---------- カメラの流れ（12秒） ----------
 const camAt = {
   near: { pos: pinWorld.clone().add(faceDir.clone().multiplyScalar(2.8)).add(sideways.clone().multiplyScalar(-0.9)).add(V(0, 0.3, 0)), look: pinWorld.clone().lerp(earthPos, 0.6).add(V(0, -0.45, 0)).add(sideways.clone().multiplyScalar(0.25)) },
@@ -384,6 +428,7 @@ const caps = [
   [7.4, "1年弱（計画）", "太陽のまわりを大きく回って、火星へ"],
   [11.8, "2027年度（計画）", "火星を回る軌道へ。そしてフォボスへ"],
 ];
+const tagH3 = document.getElementById("tag-h3");
 const tags = { tane: document.getElementById("tag-tane"), mmx: document.getElementById("tag-mmx"), mars: document.getElementById("tag-mars"), phobos: document.getElementById("tag-phobos") };
 const place = (el, p, alpha, dy = -14) => { const v = p.clone().project(camera); const vis = v.z < 1 && alpha > 0.01; el.style.opacity = vis ? alpha : 0; el.style.left = `${(v.x + 1) / 2 * W}px`; el.style.top = `${(1 - v.y) / 2 * H + dy}px`; };
 
@@ -440,7 +485,8 @@ function renderAt(t) {
   const ph = (t % 1.8) / 1.8; pinRing.uniforms.uS.value = 0.06 + ph * 0.32; pinRing.uniforms.uA.value = (1 - ph) * 0.9 * (1 - smooth(2.4, 3.4, t) * 0.7);
   pinGlow.uniforms.uA.value = 0.9;
   // MMX
-  mmxHolder.visible = FLYING ? t > 3.6 : t < 2.4;
+  mmxHolder.visible = FLYING && t > 3.6;
+  h3.visible = PRE && t < 2.6; padLight.visible = h3.visible;
   mmx.rotation.y = 0.6 + t * 0.25;
   sunLight.target.position.copy(mmxPos);
   mmxGlow.uniforms.uA.value = FLYING ? smooth(4.4, 5.4, t) * (0.55 + 0.25 * Math.sin(t * 3.5)) * Math.min(1, camera.position.distanceTo(mmxPos) / 6) : 0;
@@ -456,10 +502,12 @@ function renderAt(t) {
   // 文字
   const cap = [...caps].reverse().find((x) => t >= x[0]);
   document.getElementById("capk").textContent = cap[1]; document.getElementById("capt").textContent = cap[2];
+  capCache = ""; // オープニングで文字を書き換えたので、戻ったら書き直す
   const capFade = Math.min(smooth(cap[0], cap[0] + 0.5, t), 1);
   document.querySelector(".cap").style.opacity = capFade;
   document.getElementById("caps").textContent = "";
-  place(tags.tane, pinWorld, 1 - smooth(2.3, 3.0, t));
+  place(tags.tane, pinWorld, 1 - smooth(2.3, 3.0, t), 24);
+  place(tagH3, pinWorld, 0);
   place(tags.mmx, mmxPos, FLYING ? smooth(5.4, 6.0, t) * (1 - smooth(7.0, 7.5, t)) : 0, -185);
   place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), smooth(12.0, 12.7, t), 34);
   place(tags.phobos, phobosPos, smooth(14.0, 14.5, t), -18);
@@ -474,6 +522,32 @@ const watchCenter = earthPos.clone().add(marsPos).multiplyScalar(0.12);
 const R_FIT = 17;
 const watchH = () => { const half = Math.tan((42 / 2) * Math.PI / 180) * Math.min(1, W / H); return R_FIT / half; };
 const watchCam = { get pos() { return watchCenter.clone().add(V(0, watchH(), watchH() * 0.18)); }, get look() { return watchCenter.clone(); } };
+// ---------- 打ち上げ前：種子島に立つ H3 ロケットを、ゆっくり回りながら見る ----------
+function padAt(t) {
+  camera.fov = 42; camera.updateProjectionMatrix();
+  const n = pinWorld.clone().sub(earthPos).normalize();
+  const tan = eastW.clone().applyAxisAngle(n, 0.6 + t * 0.06);
+  const target = pinWorld.clone().add(n.clone().multiplyScalar(0.07));
+  const back = W / H < 0.7 ? 0.62 : 0.45;
+  camera.position.copy(target).add(tan.clone().multiplyScalar(back)).add(n.clone().multiplyScalar(0.1));
+  camera.up.copy(n); camera.lookAt(target.clone().add(n.clone().multiplyScalar(-0.06)));
+  document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
+  route.uniforms.uReveal.value = 0; route.uniforms.uFront.value = 0; route.uniforms.uPulse.value = -1; comet.uniforms.uA.value = 0;
+  mmxHolder.visible = false; h3.visible = true; padLight.visible = true; mmxGlow.uniforms.uA.value = 0;
+  const ph = (t % 3.6) / 3.6; pinRing.uniforms.uS.value = 0.03 + ph * 0.16; pinRing.uniforms.uA.value = (1 - ph) * 0.8; pinGlow.uniforms.uA.value = 0.5; pinGlow.uniforms.uS.value = 0.05;
+  phobosGlow.uniforms.uA.value = 0;
+  for (const b of billboards) { b.quaternion.copy(camera.quaternion); b.scale.setScalar(b.material.uniforms.uS.value); }
+  sky.position.copy(camera.position);
+  sunLight.target.position.copy(pinWorld); rimLight.target.position.copy(pinWorld); rimLight.position.copy(pinWorld).add(pinWorld.clone().sub(camera.position).normalize().add(n).multiplyScalar(2));
+  renderer.render(scene, camera);
+  camera.up.set(0, 1, 0);
+  watchCaption();
+  document.querySelector(".cap").style.opacity = 1;
+  place(tagH3, pinWorld.clone().add(n.clone().multiplyScalar(0.13)), 1, -8); place(tags.tane, pinWorld, 1, 26);
+  place(tags.mmx, pinWorld, 0); place(tags.mars, marsPos, 0); place(tags.phobos, phobosPos, 0);
+}
+window.padAt = padAt;
+
 function watchAt(t) {
   camera.fov = 42; camera.updateProjectionMatrix();
   camera.position.copy(watchCam.pos).add(V(Math.sin(t * 0.2) * 0.6, 0, Math.cos(t * 0.17) * 0.6)); camera.lookAt(watchCam.look);
@@ -481,13 +555,13 @@ function watchAt(t) {
   route.uniforms.uReveal.value = sMMX; route.uniforms.uFront.value = sMMX;
   const PERIOD = 5, RUN = 3.2, ph = t % PERIOD;
   route.uniforms.uPulse.value = ph < RUN ? -0.05 + (ph / RUN) * 1.1 : -1;
-  mmxHolder.visible = true; mmxHolder.scale.setScalar(FLYING ? 0.9 : 0.35); mmx.rotation.y = 0.6 + t * 0.25;
+  mmxHolder.visible = true; h3.visible = false; padLight.visible = false; mmxHolder.scale.setScalar(FLYING ? 0.9 : 0.35); mmx.rotation.y = 0.6 + t * 0.25;
   // 光が MMX を通るとき、MMX の灯りが強まる
   const pass = Math.exp(-Math.pow((route.uniforms.uPulse.value - sMMX) * 30, 2));
   const up = route.uniforms.uPulse.value;
   if (up >= 0 && up <= 1) { billboards.find((b) => b.material === comet).position.copy(at(up)); comet.uniforms.uC.value.set(up < sMMX ? 0x9ff7d8 : 0xffc76b); comet.uniforms.uA.value = 0.95; comet.uniforms.uS.value = 1.6; } else comet.uniforms.uA.value = 0;
   mmxGlow.uniforms.uS.value = 2.4; mmxGlow.uniforms.uA.value = 0.55 + 0.45 * pass;
-  pinRing.uniforms.uA.value = 0; pinGlow.uniforms.uA.value = 0.6;
+  pinRing.uniforms.uA.value = 0; pinGlow.uniforms.uA.value = 0.6; pinGlow.uniforms.uS.value = 0.12; place(tagH3, pinWorld, 0);
   phobosOrbit.uniforms.uA.value = 0.2; phobosGlow.uniforms.uA.value = Math.exp(-Math.pow((route.uniforms.uPulse.value - 1) * 20, 2)); phobosGlow.uniforms.uS.value = 1.2;
   for (const b of billboards) { b.quaternion.copy(camera.quaternion); b.scale.setScalar(b.material.uniforms.uS.value); }
   sky.position.copy(camera.position);
@@ -505,26 +579,31 @@ function watchCaption() {
   let k, t, sub = "";
   if (PH.phase === "flying") { k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり"; sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>`; }
   else if (PH.phase === "postponed") { k = "延期"; t = "MMX は、種子島で待っています"; sub = "新しい日時は JAXA の発表で"; }
-  else if (now >= PH.launchAt) { k = "打ち上げの予定の時刻を過ぎました"; t = "MMX は、まだ種子島に描いています"; sub = "打ち上げの結果は JAXA の発表で確かめてください。確かめたら、ここに旅の位置を出します"; }
-  else { k = "打ち上げ前"; t = "MMX は、いま種子島に"; sub = `打ち上げまで <b>${untilText(PH.launchAt - now)}</b>（${launchJst}の予定）`; }
+  else if (now >= PH.launchAt) { k = "打ち上げの予定の時刻を過ぎました"; t = "結果は JAXA の発表で"; sub = "打ち上げを確かめたら、ここに MMX の旅の位置を出します（それまでは種子島に描きます）"; }
+  else { k = "打ち上げ前"; t = "MMX は、H3ロケットに載って種子島に"; sub = `打ち上げまで <b>${untilText(PH.launchAt - now)}</b>（${launchJst}の予定）`; }
   const key = k + t + sub;
   if (key === capCache) return;
   capCache = key;
   document.getElementById("capk").textContent = k; document.getElementById("capt").textContent = t; document.getElementById("caps").innerHTML = sub;
 }
 window.ready = loadTex("../../assets/earth/day-2048.jpg").then((tex) => { earthMat.map = tex; earthMat.needsUpdate = true; return document.fonts.ready; }).then(() => { renderAt(0); return true; });
-// はじめて開いたときはオープニング（16秒）→ 監視モード。2回目からは監視モードから（「はじめから」で見直せる）
+// 打ち上げ前（PRE）：種子島の H3 ロケットと、公式のリンク。「計画の航路を見る」でオープニング（16秒）→ 種子島へ戻る（2026-10-19 オーナー）
+// 打ち上げを確かめたあと：はじめて開いたときはオープニング → 監視モード。2回目からは監視モードから
 const SEEN = "voyascope.mmx-now.seen";
 const seen = (() => { try { return localStorage.getItem(SEEN) === "1"; } catch { return false; } })();
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-let t0 = performance.now(), opening = !(seen || reduce || location.hash === "#watch");
-const skipBtn = document.getElementById("skip"), replayBtn = document.getElementById("replay");
-const toWatch = () => { opening = false; t0 = performance.now(); skipBtn.hidden = true; replayBtn.hidden = false; try { localStorage.setItem(SEEN, "1"); } catch {} };
-skipBtn.addEventListener("click", toWatch);
-replayBtn.addEventListener("click", () => { opening = true; t0 = performance.now(); skipBtn.hidden = false; replayBtn.hidden = true; });
-if (!opening) { skipBtn.hidden = true; replayBtn.hidden = false; }
+let t0 = performance.now(), opening = !PRE && !(seen || reduce || location.hash === "#watch");
+const skipBtn = document.getElementById("skip"), replayBtn = document.getElementById("replay"), links = document.getElementById("links");
+replayBtn.textContent = PRE ? "計画の航路を見る" : "はじめから";
+const sync = () => { skipBtn.hidden = !opening; replayBtn.hidden = opening; links.hidden = !PRE || opening; };
+const endOpening = () => { opening = false; t0 = performance.now(); sync(); try { localStorage.setItem(SEEN, "1"); } catch {} };
+skipBtn.addEventListener("click", endOpening);
+replayBtn.addEventListener("click", () => { opening = true; t0 = performance.now(); sync(); });
+sync();
+const idle = (t) => (PRE ? padAt(t) : watchAt(t));
+window.idleAt = idle;
 addEventListener("resize", () => { W = innerWidth; H = innerHeight; renderer.setSize(W, H); camera.aspect = W / H; camera.updateProjectionMatrix(); });
-if (!navigator.webdriver) { const loop = () => { const t = (performance.now() - t0) / 1000; if (opening && t >= 16) toWatch(); opening ? renderAt(t) : watchAt(reduce ? 0 : t); requestAnimationFrame(loop); }; window.ready.then(loop); }
+if (!navigator.webdriver) { const loop = () => { const t = (performance.now() - t0) / 1000; if (opening && t >= 16) endOpening(); opening ? renderAt(t) : idle(reduce ? 0 : t); requestAnimationFrame(loop); }; window.ready.then(loop); }
 </script>
 </body>
 </html>
