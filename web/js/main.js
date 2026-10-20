@@ -10,7 +10,7 @@ import { starfieldDataUrl } from "./stars.js";
 import { placeAt } from "./places.js";
 import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
 import { findVisiblePasses, observerOf, dir8 } from "./passes.js";
-import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
+import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord, obsLogHtml } from "./tonight.js";
 import { upcomingEvents, eventsListHtml, eventPanelHtml, nextChipHtml, bigCountdown, whenShort, hmJst, eventSpan } from "./events.js";
 import { launchProgress, launchFlowHtml, beaconTag, hms, launchSoon, soonTag } from "./launch-plan.js";
 import {
@@ -1042,11 +1042,23 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   renderPrefSelect(prefSelect, prefectures, pref?.code);
   // タイムライン（+24時間まで）に入る通過だけ「見る」ボタンを出す
   const jumpable = (p) => p.start.getTime() - Date.now() < 24 * 3600e3 - 5 * 60e3;
+  let logPass = null;
+  let logSky = "clear";
+  const renderLog = (now = new Date()) => {
+    tonightBody.querySelector(".obslog")?.remove();
+    const html = obsLogHtml(logPass, now, logSky);
+    const note = tonightBody.querySelector(".tonight-note");
+    if (html && note) note.insertAdjacentHTML("beforebegin", html);
+  };
   const updateTonight = () => {
     const now = new Date();
     passes = pref && iss ? findVisiblePasses(iss.satrec, observerOf(pref), now, { days: 5, limit: 3 }) : [];
     passesAt = now.getTime();
     renderTonight(tonightBody, { pref, passes, now, jumpable });
+    // 観測ログ：3時間以内に始まった通過（見たあとに記録する）。なければ次の通過（予告だけ）
+    const recent = pref && iss ? findVisiblePasses(iss.satrec, observerOf(pref), new Date(now.getTime() - 3 * 3600e3), { days: 3.5 / 24, limit: 4 }) : [];
+    logPass = recent.filter((p) => p.start <= now).at(-1) ?? passes[0] ?? null;
+    renderLog(now);
     // 流星群（極大の前の日から）：放射点の方角・高さと月明かり
     const meteors = activeMeteors(events, now);
     if (meteors.length) tonightBody.insertAdjacentHTML("beforeend", meteors.map((ev) => meteorHtml(ev, pref && observerOf(pref), pref?.name, now)).join(""));
@@ -1067,6 +1079,19 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     updateTonight();
   });
   tonightBody.addEventListener("click", (e) => {
+    const sky = e.target.closest("[data-sky]");
+    if (sky) {
+      logSky = sky.dataset.sky;
+      renderLog();
+      return;
+    }
+    const copy = e.target.closest("[data-obslog-copy]");
+    if (copy) {
+      const text = tonightBody.querySelector("[data-obslog-text]")?.textContent ?? "";
+      const done = () => (copy.textContent = "コピーしました");
+      navigator.clipboard?.writeText(text).then(done, () => selectText(copy)) ?? selectText(copy);
+      return;
+    }
     const story = e.target.closest("[data-meteor-story]");
     if (story) {
       selectEvent(events.find((ev) => ev.id === story.dataset.meteorStory));
@@ -1081,6 +1106,12 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     select(iss);
     setFollow(true);
   });
+  // クリップボードが使えないときは、文を選んだ状態にする（手でコピー）
+  const selectText = (btn) => {
+    const pre = tonightBody.querySelector("[data-obslog-text]");
+    if (pre) getSelection()?.selectAllChildren(pre);
+    btn.textContent = "選んだ文をコピーしてください";
+  };
   // 上のバーのボタンから、一覧のタブを開く（スマホでは全部の高さで）
   const openListTab = (id) => {
     showListFilter(id);
