@@ -38,6 +38,7 @@ VOYASCOPE は、地球のまわりを飛ぶ衛星・宇宙船・宇宙飛行士�
 | `prompts/` | 各AIへの依頼テンプレート | |
 | `docs/tasks/` | Claude Code へのタスク指示 | 番号順に進める |
 | `web/` | アプリ本体（Phase 0 で作成） | |
+| `web/lab/`・`src/lab-worker.js` | 試作の部屋（パスワードつき。まだ公開していない機能を実機で試す） | パスワードは Cloudflare のシークレット。リポジトリに書かない |
 
 ## コマンド
 

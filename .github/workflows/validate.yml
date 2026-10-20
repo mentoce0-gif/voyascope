@@ -2,9 +2,9 @@ name: validate-cards
 
 on:
   push:
-    paths: ["curation/**", "schema/**", "scripts/**", "config/**", "examples/**", "web/**", "tests/**", "prompts/**", "RULES.md"]
+    paths: ["curation/**", "schema/**", "scripts/**", "config/**", "examples/**", "web/**", "tests/**", "src/**", "prompts/**", "RULES.md"]
   pull_request:
-    paths: ["curation/**", "schema/**", "scripts/**", "config/**", "examples/**", "web/**", "tests/**", "prompts/**", "RULES.md"]
+    paths: ["curation/**", "schema/**", "scripts/**", "config/**", "examples/**", "web/**", "tests/**", "src/**", "prompts/**", "RULES.md"]
 
 jobs:
   validate:

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>観測ログ（試作）— VOYASCOPE</title>
+  <!-- 試作の部屋 01：観測ログ（OBS-LOG）。時刻を仮に動かして、通過のあとの画面と X への投稿を実機で試す -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#050e1f">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../lab.css">
+  <style>
+    html, body { height: auto; overflow: auto; }
+    .lab-field { display: grid; gap: 6px; margin: 12px 0; }
+    .lab-field select, .lab-field input { min-height: 44px; font: inherit; color: inherit; background: #07142b; border: 1px solid rgba(94, 242, 194, 0.55); border-radius: 8px; padding: 0 10px; }
+    .lab-row { display: flex; gap: 8px; }
+    .lab-row .btn { flex: 1; min-height: 44px; }
+    .lab-now { padding: 10px 12px; border: 1px dashed #ffb547; border-radius: 8px; color: #ffb547; }
+    .lab-passes { list-style: none; padding: 0; margin: 8px 0; display: grid; gap: 6px; }
+    .lab-passes button { width: 100%; min-height: 44px; text-align: left; display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+    .lab-passes .past { opacity: 0.75; }
+    h2 { font-size: 1rem; margin: 20px 0 4px; color: #5ef2c2; }
+  </style>
+  <script type="module" src="lab.js"></script>
+</head>
+<body>
+  <main class="lab">
+    <p class="lab-eyebrow mono">VOYASCOPE LAB · 01</p>
+    <h1>観測ログ（OBS-LOG）</h1>
+    <p class="k small">「今夜」の画面に入れる予定の機能です。時刻を仮に動かして、通過のあとの画面を試せます。「X で投稿」は本当に X の投稿画面が開くので、試すときは投稿せずに閉じてください。</p>
+
+    <label class="lab-field"><span>県</span><select id="pref"></select></label>
+
+    <h2>見える通過（前後10日）</h2>
+    <p class="k small">押すと、仮の時刻をその通過の5分後にします。</p>
+    <ul class="lab-passes" id="passes"></ul>
+
+    <h2>仮の時刻</h2>
+    <label class="lab-field"><span class="k small">日本時間</span><input type="datetime-local" id="at"></label>
+    <div class="lab-row"><button type="button" class="btn" id="now">いまに戻す</button></div>
+    <p class="lab-now mono" id="now-label"></p>
+
+    <div class="tonight-body" id="log"></div>
+    <p class="k small" style="margin-top:24px"><a href="../">試作の部屋へ戻る</a></p>
+  </main>
+</body>
+</html>

@@ -1,0 +1,14 @@
+/* 試作の部屋の見た目（アプリの色・字に合わせる） */
+:root { color-scheme: dark; }
+body { margin: 0; background: #050e1f; color: #d9f4ea; font-family: "Zen Kaku Gothic New", system-ui, sans-serif; }
+.mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+.k { color: #8fb3a8; }
+.small { font-size: 0.85rem; }
+a { color: #5ef2c2; }
+.lab { max-width: 560px; margin: 0 auto; padding: 24px 16px 48px; }
+.lab h1 { margin: 4px 0 8px; font-size: 1.4rem; color: #ffb547; }
+.lab-eyebrow { margin: 0; letter-spacing: 0.3em; font-size: 0.75rem; color: #ffb547; }
+.lab-list { list-style: none; padding: 0; display: grid; gap: 10px; }
+.lab-list a { display: block; padding: 14px 16px; border: 1px solid rgba(94, 242, 194, 0.55); border-radius: 12px; text-decoration: none; color: #d9f4ea; }
+.lab-list a .mono { color: #ffb547; margin-right: 8px; }
+.lab-list small { display: block; margin-top: 4px; color: #8fb3a8; }
