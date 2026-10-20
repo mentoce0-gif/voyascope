@@ -120,7 +120,8 @@
   body.tm-on .cap .t { font-size: 17px; } body.tm-on .cap .s { font-size: 12px; }
   .tm-arc .gap { fill: none; stroke: var(--mint); stroke-width: 1.6; stroke-dasharray: 3 4; opacity: .8; }
   .tm-arc text.now { fill: var(--amber); font-weight: 700; } .tm-arc .dot.now { stroke: var(--amber); } .tm-arc .dot-in.now { fill: var(--amber); }
-  body.tm-open .tm { top: auto; bottom: 92px; } /* オープニング：字幕（上）と重ならないよう下に */
+  body.tm-open .tm { top: auto; bottom: 118px; } /* オープニング：字幕（上）と重ならないよう下に */
+  body.tm-open .cap { top: 66px; bottom: auto; }
   /* 撮影用（あとで消す） */
   .btn.replay { font-family: "JetBrains Mono", monospace; font-weight: 700; letter-spacing: .14em; font-size: 12px; gap: 7px; }
   .btn.replay .ri { width: 14px; height: 11px; fill: currentColor; }
@@ -192,6 +193,8 @@
   <div class="tag amber" id="tag-h3">H3ロケット10号機（MMX を搭載）</div>
   <div class="tag" id="tag-mars">火星</div>
   <div class="tag" id="tag-earth">地球</div>
+  <div class="tag" id="tag-marsnow">火星（いま）</div>
+  <div class="tag" id="tag-moon">月</div>
   <div class="tag amber" id="tag-phobos">フォボス</div>
 </div>
 <script type="module">
@@ -199,6 +202,7 @@ import * as THREE from "../../vendor/three-r128.min.js";
 import { makeKit, MODELS } from "../../js/far/models.js";
 import { mmxPhase, transferProgress, untilText } from "./state.js";
 import { launchProgress, hms } from "../../js/launch-plan.js";
+import { GeoVector, Body as ABody, MakeTime } from "../../vendor/astronomy.min.js";
 
 // 大きさは、ピンチで変わる見える範囲（innerWidth）ではなく、ページの大きさで決める
 const vw = () => document.documentElement.clientWidth || innerWidth, vh = () => document.documentElement.clientHeight || innerHeight;
@@ -281,6 +285,32 @@ const PH = EV ? mmxPhase(EV, NOW) : { phase: "before", launchAt: Date.parse(RT.l
 const FLYING = PH.phase === "flying";
 const AU = 10, P = (v) => V(v[0] * AU, v[2] * AU, -v[1] * AU);
 const earthPos = P(RT.earth), marsPos = P(RT.mars);
+// ---------- いまの地球・火星・月（計算：astronomy-engine。2026-10-20 に JPL の近似の軌道要素と 0.02° 以内で一致を確かめた） ----------
+const OBL0 = 23.4392911 * Math.PI / 180;
+const eclA = (v) => [v.x, v.y * Math.cos(OBL0) + v.z * Math.sin(OBL0), -v.y * Math.sin(OBL0) + v.z * Math.cos(OBL0)];
+const sunGeo = (d) => GeoVector(ABody.Sun, MakeTime(d), false);
+const helioAU = (body, d) => { const s0 = sunGeo(d); if (body === "Earth") return eclA({ x: -s0.x, y: -s0.y, z: -s0.z }); const b = GeoVector(ABody[body], MakeTime(d), false); return eclA({ x: b.x - s0.x, y: b.y - s0.y, z: b.z - s0.z }); };
+const moonGeoAU = (d) => eclA(GeoVector(ABody.Moon, MakeTime(d), false));
+// MMX の太陽から見た位置（計画の軌道：打ち上げ日の地球の位置と速さ v1 から、太陽の重力だけで進める。地球の重力は入れていない推定）
+const MU_S = 2.959122082855911e-4;
+const mmxHelioAU = (() => { let cache = null; return (days) => {
+  if (cache && Math.abs(cache.d - days) < 1 / 1440) return cache.r;
+  let r = RT.earth.slice(), v = RT.v1.slice(); const n = Math.max(1, Math.ceil(Math.max(0, days) / 0.05)), h = Math.max(0, days) / n;
+  const acc = (p) => { const k = -MU_S / Math.pow(Math.hypot(...p), 3); return p.map((x) => x * k); };
+  for (let i = 0; i < n; i++) { // RK4
+    const a1 = acc(r), b1 = v, a2 = acc(r.map((x, j) => x + b1[j] * h / 2)), b2 = v.map((x, j) => x + a1[j] * h / 2);
+    const a3 = acc(r.map((x, j) => x + b2[j] * h / 2)), b3 = v.map((x, j) => x + a2[j] * h / 2), a4 = acc(r.map((x, j) => x + b3[j] * h)), b4 = v.map((x, j) => x + a3[j] * h);
+    r = r.map((x, j) => x + (b1[j] + 2 * b2[j] + 2 * b3[j] + b4[j]) * h / 6); v = v.map((x, j) => x + (a1[j] + 2 * a2[j] + 2 * a3[j] + a4[j]) * h / 6);
+  }
+  cache = { d: days, r }; return r; }; })();
+const AU_KM0 = 149597870.7;
+const subA = (a, b) => a.map((v, i) => v - b[i]), addA = (a, b) => a.map((v, i) => v + b[i]), lenA = (a) => Math.hypot(...a);
+// いまの地球から MMX まで・月までの距離（km。MMX は計画の軌道からの推定）
+function nearNow(d = new Date()) {
+  const days = (d.getTime() - Date.parse(RT.launch)) / 864e5, mH = mmxHelioAU(days), eH = helioAU("Earth", d), mG = moonGeoAU(d);
+  const toE = subA(eH, mH), toM = subA(addA(eH, mG), mH);
+  return { eH, mH, toE, toM, dE: lenA(toE) * AU_KM0, dM: lenA(toM) * AU_KM0, moonEarth: lenA(mG) * AU_KM0 };
+}
 
 // 太陽
 const sun = new THREE.Mesh(new THREE.SphereGeometry(0.9, 48, 32), new THREE.MeshStandardMaterial({ color: 0xffe2a8, emissive: 0xffc96b, emissiveIntensity: 2.2 }));
@@ -311,12 +341,12 @@ const ring = (r, color, a) => {
 const orbitLine = (pts, color, a) => {
   const p = []; for (let i = 0; i < pts.length - 1; i++) p.push(...P(pts[i]).toArray(), ...P(pts[i + 1]).toArray());
   const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(p, 3));
-  scene.add(new THREE.LineSegments(g, new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uC: { value: new THREE.Color(color) }, uA: { value: a } },
+  const o = new THREE.LineSegments(g, new THREE.ShaderMaterial({ transparent: true, depthWrite: false, uniforms: { uC: { value: new THREE.Color(color) }, uA: { value: a } },
     vertexShader: `void main(){ gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }`,
-    fragmentShader: `uniform vec3 uC; uniform float uA; void main(){ gl_FragColor = vec4(uC,uA); }` })));
+    fragmentShader: `uniform vec3 uC; uniform float uA; void main(){ gl_FragColor = vec4(uC,uA); }` }));
+  scene.add(o); return o;
 };
-orbitLine(RT.earthOrbit, 0x5b8fd6, 0.3);
-orbitLine(RT.marsOrbit, 0xd98a5b, 0.3);
+const orbitLines = [orbitLine(RT.earthOrbit, 0x5b8fd6, 0.3), orbitLine(RT.marsOrbit, 0xd98a5b, 0.3)];
 
 // 光
 // 宇宙の光：太陽からの強い主光（影をつくる）・弱く冷たい環境光・輪郭を浮かせる後ろからの青白い光
@@ -333,15 +363,32 @@ const loadTex = (src) => new Promise((res) => { const im = new Image(); im.onloa
 const earthMat = new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0 });
 const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(RE, 96, 64), earthMat); earth.add(earthMesh);
 const atm = glow(0x6fb6ff, 1.75, earthPos); atm.uniforms.uA.value = 0.45;
+const earthNow = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 48), earthMat); earthNow.visible = false; scene.add(earthNow);
 // 緯度・経度 → 地球の表面（SphereGeometry の貼り方に合わせる）
 const ll = (lat, lon, r = RE) => { const la = ((lat) * Math.PI / 180), ph = ((lon + 180) * Math.PI / 180); return V(-r * Math.cos(ph) * Math.cos(la), r * Math.sin(la), r * Math.sin(ph) * Math.cos(la)); };
-// 日本を、太陽と反対ではなく、少し昼側の外向きに向ける
+// 地球のそばの道の向き（計算。2026-10-20 オーナー：公式の計画を追う）
+//   地球から離れていく向き v∞（route.json。航路の計算）を含み、種子島の緯度（30.4°）の傾きの面を回る。
+//   分離（計画書の表2：高度 約592km・11.2km/s → 離心率 約1.19 の双曲線）は近地点のあたりと置き、そこから v∞ の向きへ約147°曲がって出ていく。
+//   地球を回る道の大きさと、打ち上げの方位・面の向き（2つのうちどちら）は模式（公表されていない）
+const ROT = 1.55 * Math.PI; // 地球のまわりの角度（約1時間11分ぶん）
+const E_H = 1.19, NU_INF = Math.acos(-1 / E_H);
+const vinfDir = P(RT.vinf).normalize();
+const OBL = 23.4392911 * Math.PI / 180;
+const poleW = P([0, Math.sin(OBL), Math.cos(OBL)]).normalize(); // 天の北極（黄道座標から）
+const n0 = poleW.clone().sub(vinfDir.clone().multiplyScalar(poleW.dot(vinfDir))).normalize();
+const orbN = n0.clone().applyAxisAngle(vinfDir, Math.acos(Math.min(1, Math.cos(30.4 * Math.PI / 180) / Math.sqrt(1 - poleW.dot(vinfDir) ** 2))));
+const periDir = vinfDir.clone().applyAxisAngle(orbN, -NU_INF); // 分離のあたり
+const pinDir = periDir.clone().applyAxisAngle(orbN, -ROT);     // 打ち上げの場所
+const faceDir = pinDir.clone();
 const outward = earthPos.clone().normalize();
 const sideways = V(-outward.z, 0, outward.x); // 公転の向き
-const faceDir = outward.clone().multiplyScalar(0.55).add(sideways.clone().multiplyScalar(0.8)).add(V(0, 0.25, 0)).normalize();
 const pinLocal = ll(30.40, 130.98);
-earth.quaternion.setFromUnitVectors(pinLocal.clone().normalize(), faceDir);
-earth.rotateOnAxis(pinLocal.clone().normalize(), 0.3 + Math.PI); // 航路が種子島から東（太平洋側）へ出ていくように、地図の向きを合わせる（2026-10-19 オーナー）
+{ // 地図の種子島を pinDir に、地図の東を、そこでの進む向き（orbN × pinDir）に合わせる
+  const pl = pinLocal.clone().normalize(), el = V(0, 1, 0).cross(pl).normalize();
+  const pw = pinDir, ew = orbN.clone().cross(pinDir).normalize();
+  const Ml = new THREE.Matrix4().makeBasis(pl, el, pl.clone().cross(el)), Mw = new THREE.Matrix4().makeBasis(pw, ew, pw.clone().cross(ew));
+  earth.quaternion.setFromRotationMatrix(Mw.multiply(Ml.transpose()));
+}
 earth.updateMatrixWorld(true);
 const pinWorld = earth.localToWorld(pinLocal.clone());
 
@@ -357,6 +404,9 @@ const marsTex = (() => {
   const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t;
 })();
 mars.add(new THREE.Mesh(new THREE.SphereGeometry(RM, 64, 48), new THREE.MeshStandardMaterial({ map: marsTex, roughness: 0.95 })));
+// いまの火星（全体の図）・いまの地球（全体の図では小さな印、MMX を追う画面では本当の方向と見かけの大きさ）・月
+const marsNow = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), new THREE.MeshStandardMaterial({ map: marsTex, roughness: 0.95 })); marsNow.visible = false; scene.add(marsNow);
+const moonLocal = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), new THREE.MeshStandardMaterial({ color: 0xb9b6ae, roughness: 1 })); moonLocal.visible = false; scene.add(moonLocal);
 const mAtm = glow(0xff9a6b, 1.15, marsPos); mAtm.uniforms.uA.value = 0.3;
 const phobosR = RM * 9376 / 3390, phobosAng = 2.2;
 const phobosPos = marsPos.clone().add(V(Math.cos(phobosAng) * phobosR, 0.04, -Math.sin(phobosAng) * phobosR));
@@ -386,7 +436,6 @@ const nW = pinWorld.clone().sub(earthPos).normalize();
 const northW = earth.localToWorld(V(0, RE, 0)).sub(earthPos).normalize();
 const eastW = northW.clone().cross(nW).normalize(); // 地図の東
 const axis = nW.clone().cross(eastW).normalize();
-const ROT = 1.55 * Math.PI; // 地球のまわりの角度（約1時間11分ぶん。誇張なし）
 for (let i = 0; i <= 260; i++) {
   const t = i / 260, ang = t * ROT;
   const alt = RE * (1.0 + 0.9 * Math.min(1, t * 4) ** 0.7 + 0.35 * Math.max(0, t - 0.8) / 0.2); // 地球を貫いて見えないよう、すぐ半径の約1.9倍へ
@@ -395,12 +444,18 @@ for (let i = 0; i <= 260; i++) {
 const sepPt = path[path.length - 1].clone();
 const sepDir = path[path.length - 1].clone().sub(path[path.length - 2]).normalize();
 const tr = RT.transfer.map(P);
-let k0 = tr.findIndex((p) => p.distanceTo(earthPos) > 2.2);
+// 分離のあと：離心率 E_H の双曲線（地球から見た形）で、v∞ の向きへ曲がりながら離れる
+{
+  const rp = sepPt.distanceTo(earthPos), RH = 3.2;
+  const hp = (nu) => earthPos.clone().add(periDir.clone().applyAxisAngle(orbN, nu).multiplyScalar(rp * (1 + E_H) / (1 + E_H * Math.cos(nu))));
+  for (let nu = 0.01; ; nu += 0.01) { const q = hp(nu); path.push(q); if (q.distanceTo(earthPos) > RH || nu > NU_INF - 0.05) break; }
+}
+// そこから、太陽のまわりの軌道（計算）に、向きをそろえて乗る（地球を止めて描いているので、地球から見た向きから太陽から見た向きへ移る）
+let k0 = tr.findIndex((p) => p.distanceTo(earthPos) > 5.5);
 const join = tr[k0], joinDir = tr[k0 + 1].clone().sub(tr[k0]).normalize();
-for (let i = 1; i <= 160; i++) {
-  const q = bez(sepPt, sepPt.clone().add(sepDir.clone().multiplyScalar(0.9)), join.clone().sub(joinDir.clone().multiplyScalar(0.9)), join, i / 160);
-  const d = q.clone().sub(earthPos); if (d.length() < RE * 1.9) q.copy(earthPos).add(d.setLength(RE * 1.9)); // 地球の中を通らない
-  path.push(q);
+{
+  const H = path[path.length - 1].clone(), hD = H.clone().sub(path[path.length - 2]).normalize(), L0 = H.distanceTo(join) * 0.4;
+  for (let i = 1; i <= 120; i++) path.push(bez(H, H.clone().add(hD.clone().multiplyScalar(L0)), join.clone().sub(joinDir.clone().multiplyScalar(L0)), join, i / 120));
 }
 const sStartArcIdx = path.length;
 let k1 = tr.length - 1; while (tr[k1].distanceTo(marsPos) < 2.6) k1--;
@@ -442,9 +497,9 @@ dg.setAttribute("position", new THREE.Float32BufferAttribute(dots, 3));
 dg.setAttribute("aS", new THREE.Float32BufferAttribute(ss, 1));
 const route = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-  uniforms: { uReveal: { value: 0 }, uMMX: { value: 0.16 }, uFront: { value: 0.16 }, uTime: { value: 0 }, uPx: { value: devicePixelRatio }, uPulse: { value: -1 } },
+  uniforms: { uReveal: { value: 0 }, uMMX: { value: 0.16 }, uFront: { value: 0.16 }, uTime: { value: 0 }, uPx: { value: devicePixelRatio }, uPulse: { value: -1 }, uMinS: { value: 0 } },
   vertexShader: `
-    attribute float aS; uniform float uReveal, uMMX, uFront, uTime, uPx, uPulse; varying vec3 vC; varying float vA;
+    attribute float aS; uniform float uReveal, uMMX, uFront, uTime, uPx, uPulse, uMinS; varying vec3 vC; varying float vA;
     void main(){
       vec4 mv = modelViewMatrix*vec4(position,1.);
       float past = step(aS, uMMX) * step(aS, uReveal);           // 通ってきた道
@@ -457,14 +512,14 @@ const route = new THREE.ShaderMaterial({
       // 監視モード：数秒に一度、実績 → MMX → 計画航路へ光が流れる（実績は緑、計画は琥珀）
       float pulse = exp(-pow((aS - uPulse) * 45., 2.)) + .45 * exp(-pow((aS - uPulse + .04) * 18., 2.)) * step(aS, uPulse);
       vC = mix(vC, step(aS, uMMX) * vec3(.75,1.,.9) + step(uMMX, aS) * vec3(1.,.78,.4), min(1., pulse));
-      vA = min(1., vA + pulse);
+      vA = min(1., vA + pulse) * step(uMinS, aS); // 全体の図では、地球のそばの模式の道（大きさを誇張）を出さない
       float sz = (past > .5 ? 2.2 : 1.7) + head * 4. + pulse * 3.;
       gl_PointSize = clamp(sz * uPx * 18. / -mv.z, 1.7 * uPx, 9. * uPx);
       gl_Position = projectionMatrix*mv;
     }`,
   fragmentShader: `varying vec3 vC; varying float vA; void main(){ float d = length(gl_PointCoord-.5)*2.; gl_FragColor = vec4(vC, vA * smoothstep(1.,.35,d)); }`,
 });
-scene.add(new THREE.Points(dg, route));
+const routeObj = new THREE.Points(dg, route); scene.add(routeObj);
 {
   // 光の筋：通ってきた道と、光が届いたところを一本の明るい線に（先端ほど琥珀色に）
   const N = 4000, lp = [], ls = [];
@@ -619,6 +674,7 @@ const tags = { tane: document.getElementById("tag-tane"), mmx: document.getEleme
 const place = (el, p, alpha, dy = -14) => { const v = p.clone().project(camera); const vis = v.z < 1 && alpha > 0.01; el.style.opacity = vis ? alpha : 0; el.style.left = `${(v.x + 1) / 2 * W}px`; el.style.top = `${(1 - v.y) / 2 * H + dy}px`; };
 
 function renderAt(t) {
+  nowObjs("plan");
   tagEarth.style.opacity = 0;
   // オープニング：地球を回る道を進むあいだ（1.9〜4.1秒）は、計画の時刻を縮めて計器に出す
   hudAt(t >= 1.9 && t < 4.1 ? "launch" : "off", Math.min(1, (t - 1.9) / 2.0) * SEP_MS, false);
@@ -714,6 +770,7 @@ const watchH = () => { const half = Math.tan((42 / 2) * Math.PI / 180) * Math.mi
 const watchCam = { get pos() { return watchCenter.clone().add(V(0, watchH(), watchH() * 0.18)); }, get look() { return watchCenter.clone(); } };
 // ---------- 打ち上げ前：種子島に立つ H3 ロケットを、ゆっくり回りながら見る ----------
 function padAt(t, lt = -1) {
+  nowObjs("plan");
   hudAt("off");
   pinLift(true);
   camera.fov = 42; camera.updateProjectionMatrix();
@@ -848,6 +905,7 @@ filmBtn.addEventListener("click", () => (film ? filmGo(FILM_STEPS.length) : film
 window.filmGo = filmGo;
 
 function coastAt(t) {
+  nowObjs("plan");
   tagEarth.style.opacity = 0;
   pinLift(false);
   const el = simEl() ?? Date.now() - PH.launchAt, f = Math.min(1, Math.max(0, el / SEP_MS));
@@ -890,7 +948,24 @@ function coastAt(t) {
 window.coastAt = coastAt;
 if (coastNow()) { tagH3.textContent = "H3＋MMX"; document.querySelector(".circ.live small").innerHTML = "ライブ中継<br>YouTube（JAXA）"; }
 
+// 場面ごとに、いまの地球・火星・月と、模式の大きな地球を出し分ける
+const tagMarsNow = document.getElementById("tag-marsnow"), tagMoon = document.getElementById("tag-moon");
+let allLines = null;
+function nowObjs(mode) {
+  if (!allLines) { allLines = []; scene.traverse((o) => { if (o.isLineSegments || o.isLine) allLines.push(o); }); } // "plan"（打ち上げ前・打ち上げの日・オープニング）／"overview"／"track"
+  earth.visible = mode === "plan"; atm.uniforms.uA.value = mode === "plan" ? 0.45 : 0; routeObj.visible = mode !== "track";
+  earthNow.visible = mode !== "plan"; moonLocal.visible = mode === "track"; marsNow.visible = mode === "overview";
+  route.uniforms.uMinS.value = mode === "overview" ? sJoin : 0;
+  for (const o of allLines) o.visible = mode !== "track"; // MMX のそばでは、太陽系の大きさの線（公転の線など）を出さない
+  if (mode === "plan") { tagMarsNow.style.opacity = 0; tagMoon.style.opacity = 0; tags.mars.textContent = "火星"; }
+}
 function watchAt(t) {
+  nowObjs("overview");
+  { // 全体の図：いまの地球（小さな印）と、いまの火星。到着のときの火星（仮）は薄く
+    const nn = nearNow(); earthNow.position.copy(P(nn.eH)); earthNow.scale.setScalar(0.22);
+    marsNow.position.copy(P(helioAU("Mars", new Date()))); marsNow.scale.setScalar(RM * 0.75);
+    tags.mars.textContent = "到着時の火星（仮）";
+  }
   pinLift(false);
   hudAt(FLYING ? "watch" : "off", Date.now() - PH.launchAt);
   camera.fov = 42; camera.updateProjectionMatrix();
@@ -913,8 +988,8 @@ function watchAt(t) {
   renderer.render(scene, camera);
   watchCaption();
   document.querySelector(".cap").style.opacity = 1;
-  place(tags.tane, pinWorld, 0); place(tags.mmx, mmxPos, 1, -26); place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 1, 30); place(tags.phobos, phobosPos, 0);
-  tagEarth.style.opacity = 0;
+  place(tags.tane, pinWorld, 0); place(tags.mmx, mmxPos, 1, -26); place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 0.55, 30); place(tags.phobos, phobosPos, 0);
+  tagEarth.textContent = "地球（いま）"; place(tagEarth, earthNow.position, 1, 22); place(tagMarsNow, marsNow.position.clone().add(V(0, -RM, 0)), 1, 26); tagMoon.style.opacity = 0;
 }
 window.watchAt = watchAt;
 // ---------- MMX を追う（2026-10-20 オーナー：しばらくは監視モードの「いまの位置」を主に）：MMX のそば・日の当たる側から。なぞって回す・寄せ引き ----------
@@ -924,17 +999,28 @@ let track = FLYING && PH.days < TRACK_DAYS;
 const tagEarth = document.getElementById("tag-earth");
 function trackAt(t) {
   pinLift(false);
+  nowObjs("track");
   hudAt("watch", Date.now() - PH.launchAt);
   camera.fov = 42; camera.updateProjectionMatrix();
-  const side = mmxDir.clone().cross(V(0, 1, 0)).normalize(); if (side.dot(mmxPos.clone().negate()) < 0) side.negate();
-  const dir = side.clone().add(V(0, 0.38, 0)).add(mmxDir.clone().multiplyScalar(-0.6)).normalize().applyAxisAngle(V(0, 1, 0), Math.sin(t * 0.05) * 0.25 + view.yaw);
-  dir.applyAxisAngle(dir.clone().cross(V(0, 1, 0)).normalize(), view.pitch);
-  // 地球が近いあいだは、地球まるごと入るように引く（2026-10-20 オーナー）。離れたら MMX に寄る
-  const dE = mmxPos.distanceTo(earthPos), wE = Math.max(0, Math.min(1, 1 - (dE - 2) / 4));
-  // 地球を画面の真ん中より上に、少し小さく（字幕とリンクに重ならないように。2026-10-20 オーナー）
-  const look = mmxPos.clone().lerp(earthPos, 0.55 * wE).add(V(0, -0.08 - 0.3 * wE, 0));
-  const dist = (1.25 + wE * (dE * 1.3 + 1.9)) * view.zoom / (0.55 + 0.45 * Math.min(1, W / H));
-  camera.position.copy(look).add(dir.multiplyScalar(dist)); camera.up.set(0, 1, 0);
+  // MMX のそばから：いまの地球と月を、計画の軌道から出した方向と、見かけの大きさのまま置く（距離だけ縮める。2026-10-20 オーナー）
+  const nn = nearNow(), dirE = P(nn.toE).normalize(), dirM = P(nn.toM).normalize(), DL = 4;
+  earthNow.position.copy(mmxPos).add(dirE.clone().multiplyScalar(DL)); earthNow.scale.setScalar(DL * 6378.137 / nn.dE);
+  { // 地球の向き：北極を天の北極へ、経度0°を、いまの恒星時の向きへ（グリニッジ平均恒星時。IAU 1982 の式）
+    const d = new Date(), jd = d.getTime() / 864e5 + 2440587.5, T = (jd - 2451545) / 36525;
+    const g = ((280.46061837 + 360.98564736629 * (jd - 2451545) + 0.000387933 * T * T) % 360) * Math.PI / 180;
+    const eq = [Math.cos(g), Math.sin(g), 0], pm = P([eq[0], eq[1] * Math.cos(OBL0) + eq[2] * Math.sin(OBL0), -eq[1] * Math.sin(OBL0) + eq[2] * Math.cos(OBL0)]).normalize();
+    const nl = V(0, 1, 0), ml = ll(0, 0, 1).normalize(), nw = poleW.clone(), mw = pm.sub(nw.clone().multiplyScalar(pm.dot(nw))).normalize();
+    const Ml = new THREE.Matrix4().makeBasis(ml, nl, ml.clone().cross(nl)), Mw = new THREE.Matrix4().makeBasis(mw, nw, mw.clone().cross(nw));
+    earthNow.quaternion.setFromRotationMatrix(Mw.multiply(Ml.transpose()));
+  }
+  moonLocal.position.copy(mmxPos).add(dirM.clone().multiplyScalar(DL * 1.05)); moonLocal.scale.setScalar(DL * 1.05 * 1737.4 / nn.dM);
+  // カメラは MMX の、地球と反対側の少し上から（地球と月が MMX の向こうに見える）
+  const upV = V(0, 1, 0), sideV = dirE.clone().cross(upV).normalize();
+  const dir = dirE.clone().negate().add(upV.clone().multiplyScalar(0.22)).add(sideV.clone().multiplyScalar(0.18)).normalize().applyAxisAngle(upV, Math.sin(t * 0.05) * 0.12 + view.yaw);
+  dir.applyAxisAngle(dir.clone().cross(upV).normalize(), view.pitch);
+  const dist = 1.7 * view.zoom / (0.55 + 0.45 * Math.min(1, W / H));
+  const look = mmxPos.clone().add(dirE.clone().multiplyScalar(DL * 0.18)).add(V(0, -0.05, 0)); // MMX を真ん中に、向こうに地球・月
+  camera.position.copy(mmxPos).add(dir.multiplyScalar(dist)); camera.up.set(0, 1, 0);
   if (blendFrom) { const k0 = Math.min(1, (performance.now() - blendFrom.t0) / 2800), k = k0 * k0 * (3 - 2 * k0);
     camera.position.lerpVectors(blendFrom.pos, camera.position.clone(), k); look.lerpVectors(blendFrom.look, look.clone(), k); camera.up.lerpVectors(blendFrom.up, V(0, 1, 0), k).normalize();
     if (k0 >= 1) blendFrom = null; }
@@ -959,7 +1045,9 @@ function trackAt(t) {
   watchCaption();
   document.querySelector(".cap").style.opacity = 1;
   place(tags.tane, pinWorld, 0); place(tags.mmx, mmxPos.clone().add(camera.up.clone().multiplyScalar(MMX_S * 0.75)), 1, -6); /* 模型の上に */ place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 1, 30); place(tags.phobos, phobosPos, 0);
-  { const rt = V(1, 0, 0).applyQuaternion(camera.quaternion); place(tagEarth, earthPos.clone().add(camera.up.clone().multiplyScalar(RE * 0.95)).add(rt.multiplyScalar(-RE * 0.5)), 1, -6); } /* 地球の上（左寄り。MMX の名札と重ならないように） */
+  tagEarth.textContent = `地球（約${Math.round(nn.dE / 10000).toLocaleString()}万km）`; place(tagEarth, earthNow.position, 1, -14);
+  place(tagMoon, moonLocal.position, 1, -12);
+  for (const el of [tagEarth, tagMoon]) el.style.left = `${Math.min(W - 60, Math.max(60, parseFloat(el.style.left)))}px`; place(tagMarsNow, V(0, 0, 0), 0); place(tags.mars, marsPos, 0);
 }
 window.trackAt = trackAt;
 // 監視モードの文字：打ち上げ前・未確認・延期・飛行中
@@ -976,7 +1064,12 @@ function watchCaption() {
     const cmp = top > 0 && ISS_KM ? `計画の高さ <b>約${alt}km</b>（ISS の約${(top / ISS_KM).toFixed(1)}倍）。<wbr>` : "";
     sub = lpc.separated ? (SEP_SEEN ? `${cmp}分離は JAXA の中継で確認` : `${cmp}分離は、<wbr>JAXA の発表で確かめます`) : (SEP_SEEN ? `${cmp}打ち上げ・分離は<wbr> JAXA の中継で確認` : `${cmp}打ち上げは JAXA の中継で確認。<wbr>分離は 5:52ごろの予定`);
   }
-  else if (PH.phase === "flying") { k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり"; sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>`; }
+  else if (PH.phase === "flying") {
+    // 地球からの距離（計画の軌道からの推定）と、いまの月までの距離とのくらべ（2026-10-20 オーナー）
+    const nn = nearNow(new Date(now));
+    k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり";
+    sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>・地球から <b>約${Math.round(nn.dE / 1e4).toLocaleString()}万km</b><wbr>（月までの約${(nn.dE / nn.moonEarth).toFixed(1)}倍・推定）`;
+  }
   else if (PH.phase === "postponed") { k = "延期"; t = "MMX は、<wbr>種子島で<wbr>待っています"; sub = "新しい日時は JAXA の発表で"; }
   else if (now >= PH.launchAt) {
     // 予定の時刻からの経過と、計画ではいま何をしているか（JAXA 打上げ計画書［10月改訂版］の表2）。打ち上がったかは公式の発表で確かめるまで描かない
