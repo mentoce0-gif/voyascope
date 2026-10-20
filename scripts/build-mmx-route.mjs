@@ -57,7 +57,10 @@ const r1 = helio("Earth", launch), r2 = helio(Body.Mars, arr), L = lambert(r1, r
 const pts = []; let st = [r1, L.v1];
 for (let d = 0; d <= TOF; d += 2) { pts.push(st[0]); st = propagate(st[0], st[1], 2); }
 const orbit = (body, days) => Array.from({ length: 181 }, (_, i) => helio(body, new Date(launch.getTime() + i / 180 * days * 864e5)));
-const out = { launch: launch.toISOString(), arrival: arr.toISOString(), tof: TOF, earth: r1, mars: r2, transfer: pts, earthOrbit: orbit("Earth", 365.25), marsOrbit: orbit(Body.Mars, 687) };
+// 地球から見て離れていく速さの向き（v∞ = 軌道の始まりの速さ − 地球の公転の速さ。AU/日）。地球のそばの道（模式）を、この向きへ出ていく形にする
+const vE0 = sub(helio("Earth", new Date(launch.getTime() + 864e5)), helio("Earth", new Date(launch.getTime() - 864e5))).map((x) => x / 2);
+const vinf = sub(L.v1, vE0);
+const out = { launch: launch.toISOString(), arrival: arr.toISOString(), tof: TOF, earth: r1, mars: r2, v1: L.v1, vinf, transfer: pts, earthOrbit: orbit("Earth", 365.25), marsOrbit: orbit(Body.Mars, 687) };
 if (!check) console.log("end miss AU", norm(sub(pts[pts.length - 1], r2)).toFixed(4));
 const file = new URL("../web/mmx/now/route.json", import.meta.url);
 if (check) {
