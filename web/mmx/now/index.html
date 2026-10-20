@@ -22,7 +22,14 @@
   .cap .k { font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .14em; color: var(--mint); }
   .cap .k, .cap .s { text-shadow: 0 0 10px var(--navy), 0 1px 2px rgba(0,0,0,.8); }
   .cap .t { font-size: 24px; font-weight: 700; margin-top: 6px; line-height: 1.35; text-shadow: 0 0 12px var(--navy); }
-  .note { position: absolute; left: 20px; right: 20px; bottom: 12px; font-size: 9.5px; line-height: 1.6; color: var(--dim); opacity: .62; pointer-events: auto; }
+  /* ただし書き：ふだんは1行にたたむ。押すと開く（2026-10-20 オーナー） */
+  .note { position: absolute; left: 14px; right: 14px; bottom: 10px; font-size: 9.5px; line-height: 1.6; color: var(--dim); pointer-events: auto; }
+  .note summary { list-style: none; display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 10px; border: 1px solid rgba(143,179,168,.3); border-radius: 999px; background: rgba(5,14,31,.6); font-size: 10.5px; color: var(--dim); cursor: pointer; }
+  .note summary::-webkit-details-marker { display: none; }
+  .note .ni { width: 14px; height: 14px; border: 1px solid currentColor; border-radius: 50%; display: inline-grid; place-items: center; font-family: "JetBrains Mono", monospace; font-size: 9px; font-style: italic; }
+  .note .nc { font-size: 11px; } .note[open] .nc { transform: rotate(45deg); }
+  .note[open] .note-body { position: absolute; left: 0; right: 0; bottom: 34px; padding: 10px 12px; border: 1px solid rgba(143,179,168,.3); border-radius: 12px; background: rgba(5,14,31,.94); backdrop-filter: blur(6px); color: var(--text); opacity: .9; z-index: 5; }
+  .note summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
   .tag { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font-size: 12px; font-weight: 700; color: var(--mint); text-shadow: 0 0 8px var(--navy); }
   .tag.amber { color: var(--amber); }
   .top { position: absolute; left: 14px; right: 14px; top: 14px; display: flex; align-items: center; gap: 10px; pointer-events: auto; }
@@ -196,7 +203,7 @@
       <a class="xbar xtag" href="https://x.com/search?q=%23MMX&amp;f=live" target="_blank" rel="noopener" aria-label="X で「#MMX」の新しい投稿を見る（X のページが開きます）"><span class="xm">𝕏</span><span class="xt"><span class="ce">#MMX</span><small>みんなの投稿</small></span></a>
     </div>
   </nav>
-  <div class="note" title="地球と火星の位置は計算。到着日は仮（打ち上げ330日後。公式は「往路1年弱」「火星圏到着 2027年度」）。地球のそばの道と火星のまわりは簡略化。大きさは実際の比ではありません。打ち上げのあとの位置は、公式の発表で打ち上げを確かめてから、計画の軌道の上を日数で進めた「およその位置」です">模式図<wbr>（位置は計算・到着日は仮・<wbr>大きさは実際の比ではない）。<wbr>打ち上げ後の位置は、<wbr>公式で確かめてから出す。<wbr>出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">ISS の高さ（NASA）</a>・<wbr><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。<wbr>MMX の形は、JAXA の<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">航行イメージ（計画書 図5）</a>（計画）にもとづく。<wbr>速さ（EST）は、計画の軌道から計算した太陽に対する速さの推定。<wbr>非公式のファンメイド作品</div>
+  <details class="note" id="note"><summary><span class="ni" aria-hidden="true">i</span>模式図・出典・非公式のファンメイド作品<span class="nc" aria-hidden="true">＋</span></summary><div class="note-body">模式図<wbr>（位置は計算・到着日は仮・<wbr>大きさは実際の比ではない）。<wbr>打ち上げ後の位置は、<wbr>公式で確かめてから出す。<wbr>出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">ISS の高さ（NASA）</a>・<wbr><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。<wbr>MMX の形は、JAXA の<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">航行イメージ（計画書 図5）</a>（計画）にもとづく。<wbr>速さ（EST）は、計画の軌道から計算した太陽に対する速さの推定。<wbr>非公式のファンメイド作品</div></details>
   <div class="tag" id="tag-tane">種子島</div>
   <div class="tag" id="tag-mmx">MMX</div>
   <div class="tag amber" id="tag-h3">H3ロケット10号機（MMX を搭載）</div>
