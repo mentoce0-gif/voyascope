@@ -2,7 +2,7 @@
 
 > **新しいチャットは、`CLAUDE.md` とこのファイルを読んでから始める。** チャットは目的ごとに1つ（例：「MMX 打ち上げ対応」「Cloudflare への切り替え」「チャッピーの報告の照合」）。
 > 区切りごとに Claude Code がこのファイルを更新する（古くなった行は消す）。日ごとの記録は [`changelog.md`](changelog.md)、全体の計画は [`roadmap.md`](roadmap.md)。
-> 最終更新：2026-10-20（MMX 打ち上げ・分離。いまどこ）
+> 最終更新：2026-10-20（MMX 打ち上げ・分離。いまどこ。次の目標 M13 の案）
 
 ## 公開先とリポジトリ
 
@@ -18,6 +18,7 @@
 
 ## いまの優先（日付順）
 
+0. **次の目標（2026-10-20 オーナー）：「宇宙関連のニュースを見た次に、概要をとらえるために使うツール」**。案は [`news-next-plan.md`](news-next-plan.md)（M13。5つの問い・カバー率と新しさ・N0〜N4）。進め方はオーナーの判断待ち（下）。決まったら N0（ニュース台帳）と N1（一言ページの形）から
 1. **MMX は打ち上げ・分離済み**（2026-10-20 4:41:03 打ち上げ、5:52ごろ分離。JAXA の打上げライブ中継で確認＝出典 https://www.youtube.com/watch?v=sZGyK9jfoy4）→ 段取りは [タスク020](tasks/020-mmx-after-launch.md)
    - 済み：出来事 `done`＋いってらっしゃい（10/27 まで）・MMX のカードを運用中・「一言でわかる」作り直し（PR #51・#54）
    - **いまどこ**（`web/mmx/now/`）：はじめて開くと航路のオープニング → 打ち上げから5日までは「MMX を追う」視点、そのあとは全体の図（`TRACK_DAYS`）。上の計器（X+経過・LIFTOFF〜MMX SEP〜NOW の弧・速さの推定 EST〈計画の軌道から〉・F10/H3-24L/MMX）、REPLAY（打ち上げ〜分離をスワイプで。打ち上げのはじめは種子島の正面から）、MISSION・ARCHIVE・SITE のリンク。計画の流れ（速度・高度・事象名）は `launch-plan.js`（改訂版の表2、C33）
@@ -75,6 +76,7 @@
 
 ## オーナーの判断待ち
 
+- **M13「ニュースの次に開く」の進め方**：目安の数字・最初の段（N0・N1）・計り方（Search Console／Cloudflare Web Analytics はルール5）・増やす主題の範囲 → [`news-next-plan.md`](news-next-plan.md) の 6.
 - **中継の埋め込み**（ルール5）：いまはリンクだけ。判断材料は [`roadmap.md`](roadmap.md) の「オーナーの判断待ち」
 - **旧リポジトリの自動更新を止める**（オーナーの操作）：`voyascope-archive` の Settings → Actions → General →「Disable actions」。止まるまで、6時間ごとに失敗の知らせが届き、データを二重に取りに行く
 - **連絡の受け口**：`contact@voyascope.org` のような転送アドレス（Cloudflare の Email Routing）、GitHub の Issue テンプレート（誤りの報告・要望）、中高生向けのフォーム（個人情報の扱いはルール5）
