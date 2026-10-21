@@ -295,6 +295,13 @@ const streak = (() => {
 // 計算は scratchpad の route.mjs。1 AU = 10。黄道面を水平に
 const [RT, EVENTS] = await Promise.all([fetch("route.json").then((r) => r.json()), fetch("../../data/events.json", { cache: "no-cache" }).then((r) => r.json())]);
 const EV = EVENTS.events.find((e) => e.id === "mmx-launch");
+// 地球からの距離：JPL Horizons の計算値（週に1回取った表。JAXA の軌道。2026-10-21 オーナー）。表がない・期間の外なら、計画の軌道からの推定
+const HZ = await fetch("../../data/horizons.json", { cache: "no-cache" }).then((r) => r.json()).then((h) => (h.probes?.mmx ? { ...h.probes.mmx, step: h.step_hours * 3600000 } : null)).catch(() => null);
+const hzKm = (d) => { if (!HZ) return null; const x = (d.getTime() - Date.parse(HZ.start)) / HZ.step, i = Math.floor(x); if (i < 0 || i >= HZ.km.length - 1) return null; return HZ.km[i] + (HZ.km[i + 1] - HZ.km[i]) * (x - i); };
+if (HZ) { // ただし書きに Horizons の出典（SSD の希望の形）と、軌道のもとのデータ（説明に書かれた機関）
+  const dl = new Date(HZ.downloaded), y = dl.getUTCFullYear(), m = dl.toLocaleString("en-US", { month: "long", timeZone: "UTC" }), dd = dl.getUTCDate();
+  document.querySelector(".note-body").insertAdjacentHTML("beforeend", `<br>地球からの距離：Solar System Dynamics. (Downloaded ${y}, ${m} ${dd}). <a href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noopener">Horizons System</a>. https://ssd.jpl.nasa.gov（軌道のもとのデータは JAXA）`);
+}
 const ISS_KM = await fetch("../../data/cards/iss.json").then((r) => r.json()).then((c) => c.stats?.altitude_km?.value ?? 0).catch(() => 0);
 const NOW = new Date();
 const PH = EV ? mmxPhase(EV, NOW) : { phase: "before", launchAt: Date.parse(RT.launch) };
@@ -324,8 +331,11 @@ const subA = (a, b) => a.map((v, i) => v - b[i]), addA = (a, b) => a.map((v, i) 
 // いまの地球から MMX まで・月までの距離（km。MMX は計画の軌道からの推定）
 function nearNow(d = new Date()) {
   const days = (d.getTime() - Date.parse(RT.launch)) / 864e5, mH = mmxHelioAU(days), eH = helioAU("Earth", d), mG = moonGeoAU(d);
-  const toE = subA(eH, mH), toM = subA(addA(eH, mG), mH);
-  return { eH, mH, toE, toM, dE: lenA(toE) * AU_KM0, dM: lenA(toM) * AU_KM0, moonEarth: lenA(mG) * AU_KM0 };
+  let toE = subA(eH, mH);
+  const hk = hzKm(d); // Horizons の距離があれば、方向は計画の軌道のまま、距離を合わせる
+  if (hk) toE = toE.map((x) => x * (hk / AU_KM0) / lenA(toE));
+  const toM = addA(toE, mG);
+  return { eH, mH: subA(eH, toE), toE, toM, dE: lenA(toE) * AU_KM0, dM: lenA(toM) * AU_KM0, moonEarth: lenA(mG) * AU_KM0, hz: !!hk };
 }
 
 // 太陽
@@ -1124,8 +1134,8 @@ function watchCaption() {
   else if (PH.phase === "flying") {
     // 地球からの距離（計画の軌道からの推定）と、いまの月までの距離とのくらべ（2026-10-20 オーナー）
     const nn = nearNow(new Date(now));
-    k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり";
-    sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>・地球から <b>約${Math.round(nn.dE / 1e4).toLocaleString()}万km</b><wbr>（月までの約${(nn.dE / nn.moonEarth).toFixed(1)}倍・推定）`;
+    k = nn.hz ? "NOW（距離は Horizons・絵は模式）" : "NOW（計画の軌道から計算・模式）"; t = '<span class="nw">MMX は、</span><br><span class="nw">いまこのあたり</span>'; // 「MMX は、」で改行（2026-10-21 オーナー）
+    sub = `<span class="nw">打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b></span>・<span class="nw">地球から <b>約${Math.round(nn.dE / 1e4).toLocaleString()}万km</b></span><wbr>（月までの約${(nn.dE / nn.moonEarth).toFixed(1)}倍・${nn.hz ? "JPL Horizons" : "推定"}）`;
   }
   else if (PH.phase === "postponed") { k = "延期"; t = "MMX は、<wbr>種子島で<wbr>待っています"; sub = "新しい日時は JAXA の発表で"; }
   else if (now >= PH.launchAt) {

@@ -145,8 +145,9 @@ function toast(msg) {
   toastTimer = setTimeout(() => (el.hidden = true), 2600);
 }
 function header() {
-  $("#top").innerHTML = `<div><div class="logo">VOYA<span class="mint">SCOPE</span></div><div class="logo-sub">SKY OBSERVER · <span class="amber">試験版</span></div></div>
-    <div style="display:flex;gap:6px"><button class="pill" data-act="pref">⌖ ${esc(s.pref?.name ?? "県を選ぶ")}</button>${nightTool()}</div>`;
+  // 左上：アプリ（地球の画面）へ戻る（2026-10-21 オーナー：戻るボタンがない）
+  $("#top").innerHTML = `<a class="app-back" href="../" aria-label="VOYASCOPE のアプリに戻る"><span class="g-icon" aria-hidden="true">←</span><span><span class="logo">VOYA<span class="mint">SCOPE</span></span><span class="logo-sub">SKY OBSERVER · <span class="amber">試験版</span></span></span></a>
+    <div class="top-right"><button class="pill" data-act="pref">⌖ ${esc(s.pref?.name ?? "県を選ぶ")}</button>${iconBtn("night", MOON_SVG, isNight(), "赤い画面（暗さに慣れた目を守る）")}</div>`;
 }
 function tabs() {
   const cur = s.page === "logs" || s.page === "share" ? "logs" : s.page;

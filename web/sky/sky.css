@@ -164,3 +164,13 @@ details.src li { margin: 4px 0; line-height: 1.6; }
 .g-actions button { min-height: 44px; border-radius: 13px; border: 1px solid rgba(94, 242, 194, 0.32); background: rgba(5, 14, 31, 0.72); font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 0 4px; white-space: nowrap; }
 .g-actions button svg { flex: 0 0 auto; }
 @media (max-height: 700px) { .g-big { min-height: 52px; } .g-count b { font-size: 22px; } .g-steer { padding: 6px 10px; } .g-steer .minor { -webkit-line-clamp: 1; } }
+
+/* 左上の「アプリに戻る」（矢印のボタン＋ロゴ） */
+.app-back { display: flex; align-items: center; gap: 10px; min-width: 0; color: var(--text); text-decoration: none; }
+.app-back > span:last-child { display: grid; min-width: 0; }
+.app-back .g-icon { width: 40px; height: 40px; }
+.app-back:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 14px; }
+.top-right { display: flex; gap: 6px; flex: 0 0 auto; align-items: center; }
+.top-right .pill { white-space: nowrap; min-height: 40px; }
+.top-right .g-icon { width: 40px; height: 40px; }
+.app-back .logo-sub { white-space: nowrap; }

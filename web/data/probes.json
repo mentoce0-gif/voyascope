@@ -271,7 +271,14 @@
         "as_of": "2026-10-03"
       },
       "distance": {
-        "method": "on_earth"
+        "method": "horizons",
+        "horizons_id": "-239",
+        "supplier": "JAXA",
+        "datasheet_quotes": [
+          "Post-launch trajectory from JAXA."
+        ],
+        "source": "https://ssd.jpl.nasa.gov/horizons/",
+        "as_of": "2026-10-21"
       },
       "events": [
         "mmx-launch"
@@ -286,7 +293,7 @@
           "url": "https://www.jaxa.jp/press/2026/08/20260820-1_j.html"
         }
       ],
-      "updated_at": "2026-10-20"
+      "updated_at": "2026-10-21"
     },
     {
       "id": "new-horizons",
