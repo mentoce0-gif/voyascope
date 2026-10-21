@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { enu, azEl, rotation, cameraDir, project, steer, fists, absoluteAlpha } from "../web/lab/sky/orient.js";
-import { meteorLogText, issLogText } from "../web/lab/sky/share.js";
+import { enu, azEl, rotation, cameraDir, project, steer, fists, absoluteAlpha } from "../web/sky/orient.js";
+import { meteorLogText, issLogText } from "../web/sky/share.js";
 
 const close = (a, b, tol = 0.5) => assert.ok(Math.abs(a - b) < tol, `${a} ≈ ${b}`);
 const azClose = (a, b, tol = 0.5) => close(((a - b + 540) % 360) - 180, 0, tol);

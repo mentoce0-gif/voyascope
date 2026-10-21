@@ -1,12 +1,12 @@
-// 試作 02：SKY OBSERVER（空を見る）。流星群と ISS を、スマホをかざして探し、見えたら記録して X に貼る
+// SKY OBSERVER（空を見る・試験版。/sky/）。試作の部屋 02 から 2026-10-21 に鍵なしの場所へ（オーナー）。流星群と ISS を、スマホをかざして探し、見えたら記録して X に貼る
 // 素案（オーナーと ChatGPT の v0.4）の画面の流れを引きつぎ、計算はアプリと同じ部品（passes.js・meteors.js）につないだ
 // 位置は県（県庁あたり）だけ。GPS は使わない。記録・写真はこの端末の中だけ（送らない）
-import { satrecFromOrbit } from "../../js/orbit.js";
-import { findVisiblePasses, observerOf, skyAt, dir8, sunEci, SUN_BELOW } from "../../js/passes.js";
-import { radiantSky, meteorNight, moonEci, moonLit, activeMeteors } from "../../js/meteors.js";
-import { whenWord, clockWord, loadPrefecture, savePrefecture } from "../../js/tonight.js";
-import { esc } from "../../js/format.js";
-import { gstime, eciToEcf, ecfToLookAngles } from "../../vendor/satellite.min.js";
+import { satrecFromOrbit } from "../js/orbit.js";
+import { findVisiblePasses, observerOf, skyAt, dir8, sunEci, SUN_BELOW } from "../js/passes.js";
+import { radiantSky, meteorNight, moonEci, moonLit, activeMeteors } from "../js/meteors.js";
+import { whenWord, clockWord, loadPrefecture, savePrefecture } from "../js/tonight.js";
+import { esc } from "../js/format.js";
+import { gstime, eciToEcf, ecfToLookAngles } from "../vendor/satellite.min.js";
 import { enu, rotation, cameraDir, project, steer, fists, absoluteAlpha } from "./orient.js";
 import { logText, postUrl, loadLogs, saveLogs } from "./share.js";
 
@@ -35,7 +35,7 @@ const icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" 
 
 // ---------- データ ----------
 const [prefData, orbit, eventsData] = await Promise.all(
-  ["../../data/prefectures.json", "../../data/orbits/iss.json", "../../data/events.json"].map((u) => fetch(u).then((r) => r.json())),
+  ["../data/prefectures.json", "../data/orbits/iss.json", "../data/events.json"].map((u) => fetch(u).then((r) => r.json())),
 );
 const prefectures = prefData.prefectures;
 const satrec = satrecFromOrbit(orbit);
@@ -140,7 +140,7 @@ function toast(msg) {
   toastTimer = setTimeout(() => (el.hidden = true), 2600);
 }
 function header() {
-  $("#top").innerHTML = `<div><div class="logo">VOYA<span class="mint">SCOPE</span></div><div class="logo-sub">SKY OBSERVER · LAB</div></div>
+  $("#top").innerHTML = `<div><div class="logo">VOYA<span class="mint">SCOPE</span></div><div class="logo-sub">SKY OBSERVER · <span class="amber">試験版</span></div></div>
     <div style="display:flex;gap:6px"><button class="pill" data-act="pref">⌖ ${esc(s.pref?.name ?? "県を選ぶ")}</button>${nightTool()}</div>`;
 }
 function tabs() {
@@ -211,7 +211,7 @@ function homeMeteor(now) {
         : ""
     }
     <div class="cta"><button class="primary" data-act="guide">空を見る ↗</button></div>
-    <p class="note">流れ星は、放射点から四方へ、空のどこにでも流れます。放射点だけを見つめず、空を広く見てください。街の明かりが少ない、空の広い場所が向いています。<br>時刻・方角は${esc(s.pref?.name ?? "東京")}の県庁あたりでの計算の目安です。天気（雲）は考えていません。</p>
+    <p class="note">流れ星は、放射点から四方へ、空のどこにでも流れます。放射点だけを見つめず、空を広く見てください。街の明かりが少ない、空の広い場所が向いています。<br>時刻・方角は${esc(s.pref?.name ?? "東京")}の県庁あたりでの計算の目安です。天気（雲）は考えていません。<br>※試験版です。非公式のファンメイド作品で、JAXA・NASA などとは関係ありません。最新の情報は<a href="https://www.nao.ac.jp/astro/sky/" target="_blank" rel="noopener">国立天文台「ほしぞら情報」</a>などの公式で確かめてください。</p>
     <details class="src"><summary>出典と計算について</summary><ul>
       <li>極大の日：<a href="${esc(ev.when.source)}" target="_blank" rel="noopener">${esc(ev.when.note ?? ev.when.source)}</a></li>
       <li>放射点：<a href="${esc(ev.radiant.source)}" target="_blank" rel="noopener">${esc(ev.radiant.note ?? ev.radiant.source)}</a></li>
@@ -236,7 +236,7 @@ function homeIss(now) {
     <div class="facts"><div class="fact"><div class="k">いまの ISS</div><div class="v">${where(cur)}</div></div>
       <div class="fact"><div class="k">見える条件</div><div class="v">${cur.el > 10 && cur.sunEl <= SUN_BELOW && cur.sunlit ? "いま見える" : "いまは見えない"}</div></div></div>
     <div class="cta"><button class="primary" data-act="guide">空を見る ↗</button></div>
-    <p class="note">ISS は、空が暗く、ISS に日が当たっているときだけ見えます（日の入りのあと・日の出の前）。時刻と方角は、公開の軌道データから計算した${esc(s.pref?.name ?? "東京")}の県庁あたりでの目安です。</p>`;
+    <p class="note">ISS は、空が暗く、ISS に日が当たっているときだけ見えます（日の入りのあと・日の出の前）。時刻と方角は、公開の軌道データから計算した${esc(s.pref?.name ?? "東京")}の県庁あたりでの目安です。<br>※試験版です。非公式のファンメイド作品で、JAXA・NASA などとは関係ありません。</p>`;
 }
 
 function home() {
@@ -289,7 +289,7 @@ function share() {
 }
 function logs() {
   return `<section class="section"><div class="caps mint">OBS-LOG / この端末</div><h2>見上げた記録。</h2>
-    <p class="lead">試作の部屋の記録です。この端末のブラウザにだけ残ります。</p>
+    <p class="lead">この端末のブラウザにだけ残ります（どこにも送りません）。</p>
     ${
       s.logs.length
         ? s.logs

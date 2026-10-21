@@ -1,5 +1,5 @@
 // 観測ログの文（X に貼る記号の形）と、端末の中の記録
-import { stamp, dir8En, SKIES } from "../../js/obslog.js";
+import { stamp, dir8En, SKIES } from "../js/obslog.js";
 
 export const SITE = "https://voyascope.org/";
 const skyMark = (id) => (SKIES.find((s) => s.id === id) ?? SKIES[0]).mark;
