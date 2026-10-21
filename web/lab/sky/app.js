@@ -24,6 +24,13 @@ const ico = {
   eye: '<circle cx="12" cy="12" r="9"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="3"/>',
   log: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/>',
 };
+// カメラと赤い画面のボタンの絵（素案 v0.4 のカメラの形を引きつぐ）
+const CAM_SVG = `<svg viewBox="0 0 28 28" width="26" height="26" fill="none" aria-hidden="true"><rect x="2.7" y="7.2" width="22.6" height="16.5" rx="4.2" stroke="currentColor" stroke-width="1.7"/><path d="M8 7.3 9.65 4.8a1.9 1.9 0 0 1 1.57-.8h5.6a1.9 1.9 0 0 1 1.55.8L20 7.3" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="14" cy="15.4" r="5.05" stroke="currentColor" stroke-width="1.6"/><circle cx="21" cy="10.85" r=".9" fill="currentColor"/></svg>`;
+const MOON_SVG = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>`;
+const isNight = () => document.documentElement.classList.contains("night");
+const toolBtn = (act, svg, label, on, aria) => `<button class="tool${on ? " on" : ""}" data-act="${act}" aria-pressed="${on}" aria-label="${aria}">${svg}<span>${label}</span></button>`;
+const camTool = () => toolBtn("camera", CAM_SVG, s.cam ? "カメラ ON" : "カメラ", !!s.cam, s.cam ? "カメラを止める" : "カメラを使う（空の映像に印を重ねる）");
+const nightTool = () => toolBtn("night", MOON_SVG, isNight() ? "赤い画面 ON" : "赤い画面", isNight(), "赤い画面（暗さに慣れた目を守る）");
 const icon = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ico[n]}</svg>`;
 
 // ---------- データ ----------
@@ -134,7 +141,7 @@ function toast(msg) {
 }
 function header() {
   $("#top").innerHTML = `<div><div class="logo">VOYA<span class="mint">SCOPE</span></div><div class="logo-sub">SKY OBSERVER · LAB</div></div>
-    <div style="display:flex;gap:6px"><button class="pill" data-act="pref">⌖ ${esc(s.pref?.name ?? "県を選ぶ")}</button><button class="pill" data-act="night" aria-pressed="${document.documentElement.classList.contains("night")}" title="赤い画面（暗さに慣れた目を守る）">●夜</button></div>`;
+    <div style="display:flex;gap:6px"><button class="pill" data-act="pref">⌖ ${esc(s.pref?.name ?? "県を選ぶ")}</button>${nightTool()}</div>`;
 }
 function tabs() {
   const cur = s.page === "logs" || s.page === "share" ? "logs" : s.page;
@@ -311,8 +318,8 @@ function guideHtml() {
     <div class="guide-top"><button class="circle-btn" data-act="home" aria-label="もどる">←</button>
       <div class="row"><button class="pill" data-act="sensor" id="sensor-btn">${s.sensor === "on" ? "向き：センサー" : "向きセンサーを使う"}</button>
       <button class="pill" data-act="calib">方位を合わせる</button>
-      <button class="pill" data-act="camera" aria-pressed="${!!s.cam}">${s.cam ? "カメラ ●" : "カメラ"}</button>
-      <button class="pill" data-act="night">●夜</button></div></div>
+      </div></div>
+    <div class="tool-rail">${camTool()}${nightTool()}</div>
     <div class="guide-status" id="gstatus"></div>
     <div class="guide-spacer"></div>
     <div class="guide-bottom">
@@ -830,9 +837,10 @@ $("#app").addEventListener("click", async (e) => {
   if (act === "night") {
     document.documentElement.classList.toggle("night");
     try {
-      localStorage.setItem("voyascope.lab.night", document.documentElement.classList.contains("night") ? "1" : "");
+      localStorage.setItem("voyascope.lab.night", isNight() ? "1" : "");
     } catch {}
-    return s.page === "guide" ? null : header();
+    document.querySelectorAll('[data-act="night"]').forEach((el) => (el.outerHTML = nightTool()));
+    return toast(isNight() ? "赤い画面にしました。暗さに慣れた目を守ります" : "赤い画面をやめました");
   }
   if (act === "sensor") return enableSensor();
   if (act === "calib") return sheetCalib();
