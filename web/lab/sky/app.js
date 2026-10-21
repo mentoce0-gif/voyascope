@@ -289,9 +289,9 @@ function logs() {
             .map(
               (l, i) => `<div class="log-item"><div><div class="t">${esc(l.title)} ${l.kind === "meteor" ? `<span class="amber">${l.count}個</span>` : ""}</div>
         <div class="m">${dateTime(new Date(l.start))} · ${l.kind === "meteor" ? `${Math.max(1, Math.round((l.end - l.start) / 60000))}分` : (ISS_SKY.find((o) => o.id === l.sky)?.label ?? "")}</div></div>
-        <button class="secondary" data-act="open" data-v="${i}">開く ↗</button></div>`,
+        <div class="log-btns"><button class="secondary" data-act="open" data-v="${i}">開く ↗</button><button class="secondary" data-act="del" data-v="${i}" aria-label="この記録を消す">消す</button></div></div>`,
             )
-            .join("")
+            .join("") + `<div class="row-actions"><button class="secondary" data-act="delAll">記録をすべて消す</button></div>`
         : `<div class="empty">✧<br>まだ記録はありません。<br>「空を見る」から始めましょう。</div>`
     }</section>`;
 }
@@ -901,10 +901,21 @@ $("#app").addEventListener("click", async (e) => {
     }
     return;
   }
+  if (act === "del" || act === "delAll") {
+    const l = s.logs[Number(v)];
+    const msg = act === "delAll" ? `記録を${s.logs.length}件、すべて消します。もとに戻せません。` : `${l.title}（${dateTime(new Date(l.start))}）の記録を消します。もとに戻せません。`;
+    if (!confirm(msg)) return;
+    s.logs = act === "delAll" ? [] : s.logs.filter((x) => x !== l);
+    saveLogs(s.logs);
+    toast("消しました");
+    return render();
+  }
   if (act === "delete") {
+    if (!confirm("この記録を消します。もとに戻せません。")) return;
     s.logs = s.logs.filter((l) => l !== s.active);
     saveLogs(s.logs);
     s.active = null;
+    toast("消しました");
     return go("logs");
   }
   if (act === "shot") return takePhoto();
