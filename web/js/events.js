@@ -1,6 +1,6 @@
 // 予定（次の出来事・これから行く）：日時の扱いと、一覧・詳細の表示
 // データは web/data/events.json（scripts/sync-web-data.mjs が curation/events から作る）。日付は公式の発表どおり
-import { esc } from "./format.js";
+import { esc, obsRound } from "./format.js";
 
 const DAY = 86400000;
 const JST = 9 * 3600000; // 予定は日本時間で出す（画面にも「日本時間」と書く）
@@ -252,7 +252,7 @@ export function eventPanelHtml(ev, now, { flowHtml = null } = {}) {
   const span = eventSpan(ev);
   const passed = status === "scheduled" && span?.precision === "at" && span.start <= now.getTime();
   // 打ち上げの日の計画の流れ（launch-plan.js）があれば、残り時間の代わりに出す
-  const countdown = flowHtml
+  let countdown = flowHtml
     ? flowHtml
     : big
     ? `<div class="event-countdown"><span class="k">${ev.kind === "launch" ? "打ち上げまで" : "その時まで"}</span><span class="mono" data-live="countdown">${esc(big)}</span></div>`
@@ -261,6 +261,8 @@ export function eventPanelHtml(ev, now, { flowHtml = null } = {}) {
       : left && status === "scheduled"
         ? `<div class="event-countdown"><span class="k">その日まで</span><span class="mono">${esc(left)}</span></div>`
         : "";
+  // 流星群は、残り時間の箱の右に、空を見る（/sky/）への OBS ボタン
+  if (ev.kind === "meteor" && countdown) countdown = countdown.replace('<div class="event-countdown">', '<div class="event-countdown has-obs">').replace(/<\/div>$/, `${obsRound("meteor", ev.title.ja)}</div>`);
   return `
     <header class="panel-head">
       <div>
