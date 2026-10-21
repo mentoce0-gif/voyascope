@@ -10,7 +10,7 @@
 |---|---|---|
 | 本番 | https://voyascope.org | **2026-10-15 に正式に切り替え（M9 ②）**。Cloudflare（Workers の静的アセット）。`.github/workflows/deploy.yml`・`wrangler.jsonc`・`web/_headers`。鍵は GitHub の Secrets（`CLOUDFLARE_API_TOKEN`・`CLOUDFLARE_ACCOUNT_ID`） |
 | もとの公開先 | https://mentoce0-gif.github.io/voyascope/ | GitHub Pages。いまは「voyascope.org に移りました」の案内だけ（`pages-moved/`・`pages.yml`。同じ道の voyascope.org へ3秒で移る） |
-| 試作の部屋 | https://voyascope.org/lab/ | パスワードつき（2026-10-20）。`src/lab-worker.js` が `/lab/` だけ Basic 認証。パスワードは Cloudflare の Worker のシークレット `LAB_PASSWORD`（未設定なら開かない）。リポジトリは公開なので中身は GitHub で見える。01＝観測ログ（OBS-LOG） |
+| 試作の部屋 | https://voyascope.org/lab/ | パスワードつき（2026-10-20）。`src/lab-worker.js` が `/lab/` だけ Basic 認証。パスワードは Cloudflare の Worker のシークレット `LAB_PASSWORD`（未設定なら開かない）。リポジトリは公開なので中身は GitHub で見える。01＝観測ログ（OBS-LOG）、02＝SKY OBSERVER（空を見る。流星群・ISS をかざして探す・数える・記録して X へ。2026-10-21） |
 | MMX の予告ページ | https://voyascope.org/mmx/ | `web/mmx/`。noindex、アプリからはまだリンクしない。紹介のメールに添えた |
 | X（旧 Twitter） | https://x.com/voyascope （@voyascope） | オーナーのアカウント（作者として発信）。プロフィールは「VOYASCOPE をつくっている人。本業のかたわら…※非公式ファンメイド作品」（2026-10-08 案C）。開発記録の投稿文は Claude Code が下書き（X の重み付きで280以内、非公式ファンメイドの一文を入れる） |
 | 公開のリポジトリ | `mentoce0-gif/voyascope` | 2026-10-04 に作り直した（PR は #1 から振り直し） |

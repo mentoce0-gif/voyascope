@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SKY OBSERVER（試作）— VOYASCOPE</title>
+  <!-- 試作の部屋 02：空を見る（流星群・ISS）。オーナーと ChatGPT の素案 v0.4 をもとに、本物の計算・向きのセンサーにつないだもの（2026-10-21） -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#050e1f">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+  <link rel="stylesheet" href="sky.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <main class="app" id="app">
+    <div class="sky-bg" aria-hidden="true"></div>
+    <header class="top" id="top"></header>
+    <div class="page" id="page"><p class="loading mono">LOADING…</p></div>
+    <div class="toast" id="toast" role="status" hidden></div>
+    <nav class="tabs" id="tabs" aria-label="メインメニュー"></nav>
+    <div class="sheet-layer" id="sheet" hidden></div>
+  </main>
+</body>
+</html>
