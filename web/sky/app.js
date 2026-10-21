@@ -66,7 +66,12 @@ const writeJson = (k, v) => {
 };
 const s = {
   page: "home",
-  subject: meteorEvent ? "meteor" : "iss",
+  // ?s=meteor / ?s=iss で、開いたときに出すものを選べる（今夜のカードの OBS ボタンから）
+  subject: (() => {
+    const q = new URLSearchParams(location.search).get("s");
+    if (q === "iss") return "iss";
+    return meteorEvent ? "meteor" : "iss";
+  })(),
   pref: prefectures.find((p) => p.code === loadPrefecture()) ?? null,
   logs: loadLogs(),
   active: null,

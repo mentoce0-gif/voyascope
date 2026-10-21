@@ -3,7 +3,7 @@
 import { gstime, eciToEcf, ecfToLookAngles } from "../vendor/satellite.min.js";
 import { sunEci, dir8, SUN_BELOW } from "./passes.js";
 import { eventSpan, whenText } from "./events.js";
-import { esc } from "./format.js";
+import { esc, obsButton } from "./format.js";
 
 const DEG = 180 / Math.PI;
 const FAR_KM = 1e12; // 星のように遠い方向として扱う
@@ -150,7 +150,7 @@ const credit = (url) => `<span class="k">出典：<a href="${esc(url)}" target="
 
 export function meteorHtml(ev, observer, prefName, now) {
   const name = ev.title.ja;
-  const head = `<h3 class="meteor-title">${esc(name)}</h3>
+  const head = `<div class="card-head"><h3 class="meteor-title">${esc(name)}</h3>${obsButton("meteor", name)}</div>
     <p class="small">${esc(ev.when_label ?? "極大")}：${esc(whenText(ev, now, { full: true }))}${ev.when.note ? `<span class="k">（${esc(ev.when.note)}）</span>` : ""}　${credit(ev.when.source)}</p>
     ${ev.rate?.value ? `<p class="small">流れ星の数：${esc(ev.rate.value)}　${credit(ev.rate.source)}</p>` : ""}`;
   if (!observer) return `<section class="meteor">${head}<p class="k small">県を選ぶと、放射点がどの方角・高さにあるかが出ます。</p></section>`;

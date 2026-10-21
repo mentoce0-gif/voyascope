@@ -1,5 +1,5 @@
 // 今夜・頭の上：県を選ぶと、ISS が見える通過の時刻・方角・空の図を出す
-import { esc } from "./format.js";
+import { esc, obsButton } from "./format.js";
 import { dir8, heightWord } from "./passes.js";
 import { SKIES, obsLogText, postUrl } from "./obslog.js";
 
@@ -114,7 +114,7 @@ export function renderTonight(el, { pref, passes, now, jumpable }) {
   const minutes = Math.max(1, Math.round((p.end - p.start) / 60000));
   el.innerHTML = `
     <div class="pass-main">
-      <div class="pass-when">${esc(whenWord(p.start, now))}　<span class="pass-time mono">${esc(clockWord(p.start))}</span></div>
+      <div class="card-head"><div class="pass-when">${esc(whenWord(p.start, now))}　<span class="pass-time mono">${esc(clockWord(p.start))}</span></div>${obsButton("iss", "ISS")}</div>
       <div class="pass-dir"><strong>${dir8(p.startAz)}</strong>から<strong>${dir8(p.endAz)}</strong>へ　<span class="k">約${minutes}分</span></div>
       <div class="pass-height k">いちばん高いとき：${heightWord(p.maxEl)}（${dir8(p.maxAz)}の空、約${Math.round(p.maxEl)}°）</div>
       ${skyChart(p)}
