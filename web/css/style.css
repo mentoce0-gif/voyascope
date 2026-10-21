@@ -163,7 +163,7 @@ body { overflow: hidden; }
 }
 .hero-start .chev { font-size: 1.3rem; line-height: 1; }
 .boot-status {
-  min-height: 4.5em;
+  min-height: 4.8em; /* 読み込めたあとの3行（1.6 × 3）。足りないと、出たときに上の文字が押し上がる（CLS） */
   margin: 1.6rem 0 0;
   font-size: 0.74rem;
   line-height: 1.6;
