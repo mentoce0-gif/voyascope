@@ -1,6 +1,7 @@
 // 今夜・頭の上：県を選ぶと、ISS が見える通過の時刻・方角・空の図を出す
 import { esc } from "./format.js";
 import { dir8, heightWord } from "./passes.js";
+import { SKIES, obsLogText, postUrl } from "./obslog.js";
 
 const TZ = "Asia/Tokyo"; // 県単位の予報なので日本時間で出す
 const STORAGE_KEY = "voyascope.prefecture";
@@ -78,6 +79,26 @@ export function renderPrefSelect(select, prefectures, current) {
   select.innerHTML =
     `<option value="">県を選ぶ</option>` +
     prefectures.map((p) => `<option value="${p.code}"${p.code === current ? " selected" : ""}>${esc(p.name)}</option>`).join("");
+}
+
+// 観測ログ（見えた通過を X に貼れる形に）。通過が始まってからだけ投稿・コピーできる
+export function obsLogHtml(pass, now, sky) {
+  if (!pass) return "";
+  const ready = pass.start <= now;
+  const text = obsLogText(pass, sky);
+  return `<div class="obslog" aria-labelledby="obslog-title">
+    <h3 id="obslog-title" class="obslog-title mono">OBS-LOG <span class="k small">${esc(whenWord(pass.start, now))} ${esc(clockWord(pass.start))}の通過</span></h3>
+    <div class="obslog-sky" role="group" aria-label="空の様子">${SKIES.map(
+      (s) => `<button type="button" class="btn small" aria-pressed="${s.id === sky}" data-sky="${s.id}"><span aria-hidden="true">${s.mark}</span> ${s.label}</button>`,
+    ).join("")}</div>
+    <pre class="obslog-text mono" data-obslog-text>${esc(text)}</pre>
+    <div class="obslog-actions">
+      ${ready
+        ? `<a class="btn" href="${esc(postUrl(text))}" target="_blank" rel="noopener">X で投稿</a><button type="button" class="btn" data-obslog-copy>コピー</button>`
+        : `<p class="k small">通過が始まったら、投稿・コピーできます。</p>`}
+    </div>
+    <p class="k small">写真は、載せたい人だけ投稿の画面で添えてください。場所（県）は入れていません。</p>
+  </div>`;
 }
 
 export function renderTonight(el, { pref, passes, now, jumpable }) {
