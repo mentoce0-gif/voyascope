@@ -34,6 +34,11 @@
   - カメラと赤い画面（旧「●夜」）を、絵とことばのボタンに。空を見る画面では右に縦にならべ、ON のときはミントで光る。赤い画面は切り替えたときに説明を出す（オーナー：スマホでわかりづらい）
   - 観測ログの一覧に「消す」（1件ずつ・すべて）。共有の画面の「この記録を消す」と同じく、消す前に確かめる（オーナー）
 
+## 2026-10-21
+
+- MMX の距離を JPL Horizons（−239）に（オーナー）：説明に「Post-launch trajectory from JAXA. Tracking data through October 19, prediction thereafter.」を1回だけ読んで確かめた。カードの distance を horizons（supplier JAXA、原文「Post-launch trajectory from JAXA.」）に。週1回の取得（月曜）から表に入る。それまでは遠くを見る部屋では「準備中」、いまどこは推定のまま。表が入ると、いまどこの地球からの距離が Horizons の値になり（方向は計画の軌道のまま）、字幕に「JPL Horizons」、ただし書きに SSD の形の出典。遠くを見る部屋の停留所に MMX（模型・言葉「火星へ向かう、旅のはじまりへ。」）
+- いまどこの字幕を「MMX は、／いまこのあたり」で改行（PR #76）
+
 ## 2026-10-20
 
 - 試作の部屋（`/lab/`、パスワードつき）を作った（オーナー）。まだ公開していない機能を実機で試すための部屋。`src/lab-worker.js`（小さな Worker）が `/lab/` だけ Basic 認証をかけ、ほかの道は Worker を通さずに静的なファイルを配る。パスワードは Cloudflare の Worker のシークレット `LAB_PASSWORD`（リポジトリには書かない。未設定のあいだは開かない）。リポジトリは公開なので、ファイルの中身は GitHub では見える。robots.txt でも `/lab/` を断る
