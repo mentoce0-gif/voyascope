@@ -310,28 +310,49 @@ let Rsmooth = null;
 let lastOrient = 0;
 let wakeLock = null;
 
+// 空を見る画面：スマホゲームの HUD のように、上下を薄くして空を広く（2026-10-21 オーナーの実機の指摘）
+const G_ICON = {
+  shot: '<rect x="3" y="7" width="18" height="13" rx="3"/><path d="M8 7l1.5-2.5h5L16 7"/><circle cx="12" cy="13.5" r="3.5"/>',
+  adjust: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+  end: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  no: '<circle cx="12" cy="12" r="8"/><path d="M8 8l8 8"/>',
+};
+const gIcon = (n) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${G_ICON[n]}</svg>`;
+const iconBtn = (act, svg, on, label) => `<button class="g-icon${on ? " on" : ""}" data-act="${act}" aria-pressed="${on}" aria-label="${label}" title="${label}">${svg}</button>`;
 function guideHtml() {
   const met = s.subject === "meteor";
+  const n = s.session?.taps.length ?? 0;
   return `<section class="guide" id="guide">
     <video id="cam" playsinline muted autoplay ${s.cam ? "" : "hidden"}></video>
     <canvas id="sky"></canvas>
-    <div class="guide-top"><button class="circle-btn" data-act="home" aria-label="もどる">←</button>
-      <div class="row"><button class="pill" data-act="sensor" id="sensor-btn">${s.sensor === "on" ? "向き：センサー" : "向きセンサーを使う"}</button>
-      <button class="pill" data-act="calib">方位を合わせる</button>
-      </div></div>
-    <div class="tool-rail">${camTool()}${nightTool()}</div>
-    <div class="guide-status" id="gstatus"></div>
+    <div class="g-head">
+      <div class="g-row"><button class="g-icon" data-act="home" aria-label="もどる">←</button>
+        <div class="segment g-seg" role="group" aria-label="見るもの">
+          <button data-act="subject" data-v="meteor" aria-pressed="${met}" ${meteorEvent ? "" : "disabled"}>流星群を探す</button>
+          <button data-act="subject" data-v="iss" aria-pressed="${!met}">ISS を探す</button></div></div>
+      <div class="g-row"><button class="g-chip" data-act="sensor" id="gstatus"></button>
+        ${iconBtn("camera", CAM_SVG, !!s.cam, s.cam ? "カメラを止める" : "カメラを使う")}${iconBtn("night", MOON_SVG, isNight(), "赤い画面（暗さに慣れた目を守る）")}</div>
+    </div>
+    <div class="g-tape" id="tape-slot" aria-hidden="true"></div>
     <div class="guide-spacer"></div>
-    <div class="guide-bottom">
-      <div class="steer"><div class="arr" id="arr">◎</div><div><div class="major" id="smajor"></div><div class="minor" id="sminor"></div></div></div>
+    ${
+      s.sensor === "off" && !s.introDone
+        ? `<div class="g-intro"><div class="caps mint">SKY FINDER</div><b>スマホを空にかざして探す</b>
+        <p>向きのセンサーで、画面と空を合わせます。センサーがないときは指で動かせます。</p>
+        <button class="primary" data-act="sensor">かざして探す</button><button class="secondary" data-act="introSkip">指で動かす</button></div>`
+        : ""
+    }
+    <div class="g-foot">
+      <div class="g-steer"><span class="arr" id="arr">◎</span><div><div class="major" id="smajor"></div><div class="minor" id="sminor"></div></div></div>
       ${
         met
-          ? `<div class="counter"><div class="count"><b id="count">${s.session?.taps.length ?? 0}</b><span id="timer">${s.session ? "" : "まだ"}</span></div>
-        <button class="primary" data-act="tap">流れた！ ＋1</button></div>
-        <div class="guide-actions">${s.cam ? `<button class="secondary" data-act="shot">写真</button>` : ""}<button class="secondary" data-act="undo" ${s.session?.taps.length ? "" : "disabled"}>1つ戻す</button><button class="secondary" data-act="finish">観測を終える</button></div>`
-          : `<div class="guide-actions">${s.cam ? `<button class="secondary" data-act="shot">写真</button>` : ""}<button class="primary" data-act="seen">✓ 見えた！</button><button class="secondary" data-act="notseen">見えなかった</button></div>`
+          ? `<div class="g-main"><div class="g-count"><b id="count">${n}</b><span id="timer">カウント</span>
+          <button class="g-undo" data-act="undo" ${n ? "" : "disabled"} aria-label="1つ戻す">−1</button></div>
+          <button class="primary g-big" data-act="tap">✦ 流れた！ <small>+1</small></button></div>
+        <div class="g-actions"><button data-act="shot">${gIcon("shot")}撮影</button><button data-act="adjust">${gIcon("adjust")}調整・詳細</button><button data-act="finish">${gIcon("end")}観測終了</button></div>`
+          : `<div class="g-main"><button class="primary g-big" data-act="seen">✓ 見えた！</button></div>
+        <div class="g-actions"><button data-act="shot">${gIcon("shot")}撮影</button><button data-act="adjust">${gIcon("adjust")}調整・詳細</button><button data-act="notseen">${gIcon("no")}見えなかった</button></div>`
       }
-      <p class="tiny dim">計算の目安です（県庁あたり）。スマホの方位は10〜20°ずれることがあります。最後は画面から目を離して、空で探してください。</p>
     </div></section>`;
 }
 
@@ -375,8 +396,8 @@ function onOrient(ev) {
   lastOrient = performance.now();
   if (s.sensor !== "on") {
     s.sensor = "on";
-    const b = $("#sensor-btn");
-    if (b) b.textContent = "向き：センサー";
+    s.introDone = true;
+    $(".g-intro")?.remove();
   }
 }
 async function enableSensor() {
@@ -412,7 +433,7 @@ function currentRotation() {
 }
 
 // 空を描く（写真の合成にも使う）
-function drawSky(ctx, w, h, R, now, { camera = false } = {}) {
+function drawSky(ctx, w, h, R, now, { camera = false, tapeTop = null } = {}) {
   const vfov = 62;
   const P = (az, el) => project(R, az, el, { width: w, height: h, vfov });
   const f = h / 2 / Math.tan((vfov / 2) / DEG);
@@ -556,7 +577,7 @@ function drawSky(ctx, w, h, R, now, { camera = false } = {}) {
   }
   // 方位のテープ（画面の上。いま向いている方位の左右45°を、目盛りと8方位で）
   const camDir = cameraDir(R);
-  const tapeY = 124 * u;
+  const tapeY = tapeTop != null ? tapeTop + 19 * u : 124 * u;
   const span = 45;
   ctx.fillStyle = "rgba(5,14,31,.6)";
   ctx.fillRect(0, tapeY - 20 * u, w, 30 * u);
@@ -646,16 +667,19 @@ function loop() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, w, h);
   const now = new Date();
-  drawSky(ctx, w, h, currentRotation(), now, { camera: !!s.cam });
+  const slot = $("#tape-slot");
+  const tapeTop = slot ? slot.getBoundingClientRect().top - cv.getBoundingClientRect().top : null;
+  drawSky(ctx, w, h, currentRotation(), now, { camera: !!s.cam, tapeTop });
   const st = steerText(now);
   $("#arr").textContent = st.arr;
   $("#smajor").textContent = st.major;
   $("#sminor").textContent = st.minor;
   const cam = cameraDir(currentRotation());
-  $("#gstatus").textContent = `${s.sensor === "on" ? (sensorState.noNorth ? "SENSOR（北が分からない端末：方位を合わせて）" : "SENSOR") : "指で動かせます"} · いま ${dir8(cam.az)} ${Math.round(cam.az)}° / 高さ ${Math.round(cam.el)}°${s.offset ? ` · 合わせ ${s.offset > 0 ? "+" : ""}${Math.round(s.offset)}°` : ""}`;
+  $("#gstatus").innerHTML = `<i class="${s.sensor === "on" ? "on" : ""}"></i><span class="lbl">${s.sensor === "on" ? (sensorState.noNorth ? "センサー・要合わせ" : "センサー") : "指で操作"}</span><span class="mono">${dir8(cam.az)} ${Math.round(cam.az)}° · 高さ${Math.round(cam.el)}°</span>`;
   if (s.session) {
     const sec = Math.floor((Date.now() - s.session.start) / 1000);
-    $("#timer") && ($("#timer").textContent = `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`);
+    const hh = Math.floor(sec / 3600), mm = Math.floor((sec % 3600) / 60), ss = String(sec % 60).padStart(2, "0");
+    $("#timer") && ($("#timer").textContent = hh ? `${hh}:${String(mm).padStart(2, "0")}:${ss}` : `${mm}:${ss}`);
   }
   raf = requestAnimationFrame(loop);
 }
@@ -750,6 +774,17 @@ function sheetPref(first = false) {
     <select id="pref-select">${prefectures.map((p) => `<option value="${p.code}" ${p === (s.pref ?? prefectures.find((x) => x.name === "東京")) ? "selected" : ""}>${esc(p.name)}</option>`).join("")}</select>
     <button class="primary" data-act="prefOk">この県にする</button>${first ? "" : `<button class="secondary" data-act="sheetClose">閉じる</button>`}</div>`;
 }
+function sheetAdjust() {
+  sheetCalib();
+  const sh = $("#sheet .sheet");
+  sh.insertAdjacentHTML(
+    "afterbegin",
+    `<div class="caps mint">ADJUST</div><h2>調整・詳細</h2>
+    <div class="row-actions" style="margin-top:0"><button class="secondary" data-act="sensorRetry">${s.sensor === "on" ? "センサー：使っています" : "向きのセンサーを使う"}</button><button class="secondary" data-act="pref">県：${esc(s.pref?.name ?? "東京")}</button></div>
+    <p class="tiny dim" style="margin-top:10px">X などのアプリの中のブラウザでは、向きのセンサーやカメラが使えないことがあります。そのときは Safari・Chrome で開いてください。</p>
+    <p class="tiny dim">計算の目安です（県庁あたり）。スマホの方位は10〜20°ずれることがあります。最後は画面から目を離して、空で探してください。</p><hr style="border:0;border-top:1px solid var(--line);margin:14px 0">`,
+  );
+}
 function sheetCalib() {
   const moon = moonNow();
   $("#sheet").hidden = false;
@@ -839,11 +874,27 @@ $("#app").addEventListener("click", async (e) => {
     try {
       localStorage.setItem("voyascope.lab.night", isNight() ? "1" : "");
     } catch {}
-    document.querySelectorAll('[data-act="night"]').forEach((el) => (el.outerHTML = nightTool()));
+    document.querySelectorAll('[data-act="night"]').forEach((el) => (el.outerHTML = el.classList.contains("g-icon") ? iconBtn("night", MOON_SVG, isNight(), "赤い画面（暗さに慣れた目を守る）") : nightTool()));
     return toast(isNight() ? "赤い画面にしました。暗さに慣れた目を守ります" : "赤い画面をやめました");
   }
-  if (act === "sensor") return enableSensor();
+  if (act === "sensor") {
+    s.introDone = true;
+    $(".g-intro")?.remove();
+    if (s.sensor === "on") return sheetAdjust();
+    return enableSensor();
+  }
+  if (act === "introSkip") {
+    s.introDone = true;
+    s.sensor = "none";
+    $(".g-intro")?.remove();
+    return;
+  }
+  if (act === "adjust") return sheetAdjust();
   if (act === "calib") return sheetCalib();
+  if (act === "sensorRetry") {
+    closeSheet();
+    return enableSensor();
+  }
   if (act === "calibMoon") {
     const cam = cameraDir(currentRotation());
     const moon = moonNow();
@@ -926,7 +977,14 @@ $("#app").addEventListener("click", async (e) => {
     toast("消しました");
     return go("logs");
   }
-  if (act === "shot") return takePhoto();
+  if (act === "shot") {
+    if (!s.cam) {
+      await toggleCamera();
+      if (s.cam) toast("カメラを ON にしました。もう一度「撮影」で写真を作ります");
+      return;
+    }
+    return takePhoto();
+  }
   if (act === "photoShare") {
     try {
       await navigator.share({ files: [new File([s.photo.blob], `voyascope-${Date.now()}.jpg`, { type: "image/jpeg" })], text: s.photo.text });

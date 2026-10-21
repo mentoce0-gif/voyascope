@@ -128,3 +128,39 @@ details.src li { margin: 4px 0; line-height: 1.6; }
 .top .tool { min-height: 44px; min-width: 0; flex-direction: row; gap: 6px; padding: 0 12px; border-radius: 999px; font-size: 12px; }
 .top .tool svg { width: 20px; height: 20px; }
 .tool-rail { position: absolute; right: var(--gx); top: calc(env(safe-area-inset-top) + 160px); z-index: 3; display: flex; flex-direction: column; gap: 10px; }
+
+/* 空を見る：スマホゲームの HUD のように、上下を薄くして空を広く（2026-10-21） */
+.g-head { position: relative; z-index: 3; padding: calc(env(safe-area-inset-top) + 8px) 12px 0; display: grid; gap: 8px; }
+.g-row { display: flex; align-items: center; gap: 8px; }
+.g-icon { appearance: none; flex: 0 0 auto; width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; border: 1px solid rgba(217, 244, 234, 0.3); background: rgba(5, 14, 31, 0.72); color: var(--text); font-size: 18px; backdrop-filter: blur(10px); padding: 0; }
+.g-icon svg { width: 22px; height: 22px; }
+.g-icon.on { background: var(--mint); color: #041a22; border-color: var(--mint); box-shadow: 0 0 14px rgba(94, 242, 194, 0.5); }
+.g-seg { flex: 1; padding: 3px; background: rgba(5, 14, 31, 0.72); backdrop-filter: blur(10px); }
+.g-seg button { min-height: 36px; padding: 6px 4px; font-size: 13px; }
+.g-chip { flex: 1; min-width: 0; min-height: 42px; text-align: left; display: flex; align-items: center; gap: 7px; padding: 0 12px; border-radius: 14px; border: 1px solid rgba(217, 244, 234, 0.18); background: rgba(5, 14, 31, 0.72); font-size: 12px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; backdrop-filter: blur(10px); }
+.g-chip i { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+.g-chip i.on { background: var(--mint); box-shadow: 0 0 8px var(--mint); }
+.g-chip .lbl { flex: 0 0 auto; }
+.g-chip .mono { flex: 1 1 auto; min-width: 0; color: var(--text); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-chip { width: 0; }
+.g-tape { position: relative; z-index: 1; height: 30px; margin-top: 8px; }
+.g-intro { position: absolute; z-index: 4; left: 16px; right: 16px; top: 42%; transform: translateY(-50%); padding: 18px; border-radius: 20px; border: 1px solid rgba(94, 242, 194, 0.45); background: rgba(6, 19, 34, 0.94); text-align: center; display: grid; gap: 10px; }
+.g-intro b { font-size: 18px; }
+.g-intro p { margin: 0; font-size: 12.5px; color: var(--dim); line-height: 1.7; }
+.g-foot { position: relative; z-index: 3; padding: 8px 12px calc(env(safe-area-inset-bottom) + 10px); display: grid; gap: 8px; background: linear-gradient(transparent, rgba(5, 14, 31, 0.88) 18%); }
+.g-steer { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 14px; border: 1px solid rgba(217, 244, 234, 0.14); background: rgba(5, 14, 31, 0.72); backdrop-filter: blur(10px); }
+.g-steer .arr { flex: 0 0 26px; font-size: 22px; text-align: center; color: var(--mint); }
+.g-steer .major { font-size: 14.5px; font-weight: 700; line-height: 1.35; }
+.g-steer .minor { font-size: 11px; color: var(--dim); line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.g-main { display: flex; gap: 8px; }
+.g-count { position: relative; flex: 0 0 84px; border: 1px solid rgba(255, 181, 71, 0.5); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(5, 14, 31, 0.72); }
+.g-count b { font: 700 26px/1 var(--mono); color: var(--amber); }
+.g-count span { font: 10px var(--mono); color: var(--dim); margin-top: 3px; }
+.g-undo { position: absolute; top: -8px; right: -8px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(217, 244, 234, 0.35); background: #0b1f3d; font: 11px var(--mono); padding: 0; }
+.g-undo:disabled { opacity: 0.35; }
+.g-big { min-height: 60px; font-size: 19px; border-radius: 16px; letter-spacing: 0.02em; }
+.g-big small { font-size: 13px; opacity: 0.8; }
+.g-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.g-actions button { min-height: 44px; border-radius: 13px; border: 1px solid rgba(94, 242, 194, 0.32); background: rgba(5, 14, 31, 0.72); font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 0 4px; white-space: nowrap; }
+.g-actions button svg { flex: 0 0 auto; }
+@media (max-height: 700px) { .g-big { min-height: 52px; } .g-count b { font-size: 22px; } .g-steer { padding: 6px 10px; } .g-steer .minor { -webkit-line-clamp: 1; } }
