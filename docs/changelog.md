@@ -12,6 +12,7 @@
   - 起動画面の絵（LCP）：地球の画像を preload（fetchpriority=high）、ロゴに fetchpriority=high と srcset（600／1200）。スマホの LCP は手元で 808ms → 136ms。MMX の予告ページの模型の画像にも fetchpriority=high
   - 起動画面の文字のずれ（CLS）：「ORBITAL DATA LOADED」の3行が入る高さ（4.8em）を先にとる
   - 計測にあった `#boot` の大きなずれ（0.823、1件）は手元で再現できず、直していない
+- アクセスの数（案A。オーナー OK）：Cloudflare Web Analytics は抜き取り（1割ほどを10倍）でオーナーの分も外せないため、自前で数える。`/api/hit`（Worker・D1）に、外から来て開いたときだけ「ページの道・来た元のドメイン名・目印」を送り、サーバでは来た元を種類に直して日ごとの回数だけ残す。サイトの中の移動・再読み込み・戻る、巡回のプログラム、オーナーの端末（`?me=1`）は数えない。表は `/lab/stats/`
 
 ## 2026-10-18
 

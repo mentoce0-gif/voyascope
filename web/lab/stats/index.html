@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>アクセスの数 — VOYASCOPE</title>
+  <!-- アクセスの数（2026-10-21 オーナー：案A）。数えるのは src/count.js、送るのは web/js/count.js。/lab/ の下なのでパスワードつき -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#050e1f">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../lab.css">
+  <style>
+    .lab { max-width: 760px; }
+    .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 16px 0; }
+    .kpi div { padding: 12px 14px; border: 1px solid rgba(94, 242, 194, 0.35); border-radius: 12px; }
+    .kpi b { display: block; font-size: 1.6rem; color: #ffb547; }
+    .wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.85rem; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid rgba(94, 242, 194, 0.15); text-align: right; white-space: nowrap; }
+    th:first-child, td:first-child { text-align: left; }
+    th { color: #8fb3a8; font-weight: 400; }
+    h2 { font-size: 1rem; margin: 28px 0 8px; color: #ffb547; }
+  </style>
+</head>
+<body>
+  <main class="lab">
+    <p class="lab-eyebrow mono">VOYASCOPE LAB</p>
+    <h1>アクセスの数</h1>
+    <p class="k small">外から来て開かれた回数（サイトの中の移動・再読み込み・戻る、オーナーの端末〈?me=1〉、巡回のプログラムは除く）。日付は日本時間。人数ではなく回数です。</p>
+    <div id="out"><p class="k">読み込み中…</p></div>
+    <p class="k small"><a href="../">試作の部屋へ戻る</a></p>
+  </main>
+  <script src="stats.js" type="module"></script>
+</body>
+</html>
