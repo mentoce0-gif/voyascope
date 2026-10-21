@@ -807,6 +807,19 @@ body { overflow: hidden; }
 .sky-label { fill: var(--amber); font-size: 9px; text-anchor: middle; font-family: var(--font-body); }
 .meteor { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--mint-dim); }
 .meteor-title { margin: 0 0 4px; font-size: 0.95rem; color: var(--mint); }
+/* レーダー（空の図）の右下に、空を見る（/sky/）への丸い OBS ボタン */
+.radar-wrap { position: relative; }
+.obs-round { position: absolute; right: 4px; bottom: 4px; width: 60px; height: 60px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; color: #041a22; background: var(--mint); text-decoration: none; box-shadow: 0 0 0 4px rgba(94, 242, 194, 0.15), 0 0 18px rgba(94, 242, 194, 0.45); }
+.obs-round .mono { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; }
+.obs-round:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+/* カードの見出しの右上に、空を見る（/sky/）への OBS ボタン */
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.obs-btn { flex: 0 0 auto; display: inline-grid; grid-template-columns: auto auto; align-items: center; column-gap: 5px; padding: 5px 9px; min-height: 44px; border: 1px solid var(--mint-dim); border-radius: 10px; color: var(--mint); text-decoration: none; background: rgba(94, 242, 194, 0.06); line-height: 1.1; }
+.obs-btn:hover { background: var(--mint-faint); }
+.obs-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.obs-btn svg { grid-row: span 2; }
+.obs-btn .mono { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; }
+.obs-btn small { font-size: 0.6rem; color: var(--amber); }
 .meteor-path { fill: none; stroke: var(--mint); stroke-width: 1.6; stroke-dasharray: 3 3; }
 .meteor-dot { fill: var(--mint); }
 .meteor-label { fill: var(--mint); text-anchor: start; }
