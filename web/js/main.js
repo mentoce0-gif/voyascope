@@ -1511,27 +1511,34 @@ async function boot() {
   startBtn.addEventListener(
     "click",
     () => {
-      $("#app").hidden = false;
-      try {
-        startApp(data);
-      } catch (e) {
-        $("#app").hidden = true;
-        status.classList.add("error");
-        status.textContent = `起動に失敗しました：${e.message}`;
-        return;
-      }
-      const bootEl = $("#boot");
-      roomReady.then(() => {
-        bootEl.classList.add("leaving");
-        setTimeout(() => {
-          bootEl.hidden = true;
-          stopNoise();
-          document.documentElement.classList.remove("from-tour");
-        }, 650);
-      });
+      // 押した手ごたえを先に描いてから、重い起動（地球の 3D）をする。押してから画面が変わるまで止まって見えないように（INP。2026-10-21 Cloudflare の計測）
+      startBtn.disabled = true;
+      $("#start-label").textContent = "起動中…";
+      requestAnimationFrame(() => setTimeout(launch, 0));
     },
     { once: true },
   );
+  function launch() {
+    $("#app").hidden = false;
+    try {
+      startApp(data);
+    } catch (e) {
+      $("#app").hidden = true;
+      status.classList.add("error");
+      status.textContent = `起動に失敗しました：${e.message}`;
+      $("#start-label").textContent = "起動できませんでした";
+      return;
+    }
+    const bootEl = $("#boot");
+    roomReady.then(() => {
+      bootEl.classList.add("leaving");
+      setTimeout(() => {
+        bootEl.hidden = true;
+        stopNoise();
+        document.documentElement.classList.remove("from-tour");
+      }, 650);
+    });
+  }
 }
 
 boot();

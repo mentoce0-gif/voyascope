@@ -75,6 +75,7 @@
 
 ## オーナーの判断待ち
 
+- **Cloudflare Web Analytics**（ルール5・個人情報）：自動の設定で、すでに計測が動いている（2026-10-21 に気づいた。HTML にタグはない）。このまま使うか、使うなら「このアプリについて」に書くか（`m9-plan.md` の4）。書くなら、何を集めるかをチャッピーに調べてもらう
 - **中継の埋め込み**（ルール5）：いまはリンクだけ。判断材料は [`roadmap.md`](roadmap.md) の「オーナーの判断待ち」
 - **旧リポジトリの自動更新を止める**（オーナーの操作）：`voyascope-archive` の Settings → Actions → General →「Disable actions」。止まるまで、6時間ごとに失敗の知らせが届き、データを二重に取りに行く
 - **連絡の受け口**：`contact@voyascope.org` のような転送アドレス（Cloudflare の Email Routing）、GitHub の Issue テンプレート（誤りの報告・要望）、中高生向けのフォーム（個人情報の扱いはルール5）
