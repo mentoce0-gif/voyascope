@@ -2,57 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-21T04:49:24.201Z",
+  "fetched_at": "2026-10-21T11:49:33.346Z",
   "days_ahead": 45,
   "launches": [
     {
-      "id": "7766f3bb-674c-4c71-b986-963bd633fcfe",
-      "net": "2026-10-21T07:00:00.000Z",
-      "precision": "min",
-      "window_end": "2026-10-21T08:45:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-20T20:57:12Z",
-      "rocket": {
-        "name": "Electron",
-        "full_name": "Electron"
-      },
-      "provider": {
-        "name": "Rocket Lab",
-        "ja": "ロケットラボ"
-      },
-      "mission": {
-        "name": "We're Not Hawking Around (3x HawkEye 360)",
-        "placeholder": false,
-        "type": "Earth Science",
-        "type_ja": "地球観測",
-        "orbit": "Sun-Synchronous Orbit",
-        "orbit_ja": "太陽同期軌道"
-      },
-      "site": {
-        "location_id": 10,
-        "name": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
-        "ja": "マヒア半島の発射場",
-        "short": "マヒア",
-        "pad": "Rocket Lab Launch Complex 1A",
-        "country": "NZL",
-        "country_ja": "ニュージーランド",
-        "position": {
-          "lat": -39.262833,
-          "lng": 177.864469
-        }
-      }
-    },
-    {
       "id": "f6af629d-39b5-4f86-bc0c-f8776444a858",
-      "net": "2026-10-21T21:59:00.000Z",
-      "precision": "min",
+      "net": "2026-10-21T23:02:41.000Z",
+      "precision": "sec",
       "window_end": "2026-10-22T01:59:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-20T23:06:03Z",
+      "updated": "2026-10-21T07:23:26Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -80,6 +41,45 @@
         "position": {
           "lat": 34.632,
           "lng": -120.611
+        }
+      }
+    },
+    {
+      "id": "7766f3bb-674c-4c71-b986-963bd633fcfe",
+      "net": "2026-10-22T07:00:00.000Z",
+      "precision": "min",
+      "window_end": null,
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-21T05:14:34Z",
+      "rocket": {
+        "name": "Electron",
+        "full_name": "Electron"
+      },
+      "provider": {
+        "name": "Rocket Lab",
+        "ja": "ロケットラボ"
+      },
+      "mission": {
+        "name": "We're Not Hawking Around (3x HawkEye 360)",
+        "placeholder": false,
+        "type": "Earth Science",
+        "type_ja": "地球観測",
+        "orbit": "Sun-Synchronous Orbit",
+        "orbit_ja": "太陽同期軌道"
+      },
+      "site": {
+        "location_id": 10,
+        "name": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
+        "ja": "マヒア半島の発射場",
+        "short": "マヒア",
+        "pad": "Rocket Lab Launch Complex 1A",
+        "country": "NZL",
+        "country_ja": "ニュージーランド",
+        "position": {
+          "lat": -39.262833,
+          "lng": 177.864469
         }
       }
     },
