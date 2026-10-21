@@ -3,7 +3,7 @@
 import { gstime, eciToEcf, ecfToLookAngles } from "../vendor/satellite.min.js";
 import { sunEci, dir8, SUN_BELOW } from "./passes.js";
 import { eventSpan, whenText } from "./events.js";
-import { esc, obsButton } from "./format.js";
+import { esc, obsRadar } from "./format.js";
 
 const DEG = 180 / Math.PI;
 const FAR_KM = 1e12; // 星のように遠い方向として扱う
@@ -150,7 +150,7 @@ const credit = (url) => `<span class="k">出典：<a href="${esc(url)}" target="
 
 export function meteorHtml(ev, observer, prefName, now) {
   const name = ev.title.ja;
-  const head = `<div class="card-head"><h3 class="meteor-title">${esc(name)}</h3>${obsButton("meteor", name)}</div>
+  const head = `<div class="card-head"><h3 class="meteor-title">${esc(name)}</h3></div>
     <p class="small">${esc(ev.when_label ?? "極大")}：${esc(whenText(ev, now, { full: true }))}${ev.when.note ? `<span class="k">（${esc(ev.when.note)}）</span>` : ""}　${credit(ev.when.source)}</p>
     ${ev.rate?.value ? `<p class="small">流れ星の数：${esc(ev.rate.value)}　${credit(ev.rate.source)}</p>` : ""}`;
   if (!observer) return `<section class="meteor">${head}<p class="k small">県を選ぶと、放射点がどの方角・高さにあるかが出ます。</p></section>`;
@@ -163,7 +163,7 @@ export function meteorHtml(ev, observer, prefName, now) {
   return `<section class="meteor">
     ${head}
     <p class="small">${esc(prefName)}から：${radiantWords(night)}</p>
-    ${radiantChart(night)}
+    ${obsRadar(radiantChart(night), "meteor", name)}
     <p class="k small">放射点の位置の${credit(ev.radiant.source).replace('<span class="k">', "<span>")}</p>
     <p class="small">${moonText}</p>
     ${ev.parent?.orbit?.value || ev.constellation ? `<button type="button" class="btn mono meteor-story-btn" data-meteor-story="${esc(ev.id)}">しくみの図を見る</button>` : ""}
