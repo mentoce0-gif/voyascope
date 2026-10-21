@@ -59,9 +59,7 @@ export function numberJa(v) {
   return typeof v === "number" ? v.toLocaleString("ja-JP") : esc(v);
 }
 
-// 空を見る（/sky/・試験版）への入口。今夜の ISS の通過・流星群のカードの右上に置く（2026-10-21 オーナー）
-export const obsButton = (subject, label) =>
-  `<a class="obs-btn" href="sky/?s=${subject}" aria-label="${label}を空で探す（SKY OBSERVER・試験版）" title="スマホをかざして探す（試験版）"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span class="mono">OBS</span><small>試験版</small></a>`;
-// レーダー（空の図）の右下に置く丸いボタン
-export const obsRadar = (chart, subject, label) =>
-  `<div class="radar-wrap">${chart}<a class="obs-round" href="sky/?s=${subject}" aria-label="${label}を空で探す（SKY OBSERVER・試験版）" title="スマホをかざして探す（試験版）"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span class="mono">OBS</span></a></div>`;
+// 空を見る（/sky/・試験版）への丸い OBS ボタン（2026-10-21 オーナー）。今夜のレーダーの右下・流星群の予定の「その日まで」の右
+export const obsRound = (subject, label) =>
+  `<a class="obs-round" href="sky/?s=${subject}" aria-label="${label}を空で探す（SKY OBSERVER・試験版）" title="スマホをかざして探す（試験版）"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span class="mono">OBS</span></a>`;
+export const obsRadar = (chart, subject, label) => `<div class="radar-wrap">${chart}${obsRound(subject, label)}</div>`;

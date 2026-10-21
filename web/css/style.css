@@ -927,6 +927,9 @@ body { overflow: hidden; }
   border-radius: 8px;
   background: rgba(94, 242, 194, 0.07);
 }
+.event-countdown.has-obs { position: relative; padding-right: 84px; min-height: 76px; justify-content: center; }
+.event-countdown .obs-round .mono { font-size: 0.66rem; color: inherit; letter-spacing: 0.1em; }
+.event-countdown.has-obs .obs-round { right: 10px; bottom: auto; top: 50%; transform: translateY(-50%); width: 56px; height: 56px; }
 .event-countdown .mono { font-size: 1.35rem; font-weight: 700; color: var(--mint); letter-spacing: 0.02em; }
 .event-h { margin: 14px 0 6px; font-size: 0.85rem; color: var(--mint); }
 .event-rows .plate-row { grid-template-columns: 24px 4.3em 1fr; } /* 「予備期間」「ロケット」を1行に */
