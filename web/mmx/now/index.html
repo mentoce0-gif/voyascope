@@ -1124,8 +1124,8 @@ function watchCaption() {
   else if (PH.phase === "flying") {
     // 地球からの距離（計画の軌道からの推定）と、いまの月までの距離とのくらべ（2026-10-20 オーナー）
     const nn = nearNow(new Date(now));
-    k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり";
-    sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>・地球から <b>約${Math.round(nn.dE / 1e4).toLocaleString()}万km</b><wbr>（月までの約${(nn.dE / nn.moonEarth).toFixed(1)}倍・推定）`;
+    k = "NOW（計画の軌道から計算・模式）"; t = '<span class="nw">MMX は、</span><br><span class="nw">いまこのあたり</span>'; // 「MMX は、」で改行（2026-10-21 オーナー）
+    sub = `<span class="nw">打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b></span>・<span class="nw">地球から <b>約${Math.round(nn.dE / 1e4).toLocaleString()}万km</b></span><wbr>（月までの約${(nn.dE / nn.moonEarth).toFixed(1)}倍・推定）`;
   }
   else if (PH.phase === "postponed") { k = "延期"; t = "MMX は、<wbr>種子島で<wbr>待っています"; sub = "新しい日時は JAXA の発表で"; }
   else if (now >= PH.launchAt) {
