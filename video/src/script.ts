@@ -80,19 +80,17 @@ export const beats = {
 	sky: {
 		seconds: T.beats.sky,
 		meteors: T.meteors,
-		phone: {from: 5.6, to: 10.0}, // SKY OBSERVER の画面（スマホをかざす）
-		toHalley: {from: 10.0, to: 11.6}, // 空 → ハレー彗星の軌道
+		toHalley: {from: 8.0, to: 9.6}, // 空 → ハレー彗星の軌道
 		captions: [
 			{
 				from: 0.5,
-				to: 5.4,
+				to: 7.6,
 				key: 'ORIONIDS · オリオン座流星群',
 				title: '見上げれば、\n流れ星。',
 				sub: `極大は **${facts.orionids.peakJa}** ごろ。暗い空で1時間に **${facts.orionids.rate}個** ほど`,
 			},
-			{from: 5.8, to: 9.8, key: 'SKY OBSERVER', title: 'スマホをかざして、\n放射点をさがす。', sub: 'voyascope.org/sky（試験版）'},
 			{
-				from: 10.4,
+				from: 8.4,
 				to: 15.6,
 				key: '1P/HALLEY · ハレー彗星',
 				title: 'もとをたどると、\nハレー彗星。',

@@ -32,7 +32,7 @@ const HALLEY = (() => {
 const EARTH_L = (o.solarLon - 180) * D;
 const EARTH = {X: Math.cos(EARTH_L), Y: Math.sin(EARTH_L)};
 
-// ビート「星空」：オリオン座流星群（夜空）→ SKY OBSERVER（スマホをかざす）→ もとをたどるとハレー彗星
+// ビート「星空」：オリオン座流星群（夜空）→ もとをたどるとハレー彗星
 export const Sky: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
@@ -40,8 +40,6 @@ export const Sky: React.FC = () => {
 
 	const skyOn = 1 - prog(frame, b.toHalley.from, b.toHalley.from + 0.8);
 	const halleyOn = prog(frame, b.toHalley.from + 0.4, b.toHalley.to);
-	const phone = interpolate(frame, [sec(b.phone.from), sec(b.phone.from) + 22, sec(b.phone.to) - 12, sec(b.phone.to)], [0, 1, 1, 0], {...clamp, easing: ease});
-	const lockP = prog(frame, b.phone.from + 1.0, b.phone.from + 2.0);
 
 	// 流れ星：放射点から外へ（数・向き・長さは演出）
 	const meteors = b.meteors.map((tm, i) => {
@@ -112,57 +110,9 @@ export const Sky: React.FC = () => {
 				{meteors}
 			</svg>
 			<div style={{opacity: skyOn}}>
-				<Tag x={RAD.x} y={RAD.y} dx={-70} dy={-50} text="放射点" sub="RADIANT" color={C.amber} opacity={prog(frame, 0.6, 1.2) * (1 - phone)} size={26} />
-				<Tag x={skyXY(o.stars[0].ra, o.stars[0].dec).x} y={skyXY(o.stars[0].ra, o.stars[0].dec).y} dx={110} dy={-40} text="オリオン座" color={C.ref} opacity={prog(frame, 1.0, 1.6) * (1 - phone)} size={26} />
+				<Tag x={RAD.x} y={RAD.y} dx={-70} dy={-50} text="放射点" sub="RADIANT" color={C.amber} opacity={prog(frame, 0.6, 1.2)} size={26} />
+				<Tag x={skyXY(o.stars[0].ra, o.stars[0].dec).x} y={skyXY(o.stars[0].ra, o.stars[0].dec).y} dx={110} dy={-40} text="オリオン座" color={C.ref} opacity={prog(frame, 1.0, 1.6)} size={26} />
 			</div>
-
-			{/* SKY OBSERVER：スマホをかざすと、放射点に照準が合う */}
-			{phone > 0 ? (
-				<svg width={width} height={height} style={{position: 'absolute', opacity: phone * skyOn}}>
-					<defs>
-						<mask id="phone-hole">
-							<rect width={width} height={height} fill="#fff" />
-							<rect x={RAD.x - 180} y={RAD.y - 230 + (1 - phone) * 300} width={360} height={720} rx={52} fill="#000" />
-						</mask>
-					</defs>
-					<rect width={width} height={height} fill="rgba(5,14,31,.62)" mask="url(#phone-hole)" />
-					<g transform={`translate(0 ${(1 - phone) * 300})`}>
-						<rect x={RAD.x - 180} y={RAD.y - 230} width={360} height={720} rx={52} fill="none" stroke={C.text} strokeWidth={5} />
-						<rect x={RAD.x - 50} y={RAD.y - 218} width={100} height={22} rx={11} fill={C.navy900} />
-						<circle cx={RAD.x} cy={RAD.y} r={interpolate(lockP, [0, 1], [110, 34])} fill="none" stroke={lockP >= 1 ? C.amber : C.mint} strokeWidth={3} />
-						<line x1={RAD.x - 60} y1={RAD.y} x2={RAD.x - 40} y2={RAD.y} stroke={C.mint} strokeWidth={2} />
-						<line x1={RAD.x + 40} y1={RAD.y} x2={RAD.x + 60} y2={RAD.y} stroke={C.mint} strokeWidth={2} />
-						<line x1={RAD.x} y1={RAD.y - 60} x2={RAD.x} y2={RAD.y - 40} stroke={C.mint} strokeWidth={2} />
-						<line x1={RAD.x} y1={RAD.y + 40} x2={RAD.x} y2={RAD.y + 60} stroke={C.mint} strokeWidth={2} />
-					</g>
-				</svg>
-			) : null}
-			{phone > 0 ? (
-				<div style={{position: 'absolute', left: RAD.x - 180, top: RAD.y - 230 + (1 - phone) * 300, width: 360, height: 720, opacity: phone * skyOn, textAlign: 'center'}}>
-					<div style={{marginTop: 54, fontFamily: F.mono, fontSize: 20, letterSpacing: '.24em', color: C.text}}>SKY OBSERVER</div>
-					<div style={{position: 'absolute', left: 0, right: 0, top: 330, fontFamily: F.body, fontWeight: 700, fontSize: 24, color: lockP >= 1 ? C.amber : C.text}}>
-						{lockP >= 1 ? '放射点はここ' : 'かざして探す'}
-					</div>
-					<div
-						style={{
-							position: 'absolute',
-							left: 40,
-							right: 40,
-							bottom: 50,
-							padding: '12px 0',
-							border: `2px solid ${C.amber}`,
-							borderRadius: 999,
-							background: 'rgba(40,24,6,.82)',
-							fontFamily: F.body,
-							fontWeight: 700,
-							fontSize: 24,
-							color: C.amber,
-						}}
-					>
-						流れた！ ＋1
-					</div>
-				</div>
-			) : null}
 
 			{/* ハレー彗星の軌道（上から見た図） */}
 			<svg width={width} height={height} style={{position: 'absolute', opacity: halleyOn}}>

@@ -1,6 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Img, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
-import {Pill, Space, clamp, ease, easeInOut, prog} from '../components/ui';
+import {Space, clamp, ease, easeInOut, prog} from '../components/ui';
 import {beats, sec} from '../script';
 import {C, F} from '../theme';
 // サイトで使っているロゴ（オーナーのもの）をそのまま使う
@@ -10,7 +10,7 @@ const b = beats.logo;
 const LW = 1200; // ロゴの画像の幅（そのままの大きさで出す）
 const LH = 207;
 const LX = (1920 - LW) / 2;
-const LY = 400;
+const LY = (1080 - LH) / 2 - 20; // ほぼ真ん中
 // ロゴの中の金色の輪（画像の座標。金色の画素から測った）
 const RING = {cx: 241, cy: 112, rx: 112, ry: 36, rot: -40.7};
 const SPARK = {x: 255, y: 57}; // 輪の上の光
@@ -23,7 +23,7 @@ const ringPt = (a: number) => {
 	return {x: LX + RING.cx + x * Math.cos(th) - y * Math.sin(th), y: LY + RING.cy + x * Math.sin(th) + y * Math.cos(th)};
 };
 
-// ビート5「のぞこう」：ことば → 光が金の輪を描く → 文字が現れて本物のロゴに → URL と注記
+// ビート5「のぞこう」：ことば → 光が金の輪を描く → 文字が現れて本物のロゴに → URL（文字だけ）
 export const Logo: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
@@ -126,31 +126,26 @@ export const Logo: React.FC = () => {
 				<circle cx={LX + SPARK.x} cy={LY + SPARK.y} r={26} fill="url(#spark-g)" opacity={frame > sec(b.reveal) ? 0.25 + 0.2 * breathe : 0} />
 			</svg>
 
-			{/* URL と注記（MMX いまどこ のボタンと同じ形） */}
-			<div style={{position: 'absolute', left: 0, right: 0, top: LY + LH + 70, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 34}}>
-				<div
-					style={{
-						opacity: url,
-						transform: `translateY(${(1 - url) * 16}px)`,
-						padding: '16px 46px',
-						border: `2px solid ${C.amber}`,
-						borderRadius: 999,
-						background: 'rgba(40,24,6,.82)',
-						boxShadow: '0 0 30px rgba(255,181,71,.28)',
-						fontFamily: F.mono,
-						fontWeight: 700,
-						fontSize: 46,
-						letterSpacing: '.14em',
-						color: C.amber,
-					}}
-				>
-					{b.url}
-				</div>
-				<div style={{opacity: note}}>
-					<Pill icon style={{fontSize: 24}}>
-						{b.disclaimer}
-					</Pill>
-				</div>
+			{/* URL と注記：飾らず、文字だけ。URL はロゴのすぐ下、注記は画面の下に小さく */}
+			<div
+				style={{
+					position: 'absolute',
+					left: 0,
+					right: 0,
+					top: LY + LH + 36,
+					textAlign: 'center',
+					opacity: url,
+					fontFamily: F.mono,
+					fontSize: 30,
+					letterSpacing: '.32em',
+					marginRight: '-.32em',
+					color: C.textDim,
+				}}
+			>
+				{b.url}
+			</div>
+			<div style={{position: 'absolute', left: 0, right: 0, bottom: 64, textAlign: 'center', opacity: note, fontFamily: F.body, fontSize: 20, color: C.textDim}}>
+				{b.disclaimer}
 			</div>
 		</AbsoluteFill>
 	);
