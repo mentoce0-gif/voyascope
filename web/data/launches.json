@@ -2,18 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-21T21:43:25.150Z",
+  "fetched_at": "2026-10-22T04:46:04.713Z",
   "days_ahead": 45,
   "launches": [
     {
       "id": "f6af629d-39b5-4f86-bc0c-f8776444a858",
-      "net": "2026-10-21T23:22:34.000Z",
+      "net": "2026-10-22T22:40:24.000Z",
       "precision": "sec",
-      "window_end": "2026-10-22T01:59:00.000Z",
+      "window_end": "2026-10-23T01:45:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-21T21:11:45Z",
+      "updated": "2026-10-22T01:12:56Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -46,13 +46,13 @@
     },
     {
       "id": "7766f3bb-674c-4c71-b986-963bd633fcfe",
-      "net": "2026-10-22T07:00:00.000Z",
+      "net": "2026-10-23T07:00:00.000Z",
       "precision": "min",
-      "window_end": null,
+      "window_end": "2026-10-23T08:45:00.000Z",
       "status": "tbc",
       "status_label": "TBC",
       "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-10-21T05:14:34Z",
+      "updated": "2026-10-22T02:44:07Z",
       "rocket": {
         "name": "Electron",
         "full_name": "Electron"
@@ -202,13 +202,13 @@
     },
     {
       "id": "e2886a96-5ce9-4f45-872f-4e25a00be837",
-      "net": "2026-10-25T05:14:00.000Z",
+      "net": "2026-10-26T05:00:00.000Z",
       "precision": "min",
-      "window_end": "2026-10-25T09:14:00.000Z",
+      "window_end": "2026-10-26T09:00:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-21T21:05:25Z",
+      "updated": "2026-10-22T01:11:23Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -241,13 +241,13 @@
     },
     {
       "id": "57ce0a39-d035-4f16-a418-bd6108f78199",
-      "net": "2026-10-28T04:31:00.000Z",
+      "net": "2026-10-29T04:17:00.000Z",
       "precision": "min",
-      "window_end": "2026-10-28T08:31:00.000Z",
+      "window_end": "2026-10-29T08:17:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-21T15:03:04Z",
+      "updated": "2026-10-22T01:11:24Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
