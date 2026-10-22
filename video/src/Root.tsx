@@ -4,6 +4,7 @@ import {TransitionSeries, linearTiming} from '@remotion/transitions';
 import {fade} from '@remotion/transitions/fade';
 import {FPS, HEIGHT, TRANSITION, Variant, WIDTH, orderOf, sec, secondsOf, totalFrames} from './script';
 import {VariantProvider} from './variant';
+import {H_LAYOUT, Layout, LayoutProvider, V_LAYOUT} from './layout';
 import {ChromeOverlay} from './components/Chrome';
 import {Now} from './scenes/Now';
 import {Near} from './scenes/Near';
@@ -15,9 +16,10 @@ import {Sources} from './scenes/Sources';
 
 const SCENES = {now: Now, near: Near, sky: Sky, depart: Depart, far: Far, logo: Logo, sources: Sources};
 
-export const Teaser: React.FC<{variant: Variant}> = ({variant}) => {
+export const Teaser: React.FC<{variant: Variant; layout?: Layout}> = ({variant, layout = H_LAYOUT}) => {
 	const total = totalFrames(variant);
 	return (
+		<LayoutProvider layout={layout}>
 		<VariantProvider v={variant}>
 			<AbsoluteFill style={{background: '#050e1f'}}>
 				<TransitionSeries>
@@ -41,11 +43,13 @@ export const Teaser: React.FC<{variant: Variant}> = ({variant}) => {
 				/>
 			</AbsoluteFill>
 		</VariantProvider>
+		</LayoutProvider>
 	);
 };
 
 const HimawariTeaser: React.FC = () => <Teaser variant="himawari" />;
 const SkyTeaser: React.FC = () => <Teaser variant="sky" />;
+const HimawariVertical: React.FC = () => <Teaser variant="himawari" layout={V_LAYOUT} />;
 
 export const RemotionRoot: React.FC = () => (
 	<>
@@ -53,6 +57,7 @@ export const RemotionRoot: React.FC = () => (
 		<Composition id="VoyascopeTeaser" component={HimawariTeaser} durationInFrames={totalFrames('himawari')} fps={FPS} width={WIDTH} height={HEIGHT} />
 		{/* 流星群版：ISS → オリオン座流星群 → MMX → ボイジャー1号（衛星・星空・探査機・遠くを見る） */}
 		<Composition id="VoyascopeTeaserSky" component={SkyTeaser} durationInFrames={totalFrames('sky')} fps={FPS} width={WIDTH} height={HEIGHT} />
-		{/* 縦長（X・ショート向け）は、構図を作り直すときに足す */}
+		{/* 縦版（スマホ・ショート向け 1080×1920）：ひまわり版を縦の構図で。台本・事実・音楽は横と同じ */}
+		<Composition id="VoyascopeTeaserVertical" component={HimawariVertical} durationInFrames={totalFrames('himawari')} fps={FPS} width={V_LAYOUT.W} height={V_LAYOUT.H} />
 	</>
 );

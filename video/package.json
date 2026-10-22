@@ -8,7 +8,8 @@
     "render": "node scripts/music.mjs && remotion render VoyascopeTeaser out/voyascope-teaser.mp4 && remotion render VoyascopeTeaserSky out/voyascope-teaser-sky.mp4",
     "gif": "remotion render VoyascopeTeaserSky out/voyascope-preview-sky.gif --codec=gif --every-nth-frame=3 --scale=0.4",
     "typecheck": "tsc --noEmit -p .",
-    "music": "node scripts/music.mjs"
+    "music": "node scripts/music.mjs",
+    "render:vertical": "node scripts/music.mjs himawari && remotion render VoyascopeTeaserVertical out/voyascope-teaser-vertical.mp4"
   },
   "dependencies": {
     "@remotion/bundler": "^4.0.537",

@@ -4,6 +4,7 @@ import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remoti
 import {C, F} from '../theme';
 import {FPS, beatStart, chrome} from '../script';
 import {useVariant} from '../variant';
+import {Layout, useLayout} from '../layout';
 import {Pill, clamp, easeInOut} from './ui';
 
 // ブランドのアイコン（web/favicon.svg と同じ形：ロゴの「O」と、斜めに回る金色の輪）
@@ -27,15 +28,12 @@ export const BrandIcon: React.FC<{size?: number}> = ({size = 52}) => (
 	</svg>
 );
 
-// 目盛りの曲線（ゆるい弧）の上の点
-const X0 = 80;
-const X1 = 1840;
-const Y = 1022;
-const BOW = 26;
-const at = (t: number) => {
-	const x = X0 + (X1 - X0) * t;
-	const y = Y - BOW * 4 * t * (1 - t);
-	return {x, y};
+// 目盛りの曲線（ゆるい弧）の上の点。横は画面の下、縦はスマホのボタンを避けて少し上
+const arcAt = (L: Layout) => (t: number) => {
+	const X0 = L.pad;
+	const X1 = L.W - L.pad;
+	const BOW = L.vertical ? 18 : 26;
+	return {x: X0 + (X1 - X0) * t, y: L.arcY - BOW * 4 * t * (1 - t)};
 };
 // 目盛りの位置：距離の版は近いほど詰める、流星群の版（アプリの4本柱）は等間隔
 const TICKS_BY: Record<string, number[]> = {himawari: [0, 0.2, 0.42, 0.68, 1], sky: [0, 0.25, 0.5, 0.75, 1]};
@@ -48,6 +46,9 @@ export const ChromeOverlay: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
 	const v = useVariant();
+	const L = useLayout();
+	const at = arcAt(L);
+	const Y = L.arcY;
 	const arcCfg = chrome.arcs[v];
 	const TICK_T = TICKS_BY[v];
 	// ロゴの場面に入ったら消える
@@ -74,7 +75,7 @@ export const ChromeOverlay: React.FC = () => {
 	return (
 		<AbsoluteFill style={{opacity: vis, pointerEvents: 'none'}}>
 			{/* 左上：ブランド */}
-			<div style={{position: 'absolute', left: 72, top: 40, display: 'flex', alignItems: 'center', gap: 18}}>
+			<div style={{position: 'absolute', left: L.vertical ? 48 : 72, top: L.vertical ? 56 : 40, display: 'flex', alignItems: 'center', gap: L.vertical ? 14 : 18}}>
 				<div
 					style={{
 						width: 64,
@@ -88,11 +89,13 @@ export const ChromeOverlay: React.FC = () => {
 				>
 					<BrandIcon size={48} />
 				</div>
-				<span style={{fontFamily: F.mono, fontSize: 26, letterSpacing: '.32em', color: C.text}}>VOYASCOPE</span>
+				<span style={{fontFamily: F.mono, fontSize: L.vertical ? 22 : 26, letterSpacing: '.32em', color: C.text}}>VOYASCOPE</span>
 			</div>
 			{/* 右上：注記 */}
-			<div style={{position: 'absolute', right: 72, top: 50}}>
-				<Pill icon>{chrome.pill}</Pill>
+			<div style={{position: 'absolute', right: L.vertical ? 48 : 72, top: L.vertical ? 66 : 50}}>
+				<Pill icon style={L.vertical ? {fontSize: 17, padding: '6px 14px'} : undefined}>
+					{chrome.pill}
+				</Pill>
 			</div>
 
 			{/* 下：地球からの距離 */}
@@ -127,14 +130,14 @@ export const ChromeOverlay: React.FC = () => {
 							textShadow: `0 0 10px ${C.navy900}`,
 						}}
 					>
-						<div style={{fontSize: 19, fontWeight: 700, letterSpacing: '.12em', color: near ? C.amber : C.text, opacity: near ? 1 : 0.75}}>
+						<div style={{fontSize: L.vertical ? 17 : 19, fontWeight: 700, letterSpacing: L.vertical ? '.06em' : '.12em', color: near ? C.amber : C.text, opacity: near ? 1 : 0.75}}>
 							{tk.label}
 						</div>
-						<div style={{fontSize: 16, letterSpacing: '.08em', color: C.textDim}}>{tk.sub || ' '}</div>
+						<div style={{fontSize: L.vertical ? 14 : 16, letterSpacing: '.08em', color: C.textDim}}>{tk.sub || ' '}</div>
 					</div>
 				);
 			})}
-			<div style={{position: 'absolute', left: 80, top: Y + 22, fontFamily: F.mono, fontSize: 15, letterSpacing: '.2em', color: C.textDim}}>
+			<div style={{position: 'absolute', left: L.pad, top: Y + 22, fontFamily: F.mono, fontSize: 15, letterSpacing: '.2em', color: C.textDim}}>
 				<span style={{fontFamily: /[ぁ-んァ-ン一-龥]/.test(arcCfg.title) ? F.body : F.mono, letterSpacing: /[ぁ-ん]/.test(arcCfg.title) ? '.08em' : undefined}}>{arcCfg.title}</span>
 				{arcCfg.note ? <span style={{fontFamily: F.body, letterSpacing: 0, marginLeft: 14}}>（{arcCfg.note}）</span> : null}
 			</div>

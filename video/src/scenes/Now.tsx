@@ -5,16 +5,19 @@ import {Globe, orbitPoint, splitPath} from '../components/Globe';
 import {beats} from '../script';
 import {EARTH_RADIUS_KM, facts} from '../facts';
 import {C} from '../theme';
+import {Layout, useLayout} from '../layout';
 
 const b = beats.now;
 const ISS_R = (EARTH_RADIUS_KM + facts.iss.altitudeKm) / EARTH_RADIUS_KM;
-export const NOW_EARTH = {x: 1180, y: 500, r: 230}; // 次の場面（Near）もここから始まる
+// 地球の位置と大きさ。次の場面（Near）もここから始まる
+export const nowEarth = (L: Layout) => (L.vertical ? {x: 540, y: 860, r: 300} : {x: 1180, y: 500, r: 230});
 
 // ビート1「いま」：星の中に地球。照準が合って、ISS の光が回っている
 export const Now: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
-	const {x: cx, y: cy, r} = NOW_EARTH;
+	const L = useLayout();
+	const {x: cx, y: cy, r} = nowEarth(L);
 	const appear = prog(frame, 0, 1.6);
 	const lock = prog(frame, b.lockOn.from, b.lockOn.to);
 	const spin = -150 + frame * 0.06;
@@ -54,7 +57,7 @@ export const Now: React.FC = () => {
 					<circle r={r * 1.28 * 1.25} fill="none" stroke={C.amber} strokeWidth={3} opacity={lockedFlash * 0.6} />
 				</g>
 			</svg>
-			<Tag x={cx + r * 1.28} y={cy - r * 1.28} dx={50} dy={-34} text="TARGET · EARTH" color={C.amber} opacity={lock >= 1 ? interpolate(frame, [72, 84], [0, 1], clamp) : 0} size={24} />
+			<Tag x={cx + r * 1.28} y={cy - r * 1.28} dx={L.vertical ? -60 : 50} dy={-34} text="TARGET · EARTH" color={C.amber} opacity={lock >= 1 ? interpolate(frame, [72, 84], [0, 1], clamp) : 0} size={24} />
 			<Scrim />
 			<Readout k={b.readout.key} value={b.readout.value} opacity={appear} />
 			<Captions items={b.captions} />

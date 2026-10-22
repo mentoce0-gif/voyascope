@@ -1,10 +1,11 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
-import {Beacon, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, easeInOut, prog} from '../components/ui';
+import {Badges, Beacon, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, easeInOut, prog} from '../components/ui';
 import {Globe, project, splitPath} from '../components/Globe';
 import {beats, sec} from '../script';
 import {EARTH_RADIUS_KM, GROUND_TRACK, facts} from '../facts';
 import {C, F} from '../theme';
+import {Layout, useLayout} from '../layout';
 
 const b = beats.depart;
 const pad = (v: number) => String(Math.floor(v)).padStart(2, '0');
@@ -61,31 +62,36 @@ const missionAt = (t: number) => {
 	return SEP;
 };
 
-// 太陽系の模式図：楕円の移行軌道（形は模式。位置は実際のものではない）
-const SUN = {x: 1180, y: 470};
-const R1 = 280; // 地球の軌道
-const R2 = 430; // 火星の軌道
-const SQ = 0.42; // 斜めから見た感じ（縦につぶす）
+// 太陽系の模式図：楕円の移行軌道（形は模式。位置は実際のものではない）。横と縦で置き場所と大きさが違う
 const TH0 = (200 * Math.PI) / 180;
-const A = (R1 + R2) / 2;
-const E = (R2 - R1) / (R2 + R1);
-const onTransfer = (nu: number) => {
-	const r = (A * (1 - E * E)) / (1 + E * Math.cos(nu));
-	const th = TH0 + nu;
-	return {x: SUN.x + r * Math.cos(th), y: SUN.y - r * Math.sin(th) * SQ};
+export const solarGeom = (L: Layout) => {
+	const SUN = L.vertical ? {x: 540, y: 820} : {x: 1180, y: 470};
+	const R1 = L.vertical ? 210 : 280; // 地球の軌道
+	const R2 = L.vertical ? 330 : 430; // 火星の軌道
+	const SQ = L.vertical ? 0.6 : 0.42; // 斜めから見た感じ（縦につぶす）
+	const A = (R1 + R2) / 2;
+	const E = (R2 - R1) / (R2 + R1);
+	const onTransfer = (nu: number) => {
+		const r = (A * (1 - E * E)) / (1 + E * Math.cos(nu));
+		const th = TH0 + nu;
+		return {x: SUN.x + r * Math.cos(th), y: SUN.y - r * Math.sin(th) * SQ};
+	};
+	const onCircle = (R: number, th: number) => ({x: SUN.x + R * Math.cos(th), y: SUN.y - R * Math.sin(th) * SQ});
+	return {SUN, R1, R2, SQ, onTransfer, onCircle};
 };
-const onCircle = (R: number, th: number) => ({x: SUN.x + R * Math.cos(th), y: SUN.y - R * Math.sin(th) * SQ});
 const arc = (f: (t: number) => {x: number; y: number}, t0: number, t1: number, n = 90) =>
 	Array.from({length: n + 1}, (_, i) => f(t0 + ((t1 - t0) * i) / n))
 		.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
 		.join(' ');
 
-const G = {x: 1240, y: 600, r: 360};
 
 // ビート3「出発」：種子島から、地球を約4分の3周して分離（計画書の表2・図3）→ 太陽系の模式図で火星へ
 export const Depart: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
+	const L = useLayout();
+	const {SUN, R1, R2, SQ, onTransfer, onCircle} = solarGeom(L);
+	const G = L.vertical ? {x: 540, y: 880, r: 380} : {x: 1240, y: 600, r: 360};
 	const t = frame / 30;
 
 	// --- 前半：地球と打ち上げ
@@ -135,7 +141,8 @@ export const Depart: React.FC = () => {
 	const backMid = onTransfer(Math.PI * 1.5);
 
 	// 打ち上げ〜分離の線（MMX いまどこ の事象の弧と同じ考え）。目盛りは表2の時刻に比例
-	const evW = 620;
+	const evW = L.vertical ? 560 : 620;
+	const evY = L.vertical ? 350 : 316;
 	const evX = (s: number) => (s / SEP) * evW;
 	const evTicks = [
 		{s: 0, label: 'LIFTOFF'},
@@ -237,7 +244,7 @@ export const Depart: React.FC = () => {
 				]}
 			/>
 			<svg width={width} height={height} style={{position: 'absolute', opacity: launchUi}}>
-				<g transform="translate(84 316)">
+				<g transform={`translate(${L.pad + 4} ${evY})`}>
 					<line x1={0} y1={0} x2={evW} y2={0} stroke="rgba(217,244,234,.35)" strokeWidth={2} />
 					<line x1={evX(SECO1)} y1={0} x2={evX(SELI2)} y2={0} stroke={C.mint} strokeWidth={2} strokeDasharray="3 6" opacity={0.6} />
 					<line x1={0} y1={0} x2={evX(ms)} y2={0} stroke={C.mint} strokeWidth={3} />
@@ -247,15 +254,15 @@ export const Depart: React.FC = () => {
 					<circle cx={evX(ms)} cy={0} r={11} fill="none" stroke={C.amber} strokeWidth={2.5} opacity={ms > 0 && ms < SEP ? 1 : 0} />
 				</g>
 			</svg>
-			<div style={{position: 'absolute', left: 0, top: 332, width, opacity: launchUi, fontFamily: F.mono, fontSize: 16, letterSpacing: '.12em'}}>
+			<div style={{position: 'absolute', left: 0, top: evY + 16, width, opacity: launchUi, fontFamily: F.mono, fontSize: 16, letterSpacing: '.12em'}}>
 				{evTicks
 					.filter((e) => e.label)
 					.map((e) => (
-						<span key={e.label} style={{position: 'absolute', left: 84 + evX(e.s), transform: e.s === 0 ? 'translateX(-6px)' : e.s === SEP ? 'translateX(calc(-100% + 6px))' : 'translateX(-50%)', color: ms >= e.s ? C.text : C.textDim, whiteSpace: 'nowrap'}}>
+						<span key={e.label} style={{position: 'absolute', left: L.pad + 4 + evX(e.s), transform: e.s === 0 ? 'translateX(-6px)' : e.s === SEP ? 'translateX(calc(-100% + 6px))' : 'translateX(-50%)', color: ms >= e.s ? C.text : C.textDim, whiteSpace: 'nowrap'}}>
 							{e.label}
 						</span>
 					))}
-				<span style={{position: 'absolute', left: 84 + evX((SECO1 + SELI2) / 2), transform: 'translateX(-50%)', color: coasting ? C.amber : C.textDim, fontFamily: F.body, letterSpacing: 0, fontSize: 18, whiteSpace: 'nowrap'}}>
+				<span style={{position: 'absolute', left: L.pad + 4 + evX((SECO1 + SELI2) / 2), transform: 'translateX(-50%)', color: coasting ? C.amber : C.textDim, fontFamily: F.body, letterSpacing: 0, fontSize: 18, whiteSpace: 'nowrap'}}>
 					慣性飛行 約{COAST_MIN}分
 				</span>
 			</div>
@@ -269,7 +276,7 @@ export const Depart: React.FC = () => {
 			<Readout k="RETURN" value={`FY${facts.mmx.returnFy}`} color={C.mint} opacity={interpolate(frame, [sec(14.8), sec(14.8) + 6], [0, 1], clamp)} changeAt={14.8} />
 			<TmRow at={b.cruise.from} opacity={solar} items={[{k: 'FROM', v: 'EARTH'}, {k: 'TO', v: 'MARS · PHOBOS', color: C.amber}]} />
 
-			<div style={{position: 'absolute', right: 72, top: 116, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10}}>
+			<Badges>
 				{fast > 0 ? (
 					<>
 						<Pill color={C.amber} style={{opacity: fast}}>
@@ -279,7 +286,7 @@ export const Depart: React.FC = () => {
 					</>
 				) : null}
 				{solar > 0 ? <Pill style={{opacity: solar}}>{b.badgeSchematic}</Pill> : null}
-			</div>
+			</Badges>
 			<Captions items={b.captions} />
 		</AbsoluteFill>
 	);

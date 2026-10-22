@@ -1,25 +1,30 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
-import {Beacon, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, easeInOut, prog} from '../components/ui';
+import {Badges, Beacon, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, easeInOut, prog} from '../components/ui';
 import {beats, sec} from '../script';
 import {facts} from '../facts';
 import {C, F} from '../theme';
+import {useLayout} from '../layout';
+import {solarGeom} from './Depart';
 
 const b = beats.far;
-const SUN = {x: 1560, y: 640};
-const VGR = {x: 760, y: 430};
-const HELIO = 520; // 太陽圏のはて（模式）
 const pad = (v: number) => String(Math.floor(v)).padStart(2, '0');
 
 // ビート4「いちばん遠く」：太陽系が点になるまで引き、光がボイジャー1号まで1日かけて届く
 export const Far: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
+	const L = useLayout();
+	// 太陽系の位置（前の場面の模式図から引いていく）・ボイジャー1号・太陽圏のはて（模式）
+	const SUN = L.vertical ? {x: 760, y: 1150} : {x: 1560, y: 640};
+	const VGR = L.vertical ? {x: 300, y: 560} : {x: 760, y: 430};
+	const HELIO = L.vertical ? 380 : 520;
+	const g0 = solarGeom(L);
 	const shrink = prog(frame, 0, 2.6, easeInOut);
-	const R1 = interpolate(shrink, [0, 1], [280, 6]);
-	const R2 = interpolate(shrink, [0, 1], [430, 10]);
-	const sunX = interpolate(shrink, [0, 1], [1180, SUN.x]);
-	const sunY = interpolate(shrink, [0, 1], [470, SUN.y]);
+	const R1 = interpolate(shrink, [0, 1], [g0.R1, 6]);
+	const R2 = interpolate(shrink, [0, 1], [g0.R2, 10]);
+	const sunX = interpolate(shrink, [0, 1], [g0.SUN.x, SUN.x]);
+	const sunY = interpolate(shrink, [0, 1], [g0.SUN.y, SUN.y]);
 	const helio = prog(frame, 1.8, 4.0);
 	const vAppear = prog(frame, 0.6, 2.2);
 	const c = prog(frame, b.count.from, b.count.to, (x) => x); // 光：時間に比例して進む
@@ -35,8 +40,8 @@ export const Far: React.FC = () => {
 			<svg width={width} height={height} style={{position: 'absolute'}}>
 				{/* 太陽圏のはて（模式）。外側が恒星間空間 */}
 				<circle cx={SUN.x} cy={SUN.y} r={HELIO} fill="rgba(168,188,224,0.04)" stroke={C.ref} strokeOpacity={0.45 * helio} strokeWidth={2} strokeDasharray="3 10" opacity={helio} />
-				<ellipse cx={sunX} cy={sunY} rx={R1} ry={R1 * 0.42} stroke={C.mintDim} strokeWidth={2} fill="none" />
-				<ellipse cx={sunX} cy={sunY} rx={R2} ry={R2 * 0.42} stroke={C.ref} strokeOpacity={0.55} strokeWidth={2} fill="none" />
+				<ellipse cx={sunX} cy={sunY} rx={R1} ry={R1 * g0.SQ} stroke={C.mintDim} strokeWidth={2} fill="none" />
+				<ellipse cx={sunX} cy={sunY} rx={R2} ry={R2 * g0.SQ} stroke={C.ref} strokeOpacity={0.55} strokeWidth={2} fill="none" />
 				<circle cx={sunX} cy={sunY} r={50} fill={C.amber} opacity={0.12} />
 				<circle cx={sunX} cy={sunY} r={interpolate(shrink, [0, 1], [22, 9])} fill={C.amber} />
 				{/* ボイジャー1号への道 */}
@@ -55,7 +60,7 @@ export const Far: React.FC = () => {
 				</g>
 			</svg>
 
-			<Tag x={VGR.x} y={VGR.y} dx={-70} dy={-70} text="ボイジャー1号" sub="VOYAGER 1" color={C.amber} opacity={vAppear} />
+			<Tag x={VGR.x} y={VGR.y} dx={L.vertical ? 60 : -70} dy={-70} text="ボイジャー1号" sub="VOYAGER 1" color={C.amber} opacity={vAppear} />
 			<Tag x={SUN.x} y={SUN.y} dx={60} dy={70} text="太陽・地球" opacity={prog(frame, 1.6, 2.4)} size={26} />
 			<div
 				style={{
@@ -85,9 +90,9 @@ export const Far: React.FC = () => {
 					{k: 'LIGHT TRAVEL', unit: '億 km', v: c > 0 ? `約${Math.round(facts.voyager.lightDayOku * c)}` : '—', color: done ? C.amber : C.mint},
 				]}
 			/>
-			<div style={{position: 'absolute', right: 72, top: 116}}>
+			<Badges>
 				<Pill>{b.badge}</Pill>
-			</div>
+			</Badges>
 			<Captions items={b.captions} />
 		</AbsoluteFill>
 	);

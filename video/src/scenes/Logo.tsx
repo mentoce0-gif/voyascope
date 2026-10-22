@@ -3,30 +3,35 @@ import {AbsoluteFill, Img, interpolate, useCurrentFrame, useVideoConfig} from 'r
 import {Space, clamp, ease, easeInOut, prog} from '../components/ui';
 import {beats, sec} from '../script';
 import {C, F} from '../theme';
+import {useLayout} from '../layout';
 // サイトで使っているロゴ（オーナーのもの）をそのまま使う
 import logoSrc from '../../../web/assets/brand/logo-1200.webp';
 
 const b = beats.logo;
-const LW = 1200; // ロゴの画像の幅（そのままの大きさで出す）
-const LH = 207;
-const LX = (1920 - LW) / 2;
-const LY = (1080 - LH) / 2 - 20; // ほぼ真ん中
-// ロゴの中の金色の輪（画像の座標。金色の画素から測った）
-const RING = {cx: 241, cy: 112, rx: 112, ry: 36, rot: -40.7};
-const SPARK = {x: 255, y: 57}; // 輪の上の光
-
-// 輪の上の点（角度 a）を画面の座標に
-const ringPt = (a: number) => {
-	const th = (RING.rot * Math.PI) / 180;
-	const x = RING.rx * Math.cos(a);
-	const y = RING.ry * Math.sin(a);
-	return {x: LX + RING.cx + x * Math.cos(th) - y * Math.sin(th), y: LY + RING.cy + x * Math.sin(th) + y * Math.cos(th)};
-};
+// ロゴの中の金色の輪（1200px の画像の座標。金色の画素から測った）
+const RING0 = {cx: 241, cy: 112, rx: 112, ry: 36, rot: -40.7};
+const SPARK0 = {x: 255, y: 57}; // 輪の上の光
 
 // ビート5「のぞこう」：ことば → 光が金の輪を描く → 文字が現れて本物のロゴに → URL（文字だけ）
 export const Logo: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
+	const L = useLayout();
+	// ロゴの画像：横はそのままの大きさ（1200px）、縦は幅に合わせて 75%。ほぼ真ん中に
+	const S = L.vertical ? 0.75 : 1;
+	const LW = 1200 * S;
+	const LH = 207 * S;
+	const LX = (width - LW) / 2;
+	const LY = (height - LH) / 2 - 20;
+	const RING = {cx: RING0.cx * S, cy: RING0.cy * S, rx: RING0.rx * S, ry: RING0.ry * S, rot: RING0.rot};
+	const SPARK = {x: SPARK0.x * S, y: SPARK0.y * S};
+	// 輪の上の点（角度 a）を画面の座標に
+	const ringPt = (a: number) => {
+		const th = (RING.rot * Math.PI) / 180;
+		const x = RING.rx * Math.cos(a);
+		const y = RING.ry * Math.sin(a);
+		return {x: LX + RING.cx + x * Math.cos(th) - y * Math.sin(th), y: LY + RING.cy + x * Math.sin(th) + y * Math.cos(th)};
+	};
 
 	const tag = interpolate(frame, [sec(b.tagline.from), sec(b.tagline.from) + 14, sec(b.tagline.to) - 12, sec(b.tagline.to)], [0, 1, 1, 0], clamp);
 	const tagY = interpolate(frame, [sec(b.tagline.from), sec(b.tagline.from) + 20], [24, 0], {...clamp, easing: ease});
@@ -74,7 +79,7 @@ export const Logo: React.FC = () => {
 					opacity: tag,
 					fontFamily: F.body,
 					fontWeight: 700,
-					fontSize: 88,
+					fontSize: L.vertical ? 60 : 88,
 					letterSpacing: '.06em',
 					color: C.text,
 				}}
@@ -114,7 +119,7 @@ export const Logo: React.FC = () => {
 				{fly > 0 && draw === 0 ? (
 					<line x1={flyFrom.x} y1={flyFrom.y} x2={head.x} y2={head.y} stroke="url(#ring-g)" strokeWidth={2} opacity={0.35} />
 				) : null}
-				{draw > 0 ? <path d={ringPath} stroke="url(#ring-g)" strokeWidth={7} fill="none" strokeLinecap="round" opacity={svgRingFade} /> : null}
+				{draw > 0 ? <path d={ringPath} stroke="url(#ring-g)" strokeWidth={7 * S} fill="none" strokeLinecap="round" opacity={svgRingFade} /> : null}
 				{sparkOn ? (
 					<g>
 						<circle cx={head.x} cy={head.y} r={34} fill="url(#spark-g)" />
@@ -136,7 +141,7 @@ export const Logo: React.FC = () => {
 					textAlign: 'center',
 					opacity: url,
 					fontFamily: F.mono,
-					fontSize: 30,
+					fontSize: L.vertical ? 26 : 30,
 					letterSpacing: '.32em',
 					marginRight: '-.32em',
 					color: C.textDim,
@@ -144,7 +149,7 @@ export const Logo: React.FC = () => {
 			>
 				{b.url}
 			</div>
-			<div style={{position: 'absolute', left: 0, right: 0, bottom: 64, textAlign: 'center', opacity: note, fontFamily: F.body, fontSize: 20, color: C.textDim}}>
+			<div style={{position: 'absolute', left: L.pad, right: L.pad, bottom: L.vertical ? 300 : 64, textAlign: 'center', opacity: note, fontFamily: F.body, fontSize: L.vertical ? 18 : 20, color: C.textDim}}>
 				{b.disclaimer}
 			</div>
 		</AbsoluteFill>

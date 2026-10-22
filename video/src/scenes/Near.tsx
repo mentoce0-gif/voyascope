@@ -1,8 +1,9 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
-import {Beacon, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, easeInOut, prog} from '../components/ui';
+import {Badges, Beacon, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, easeInOut, prog} from '../components/ui';
 import {Globe, orbitPoint, project, splitPath} from '../components/Globe';
-import {NOW_EARTH} from './Now';
+import {nowEarth} from './Now';
+import {useLayout} from '../layout';
 import {beats, captionsOf, sec} from '../script';
 import {useVariant} from '../variant';
 import {EARTH_RADIUS_KM, facts} from '../facts';
@@ -22,12 +23,15 @@ export const Near: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
 	const v = useVariant();
+	const L = useLayout();
+	const NOW_EARTH = nowEarth(L);
+	const P = L.vertical ? {r: 400, x: 540, y: 860, rFar: 66, yFar: 860} : {r: 340, x: 1240, y: 540, rFar: 66, yFar: 520};
 	const withGeo = v === 'himawari'; // 流星群版は ISS だけ（静止軌道まで引かない）
 	const push = prog(frame, b.pushIn.from, b.pushIn.to, easeInOut);
 	const z = withGeo ? prog(frame, b.zoomOut.from, b.zoomOut.to, easeInOut) : 0;
-	const r = interpolate(z, [0, 1], [interpolate(push, [0, 1], [NOW_EARTH.r, 340]), 66]);
-	const cx = interpolate(z, [0, 1], [interpolate(push, [0, 1], [NOW_EARTH.x, 1240]), 1240]);
-	const cy = interpolate(z, [0, 1], [interpolate(push, [0, 1], [NOW_EARTH.y, 540]), 520]);
+	const r = interpolate(z, [0, 1], [interpolate(push, [0, 1], [NOW_EARTH.r, P.r]), P.rFar]);
+	const cx = interpolate(z, [0, 1], [interpolate(push, [0, 1], [NOW_EARTH.x, P.x]), P.x]);
+	const cy = interpolate(z, [0, 1], [interpolate(push, [0, 1], [NOW_EARTH.y, P.y]), P.yFar]);
 	const spin = -150 + (frame + sec(beats.now.seconds)) * 0.06;
 
 	// ISS：アニメーションでは約5秒で1周（本物は約90分）
@@ -73,13 +77,13 @@ export const Near: React.FC = () => {
 			<Tag
 				x={cx + iss.x}
 				y={cy + iss.y}
-				dx={iss.x > 0 ? 70 : -70}
+				dx={cx + iss.x < width / 2 ? 70 : -70} // タグは画面の内側へ向けて出す（端で切れないように）
 				dy={-70}
 				text={b.labels.iss}
 				sub="ISS"
 				opacity={issVisible ? nearUi * interpolate(frame, [sec(1.2), sec(1.6)], [0, 1], clamp) : 0}
 			/>
-			<Tag x={cx + hima.x} y={cy + hima.y} dx={90} dy={40} text={b.labels.himawari} sub="HIMAWARI-9" color={C.amber} opacity={withGeo ? prog(frame, b.zoomOut.to - 0.3, b.zoomOut.to + 0.5) : 0} />
+			<Tag x={cx + hima.x} y={cy + hima.y} dx={L.vertical ? -90 : 90} dy={L.vertical ? 80 : 40} text={b.labels.himawari} sub="HIMAWARI-9" color={C.amber} opacity={withGeo ? prog(frame, b.zoomOut.to - 0.3, b.zoomOut.to + 0.5) : 0} />
 			<Tag x={cx + japan.x} y={cy + japan.y} dx={-60} dy={-50} text={b.labels.japan} color={C.amber} size={24} opacity={farUi} />
 
 			<Scrim />
@@ -96,9 +100,9 @@ export const Near: React.FC = () => {
 				]}
 			/>
 			<TmRow at={b.zoomOut.to} opacity={farUi} items={[{k: 'ORBIT', v: 'GEO', color: C.amber}, {k: 'TARGET', v: 'HIMAWARI-9', color: C.amber}]} />
-			<div style={{position: 'absolute', right: 72, top: 116, opacity: interpolate(frame, [sec(2), sec(2.6)], [0, 1], clamp)}}>
+			<Badges opacity={interpolate(frame, [sec(2), sec(2.6)], [0, 1], clamp)}>
 				<Pill color={C.mint}>{b.badgeNear}</Pill>
-			</div>
+			</Badges>
 			<Captions items={captionsOf(v, 'near')} />
 		</AbsoluteFill>
 	);

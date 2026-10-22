@@ -4,6 +4,7 @@ import React from 'react';
 import {AbsoluteFill, Easing, interpolate, random, useCurrentFrame, useVideoConfig} from 'remotion';
 import {C, F} from '../theme';
 import {Caption, sec} from '../script';
+import {useLayout} from '../layout';
 
 export const ease = Easing.bezier(0.16, 1, 0.3, 1); // 止まる手前でゆっくり
 export const easeInOut = Easing.bezier(0.65, 0, 0.35, 1);
@@ -59,6 +60,7 @@ const rich = (s: string) =>
 // 字幕（3段）：左下。key → title（1行ずつ下から）→ sub の順に出る
 export const Captions: React.FC<{items: Caption[]}> = ({items}) => {
 	const frame = useCurrentFrame();
+	const L = useLayout();
 	return (
 		<AbsoluteFill style={{pointerEvents: 'none'}}>
 			{items.map((c, i) => {
@@ -67,7 +69,7 @@ export const Captions: React.FC<{items: Caption[]}> = ({items}) => {
 				const f0 = sec(c.from);
 				const lines = c.title.split('\n');
 				return (
-					<div key={i} style={{position: 'absolute', left: 80, bottom: 190, right: 700, opacity: a}}>
+					<div key={i} style={{position: 'absolute', left: L.pad, bottom: L.capBottom, right: L.vertical ? L.pad : 700, opacity: a}}>
 						<div
 							style={{
 								fontFamily: F.mono,
@@ -89,7 +91,7 @@ export const Captions: React.FC<{items: Caption[]}> = ({items}) => {
 										style={{
 											fontFamily: F.body,
 											fontWeight: 700,
-											fontSize: 64,
+											fontSize: L.capTitle,
 											lineHeight: 1.32,
 											color: C.text,
 											textShadow: shadow,
@@ -108,7 +110,7 @@ export const Captions: React.FC<{items: Caption[]}> = ({items}) => {
 								style={{
 									marginTop: 14,
 									fontFamily: F.body,
-									fontSize: 30,
+									fontSize: L.capSub,
 									color: C.textDim,
 									textShadow: shadow,
 									opacity: interpolate(frame, [f0 + 16, f0 + 30], [0, 1], clamp),
@@ -134,9 +136,10 @@ export const Readout: React.FC<{k: string; value: string; color?: string; change
 	opacity = 1,
 }) => {
 	const frame = useCurrentFrame();
+	const L = useLayout();
 	const p = changeAt === undefined ? 1 : interpolate(frame, [sec(changeAt), sec(changeAt) + 10], [0, 1], {...clamp, easing: ease});
 	return (
-		<div style={{position: 'absolute', left: 80, top: 112, opacity, display: 'flex', alignItems: 'baseline', gap: 16, textShadow: shadow}}>
+		<div style={{position: 'absolute', left: L.pad, top: L.readoutTop, opacity, display: 'flex', alignItems: 'baseline', gap: 16, textShadow: shadow}}>
 			<span style={{fontFamily: F.mono, fontSize: 24, letterSpacing: '.2em', color: C.mint, opacity: p}}>{k}</span>
 			<span
 				style={{
@@ -159,10 +162,11 @@ export const Readout: React.FC<{k: string; value: string; color?: string; change
 
 // 値の行（ラベルは小さく2段、値は mint の縦線つき）
 export type TmItem = {k: string; unit?: string; v: string; color?: string};
-export const TmRow: React.FC<{items: TmItem[]; at?: number; opacity?: number; top?: number}> = ({items, at = 0, opacity = 1, top = 206}) => {
+export const TmRow: React.FC<{items: TmItem[]; at?: number; opacity?: number; top?: number}> = ({items, at = 0, opacity = 1, top}) => {
 	const frame = useCurrentFrame();
+	const L = useLayout();
 	return (
-		<div style={{position: 'absolute', left: 80, top, display: 'flex', gap: 40, alignItems: 'flex-end', opacity, textShadow: shadow}}>
+		<div style={{position: 'absolute', left: L.pad, top: top ?? L.tmTop, display: 'flex', gap: L.vertical ? 28 : 40, alignItems: 'flex-end', opacity, textShadow: shadow}}>
 			{items.map((it, i) => {
 				const p = interpolate(frame, [sec(at) + i * 5, sec(at) + i * 5 + 12], [0, 1], {...clamp, easing: ease});
 				return (
@@ -175,7 +179,7 @@ export const TmRow: React.FC<{items: TmItem[]; at?: number; opacity?: number; to
 							style={{
 								fontFamily: F.mono,
 								fontWeight: 700,
-								fontSize: 40,
+								fontSize: L.vertical ? 34 : 40,
 								lineHeight: 1,
 								paddingLeft: 14,
 								borderLeft: `3px solid ${it.color ?? C.mint}`,
@@ -235,6 +239,28 @@ export const Pill: React.FC<{children: React.ReactNode; color?: string; style?: 
 		{children}
 	</div>
 );
+
+// 場面ごとの注記（模式図・早送り など）を右上に積む。縦では小さくして、計器の下に
+export const Badges: React.FC<{children: React.ReactNode; opacity?: number}> = ({children, opacity = 1}) => {
+	const L = useLayout();
+	return (
+		<div
+			style={{
+				position: 'absolute',
+				right: L.vertical ? 48 : 72,
+				top: L.badgeTop,
+				display: 'flex',
+				flexDirection: 'column',
+				alignItems: 'flex-end',
+				gap: 10,
+				opacity,
+				zoom: L.vertical ? 0.82 : 1,
+			}}
+		>
+			{children}
+		</div>
+	);
+};
 
 // 点（x, y）から点線のリーダーをのばして、太字のタグ（MMX いまどこ の .tag と .leader）
 export const Tag: React.FC<{x: number; y: number; text: string; dx?: number; dy?: number; color?: string; opacity?: number; size?: number; sub?: string}> = ({

@@ -2,6 +2,7 @@
 // 使い方：node scripts/stills.mjs            … 各ビートの要所
 //        node scripts/stills.mjs 300 615     … 指定したフレームだけ
 //        VARIANT=sky node scripts/stills.mjs … 流星群版（ふだんはひまわり版）
+//        VERTICAL=1 node scripts/stills.mjs  … 縦版（ひまわり版）
 import {bundle} from '@remotion/bundler';
 import {renderStill, selectComposition} from '@remotion/renderer';
 import {mkdirSync, readFileSync} from 'node:fs';
@@ -13,7 +14,8 @@ const root = path.resolve(import.meta.dirname, '..');
 // [ビート, そのビートの頭からの秒]。フレームは timing.json から計算する（ビートの長さを変えてもずれない）
 const T = JSON.parse(readFileSync(path.join(root, 'src/timing.json'), 'utf8'));
 const VARIANT = process.env.VARIANT ?? 'himawari';
-const COMP = {himawari: 'VoyascopeTeaser', sky: 'VoyascopeTeaserSky'}[VARIANT];
+const VERTICAL = process.env.VERTICAL === '1';
+const COMP = VERTICAL ? 'VoyascopeTeaserVertical' : {himawari: 'VoyascopeTeaser', sky: 'VoyascopeTeaserSky'}[VARIANT];
 const ORDER = T.variants[VARIANT].order;
 const secOf = (k) => T.variants[VARIANT].beats[k] ?? T.beats[k];
 const beatStart = {};
@@ -41,7 +43,7 @@ const composition = await selectComposition({serveUrl, id: COMP, browserExecutab
 mkdirSync(path.join(root, 'out/stills'), {recursive: true});
 for (const [name, list] of Object.entries(frames)) {
 	for (const frame of list) {
-		const output = path.join(root, `out/stills/${VARIANT}-${name}-${String(frame).padStart(4, '0')}.png`);
+		const output = path.join(root, `out/stills/${VERTICAL ? 'v-' : ''}${VARIANT}-${name}-${String(frame).padStart(4, '0')}.png`);
 		await renderStill({serveUrl, composition, frame, output, browserExecutable, chromeMode});
 		console.log(output);
 	}

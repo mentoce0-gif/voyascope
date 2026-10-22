@@ -32,6 +32,7 @@
 | `src/components/Chrome.tsx` | どの場面にも重なる帯：左上のブランド・右上の注記・下の「地球からの距離」の目盛り |
 | `src/components/Globe.tsx` | 線画の地球（正射図法・陸地の線は `web/data/land-110m.geojson`）と軌道の点の計算 |
 | `src/scenes/*.tsx` | 各ビート（Now → Near →〔流星群版だけ Sky〕→ Depart → Far → Logo → Sources） |
+| `src/layout.tsx` | 横（1920×1080）か縦（1080×1920）か。縦では文字を上と真ん中に寄せ、スマホのボタンが出る下と右を避ける |
 | `src/variant.tsx` | いまどちらの版か（場面が ISS だけにするか・出典・目盛りを切り替える） |
 | `src/Root.tsx` | ビートを重ねてつなぐ（0.5秒）・帯・音楽 |
 | `scripts/music.mjs` | 音楽をコードで合成 → `public/music/theme.wav`（リポジトリには入れない。`npm run music`） |
@@ -45,6 +46,7 @@ npm run music         # 音楽を合成 → public/music/theme.wav（studio・re
 npm run studio        # ブラウザでプレビュー（タイムラインで見ながら直せる）
 npm run stills        # 要所の静止画 → out/stills/（VARIANT=sky で流星群版。node scripts/stills.mjs 300 615 で指定のフレームだけ）
 npm run render        # 最終の MP4（H.264＋AAC）→ out/voyascope-teaser.mp4（ひまわり版）・out/voyascope-teaser-sky.mp4（流星群版）
+npm run render:vertical  # 縦版（ひまわり版・1080×1920）→ out/voyascope-teaser-vertical.mp4
 npm run gif           # 流星群版のプレビューの GIF（Remotion で直接。1/3 のフレーム・40% の大きさ。音なし）
 ```
 
@@ -80,7 +82,7 @@ REMOTION_BROWSER=/path/to/chrome REMOTION_CHROME_MODE=chrome-for-testing npm run
 | 「色をもっと琥珀に」 | `src/theme.ts` の `C` |
 | 「字幕を大きく」 | `src/components/ui.tsx` の `Captions` の `size` |
 | 「数字を最新に」 | `curation/` のカードを直す（動画は次のレンダリングで自動で変わる） |
-| 「縦長版がほしい」 | `src/Root.tsx` に 1080×1920 の Composition を足して、各場面の座標を作り直す |
+| 「縦版の◯◯の位置を変えて」 | 共通の位置は `src/layout.tsx` の `V_LAYOUT`（計器・字幕・目盛りの高さなど）、場面ごとの絵の位置は各場面の `L.vertical ? 縦 : 横` |
 
 ## 決まり（RULES.md から）
 
