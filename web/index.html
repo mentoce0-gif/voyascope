@@ -265,6 +265,8 @@
       <p class="small">軌道データや画像などの権利は、それぞれの提供元にあります。</p>
       <h3>文字で読む</h3>
       <p class="small"><a href="missions/">一言でわかる一覧</a>：探査機・人工衛星・ミッションを、一言と要点で（出典つき）。</p>
+      <h3>アクセスの数え方</h3>
+      <p class="small">どのページが何回開かれたかと、どこから来たか（X・検索など、来た元の種類だけ）を数えています。あなたを見分ける情報（IP アドレス・端末の情報・Cookie など）は残しません。表示の速さを測るために、Cloudflare Web Analytics も使っています。</p>
       <h3>ライセンスとお願い</h3>
       <p class="small">このアプリのプログラムは作者が権利を持ちます（<a href="https://github.com/mentoce0-gif/voyascope/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>。許可なくコピーサイトなどに使うことはできません）。VOYASCOPE が書いた文章は <a href="https://github.com/mentoce0-gif/voyascope/blob/main/CONTENT_LICENSE.md" target="_blank" rel="noopener">CC BY 4.0</a> です（ロゴを除く）。書いてある事実は、それぞれの出典で確かめてください。<b>軍事目的や、誰かを傷つけたり虐げたりすることには使わないでください。</b>これはライセンスの条件ではなく、作者からのお願いです。</p>
     </div>
@@ -302,5 +304,7 @@
     })();
   </script>
   <script type="module" src="js/main.js"></script>
+  <!-- アクセスを数える（外から来た回数だけ。js/count.js） -->
+  <script src="js/count.js" defer></script>
 </body>
 </html>
