@@ -3,6 +3,7 @@ import React from 'react';
 import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
 import {C, F} from '../theme';
 import {FPS, beatStart, chrome} from '../script';
+import {useVariant} from '../variant';
 import {Pill, clamp, easeInOut} from './ui';
 
 // ブランドのアイコン（web/favicon.svg と同じ形：ロゴの「O」と、斜めに回る金色の輪）
@@ -36,8 +37,9 @@ const at = (t: number) => {
 	const y = Y - BOW * 4 * t * (1 - t);
 	return {x, y};
 };
-const TICK_T = [0, 0.2, 0.42, 0.68, 1];
-const posToT = (pos: number) => {
+// 目盛りの位置：距離の版は近いほど詰める、流星群の版（アプリの4本柱）は等間隔
+const TICKS_BY: Record<string, number[]> = {himawari: [0, 0.2, 0.42, 0.68, 1], sky: [0, 0.25, 0.5, 0.75, 1]};
+const posToT = (TICK_T: number[], pos: number) => {
 	const i = Math.min(TICK_T.length - 2, Math.floor(pos));
 	return TICK_T[i] + (TICK_T[i + 1] - TICK_T[i]) * (pos - i);
 };
@@ -45,20 +47,23 @@ const posToT = (pos: number) => {
 export const ChromeOverlay: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
+	const v = useVariant();
+	const arcCfg = chrome.arcs[v];
+	const TICK_T = TICKS_BY[v];
 	// ロゴの場面に入ったら消える
-	const logoAt = beatStart('logo');
+	const logoAt = beatStart(v, 'logo');
 	const vis = interpolate(frame, [0, 12, logoAt, logoAt + 14], [0, 1, 1, 0], clamp);
 	if (vis <= 0) return null;
 
 	// いまの場所（目盛りの位置）を、台本のキーから決める
-	const keys = chrome.arcKeys.map(([b, s, p]) => [beatStart(b) + s * FPS, p] as const);
+	const keys = arcCfg.keys.map(([b, s, p]) => [beatStart(v, b) + s * FPS, p] as const);
 	let pos = keys[0][1];
 	for (let i = 0; i < keys.length - 1; i++) {
 		const [f0, p0] = keys[i];
 		const [f1, p1] = keys[i + 1];
 		if (frame >= f0) pos = interpolate(frame, [f0, f1], [p0, p1], {...clamp, easing: easeInOut});
 	}
-	const tNow = posToT(pos);
+	const tNow = posToT(TICK_T, pos);
 	const nowPt = at(tNow);
 	const path = (t0: number, t1: number) =>
 		Array.from({length: 60}, (_, i) => at(t0 + ((t1 - t0) * i) / 59))
@@ -104,10 +109,10 @@ export const ChromeOverlay: React.FC = () => {
 				<circle cx={nowPt.x} cy={nowPt.y} r={13} fill="none" stroke={C.amber} strokeWidth={3} />
 				<circle cx={nowPt.x} cy={nowPt.y} r={6} fill={C.amber} />
 			</svg>
-			{chrome.ticks.map((tk, i) => {
+			{arcCfg.ticks.map((tk, i) => {
 				const p = at(TICK_T[i]);
 				const near = Math.abs(pos - i) < 0.5;
-				const align = i === 0 ? 'left' : i === chrome.ticks.length - 1 ? 'right' : 'center';
+				const align = i === 0 ? 'left' : i === arcCfg.ticks.length - 1 ? 'right' : 'center';
 				return (
 					<div
 						key={tk.label}
@@ -130,8 +135,8 @@ export const ChromeOverlay: React.FC = () => {
 				);
 			})}
 			<div style={{position: 'absolute', left: 80, top: Y + 22, fontFamily: F.mono, fontSize: 15, letterSpacing: '.2em', color: C.textDim}}>
-				{chrome.arcTitle}
-				<span style={{fontFamily: F.body, letterSpacing: 0, marginLeft: 14}}>（{chrome.arcNote}）</span>
+				<span style={{fontFamily: /[ぁ-んァ-ン一-龥]/.test(arcCfg.title) ? F.body : F.mono, letterSpacing: /[ぁ-ん]/.test(arcCfg.title) ? '.08em' : undefined}}>{arcCfg.title}</span>
+				{arcCfg.note ? <span style={{fontFamily: F.body, letterSpacing: 0, marginLeft: 14}}>（{arcCfg.note}）</span> : null}
 			</div>
 		</AbsoluteFill>
 	);

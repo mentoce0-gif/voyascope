@@ -1,20 +1,30 @@
 // 動画の音楽を、コードで合成して public/music/theme.wav に書き出す（サンプルや既存の曲は使わない）。
 // 映像のきっかけ（打ち上げ・光が届く・ロゴ）は src/timing.json から読むので、秒を変えたら作り直すだけで合う。
-//   node scripts/music.mjs
+//   node scripts/music.mjs            … すべての版（public/music/theme-<版>.wav）
+//   node scripts/music.mjs sky        … 流星群版だけ
 // 曲の形：D の音階。静かな和音 → 計器の刻み → 打ち上げで鼓動 → 遠くで鐘 → ロゴで長調に着地
 import {mkdirSync, readFileSync, writeFileSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
 const T = JSON.parse(readFileSync(path.join(root, 'src/timing.json'), 'utf8'));
-const ORDER = ['now', 'near', 'depart', 'far', 'logo', 'sources'];
+const VARIANT = process.argv[2];
+if (!VARIANT) {
+	// 版を指定しなければ、すべての版を順に作る
+	for (const v of Object.keys(T.variants)) execFileSync(process.execPath, [import.meta.filename, v], {stdio: 'inherit'});
+	process.exit(0);
+}
+const ORDER = T.variants[VARIANT].order;
+const secOf = (k) => T.variants[VARIANT].beats[k] ?? T.beats[k];
 const OVER = T.transition / T.fps;
 const start = {};
 let acc = 0;
 ORDER.forEach((k, i) => {
 	start[k] = acc;
-	acc += T.beats[k] - (i < ORDER.length - 1 ? OVER : 0);
+	acc += secOf(k) - (i < ORDER.length - 1 ? OVER : 0);
 });
+const next = (k) => start[ORDER[ORDER.indexOf(k) + 1]]; // 次のビートの頭
 const DUR = acc;
 const cue = (name) => start[T.cues[name][0]] + T.cues[name][1];
 
@@ -177,16 +187,45 @@ const prog = ['Dm9', 'Bbmaj7', 'F', 'Csus'];
 {
 	let t = start.near;
 	let i = 0;
-	while (t < start.depart - 0.5) {
-		const len = Math.min(beat * 8, start.depart - t);
+	while (t < next('near') - 0.5) {
+		const len = Math.min(beat * 8, next('near') - t);
 		pad(t, t + len, chords[prog[i % 4]], 0.9, {bright: 0.18, att: 1.2, rel: 1.6});
 		i++;
 		t += beat * 8;
 	}
 	const arp = [74, 69, 72, 76, 74, 69, 77, 72];
-	for (let k = 0, tt = start.near + 0.6; tt < start.depart - 0.8; k++, tt += beat / 2) {
+	for (let k = 0, tt = start.near + 0.6; tt < next('near') - 0.8; k++, tt += beat / 2) {
 		pluck(tt, arp[k % arp.length], 0.07, 0.18, k % 2 ? 0.35 : -0.35);
 	}
+}
+
+// 2'. 星空（流星群版だけ）：刻みが止み、静かな夜の和音。流れ星ごとに「ひゅっ」と高い鈴
+const whoosh = (t, gain, pan) => {
+	const s0 = Math.floor(t * SR);
+	let low = 0;
+	let band = 0;
+	for (let k = 0; k < 0.6 * SR; k++) {
+		const p = k / (0.6 * SR);
+		const f = 6000 * (1 - p) + 900 * p; // 高いところから下りる
+		const F = 2 * Math.sin((Math.PI * f) / SR);
+		const high = rnd() - low - 0.4 * band;
+		band += F * high;
+		low += F * band;
+		const v = band * gain * Math.sin(Math.PI * p) ** 2;
+		put(s0 + k, v * (1 - pan) * 0.8, v * (1 + pan) * 0.8, 0.6);
+	}
+};
+if (start.sky !== undefined) {
+	pad(start.sky - 0.3, next('sky'), [38, 50, 57, 62, 69], 1.0, {bright: 0.09, att: 2.2, rel: 1.8});
+	pad(start.sky + 1, start.sky + T.beats.sky * 0.62, [74, 78, 81], 0.5, {bright: 0.07, att: 2.5, rel: 1.5}); // 夜空
+	T.meteors.forEach((m, i) => {
+		const t = start.sky + m;
+		whoosh(t, 0.22, ((i % 5) - 2) / 3);
+		bell(t + 0.05, [86, 88, 90, 93, 86, 90, 88, 93, 86, 90][i % 10], 0.04, 1.4, ((i % 3) - 1) / 2);
+	});
+	// ハレー彗星の軌道へ引くところ：低い和音がふくらむ
+	pad(start.sky + 10, next('sky'), [36, 43, 50, 55], 0.9, {bright: 0.12, att: 2.0, rel: 1.0});
+	riser(next('sky') - 2.2, next('sky') + 0.4, 0.25, 300, 3000);
 }
 
 // 3. 出発：打ち上げの前に風が上がり、打ち上げで衝撃、そこから鼓動
@@ -284,5 +323,5 @@ for (let s = 0; s < N; s++) {
 	buf.writeInt16LE(Math.round(Math.max(-1, Math.min(1, R[s] * norm)) * 32767), 46 + s * 4);
 }
 mkdirSync(path.join(root, 'public/music'), {recursive: true});
-writeFileSync(path.join(root, 'public/music/theme.wav'), buf);
-console.log(`public/music/theme.wav（${DUR.toFixed(2)} 秒）`);
+writeFileSync(path.join(root, `public/music/theme-${VARIANT}.wav`), buf);
+console.log(`public/music/theme-${VARIANT}.wav（${DUR.toFixed(2)} 秒）`);

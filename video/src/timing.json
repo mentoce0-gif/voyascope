@@ -2,14 +2,20 @@
   "_": "ビートの長さ（秒）と、音楽を合わせるきっかけ。script.ts と scripts/music.mjs の両方が読む。秒を変えたら npm run music で音楽も作り直す",
   "fps": 30,
   "transition": 15,
-  "beats": { "now": 9, "near": 18, "depart": 20, "far": 18, "logo": 11, "sources": 7 },
+  "beats": { "now": 9, "near": 18, "sky": 16, "depart": 20, "far": 18, "logo": 11, "sources": 7 },
+  "variants": {
+    "himawari": { "_": "ISS → ひまわり9号（距離のものさし）", "order": ["now", "near", "depart", "far", "logo", "sources"], "beats": {} },
+    "sky": { "_": "ISS → オリオン座流星群（アプリの4本柱：衛星・星空・探査機・遠くを見る）", "order": ["now", "near", "sky", "depart", "far", "logo", "sources"], "beats": { "near": 9.5 } }
+  },
   "cues": {
     "liftoff": ["depart", 1.4],
-    "separation": ["depart", 7.0],
+    "separation": ["depart", 7.4],
     "toSolar": ["depart", 8.4],
     "lightStart": ["far", 6.0],
     "lightArrive": ["far", 12.0],
     "ring": ["logo", 3.2],
     "logoReveal": ["logo", 5.4]
-  }
+  },
+  "_meteors": "流れ星が流れる時刻（sky のビートの頭からの秒）。映像と音の両方が使う。数は演出",
+  "meteors": [0.7, 1.6, 2.5, 3.1, 4.2, 5.0, 5.9, 7.3, 8.6, 9.6]
 }

@@ -3,7 +3,8 @@ import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remoti
 import {Beacon, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, easeInOut, prog} from '../components/ui';
 import {Globe, orbitPoint, project, splitPath} from '../components/Globe';
 import {NOW_EARTH} from './Now';
-import {beats, sec} from '../script';
+import {beats, captionsOf, sec} from '../script';
+import {useVariant} from '../variant';
 import {EARTH_RADIUS_KM, facts} from '../facts';
 import {C} from '../theme';
 
@@ -20,8 +21,10 @@ const n = (v: number) => v.toLocaleString('en-US');
 export const Near: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
+	const v = useVariant();
+	const withGeo = v === 'himawari'; // 流星群版は ISS だけ（静止軌道まで引かない）
 	const push = prog(frame, b.pushIn.from, b.pushIn.to, easeInOut);
-	const z = prog(frame, b.zoomOut.from, b.zoomOut.to, easeInOut);
+	const z = withGeo ? prog(frame, b.zoomOut.from, b.zoomOut.to, easeInOut) : 0;
 	const r = interpolate(z, [0, 1], [interpolate(push, [0, 1], [NOW_EARTH.r, 340]), 66]);
 	const cx = interpolate(z, [0, 1], [interpolate(push, [0, 1], [NOW_EARTH.x, 1240]), 1240]);
 	const cy = interpolate(z, [0, 1], [interpolate(push, [0, 1], [NOW_EARTH.y, 540]), 520]);
@@ -35,13 +38,13 @@ export const Near: React.FC = () => {
 	const trail = Array.from({length: 30}, (_, i) => orbitPoint(r * ISS_R, issAngle - i * 1.5, ISS_INCL, 40, spin, TILT));
 
 	// 静止軌道：赤道の上の円。ひまわり9号は地球と一緒に回るので、日本の経度の上に止まって見える
-	const geoAppear = prog(frame, b.zoomOut.from + 1.0, b.zoomOut.to + 0.6);
+	const geoAppear = withGeo ? prog(frame, b.zoomOut.from + 1.0, b.zoomOut.to + 0.6) : 0;
 	const geoPts = Array.from({length: 181}, (_, i) => project(0, i * 2, r * GEO_R, spin, TILT));
 	const hima = project(0, JAPAN.lon + 2, r * GEO_R, spin, TILT);
 	const japan = project(JAPAN.lat, JAPAN.lon, r, spin, TILT);
 
-	const nearUi = interpolate(frame, [sec(b.zoomOut.from) - 12, sec(b.zoomOut.from) + 4], [1, 0], clamp);
-	const farUi = interpolate(frame, [sec(b.zoomOut.to) - 6, sec(b.zoomOut.to) + 10], [0, 1], clamp);
+	const nearUi = withGeo ? interpolate(frame, [sec(b.zoomOut.from) - 12, sec(b.zoomOut.from) + 4], [1, 0], clamp) : 1;
+	const farUi = withGeo ? interpolate(frame, [sec(b.zoomOut.to) - 6, sec(b.zoomOut.to) + 10], [0, 1], clamp) : 0;
 
 	return (
 		<AbsoluteFill>
@@ -76,7 +79,7 @@ export const Near: React.FC = () => {
 				sub="ISS"
 				opacity={issVisible ? nearUi * interpolate(frame, [sec(1.2), sec(1.6)], [0, 1], clamp) : 0}
 			/>
-			<Tag x={cx + hima.x} y={cy + hima.y} dx={90} dy={40} text={b.labels.himawari} sub="HIMAWARI-9" color={C.amber} opacity={prog(frame, b.zoomOut.to - 0.3, b.zoomOut.to + 0.5)} />
+			<Tag x={cx + hima.x} y={cy + hima.y} dx={90} dy={40} text={b.labels.himawari} sub="HIMAWARI-9" color={C.amber} opacity={withGeo ? prog(frame, b.zoomOut.to - 0.3, b.zoomOut.to + 0.5) : 0} />
 			<Tag x={cx + japan.x} y={cy + japan.y} dx={-60} dy={-50} text={b.labels.japan} color={C.amber} size={24} opacity={farUi} />
 
 			<Scrim />
@@ -96,7 +99,7 @@ export const Near: React.FC = () => {
 			<div style={{position: 'absolute', right: 72, top: 116, opacity: interpolate(frame, [sec(2), sec(2.6)], [0, 1], clamp)}}>
 				<Pill color={C.mint}>{b.badgeNear}</Pill>
 			</div>
-			<Captions items={b.captions} />
+			<Captions items={captionsOf(v, 'near')} />
 		</AbsoluteFill>
 	);
 };

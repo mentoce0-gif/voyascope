@@ -12,7 +12,9 @@ export const TRANSITION = T.transition; // 場面のつなぎ（フレーム。�
 
 const n = (v: number) => v.toLocaleString('en-US');
 
-export type Caption = {from: number; to: number; key: string; title: string; sub?: string};
+export type Variant = 'himawari' | 'sky';
+export const VARIANTS: Variant[] = ['himawari', 'sky'];
+export type Caption = {from: number; to: number; key: string; title: string; sub?: string; only?: Variant};
 
 export const beats = {
 	now: {
@@ -39,6 +41,7 @@ export const beats = {
 			{
 				from: 11.0,
 				to: 17.6,
+				only: 'himawari',
 				key: 'HIMAWARI-9 · ひまわり9号',
 				title: `さらに遠く、\n約${n(facts.himawari.altitudeKm)} km。`,
 				sub: '日本と東アジアの天気を見はる',
@@ -59,7 +62,7 @@ export const beats = {
 				to: 8.2,
 				key: 'MMX · 火星衛星探査機',
 				title: `${facts.mmx.launchJa}、\n${facts.mmx.site}から火星へ。`,
-				sub: `${facts.mmx.vehicle}。**${facts.mmx.sepJst}ごろ**ロケットから分離`,
+				sub: `地球をぐるりと回ってから、**${facts.mmx.sepJst}ごろ** 火星へ向かう軌道で分離`,
 			},
 			{from: 10.6, to: 14.6, key: 'MISSION', title: '火星の衛星フォボスの砂を、\n地球へ持ち帰る。'},
 			{
@@ -70,8 +73,34 @@ export const beats = {
 				sub: '人類初の、火星圏からのサンプルリターンをめざす',
 			},
 		] as Caption[],
-		badgeFast: '早送り',
+		badgeFast: '早送り・計画の値',
+		badgeAlt: '高さは誇張',
 		badgeSchematic: '模式図：軌道の形・位置は実際のものではありません',
+	},
+	sky: {
+		seconds: T.beats.sky,
+		meteors: T.meteors,
+		phone: {from: 5.6, to: 10.0}, // SKY OBSERVER の画面（スマホをかざす）
+		toHalley: {from: 10.0, to: 11.6}, // 空 → ハレー彗星の軌道
+		captions: [
+			{
+				from: 0.5,
+				to: 5.4,
+				key: 'ORIONIDS · オリオン座流星群',
+				title: '見上げれば、\n流れ星。',
+				sub: `極大は **${facts.orionids.peakJa}** ごろ。暗い空で1時間に **${facts.orionids.rate}個** ほど`,
+			},
+			{from: 5.8, to: 9.8, key: 'SKY OBSERVER', title: 'スマホをかざして、\n放射点をさがす。', sub: 'voyascope.org/sky（試験版）'},
+			{
+				from: 10.4,
+				to: 15.6,
+				key: '1P/HALLEY · ハレー彗星',
+				title: 'もとをたどると、\nハレー彗星。',
+				sub: 'オリオン座流星群の母天体',
+			},
+		] as Caption[],
+		badgeMeteors: `流れ星の数・向きは演出（実際は1時間に${facts.orionids.rate}個ほど）`,
+		badgeHalley: '軌道の形は JPL の値から計算・上から見た図',
 	},
 	far: {
 		seconds: T.beats.far,
@@ -105,43 +134,73 @@ export const beats = {
 	},
 };
 
-// 画面の上の帯と、下の「地球からの距離」の目盛り（すべての場面で共通）
+// 画面の上の帯と、下の目盛り（すべての場面で共通）。目盛りは版ごと
+export type ArcKey = [BeatKey, number, number]; // [ビート, 秒, 目盛りの位置（0〜）]：この点を結んで、いまの場所の印が進む
 export const chrome = {
 	pill: '非公式のファンメイド作品・出典は最後に',
-	arcTitle: 'DISTANCE FROM EARTH',
-	arcNote: '目盛りの間かくは模式',
-	ticks: [
-		{label: 'EARTH', sub: ''},
-		{label: 'ISS', sub: `${n(facts.iss.altitudeKm)} km`},
-		{label: 'HIMAWARI-9', sub: `${n(facts.himawari.altitudeKm)} km`},
-		{label: 'MARS', sub: 'MMX'},
-		{label: 'VOYAGER 1', sub: '1 LIGHT-DAY'},
-	],
-	// [ビート, 秒, 目盛りの位置（0〜4）]：この点を結んで、いまの場所の印が進む
-	arcKeys: [
-		['now', 0, 0],
-		['near', 0.6, 0],
-		['near', 2.0, 1],
-		['near', 8.4, 1],
-		['near', 11.4, 2],
-		['depart', 10.6, 2],
-		['depart', 15.4, 3],
-		['far', T.cues.lightStart[1], 3],
-		['far', T.cues.lightArrive[1], 4],
-	] as [BeatKey, number, number][],
+	arcs: {
+		// ひまわり版：地球からの距離（目盛りの間かくは模式）
+		himawari: {
+			title: 'DISTANCE FROM EARTH',
+			note: '目盛りの間かくは模式',
+			ticks: [
+				{label: 'EARTH', sub: ''},
+				{label: 'ISS', sub: `${n(facts.iss.altitudeKm)} km`},
+				{label: 'HIMAWARI-9', sub: `${n(facts.himawari.altitudeKm)} km`},
+				{label: 'MARS', sub: 'MMX'},
+				{label: 'VOYAGER 1', sub: '1 LIGHT-DAY'},
+			],
+			keys: [
+				['now', 0, 0],
+				['near', 0.6, 0],
+				['near', 2.0, 1],
+				['near', 8.4, 1],
+				['near', 11.4, 2],
+				['depart', 10.6, 2],
+				['depart', 15.4, 3],
+				['far', T.cues.lightStart[1], 3],
+				['far', T.cues.lightArrive[1], 4],
+			] as ArcKey[],
+		},
+		// 流星群版：VOYASCOPE でのぞけるもの（アプリの4本柱）
+		sky: {
+			title: 'VOYASCOPE でのぞけるもの',
+			note: '',
+			ticks: [
+				{label: 'NOW', sub: 'いま'},
+				{label: 'SATELLITES', sub: '衛星'},
+				{label: 'SKY', sub: '星空'},
+				{label: 'PROBES', sub: '探査機 · MMX'},
+				{label: 'FAR', sub: '遠くを見る'},
+			],
+			keys: [
+				['now', 0, 0],
+				['near', 0.4, 0],
+				['near', 1.6, 1],
+				['sky', 0.0, 1],
+				['sky', 1.0, 2],
+				['depart', 0.0, 2],
+				['depart', 1.0, 3],
+				['far', 0.0, 3],
+				['far', 1.2, 4],
+			] as ArcKey[],
+		},
+	},
 };
 
-export const ORDER = ['now', 'near', 'depart', 'far', 'logo', 'sources'] as const;
-export type BeatKey = (typeof ORDER)[number];
+export type BeatKey = keyof typeof beats;
+export const orderOf = (v: Variant) => T.variants[v].order as BeatKey[];
+export const secondsOf = (v: Variant, k: BeatKey) => (T.variants[v].beats as Record<string, number>)[k] ?? beats[k].seconds;
+export const captionsOf = (v: Variant, k: BeatKey) => ((beats[k] as {captions?: Caption[]}).captions ?? []).filter((c) => !c.only || c.only === v);
 
 export const sec = (s: number) => Math.round(s * FPS);
 // ビートの頭のフレーム（つなぎのぶん重なる）
-export const beatStart = (k: BeatKey) => {
+export const beatStart = (v: Variant, k: BeatKey) => {
 	let at = 0;
-	for (const b of ORDER) {
+	for (const b of orderOf(v)) {
 		if (b === k) return at;
-		at += sec(beats[b].seconds) - TRANSITION;
+		at += sec(secondsOf(v, b)) - TRANSITION;
 	}
 	return at;
 };
-export const TOTAL_FRAMES = beatStart('sources') + sec(beats.sources.seconds);
+export const totalFrames = (v: Variant) => beatStart(v, 'sources') + sec(secondsOf(v, 'sources'));

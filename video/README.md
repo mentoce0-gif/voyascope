@@ -1,6 +1,6 @@
 # VOYASCOPE イメージ動画（Remotion）
 
-1920×1080・30fps・80.5秒（出典の画面つき）。音楽つき。映像も音楽もコードで作っている（写真・既存の曲・動画生成 AI は使わない）。ロゴだけはサイトのもの（`web/assets/brand/logo-1200.webp`）をそのまま使う。
+1920×1080・30fps。**2つの版**：ひまわり版（`VoyascopeTeaser`・80.5秒）と流星群版（`VoyascopeTeaserSky`・87.5秒。衛星・星空・探査機・遠くを見るの4本柱）。どちらも出典の画面つき・音楽つき。映像も音楽もコードで作っている（写真・既存の曲・動画生成 AI は使わない）。ロゴだけはサイトのもの（`web/assets/brand/logo-1200.webp`）をそのまま使う。
 見た目は MMX いまどこ（`web/mmx/now/`）の UI に合わせた（[docs/04-review.md](docs/04-review.md)）。
 サイト（`web/`）とは別のプロジェクト。公開先（Cloudflare）には入らない（`wrangler.jsonc` の公開は `web/` だけ）。
 
@@ -26,12 +26,13 @@
 |---|---|
 | `src/timing.json` | **秒**：ビートの長さと、音楽を合わせるきっかけ（打ち上げ・分離・光・輪・ロゴ） |
 | `src/script.ts` | **台本**：字幕（key／title／sub ＝ナレーション案）・左上の計器・注記・下の目盛り・URL |
-| `src/facts.ts` | 事実：`curation/` のカードから値と出典 URL を読む。最後の出典画面の一覧もここ |
+| `src/facts.ts` | 事実：`curation/` のカードと `web/js/launch-plan.js`（打ち上げの計画）から値と出典 URL を読む。打ち上げの地上の経路（計画書の図3から読み取り）・最後の出典画面の一覧もここ |
 | `src/theme.ts` | 色（navy / amber / mint）とフォント（Zen Kaku Gothic New・JetBrains Mono） |
 | `src/components/ui.tsx` | 部品（いまどこ と同じ形）：字幕の3段・左上の計器・縦線つきの値・ピル・リーダーつきのタグ・光る点・背景の星 |
 | `src/components/Chrome.tsx` | どの場面にも重なる帯：左上のブランド・右上の注記・下の「地球からの距離」の目盛り |
 | `src/components/Globe.tsx` | 線画の地球（正射図法・陸地の線は `web/data/land-110m.geojson`）と軌道の点の計算 |
-| `src/scenes/*.tsx` | 各ビート（Now → Near → Depart → Far → Logo → Sources） |
+| `src/scenes/*.tsx` | 各ビート（Now → Near →〔流星群版だけ Sky〕→ Depart → Far → Logo → Sources） |
+| `src/variant.tsx` | いまどちらの版か（場面が ISS だけにするか・出典・目盛りを切り替える） |
 | `src/Root.tsx` | ビートを重ねてつなぐ（0.5秒）・帯・音楽 |
 | `scripts/music.mjs` | 音楽をコードで合成 → `public/music/theme.wav`（リポジトリには入れない。`npm run music`） |
 
@@ -42,9 +43,9 @@ cd video
 npm install
 npm run music         # 音楽を合成 → public/music/theme.wav（studio・render も先にこれを実行する）
 npm run studio        # ブラウザでプレビュー（タイムラインで見ながら直せる）
-npm run stills        # 要所の静止画 → out/stills/（node scripts/stills.mjs 300 615 で指定のフレームだけ）
-npm run render        # 最終の MP4（H.264＋AAC）→ out/voyascope-teaser.mp4
-npm run gif           # プレビューの GIF（Remotion で直接。1/3 のフレーム・40% の大きさ。音なし）
+npm run stills        # 要所の静止画 → out/stills/（VARIANT=sky で流星群版。node scripts/stills.mjs 300 615 で指定のフレームだけ）
+npm run render        # 最終の MP4（H.264＋AAC）→ out/voyascope-teaser.mp4（ひまわり版）・out/voyascope-teaser-sky.mp4（流星群版）
+npm run gif           # 流星群版のプレビューの GIF（Remotion で直接。1/3 のフレーム・40% の大きさ。音なし）
 ```
 
 GIF は、できた MP4 から ffmpeg で作るほうが速くて軽い（約6.3MB）：

@@ -3,13 +3,16 @@ import {AbsoluteFill} from 'remotion';
 import {Space} from '../components/ui';
 import {BrandIcon} from '../components/Chrome';
 import {beats} from '../script';
-import {sources} from '../facts';
+import {sourcesFor} from '../facts';
+import {useVariant} from '../variant';
 import {C, F} from '../theme';
 
 const b = beats.sources;
 
 // 出典：動画に出した数字の元（curation/ のカードに付いている URL）。2列で、読める大きさに
-export const Sources: React.FC = () => (
+export const Sources: React.FC = () => {
+	const sources = sourcesFor(useVariant());
+	return (
 	<AbsoluteFill>
 		<Space drift={0} density={120} />
 		<div style={{position: 'absolute', left: 96, right: 96, top: 80}}>
@@ -17,7 +20,7 @@ export const Sources: React.FC = () => (
 				<BrandIcon size={56} />
 				<span style={{fontFamily: F.body, fontWeight: 700, fontSize: 46, color: C.text}}>{b.title}</span>
 			</div>
-			<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 64, rowGap: 22}}>
+			<div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 64, rowGap: 16}}>
 				{sources.map((s) => (
 					<div key={s.label} style={{borderLeft: `3px solid ${C.mintDim}`, paddingLeft: 16, minWidth: 0}}>
 						<div style={{fontFamily: F.body, fontSize: 25, color: C.text, lineHeight: 1.35}}>{s.label}</div>
@@ -32,3 +35,4 @@ export const Sources: React.FC = () => (
 		</div>
 	</AbsoluteFill>
 );
+};
