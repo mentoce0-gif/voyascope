@@ -17,7 +17,6 @@
 | ボイジャー1号 打ち上げ 1977-09-05 | 1977-09-05 | `curation/probes/voyager-1.json` launch_date | https://science.nasa.gov/mission/voyager/voyager-1/ |
 | 2026-11-18、1光日（約259億 km） | 2026-11-18T10:16:07Z。光で24時間、約259億 km、人工物で初 | `curation/events/voyager-1-one-light-day.json` | https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/ |
 | 恒星間空間を飛ぶ | 太陽圏の外の「恒星間空間」 | `curation/probes/voyager-1.json` location | https://science.nasa.gov/mission/voyager/voyager-1/ |
-
 | 地球の半径 6,371 km（軌道の比の計算だけ） | 6371.000 km（volumetric mean radius） | `video/src/facts.ts` に定数 | https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html |
 | 陸地の形 | Natural Earth 1:110m（パブリックドメイン） | `web/data/land-110m.geojson`（サイトと同じ） | https://www.naturalearthdata.com/ |
 
@@ -28,4 +27,4 @@
 - **MMX の今の距離・速さ**：Horizons の値は「Post-launch trajectory from JAXA」だが、実際の追跡かどうかは確かめていない（handoff.md の「次」）。動画には出さない
 - **火星到着の日付**：「2027年度」は公表されているが、日付は仮（route.mjs の330日は仮の値）。航路の図には日付を書かず「模式図」と書く
 - **ボイジャー1号の今日の距離**：Horizons は1992年以降は予測の値（カードの note）。NASA の公表している 11/18 の節目だけを使う
-- **画像・ロゴ**：機体の写真（NASA など）、JAXA・NASA のロゴ、ESA の画像は使わない（すべて図形で描く）
+- **画像・ロゴ**：機体の写真（NASA など）、JAXA・NASA のロゴ、ESA の画像は使わない（すべて図形で描く。ロゴは VOYASCOPE のものだけ）
