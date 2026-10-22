@@ -1,5 +1,11 @@
 import React from 'react';
 import {C} from '../theme';
+// 陸地の形：サイトと同じ Natural Earth の 1:110m（web/data/land-110m.geojson。パブリックドメイン）
+import land from '../../../web/data/land-110m.geojson';
+
+const RINGS: [number, number][][] = land.features.flatMap((f) =>
+	(f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : (f.geometry.coordinates as unknown[])).flatMap((poly) => poly as [number, number][][]),
+);
 
 // 線画の地球（正射図法）。spin は経度方向の回転（度）、tilt は手前への傾き（度）
 const D = Math.PI / 180;
@@ -48,16 +54,18 @@ export const splitPath = (pts: Vec[], front: boolean, occludeR = Infinity) => {
 
 export const Globe: React.FC<{r: number; spin: number; tilt?: number; glow?: number}> = ({r, spin, tilt = 18, glow = 1}) => {
 	const lines: React.ReactNode[] = [];
-	for (let lon = 0; lon < 360; lon += 20) {
+	const w = Math.max(0.6, Math.min(1.6, r / 200)); // 小さいときは線を細く
+	for (let lon = 0; lon < 360; lon += 30) {
 		const pts = Array.from({length: 61}, (_, i) => project(-90 + i * 3, lon, r, spin, tilt));
-		lines.push(<path key={`m${lon}`} d={splitPath(pts, true)} stroke={C.mintDim} strokeWidth={1.3} fill="none" />);
+		lines.push(<path key={`m${lon}`} d={splitPath(pts, true)} stroke={C.mintFaint} strokeWidth={w} fill="none" />);
 	}
-	for (let lat = -60; lat <= 60; lat += 20) {
+	for (let lat = -60; lat <= 60; lat += 30) {
 		const pts = Array.from({length: 121}, (_, i) => project(lat, i * 3, r, spin, tilt));
-		lines.push(
-			<path key={`p${lat}`} d={splitPath(pts, true)} stroke={lat === 0 ? C.mint : C.mintDim} strokeWidth={lat === 0 ? 1.8 : 1.3} fill="none" />,
-		);
+		lines.push(<path key={`p${lat}`} d={splitPath(pts, true)} stroke={lat === 0 ? C.mintDim : C.mintFaint} strokeWidth={w} fill="none" />);
 	}
+	let landD = '';
+	for (const ring of RINGS) landD += splitPath(ring.map(([lon, lat]) => project(lat, lon, r, spin, tilt)), true);
+	lines.push(<path key="land" d={landD} stroke={C.mint} strokeWidth={w * 1.25} strokeLinejoin="round" fill="none" opacity={0.95} />);
 	return (
 		<g>
 			<defs>

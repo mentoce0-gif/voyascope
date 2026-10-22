@@ -51,6 +51,13 @@ export const facts = {
 		vehicle: mmxLaunch.vehicle.value,
 		site: mmxLaunch.site.label,
 		sitePos: mmxLaunch.site.position.value,
+		// 分離の時刻：カードの status の note「…5:52 ごろ H3 ロケットから分離（JAXA の打上げライブ中継で確認）」から
+		sepJst: /(\d{1,2}:\d{2}) ?ごろ/.exec(mmx.status.note)![1],
+		// 打ち上げから分離までの分（分離の時刻は「ごろ」なので、分の単位まで）
+		sepElapsedMin: (() => {
+			const [h, m] = /(\d{1,2}):(\d{2}) ?ごろ/.exec(mmx.status.note)!.slice(1).map(Number);
+			return Math.round(h * 60 + m - (mmxT.h * 60 + mmxT.mi + mmxT.s / 60));
+		})(),
 		// カードの要約「2031年度に、人類初の火星圏からのサンプルリターンをめざす」から年度を取り出す
 		returnFy: Number(/(\d{4})年度/.exec(mmxLaunch.summary.value)![1]),
 	},
@@ -71,7 +78,7 @@ export const sources: {label: string; url: string}[] = [
 	{label: 'ひまわり9号の高さ（気象庁）', url: himawari.stats.altitude_km.source},
 	{label: 'ひまわり9号の仕事（気象庁）', url: himawari.mission.source},
 	{label: 'MMX の打ち上げ日時（JAXA）', url: mmxLaunch.when.source},
-	{label: 'MMX の打ち上げの確認（JAXA の中継）', url: mmxLaunch.status.source},
+	{label: 'MMX の打ち上げと分離の確認（JAXA の中継）', url: mmx.status.source},
 	{label: 'MMX のロケットと 2031年度の帰還（JAXA 打上げ計画書）', url: mmxLaunch.summary.source},
 	{label: 'MMX のミッション（JAXA）', url: mmx.mission.source},
 	{label: 'ボイジャー1号の打ち上げ（NASA）', url: voyager.launch_date.source},

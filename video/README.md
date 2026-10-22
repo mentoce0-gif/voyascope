@@ -1,6 +1,7 @@
 # VOYASCOPE イメージ動画（Remotion）
 
-1920×1080・30fps・86秒（本編80秒＋出典6秒）。音なし。すべてコードで描いている（写真・ロゴ・動画生成 AI は使わない）。
+1920×1080・30fps・80.5秒（出典の画面つき）。音楽つき。映像も音楽もコードで作っている（写真・既存の曲・動画生成 AI は使わない）。ロゴだけはサイトのもの（`web/assets/brand/logo-1200.webp`）をそのまま使う。
+見た目は MMX いまどこ（`web/mmx/now/`）の UI に合わせた（[docs/04-review.md](docs/04-review.md)）。
 サイト（`web/`）とは別のプロジェクト。公開先（Cloudflare）には入らない（`wrangler.jsonc` の公開は `web/` だけ）。
 
 ## なぜ Remotion か
@@ -18,31 +19,35 @@
 2. データ（すべての数字と出典） → [`docs/02-data.md`](docs/02-data.md)。数字は `src/facts.ts` が `curation/` のカードを直接読む
 3. 構成・ストーリーボード → [`docs/03-storyboard.md`](docs/03-storyboard.md)
 4. 実装 → `src/`（下の表）
-5. レビュー → `npm run stills` で要所の静止画を `out/stills/` に
+5. レビュー → [`docs/04-review.md`](docs/04-review.md)（2巡ぶんの違和感と直したこと）。`npm run stills` で要所の静止画を `out/stills/` に
 6. レンダリング → 下の「つくりかた」
 
 | ファイル | 中身 |
 |---|---|
-| `src/script.ts` | **台本**：ビートごとの秒数・字幕（＝ナレーション案）・表示の時刻・注記・URL |
+| `src/timing.json` | **秒**：ビートの長さと、音楽を合わせるきっかけ（打ち上げ・分離・光・輪・ロゴ） |
+| `src/script.ts` | **台本**：字幕（key／title／sub ＝ナレーション案）・左上の計器・注記・下の目盛り・URL |
 | `src/facts.ts` | 事実：`curation/` のカードから値と出典 URL を読む。最後の出典画面の一覧もここ |
 | `src/theme.ts` | 色（navy / amber / mint）とフォント（Zen Kaku Gothic New・JetBrains Mono） |
-| `src/components/ui.tsx` | 背景の星・観測端末の枠・字幕・計器のカウンタ・動きのカーブ |
-| `src/components/Globe.tsx` | 線画の地球（正射図法）と軌道の点の計算 |
-| `src/scenes/*.tsx` | 各ビート（Now → Near → Depart → Far → Cta → Sources） |
-| `src/Root.tsx` | ビートを順につなぐ・区切りの暗転 |
+| `src/components/ui.tsx` | 部品（いまどこ と同じ形）：字幕の3段・左上の計器・縦線つきの値・ピル・リーダーつきのタグ・光る点・背景の星 |
+| `src/components/Chrome.tsx` | どの場面にも重なる帯：左上のブランド・右上の注記・下の「地球からの距離」の目盛り |
+| `src/components/Globe.tsx` | 線画の地球（正射図法・陸地の線は `web/data/land-110m.geojson`）と軌道の点の計算 |
+| `src/scenes/*.tsx` | 各ビート（Now → Near → Depart → Far → Logo → Sources） |
+| `src/Root.tsx` | ビートを重ねてつなぐ（0.5秒）・帯・音楽 |
+| `scripts/music.mjs` | 音楽をコードで合成 → `public/music/theme.wav`（リポジトリには入れない。`npm run music`） |
 
 ## つくりかた
 
 ```
 cd video
 npm install
+npm run music         # 音楽を合成 → public/music/theme.wav（studio・render も先にこれを実行する）
 npm run studio        # ブラウザでプレビュー（タイムラインで見ながら直せる）
 npm run stills        # 要所の静止画 → out/stills/（node scripts/stills.mjs 300 615 で指定のフレームだけ）
-npm run render        # 最終の MP4 → out/voyascope-teaser.mp4（H.264）
-npm run gif           # プレビューの GIF（Remotion で直接。1/3 のフレーム・40% の大きさ）
+npm run render        # 最終の MP4（H.264＋AAC）→ out/voyascope-teaser.mp4
+npm run gif           # プレビューの GIF（Remotion で直接。1/3 のフレーム・40% の大きさ。音なし）
 ```
 
-GIF は、できた MP4 から ffmpeg で作るほうが速くて軽い（約7.7MB）：
+GIF は、できた MP4 から ffmpeg で作るほうが速くて軽い（約6.3MB）：
 
 ```
 ffmpeg -i out/voyascope-teaser.mp4 -vf "fps=10,scale=480:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" out/voyascope-preview.gif
@@ -64,9 +69,13 @@ REMOTION_BROWSER=/path/to/chrome REMOTION_CHROME_MODE=chrome-for-testing npm run
 | 言い方の例 | 直すところ |
 |---|---|
 | 「◯◯の字幕を△△に」 | `src/script.ts` の該当ビートの `lines[].text` |
-| 「ビート3を2秒長く」 | `src/script.ts` の `depart.seconds`（中の `from`/`to` もずらす） |
+| 「ビート3を2秒長く」 | `src/timing.json` の `beats.depart`（`script.ts` の中の `from`/`to` もずらす）。`npm run music` で音楽も合う |
 | 「字幕をもっと早く出して」 | `lines[].from` |
 | 「ズームアウトをゆっくりに」 | `near.zoomOut`・`depart.toSolar` の秒 |
+| 「左上の数字を変えて」 | 各場面の `<Readout>`（`src/scenes/*.tsx`） |
+| 「音楽をもっと静かに／明るく」 | `scripts/music.mjs`（和音は `chords`、テンポは `BPM`、各部の音量は関数の gain）→ `npm run music` |
+| 「打ち上げの音の山をずらして」 | `src/timing.json` の `cues` |
+| 「ロゴの出方を変えて」 | `src/scenes/Logo.tsx`（輪を描く・文字が現れる・光の時刻は `timing.json` の `ring`・`logoReveal`） |
 | 「色をもっと琥珀に」 | `src/theme.ts` の `C` |
 | 「字幕を大きく」 | `src/components/ui.tsx` の `Captions` の `size` |
 | 「数字を最新に」 | `curation/` のカードを直す（動画は次のレンダリングで自動で変わる） |
@@ -76,9 +85,13 @@ REMOTION_BROWSER=/path/to/chrome REMOTION_CHROME_MODE=chrome-for-testing npm run
 
 - 数字は `curation/` のカード（出典つき）からだけ出す。出典は最後の画面に一覧で出す
 - 軌道・距離の図は「模式図」と画面に書く（ISS と静止軌道の半径の比だけは本物どおり）
-- 人物は出さない。機関のロゴ・写真は使わない。「非公式のファンメイド作品」を締めの画面と出典の画面に書く
+- 打ち上げは「早送り」と書く。分離の時刻はカードの「5:52ごろ」の精度（分）まで
+- 人物は出さない。機関のロゴ・写真は使わない。「非公式のファンメイド作品」を右上・締め・出典の画面に書く
 
 ## ライセンスについて（オーナーの確認待ち）
 
 - **Remotion**：Remotion License。個人・社員3人までの営利団体・非営利団体は無料（商用も可）、それ以外は Company License が要る（https://github.com/remotion-dev/remotion/blob/main/LICENSE.md）
+- **ロゴ**：VOYASCOPE のロゴ（オーナーのもの。CONTENT_LICENSE では自由に使ってよいものとしては配っていない）を、オーナーの動画として使う
+- **陸地の形**：Natural Earth（パブリックドメイン。サイトと同じデータ）
+- **音楽**：コードで合成したもの（既存の曲・サンプルは使っていない）
 - **フォント**：Zen Kaku Gothic New・JetBrains Mono とも SIL Open Font License（Google Fonts から描画時に読むだけで、リポジトリには入れていない）

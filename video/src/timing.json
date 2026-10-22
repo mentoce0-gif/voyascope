@@ -1,0 +1,15 @@
+{
+  "_": "ビートの長さ（秒）と、音楽を合わせるきっかけ。script.ts と scripts/music.mjs の両方が読む。秒を変えたら npm run music で音楽も作り直す",
+  "fps": 30,
+  "transition": 15,
+  "beats": { "now": 9, "near": 18, "depart": 20, "far": 18, "logo": 11, "sources": 7 },
+  "cues": {
+    "liftoff": ["depart", 1.4],
+    "separation": ["depart", 7.0],
+    "toSolar": ["depart", 8.4],
+    "lightStart": ["far", 6.0],
+    "lightArrive": ["far", 12.0],
+    "ring": ["logo", 3.2],
+    "logoReveal": ["logo", 5.4]
+  }
+}
