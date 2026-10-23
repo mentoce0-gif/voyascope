@@ -158,6 +158,15 @@
   body.tm-watch .tm-row { display: flex; } body.tm-watch .tm-alt-q, body.tm-watch .tm-plan { display: none; } body.tm-watch .tm-est { display: inline; }
   .film-hint { margin-top: 10px; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .2em; color: var(--amber); pointer-events: auto; cursor: pointer; animation: hint-up 1.6s ease-in-out infinite; }
   .film-hint b { font-size: 16px; }
+  /* PC など横に広い画面（2026-10-23 オーナー）：計器・字幕・REPLAY・リンクを左の幅 460px の列にまとめる（弧の文字が横に伸びない） */
+  @media (min-width: 700px) {
+    .tm { right: auto; width: 440px; }
+    body.nl-on .cap { right: auto; width: 300px; }
+    .replay-big { right: auto; left: 330px; }
+    .nowlinks { left: 14px; right: auto; width: 440px; margin: 0; }
+    body.pre .links { left: 16px; right: auto; width: 440px; margin: 0; }
+    .note { right: auto; max-width: 460px; }
+  }
   .warp-vignette { position: fixed; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
 </style>
 </head>
@@ -1058,6 +1067,7 @@ let track = FLYING && PH.days < TRACK_DAYS;
 const tagEarth = document.getElementById("tag-earth");
 // 上の計器と下の字幕のあいだ（空いているところ）の真ん中に、絵の中心を寄せる。空きの高さを返す
 function freeOffset() {
+  if (W >= 700) { camera.setViewOffset(W, H, -Math.min(240, W * 0.16), 0, W, H); return Math.max(260, H * 0.8); } // 横に広い画面：文字は左の列なので、絵は右へ寄せる
   const tmB = document.getElementById("tm").getBoundingClientRect().bottom || 200, capT = document.querySelector(".cap").getBoundingClientRect().top || H * 0.6;
   camera.setViewOffset(W, H, 0, H / 2 - (tmB + capT) / 2, W, H);
   return Math.max(120, capT - tmB);
