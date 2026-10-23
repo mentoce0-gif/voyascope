@@ -1,7 +1,8 @@
 import React from 'react';
 import {AbsoluteFill, interpolate, random, useCurrentFrame, useVideoConfig} from 'remotion';
-import {Badges, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, easeInOut} from '../components/ui';
+import {Badges, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, ease, easeInOut} from '../components/ui';
 import {Globe} from '../components/Globe';
+import {Voyager} from '../components/Voyager';
 import {beats} from '../script';
 import {facts} from '../facts';
 import {C, F} from '../theme';
@@ -10,22 +11,8 @@ import {useLayout} from '../layout';
 const b = beats.far;
 const pad = (v: number) => String(Math.floor(v)).padStart(2, '0');
 const lerp = (a: number, c: number, t: number) => a + (c - a) * t;
-
-// --- 3D の世界（大きさ・距離の比は模式）。太陽は原点、地球は x=1、光は +x へ進んでボイジャー1号へ
-type V3 = [number, number, number];
-const SUN: V3 = [0, 0, 0];
-const EARTH: V3 = [1, 0, 0];
-const EARTH_R = 0.02; // 地球の半径（模式）
-const D = 400; // 地球 → ボイジャー1号（模式）
-const VGR: V3 = [1 + D, 0, 0];
+const D = 400; // 地球 → ボイジャー1号（模式の長さ）
 const HELIO_P = 0.55; // 太陽圏のはて（模式）を、道のどこでくぐるか
-const sub3 = (a: V3, c: V3): V3 => [a[0] - c[0], a[1] - c[1], a[2] - c[2]];
-const dot = (a: V3, c: V3) => a[0] * c[0] + a[1] * c[1] + a[2] * c[2];
-const cross = (a: V3, c: V3): V3 => [a[1] * c[2] - a[2] * c[1], a[2] * c[0] - a[0] * c[2], a[0] * c[1] - a[1] * c[0]];
-const norm = (a: V3): V3 => {
-	const l = Math.hypot(...a);
-	return [a[0] / l, a[1] / l, a[2] / l];
-};
 
 // 光の進み（0〜1）：timing.json の lightCurve を結ぶ。計器の時間・距離もこれに比例（光の速さは一定）
 const lightAt = (t: number) => {
@@ -38,81 +25,56 @@ const lightAt = (t: number) => {
 	}
 	return 1;
 };
-// 地球の手前（太陽から地球まで）の光：見せるための動き（時間の数字は出さない）
-const nearLight = (t: number) => interpolate(t, [0.5, b.count.from], [0, 1], clamp); // 0＝太陽、1＝地球
 
-// ビート4「いちばん遠く」：逆光の地球を光が越えていく → ぐるんと振り向いて光を追う → ワープ → ボイジャー1号に届く
+// ビート4「いちばん遠く」
+//  A 日の出の構図：夜の地球の縁の向こうから太陽。光の波面が広がり、地球に届くと大気の縁が燃える
+//  B 光がカメラに届いて画面が光に包まれ、ぐるんと振り向く（地球と星が流れる）
+//  C ワープ：光を追って24時間を早送り（向かう先から放射するまっすぐの星の筋）。太陽圏のはて（模式）をくぐる
+//  D 減速して、ボイジャー1号（形はイメージ）。光が皿の上を走って届く
 export const Far: React.FC = () => {
 	const frame = useCurrentFrame();
 	const {width, height} = useVideoConfig();
 	const L = useLayout();
 	const t = frame / 30;
 	const p = lightAt(t);
-	const headX = t < b.count.from ? nearLight(t) : 1 + p * D; // 光の先頭（x）
+	const diag = Math.hypot(width, height);
 
-	// --- カメラ
-	// A：地球のうしろ（太陽の反対側）から、太陽と地球をななめに見る（地球は逆光）
-	const C0: V3 = [1.1, 0.026, 0.095];
-	const lookX = L.vertical ? 0.86 : 0.55; // 太陽と地球のあいだを見る（縦は画面がせまいので、地球寄りに）
-	const yaw0 = Math.atan2(0 - C0[2], lookX - C0[0]);
-	// B：ぐるんと振り向いて、光の進む向き（+x）へ。C：光の少しうしろについて追う
-	const swing = interpolate(t, [b.swing, b.warp], [0, 1], {...clamp, easing: easeInOut});
-	const chase: V3 = [headX - 0.35, 0.02, 0];
-	// D：届いたあとは、ボイジャー1号のまわりをゆっくり回る
-	const after = interpolate(t, [b.count.to, b.seconds], [0, 1], clamp);
-	let cam: V3;
-	let yaw: number;
-	if (t < b.count.to) {
-		cam = [lerp(C0[0], chase[0], swing), lerp(C0[1], chase[1], swing), lerp(C0[2], chase[2], swing)];
-		// 向き：yaw0（太陽のほう）から 2π（+x）まで、地球のほうを通って回る
-		const y0 = yaw0 < 0 ? yaw0 + Math.PI * 2 : yaw0;
-		yaw = lerp(y0, Math.PI * 2, swing);
-	} else {
-		const ph = 0.15 + after * 0.45;
-		cam = [VGR[0] - 0.35 * Math.cos(ph), 0.02 + after * 0.04, -0.35 * Math.sin(ph)];
-		yaw = Math.atan2(VGR[2] - cam[2], VGR[0] - cam[0]);
-	}
-	// 曲がる感じ：ワープ中は機体ごと少し傾ける（星の筋はまっすぐのまま。MMX いまどこ と同じ考え）
-	const warpOn = interpolate(t, [b.warp - 0.4, b.warp + 0.4, b.count.to - 1.0, b.count.to], [0, 1, 1, 0], clamp);
-	const roll = Math.sin(t * 0.9) * 0.07 * warpOn;
-	const fwd = norm([Math.cos(yaw), -0.02, Math.sin(yaw)]);
-	const right = norm(cross(fwd, [0, 1, 0]));
-	const up0 = cross(right, fwd);
-	const right2: V3 = [right[0] * Math.cos(roll) + up0[0] * Math.sin(roll), right[1] * Math.cos(roll) + up0[1] * Math.sin(roll), right[2] * Math.cos(roll) + up0[2] * Math.sin(roll)];
-	const up = cross(right2, fwd);
+	// ===== A：日の出の構図 =====
+	const E = L.vertical ? {x: 820, y: 1150, R: 560} : {x: 1420, y: 1050, R: 620};
+	const sd = {x: -0.62, y: -0.78}; // 地球の中心から見た太陽の向き（左上）
+	const SUN = {x: E.x + sd.x * E.R * 1.012, y: E.y + sd.y * E.R * 1.012};
+	const push = 1 + 0.05 * interpolate(t, [0, b.swing], [0, 1], clamp); // ゆっくり寄る
+	// 光の波面：太陽から広がり、地球に届く（count.from）→ カメラに届く（画面が光に包まれる）
+	const reachEarth = Math.hypot(E.x - SUN.x, E.y - SUN.y);
+	const waveR = interpolate(t, [0.5, b.count.from, b.swing + 0.05], [0, reachEarth, diag * 1.25], clamp);
+	const waveOn = interpolate(t, [0.5, 0.8, b.swing, b.swing + 0.1], [0, 1, 1, 0], clamp);
+	const ignite = interpolate(t, [b.count.from - 0.15, b.count.from + 0.1, b.count.from + 1.4], [0, 1, 0.35], clamp); // 大気の縁が燃える
+	const sunUp = interpolate(t, [0, 1.2], [0.55, 1], clamp);
+	const flash = interpolate(t, [b.swing - 0.25, b.swing + 0.05, b.swing + 0.8], [0, 0.9, 0], clamp);
+
+	// ===== B：ぐるんと振り向く（素早いパン） =====
+	const wp = interpolate(t, [b.swing, b.warp - 0.3], [0, 1], {...clamp, easing: easeInOut});
+	const whipSpeed = Math.sin(Math.PI * wp); // 0 → 1 → 0
+	const aShift = -wp * width * 1.7;
+	const aRoll = -9 * wp;
+	const aOn = interpolate(t, [b.warp - 0.6, b.warp - 0.1], [1, 0], clamp);
+
+	// ===== C：ワープ =====
+	const headX = 1 + p * D;
+	const camX = headX - 0.35;
+	const warpOn = interpolate(t, [b.warp - 0.5, b.warp + 0.3, b.count.to - 1.0, b.count.to], [0, 1, 1, 0], clamp);
+	const speed = (lightAt(t + 1 / 30) - p) * D * 30;
+	const VP = {x: width / 2 + Math.sin(t * 0.7) * 24 * warpOn, y: (L.vertical ? height * 0.44 : height * 0.5) + Math.cos(t * 0.5) * 14 * warpOn};
+	const roll = Math.sin(t * 0.9) * 4 * warpOn; // 機体ごと少し傾く（度）
 	const FOC = L.vertical ? width * 0.95 : width * 0.55;
-	const CX = width / 2;
-	const CY = L.vertical ? height * 0.46 : height * 0.5;
-	const proj = (P: V3) => {
-		const d = sub3(P, cam);
-		const z = dot(d, fwd);
-		return {x: CX + (dot(d, right2) / z) * FOC, y: CY - (dot(d, up) / z) * FOC, z};
-	};
-
-	// --- 太陽・地球（A・B）
-	const sun = proj(SUN);
-	const earth = proj(EARTH);
-	const earthR = earth.z > 0 ? (EARTH_R / earth.z) * FOC : 0;
-	const sunR = sun.z > 0 ? (0.05 / sun.z) * FOC : 0;
-	const nearOn = interpolate(t, [b.warp - 0.2, b.warp + 0.6], [1, 0], clamp);
-	// 逆光：太陽の側の縁が光る（地球の中心から見た太陽の向き）
-	const rimAng = Math.atan2(sun.y - earth.y, sun.x - earth.x);
-	// 光：太陽から出て地球を越える、明るい筋
-	const beamA = proj([Math.max(0, headX - 0.35), 0, 0]);
-	const beamB = proj([headX, 0, 0]);
-	const passFlash = interpolate(t, [b.count.from - 0.1, b.count.from + 0.15, b.count.from + 0.9], [0, 1, 0], clamp);
-
-	// --- ワープ（C）：向かう先から放射するまっすぐの筋。速さで長さが変わる
-	const speed = (lightAt(t + 1 / 30) - p) * D * 30; // 1秒あたりに進む世界の長さ
-	const vp = proj([headX + 1000, 0, 0]); // 消失点（向かう先）
 	const streakK = Math.min(1, speed / 140) * warpOn;
 	const travel = (headX - 1) * 0.06;
 	const streaks =
 		streakK > 0.01
-			? Array.from({length: 260}, (_, i) => {
+			? Array.from({length: 280}, (_, i) => {
 					const ang = random(`wa${i}`) * Math.PI * 2;
 					const z0 = random(`wz${i}`);
-					const zz = 1 - ((z0 + travel * (0.6 + random(`ws${i}`))) % 1); // 1（遠い）→ 0（近い）
+					const zz = 1 - ((z0 + travel * (0.6 + random(`ws${i}`))) % 1);
 					const r1 = 40 / Math.max(0.04, zz);
 					const r0 = r1 * (1 - 0.55 * streakK);
 					const cs = Math.cos(ang);
@@ -121,10 +83,10 @@ export const Far: React.FC = () => {
 					return (
 						<line
 							key={i}
-							x1={vp.x + cs * r0}
-							y1={vp.y + sn * r0}
-							x2={vp.x + cs * r1}
-							y2={vp.y + sn * r1}
+							x1={VP.x + cs * r0}
+							y1={VP.y + sn * r0}
+							x2={VP.x + cs * r1}
+							y2={VP.y + sn * r1}
 							stroke={i % 7 === 0 ? C.amber : i % 3 === 0 ? C.mint : '#e8f1ff'}
 							strokeWidth={1 + (1 - zz) * 2.2}
 							strokeLinecap="round"
@@ -133,127 +95,281 @@ export const Far: React.FC = () => {
 					);
 				})
 			: null;
-	// 太陽圏のはて（模式）：道の途中の大きな輪。くぐると画面の外へ広がって消える
-	const helioX = 1 + HELIO_P * D;
-	const helioDist = helioX - cam[0];
+	const helioDist = 1 + HELIO_P * D - camX;
 	const helioR = helioDist > 0.05 ? (60 / helioDist) * FOC : 0;
 	const helioOn = helioDist > 0 && helioR < width * 1.6 ? interpolate(helioR, [10, 60, width * 0.9, width * 1.6], [0, 1, 1, 0], clamp) * warpOn : 0;
-	const crossed = interpolate(-helioDist, [0, 15, 90, 160], [0, 1, 1, 0], clamp) * warpOn; // くぐったあと、しばらく
+	const crossed = interpolate(-helioDist, [0, 15, 90, 160], [0, 1, 1, 0], clamp) * warpOn;
 
-	// --- ボイジャー1号（D）
-	const v = proj(VGR);
-	const vS = v.z > 0.05 ? (0.022 / v.z) * FOC : 0;
-	const vOn = interpolate(p, [0.9, 0.97], [0, 1], clamp);
-	const arrive = interpolate(t, [b.count.to, b.count.to + 0.9], [0, 1], clamp);
+	// ===== D：ボイジャー1号 =====
+	const vDist = Math.max(0.35, 1 + D - camX);
+	const sFinal = L.vertical ? width * 0.16 : height * 0.15;
+	const after = interpolate(t, [b.count.to, b.seconds], [0, 1], clamp);
+	const vScale = ((sFinal * 0.35) / vDist) * (1 + 0.08 * ease(after));
+	const vOn = interpolate(p, [0.9, 0.975], [0, 1], clamp);
+	const vX = VP.x + (0.035 / vDist) * FOC + (L.vertical ? 0 : width * 0.12 * vOn) - after * width * 0.03;
+	const vY = VP.y + (0.02 / vDist) * FOC + (L.vertical ? -height * 0.02 : 0);
+	const yaw = lerp(0.42, 0.95, easeInOut(after)) + (1 - vOn) * 0.2;
+	const sheen = interpolate(t, [b.count.to - 0.05, b.count.to + 0.9], [-0.3, 1.3], clamp);
+	const vGlow = interpolate(t, [b.count.to, b.count.to + 0.25, b.count.to + 2.5], [0, 1, 0.25], clamp);
 	const hours = 24 * p;
 	const counting = interpolate(t, [b.count.from, b.count.from + 0.3], [0, 1], clamp);
 	const done = p >= 1;
 
+	// ゴースト（レンズの映りこみ）：太陽から画面の中心を通る線の上
+	const gc = {x: width / 2, y: height / 2};
+	const ghosts = [
+		{k: 0.55, r: 26, c: C.mint, o: 0.18},
+		{k: 0.85, r: 64, c: '#9fd8ff', o: 0.08},
+		{k: 1.25, r: 18, c: C.amber, o: 0.22},
+		{k: 1.6, r: 110, c: C.mint, o: 0.05},
+	];
+
 	return (
 		<AbsoluteFill>
-			<Space drift={0.04} density={340} />
+			<Space drift={0.03} density={360} />
 			<svg width={width} height={height} style={{position: 'absolute'}}>
 				<defs>
-					<radialGradient id="sun-g">
-						<stop offset="0" stopColor="#fff8e6" />
-						<stop offset="0.25" stopColor="#ffd27a" stopOpacity="0.9" />
+					<filter id="far-blur-s" x="-50%" y="-50%" width="200%" height="200%">
+						<feGaussianBlur stdDeviation="6" />
+					</filter>
+					<filter id="far-blur-m" x="-50%" y="-50%" width="200%" height="200%">
+						<feGaussianBlur stdDeviation="18" />
+					</filter>
+					<filter id="far-whip" x="-20%" y="-20%" width="140%" height="140%">
+						<feGaussianBlur stdDeviation={`${2 + whipSpeed * 70} ${1 + whipSpeed * 4}`} />
+					</filter>
+					<radialGradient id="sun-core">
+						<stop offset="0" stopColor="#ffffff" />
+						<stop offset="0.25" stopColor="#fff4d6" />
+						<stop offset="1" stopColor="#ffd27a" stopOpacity="0" />
+					</radialGradient>
+					<radialGradient id="sun-halo">
+						<stop offset="0" stopColor="#ffe3a8" stopOpacity="0.55" />
+						<stop offset="0.35" stopColor="#ffb547" stopOpacity="0.16" />
 						<stop offset="1" stopColor="#ffb547" stopOpacity="0" />
 					</radialGradient>
-					<radialGradient id="rim-g" cx="0.5" cy="0.5" r="0.5">
-						<stop offset="0.86" stopColor="#ffd27a" stopOpacity="0" />
-						<stop offset="0.97" stopColor="#ffe9b8" stopOpacity="0.95" />
-						<stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+					<radialGradient id="earth-night" cx={0.5 + sd.x * 0.32} cy={0.5 + sd.y * 0.32} r="0.75">
+						<stop offset="0" stopColor="#0a1a30" />
+						<stop offset="0.5" stopColor="#040b17" />
+						<stop offset="1" stopColor="#010309" />
 					</radialGradient>
-					<mask id="rim-mask">
-						{/* 縁の光は太陽の側だけ */}
-						<rect x={0} y={0} width={width} height={height} fill="#000" />
-						<circle cx={earth.x + Math.cos(rimAng) * earthR * 0.9} cy={earth.y + Math.sin(rimAng) * earthR * 0.9} r={earthR * 1.25} fill="#fff" />
+					{/* 大気の縁の明るさ：太陽に近いほど明るい */}
+					<radialGradient id="limb-mask-g" gradientUnits="userSpaceOnUse" cx={SUN.x} cy={SUN.y} r={E.R * 1.5}>
+						<stop offset="0" stopColor="#fff" />
+						<stop offset="0.45" stopColor="#888" />
+						<stop offset="1" stopColor="#000" />
+					</radialGradient>
+					<radialGradient id="limb-mask-t" gradientUnits="userSpaceOnUse" cx={SUN.x} cy={SUN.y} r={E.R * 0.75}>
+						<stop offset="0" stopColor="#fff" />
+						<stop offset="1" stopColor="#000" />
+					</radialGradient>
+					<mask id="limb-mask">
+						<rect width={width} height={height} fill="url(#limb-mask-g)" />
 					</mask>
+					<mask id="limb-mask-tight">
+						<rect width={width} height={height} fill="url(#limb-mask-t)" />
+					</mask>
+					<clipPath id="earth-clip">
+						<circle cx={E.x} cy={E.y} r={E.R} />
+					</clipPath>
+					<linearGradient id="flare-h" x1="0" y1="0" x2="1" y2="0">
+						<stop offset="0" stopColor="#9fd8ff" stopOpacity="0" />
+						<stop offset="0.5" stopColor="#d9f4ff" stopOpacity="0.55" />
+						<stop offset="1" stopColor="#9fd8ff" stopOpacity="0" />
+					</linearGradient>
+					<radialGradient id="far-vignette" cx="0.5" cy="0.5" r="0.75">
+						<stop offset="0.6" stopColor="#000" stopOpacity="0" />
+						<stop offset="1" stopColor="#000" stopOpacity="0.5" />
+					</radialGradient>
+					<radialGradient id="far-flash" cx="0.42" cy="0.4" r="0.85">
+						<stop offset="0" stopColor="#ffffff" stopOpacity="1" />
+						<stop offset="0.5" stopColor="#f2fffb" stopOpacity="0.85" />
+						<stop offset="1" stopColor="#bfeee0" stopOpacity="0.55" />
+					</radialGradient>
+					<filter id="far-grain">
+						<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed={frame % 60} />
+						<feColorMatrix type="saturate" values="0" />
+					</filter>
 				</defs>
 
-				{/* A・B：太陽と逆光の地球 */}
-				<g opacity={nearOn}>
-					{sun.z > 0 ? (
-						<g>
-							<circle cx={sun.x} cy={sun.y} r={sunR * 7} fill="url(#sun-g)" opacity={0.55} />
-							<circle cx={sun.x} cy={sun.y} r={sunR * 1.6} fill="url(#sun-g)" />
-							<circle cx={sun.x} cy={sun.y} r={sunR * 0.6} fill="#fff8e6" />
-						</g>
-					) : null}
-					{t < b.swing + 0.6 && beamB.z > 0.05 && beamA.z > 0.05 ? (
-						<g>
-							<line x1={beamA.z > 0 ? beamA.x : beamB.x} y1={beamA.z > 0 ? beamA.y : beamB.y} x2={beamB.x} y2={beamB.y} stroke="#fff8e6" strokeWidth={10} strokeLinecap="round" opacity={0.25} />
-							<line x1={beamA.z > 0 ? beamA.x : beamB.x} y1={beamA.z > 0 ? beamA.y : beamB.y} x2={beamB.x} y2={beamB.y} stroke="#fff" strokeWidth={3} strokeLinecap="round" />
-							<circle cx={beamB.x} cy={beamB.y} r={9} fill="#fff" />
-							<circle cx={beamB.x} cy={beamB.y} r={30} fill="url(#sun-g)" />
-						</g>
-					) : null}
-					{earth.z > 0 && earthR > 1 ? (
-						<g>
-							<g transform={`translate(${earth.x} ${earth.y})`} opacity={0.55}>
-								<Globe r={earthR} spin={-40 + frame * 0.05} tilt={10} glow={0.3} />
+				{/* ===== A・B：日の出の構図（B では左へ流れて消える） ===== */}
+				{aOn > 0 ? (
+					<g opacity={aOn} filter={whipSpeed > 0.02 ? 'url(#far-whip)' : undefined} transform={`translate(${aShift} 0) rotate(${aRoll} ${width / 2} ${height / 2})`}>
+						<g transform={`translate(${SUN.x} ${SUN.y}) scale(${push}) translate(${-SUN.x} ${-SUN.y})`}>
+							{/* 太陽（地球の向こう） */}
+							<circle cx={SUN.x} cy={SUN.y} r={E.R * 1.1} fill="url(#sun-halo)" opacity={sunUp} />
+							<circle cx={SUN.x} cy={SUN.y} r={E.R * 0.16} fill="url(#sun-core)" opacity={sunUp} />
+							{/* 光の波面：地球のうしろを回りこんで広がる */}
+							{waveR > 0 && waveOn > 0 ? (
+								<g opacity={waveOn}>
+									<circle cx={SUN.x} cy={SUN.y} r={waveR} fill="none" stroke="#d9fff4" strokeWidth={30} opacity={0.35} filter="url(#far-blur-m)" />
+									<circle cx={SUN.x} cy={SUN.y} r={waveR} fill="none" stroke="#ffffff" strokeWidth={2.2} opacity={0.85} />
+									<circle cx={SUN.x} cy={SUN.y} r={waveR * 0.985} fill="none" stroke={C.mint} strokeWidth={1.2} opacity={0.5} />
+								</g>
+							) : null}
+							{/* 夜の地球（陸地の線はかすかに） */}
+							<circle cx={E.x} cy={E.y} r={E.R} fill="url(#earth-night)" />
+							<g clipPath="url(#earth-clip)" opacity={0.22}>
+								<g transform={`translate(${E.x} ${E.y})`}>
+									<Globe r={E.R} spin={-20 + frame * 0.02} tilt={18} glow={0} />
+								</g>
 							</g>
-							{/* 夜の側：影を重ねる */}
-							<circle cx={earth.x} cy={earth.y} r={earthR} fill={C.navy900} opacity={0.6} />
-							{/* 太陽の側の縁が光る（逆光） */}
-							<circle cx={earth.x} cy={earth.y} r={earthR * 1.05} fill="url(#rim-g)" mask="url(#rim-mask)" />
-							<circle cx={earth.x} cy={earth.y} r={earthR * 1.6} fill="#ffd27a" opacity={0.25 * passFlash} />
+							<circle cx={E.x} cy={E.y} r={E.R} fill="url(#earth-night)" opacity={0.8} />
+							{/* 大気の縁（逆光）：太い光のにじみ＋細い明るい弧。光が届くと燃える */}
+							<g mask="url(#limb-mask)">
+								<circle cx={E.x} cy={E.y} r={E.R * 1.012} fill="none" stroke="#7fc8ff" strokeWidth={E.R * 0.05} opacity={0.5 + 0.5 * ignite} filter="url(#far-blur-m)" />
+								<circle cx={E.x} cy={E.y} r={E.R * 1.004} fill="none" stroke="#bfe6ff" strokeWidth={6 + 8 * ignite} opacity={0.75} filter="url(#far-blur-s)" />
+							</g>
+							<g mask="url(#limb-mask-tight)">
+								<circle cx={E.x} cy={E.y} r={E.R * 1.001} fill="none" stroke="#fff6dc" strokeWidth={2.5 + 2 * ignite} />
+							</g>
+							{/* 地球の縁から出る太陽の光芒（レンズの効果なので、地球より手前に） */}
+							<g opacity={sunUp * (0.75 + 0.25 * ignite)}>
+								<circle cx={SUN.x} cy={SUN.y} r={E.R * 0.06} fill="url(#sun-core)" />
+								{Array.from({length: 6}, (_, i) => {
+									const a = (i / 6) * Math.PI * 2 + 0.25 + t * 0.03;
+									const len = E.R * (i % 2 ? 0.55 : 0.9) * (1 + 0.4 * ignite);
+									return (
+										<line
+											key={i}
+											x1={SUN.x}
+											y1={SUN.y}
+											x2={SUN.x + Math.cos(a) * len}
+											y2={SUN.y + Math.sin(a) * len}
+											stroke="#fff4d6"
+											strokeWidth={1.6}
+											opacity={0.55}
+											filter="url(#far-blur-s)"
+										/>
+									);
+								})}
+								<ellipse cx={SUN.x} cy={SUN.y} rx={E.R * 1.4} ry={4} fill="url(#flare-h)" opacity={0.8} />
+							</g>
+							{/* 光が地球を越えたあとの光の筋 */}
+							{ignite > 0
+								? Array.from({length: 14}, (_, i) => {
+										const a = Math.atan2(sd.y, sd.x) + Math.PI + (random(`gr${i}`) - 0.5) * 1.6;
+										const len = E.R * (1.2 + random(`gl${i}`) * 1.4);
+										return (
+											<line
+												key={i}
+												x1={SUN.x}
+												y1={SUN.y}
+												x2={SUN.x - Math.cos(a) * len}
+												y2={SUN.y - Math.sin(a) * len}
+												stroke="#fff4d6"
+												strokeWidth={10 + random(`gw${i}`) * 26}
+												opacity={0.05 * ignite}
+												filter="url(#far-blur-m)"
+											/>
+										);
+									})
+								: null}
+						</g>
+						{/* レンズのゴースト */}
+						{ghosts.map((g, i) => {
+							const gx = SUN.x + (gc.x - SUN.x) * g.k * 2;
+							const gy = SUN.y + (gc.y - SUN.y) * g.k * 2;
+							return <circle key={i} cx={gx} cy={gy} r={g.r} fill={g.c} opacity={g.o * sunUp} stroke={g.c} strokeOpacity={g.o * 1.5} />;
+						})}
+					</g>
+				) : null}
+
+				{/* B：振り向くあいだ、星が横に流れる */}
+				{whipSpeed > 0.02
+					? Array.from({length: 160}, (_, i) => {
+							const y = random(`hy${i}`) * height;
+							const x = ((((random(`hx${i}`) * width * 1.4 - wp * width * 2.4) % (width * 1.4)) + width * 1.4) % (width * 1.4)) - width * 0.2;
+							const len = 40 + whipSpeed * (200 + random(`hl${i}`) * 380);
+							return (
+								<line
+									key={i}
+									x1={x}
+									y1={y}
+									x2={x + len}
+									y2={y + len * 0.04}
+									stroke="#e8f1ff"
+									strokeWidth={1 + random(`hw${i}`) * 1.5}
+									opacity={0.5 * whipSpeed}
+									strokeLinecap="round"
+								/>
+							);
+						})
+					: null}
+
+				{/* ===== C：ワープ ===== */}
+				<g transform={`rotate(${roll} ${VP.x} ${VP.y})`}>
+					{streaks}
+					{helioOn > 0 ? (
+						<g opacity={helioOn}>
+							<circle cx={VP.x} cy={VP.y} r={helioR} fill="rgba(168,188,224,0.05)" />
+							<circle cx={VP.x} cy={VP.y} r={helioR} fill="none" stroke={C.ref} strokeWidth={10} opacity={0.25} filter="url(#far-blur-s)" />
+							<circle cx={VP.x} cy={VP.y} r={helioR} fill="none" stroke={C.ref} strokeWidth={2} strokeDasharray="3 12" />
+						</g>
+					) : null}
+					{t >= b.warp - 0.3 && t < b.count.to ? (
+						<g opacity={interpolate(t, [b.warp - 0.3, b.warp + 0.2], [0, 1], clamp)}>
+							<circle cx={VP.x} cy={VP.y} r={70} fill="url(#sun-core)" opacity={0.5} />
+							<circle cx={VP.x} cy={VP.y} r={5} fill="#fff" />
 						</g>
 					) : null}
 				</g>
 
-				{/* C：ワープ */}
-				{streaks}
-				{helioOn > 0 ? (
-					<g opacity={helioOn}>
-						<circle cx={vp.x} cy={vp.y} r={helioR} fill="none" stroke={C.ref} strokeWidth={3} strokeDasharray="4 14" />
-						<circle cx={vp.x} cy={vp.y} r={helioR} fill="rgba(168,188,224,0.05)" />
-					</g>
-				) : null}
-				{t >= b.warp && t < b.count.to ? (
-					<g>
-						{/* 追いかけている光の先頭 */}
-						<circle cx={proj([headX, 0, 0]).x} cy={proj([headX, 0, 0]).y} r={34} fill="url(#sun-g)" opacity={0.9} />
-						<circle cx={proj([headX, 0, 0]).x} cy={proj([headX, 0, 0]).y} r={6} fill="#fff" />
+				{/* ===== D：ボイジャー1号 ===== */}
+				{vOn > 0 ? (
+					<g opacity={vOn}>
+						{done ? (
+							<circle
+								cx={vX}
+								cy={vY}
+								r={vScale * (1.2 + interpolate(t, [b.count.to, b.count.to + 1.2], [0, 5], clamp))}
+								fill="none"
+								stroke={C.mint}
+								strokeWidth={2}
+								opacity={interpolate(t, [b.count.to, b.count.to + 1.2], [0.8, 0], clamp)}
+							/>
+						) : null}
+						<circle cx={vX} cy={vY} r={vScale * 2.4} fill={C.mint} opacity={0.06 * vGlow} filter="url(#far-blur-m)" />
+						<Voyager id="vgr" x={vX} y={vY} s={vScale} yaw={yaw} pitch={0.3} roll={-0.12} sheen={sheen} glow={vGlow} />
 					</g>
 				) : null}
 
-				{/* D：ボイジャー1号（形はイメージ。アンテナの皿・本体・のびた腕） */}
-				{v.z > 0.05 && vOn > 0 ? (
-					<g opacity={vOn} transform={`translate(${v.x} ${v.y})`}>
-						<line x1={-vS * 0.1} y1={vS * 0.1} x2={-vS * 2.4} y2={vS * 0.9} stroke={C.textDim} strokeWidth={Math.max(1, vS * 0.03)} />
-						<line x1={vS * 0.1} y1={vS * 0.15} x2={vS * 1.3} y2={vS * 1.1} stroke={C.textDim} strokeWidth={Math.max(1, vS * 0.04)} />
-						<circle cx={vS * 1.3} cy={vS * 1.1} r={vS * 0.1} fill={C.textDim} />
-						<rect x={-vS * 0.25} y={vS * 0.05} width={vS * 0.5} height={vS * 0.32} fill="#3a4a63" stroke={C.text} strokeWidth={1} />
-						<ellipse cx={0} cy={0} rx={vS} ry={vS * 0.62} fill="#dfe8f2" stroke="#fff" strokeWidth={1.5} />
-						<ellipse cx={0} cy={0} rx={vS * 0.75} ry={vS * 0.46} fill="none" stroke="#9fb2c8" strokeWidth={1} />
-						<circle cx={0} cy={-vS * 0.02} r={vS * 0.06} fill="#9fb2c8" />
-						{/* 光が届いた */}
-						<circle cx={0} cy={0} r={vS * (1.2 + arrive * 4)} fill="none" stroke={C.mint} strokeWidth={4} opacity={done ? 1 - arrive : 0} />
-						<circle cx={0} cy={0} r={vS * 1.8} fill={C.mint} opacity={done ? 0.12 * (1 - arrive) : 0} />
-					</g>
-				) : null}
+				{/* 光に包まれる（真ん中ほど強い光） */}
+				<rect width={width} height={height} fill="url(#far-flash)" opacity={flash} />
+				{/* 周辺減光と、ごく薄いフィルムの粒子 */}
+				<rect width={width} height={height} fill="url(#far-vignette)" />
+				<rect width={width} height={height} filter="url(#far-grain)" opacity={0.045} />
 			</svg>
 
 			{/* タグ */}
-			<Tag x={sun.x} y={sun.y} dx={-60} dy={-80} text="太陽" color={C.amber} opacity={sun.z > 0 ? nearOn * interpolate(t, [0.3, 0.9, b.swing, b.swing + 0.4], [0, 1, 1, 0], clamp) : 0} size={26} />
+			<Tag x={SUN.x} y={SUN.y} dx={-70} dy={-90} text="太陽" color={C.amber} opacity={aOn * interpolate(t, [0.4, 1.0, b.swing - 0.3, b.swing], [0, 1, 1, 0], clamp)} size={26} />
 			<Tag
-				x={earth.x}
-				y={earth.y + earthR * 0.7}
-				dx={L.vertical ? -40 : 60}
-				dy={90}
+				x={E.x - E.R * 0.25}
+				y={E.y - E.R * 0.55}
+				dx={-60}
+				dy={L.vertical ? 260 : 180}
 				text="地球"
 				sub="EARTH"
-				opacity={earth.z > 0 ? nearOn * interpolate(t, [0.6, 1.2, b.swing, b.swing + 0.4], [0, 1, 1, 0], clamp) : 0}
+				opacity={aOn * interpolate(t, [0.8, 1.4, b.swing - 0.3, b.swing], [0, 1, 1, 0], clamp)}
 				size={26}
 			/>
-			<Tag x={beamB.x} y={beamB.y} dx={50} dy={-60} text="光" sub="LIGHT" color="#fff8e6" opacity={beamB.z > 0 ? interpolate(t, [0.9, 1.4, b.swing - 0.2, b.swing + 0.2], [0, 1, 1, 0], clamp) : 0} size={26} />
+			<Tag
+				x={SUN.x + waveR * 0.72}
+				y={SUN.y - waveR * 0.69}
+				dx={60}
+				dy={-40}
+				text="光"
+				sub="LIGHT"
+				color="#f2fffb"
+				opacity={interpolate(t, [0.9, 1.3, b.count.from - 0.3, b.count.from], [0, 1, 1, 0], clamp)}
+				size={26}
+			/>
 			{helioOn > 0.05 ? (
 				<div
 					style={{
 						position: 'absolute',
-						left: vp.x,
-						top: vp.y - helioR - 46,
+						left: VP.x,
+						top: VP.y - helioR - 46,
 						transform: 'translateX(-50%)',
 						opacity: helioOn,
 						fontFamily: F.body,
@@ -271,19 +387,29 @@ export const Far: React.FC = () => {
 					position: 'absolute',
 					left: 0,
 					right: 0,
-					top: CY - 160,
+					top: VP.y - 160,
 					textAlign: 'center',
 					opacity: crossed,
 					fontFamily: F.body,
 					fontWeight: 700,
 					fontSize: 30,
+					letterSpacing: '.08em',
 					color: C.text,
 					textShadow: `0 0 16px ${C.navy900}`,
 				}}
 			>
 				ここから先は「恒星間空間」
 			</div>
-			<Tag x={v.x} y={v.y} dx={L.vertical ? -60 : -110} dy={-90} text="ボイジャー1号" sub="VOYAGER 1 · 形はイメージ" color={C.amber} opacity={v.z > 0.05 ? vOn * interpolate(t, [b.count.to - 0.6, b.count.to], [0, 1], clamp) : 0} />
+			<Tag
+				x={vX - vScale * 0.6}
+				y={vY - vScale * 0.8}
+				dx={L.vertical ? -40 : -120}
+				dy={-80}
+				text="ボイジャー1号"
+				sub="VOYAGER 1 · 形はイメージ"
+				color={C.amber}
+				opacity={vOn * interpolate(t, [b.count.to - 0.4, b.count.to + 0.2], [0, 1], clamp)}
+			/>
 
 			<Scrim />
 			<Readout k="LIGHT" value={`${pad(hours)}:${pad((hours * 60) % 60)}:${pad((hours * 3600) % 60)}`} color={done ? C.amber : C.text} opacity={counting} />
