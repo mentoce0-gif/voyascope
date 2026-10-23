@@ -53,7 +53,8 @@ export const Far: React.FC = () => {
 	// --- カメラ
 	// A：地球のうしろ（太陽の反対側）から、太陽と地球をななめに見る（地球は逆光）
 	const C0: V3 = [1.1, 0.026, 0.095];
-	const yaw0 = Math.atan2(0 - C0[2], 0.55 - C0[0]); // 太陽と地球のあいだ（x=0.55）を見る向き
+	const lookX = L.vertical ? 0.86 : 0.55; // 太陽と地球のあいだを見る（縦は画面がせまいので、地球寄りに）
+	const yaw0 = Math.atan2(0 - C0[2], lookX - C0[0]);
 	// B：ぐるんと振り向いて、光の進む向き（+x）へ。C：光の少しうしろについて追う
 	const swing = interpolate(t, [b.swing, b.warp], [0, 1], {...clamp, easing: easeInOut});
 	const chase: V3 = [headX - 0.35, 0.02, 0];
