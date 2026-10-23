@@ -103,18 +103,27 @@ export const beats = {
 	far: {
 		seconds: T.beats.far,
 		count: {from: T.cues.lightStart[1] as number, to: T.cues.lightArrive[1] as number},
+		swing: T.cues.swing[1] as number, // 地球を越えた光を、カメラがぐるんと振り向いて追う
+		warp: T.cues.warp[1] as number, // ここからワープ（光を追って早送り）
+		lightCurve: T.lightCurve as [number, number][], // 光が地球 → ボイジャー1号の道のどこまで進んだか
 		captions: [
-			{from: 0.6, to: 5.6, key: 'VOYAGER 1 · ボイジャー1号', title: `${facts.voyager.launchYear}年に旅立ち、\nいまは恒星間空間を飛ぶ。`},
 			{
-				from: 6.0,
-				to: 11.8,
+				from: 0.5,
+				to: 4.6,
+				key: 'VOYAGER 1 · ボイジャー1号',
+				title: '光を追いかけて、\nいちばん遠くへ。',
+				sub: `${facts.voyager.launchYear}年に旅立ち、いまは恒星間空間を飛ぶ`,
+			},
+			{
+				from: 5.0,
+				to: 11.6,
 				key: facts.voyager.lightDayIso,
 				title: '光でも24時間かかる\n距離に届く。',
 				sub: `地球から光で1日＝**約${facts.voyager.lightDayOku}億 km**`,
 			},
 			{from: 12.2, to: 17.6, key: '1 LIGHT-DAY', title: '人がつくったもので、\nはじめて。', sub: `${facts.voyager.lightDayJa}（NASA の発表）`},
 		] as Caption[],
-		badge: '模式図：距離の比は実際のものではありません',
+		badge: '演出：光を追って24時間を早送り。大きさ・距離の比は模式',
 	},
 	logo: {
 		seconds: T.beats.logo,

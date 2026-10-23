@@ -250,15 +250,55 @@ impact(lift, 0.9);
 	impact(cue('toSolar') + 0.4, 0.35);
 }
 
-// 4. いちばん遠く：鼓動が消え、広い和音。光が進むあいだ、1時間ごとに刻み（24回）、届いたら鐘
+// 4. いちばん遠く：鼓動が消え、広い和音。光が地球を越える → 振り向くところで風が上がり → ワープの「びゅーー」
+//    光が進むあいだ、1時間ごとに刻み（24回。timing.json の lightCurve で、光がその時間ぶん進んだ瞬間に鳴る）、届いたら鐘
 pad(start.far, start.logo, [38, 50, 57, 64, 69], 1.0, {bright: 0.1, att: 2.5, rel: 2.5});
-pad(start.far + 4, start.logo, [74, 81], 0.6, {bright: 0.08, att: 3});
 {
+	const curve = T.lightCurve.map(([s, p]) => [start.far + s, p]);
+	const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2); // easeInOut に近い形
+	const pAt = (t) => {
+		if (t <= curve[0][0]) return 0;
+		for (let i = 0; i < curve.length - 1; i++) {
+			const [t0, p0] = curve[i];
+			const [t1, p1] = curve[i + 1];
+			if (t <= t1) return p0 + (p1 - p0) * ease((t - t0) / (t1 - t0));
+		}
+		return 1;
+	};
 	const a = cue('lightStart');
-	const b = cue('lightArrive');
-	for (let h = 1; h <= 24; h++) tick(a + ((b - a) * h) / 24, 0.03 + 0.002 * h, 1800 + h * 30, ((h % 5) - 2) / 4);
-	bell(b, 74, 0.12, 3.5, 0);
-	bell(b + 0.02, 81, 0.07, 3.0, 0.3);
+	const z = cue('lightArrive');
+	// 光が地球を越える瞬間：高い鈴
+	bell(a, 86, 0.08, 2.2, 0.2);
+	// 振り向く：風が上がる
+	riser(cue('swing') - 0.2, cue('warp') + 0.2, 0.4, 250, 4000);
+	// ワープ：ノイズを帯域で掃く長い「びゅーー」（速さに合わせて高く・強く）
+	{
+		const s0 = Math.floor(cue('warp') * SR);
+		const s1 = Math.floor(z * SR);
+		let low = 0;
+		let band = 0;
+		for (let s = s0; s < s1; s++) {
+			const t = s / SR;
+			const sp = Math.min(1, (pAt(t + 0.02) - pAt(t)) * 50 / 0.8 * 6); // おおよその速さ（0〜1）
+			const f = 500 + 5200 * sp;
+			const F = 2 * Math.sin((Math.PI * f) / SR);
+			const high = rnd() - low - 0.35 * band;
+			band += F * high;
+			low += F * band;
+			const env = Math.min(1, (t - cue('warp')) / 0.4) * Math.min(1, (z - t) / 0.6);
+			const v = band * 0.16 * env * (0.35 + 0.65 * sp);
+			put(s, v * (1 + 0.3 * Math.sin(t * 2.1)), v * (1 - 0.3 * Math.sin(t * 2.1)), 0.5);
+		}
+	}
+	pad(cue('warp'), z, [74, 81], 0.6, {bright: 0.08, att: 1.5, rel: 1.2});
+	for (let h = 1; h <= 24; h++) {
+		// 光が h 時間ぶん進んだ瞬間（p = h/24）をさがす
+		let tt = a;
+		while (tt < z && pAt(tt) < h / 24) tt += 0.005;
+		tick(tt, 0.022 + 0.0015 * h, 1800 + h * 30, ((h % 5) - 2) / 4);
+	}
+	bell(z, 74, 0.12, 3.5, 0);
+	bell(z + 0.02, 81, 0.07, 3.0, 0.3);
 }
 
 // 5. ロゴ：風が上がり、輪が描かれ、長調の和音に着地

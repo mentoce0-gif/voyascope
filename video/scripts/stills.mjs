@@ -34,7 +34,7 @@ POINTS.filter(([k, s]) => ORDER.includes(k) && s < secOf(k)).forEach(([k, s], i)
 	DEFAULT[`${String(i).padStart(2, '0')}-${k}`] = [beatStart[k] + Math.round(s * T.fps)];
 });
 const args = process.argv.slice(2).map(Number);
-const frames = args.length ? Object.fromEntries(args.map((f) => [`f`, [f]])) : DEFAULT;
+const frames = args.length ? Object.fromEntries(args.map((f) => [`f${String(f).padStart(4, '0')}`, [f]])) : DEFAULT;
 
 const serveUrl = await bundle({entryPoint: path.join(root, 'src/index.ts'), webpackOverride, publicDir: path.join(root, 'public')});
 const browserExecutable = process.env.REMOTION_BROWSER ?? null;
