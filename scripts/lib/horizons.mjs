@@ -90,6 +90,20 @@ export function parseHorizons(api, { command, quotes = [], days = DAYS } = {}) {
   return { target, km, missingQuotes: quotes.filter((q) => !sheet.includes(squash(q))) };
 }
 
+// 頼んだ期間の途中で軌道のデータが終わるとき（例：探査機の運用機関が出した軌道が、先の日付まで無い）、
+// Horizons は表の代わりに「No ephemeris for target "…" after A.D. 2026-DEC-01 00:00:00.0000 TDB」と返す。
+// その日時を読む（読めなければ null）。取得のスクリプトは、そのときだけ、その日の手前までに縮めてもう一度だけ頼む（2026-10-23 オーナー：案A）
+const MON = { JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5, JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11 };
+export function ephemerisEnd(api) {
+  const text = `${api?.error ?? ""}\n${api?.result ?? ""}`;
+  const m = /No ephemeris for target[^\n]*?after A\.D\. (\d{4})-([A-Z]{3})-(\d{2}) (\d{2}):(\d{2})/.exec(text);
+  if (!m || !(m[2] in MON)) return null;
+  return new Date(Date.UTC(+m[1], MON[m[2]], +m[3], +m[4], +m[5]));
+}
+
+// 縮めた表の日数：start から end の手前までに入る日数（1日ごと）。1日に満たなければ 0
+export const daysBefore = (start, end) => Math.max(0, Math.floor((end.getTime() - start.getTime() - 60000) / (STEP_HOURS * 3600000)));
+
 export class VersionError extends Error {
   constructor(version) {
     super(`Horizons API の version が ${version ?? "（なし）"} です（${API_VERSION} のはず）。出力の形が変わったかもしれないので、止めます`);
