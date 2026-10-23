@@ -2,87 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-23T04:49:48.048Z",
+  "fetched_at": "2026-10-23T11:39:25.002Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "7766f3bb-674c-4c71-b986-963bd633fcfe",
-      "net": "2026-10-23T07:00:00.000Z",
-      "precision": "min",
-      "window_end": "2026-10-23T08:45:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-22T23:54:09Z",
-      "rocket": {
-        "name": "Electron",
-        "full_name": "Electron"
-      },
-      "provider": {
-        "name": "Rocket Lab",
-        "ja": "ロケットラボ"
-      },
-      "mission": {
-        "name": "We're Not Hawking Around (3x HawkEye 360)",
-        "placeholder": false,
-        "type": "Earth Science",
-        "type_ja": "地球観測",
-        "orbit": "Sun-Synchronous Orbit",
-        "orbit_ja": "太陽同期軌道"
-      },
-      "site": {
-        "location_id": 10,
-        "name": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
-        "ja": "マヒア半島の発射場",
-        "short": "マヒア",
-        "pad": "Rocket Lab Launch Complex 1A",
-        "country": "NZL",
-        "country_ja": "ニュージーランド",
-        "position": {
-          "lat": -39.262833,
-          "lng": 177.864469
-        }
-      }
-    },
-    {
-      "id": "9648124f-8568-46d2-86d7-4b4d6f12187f",
-      "net": "2026-10-23T10:15:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-10-23T10:28:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-17T14:12:16Z",
-      "rocket": {
-        "name": "Long March 6A",
-        "full_name": "Long March 6A"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 19,
-        "name": "Taiyuan Satellite Launch Center, People's Republic of China",
-        "ja": "太原衛星発射センター",
-        "short": "太原",
-        "pad": "Launch Complex 9A",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 38.8583,
-          "lng": 111.5802
-        }
-      }
-    },
     {
       "id": "3621085f-deae-4f89-bd54-c0f96ee44421",
       "net": "2026-10-23T19:25:00.000Z",
@@ -130,7 +52,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-22T23:53:10Z",
+      "updated": "2026-10-23T07:27:42Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -208,7 +130,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-22T01:11:23Z",
+      "updated": "2026-10-23T05:00:19Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -275,6 +197,45 @@
         "position": {
           "lat": 34.632,
           "lng": -120.611
+        }
+      }
+    },
+    {
+      "id": "20d5676e-111b-40e3-8923-b218c3665ca2",
+      "net": "2026-10-30T17:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-10-30T21:00:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-23T08:05:38Z",
+      "rocket": {
+        "name": "GSLV Mk II",
+        "full_name": "GSLV Mk. II"
+      },
+      "provider": {
+        "name": "Indian Space Research Organization",
+        "ja": "インド宇宙研究機関（ISRO）"
+      },
+      "mission": {
+        "name": "IRNSS-1L (NVS-03)",
+        "placeholder": false,
+        "type": "Navigation",
+        "type_ja": "測位",
+        "orbit": "Geostationary Transfer Orbit",
+        "orbit_ja": "静止トランスファー軌道"
+      },
+      "site": {
+        "location_id": 14,
+        "name": "Satish Dhawan Space Centre, India",
+        "ja": "サティシュ・ダワン宇宙センター",
+        "short": "スリハリコタ",
+        "pad": "Satish Dhawan Space Centre Second Launch Pad",
+        "country": "IND",
+        "country_ja": "インド",
+        "position": {
+          "lat": 13.7199,
+          "lng": 80.2304
         }
       }
     },
