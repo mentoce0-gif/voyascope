@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MMX: Who Built What — VOYASCOPE</title>
+  <meta name="description" content="Japan's MMX mission to Mars's moon Phobos carries parts from the USA, France, Germany, Spain and Europe. Where they were made, where they fly on the spacecraft, and where the official dates still differ — every fact linked to its source. Unofficial, fan-made.">
+  <!-- 試作（2026-10-23）。docs/mmx-partners-study.md。オーナーの OK が出るまで noindex・アプリからはリンクしない（/mmx/ からだけ） -->
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#050e1f">
+  <link rel="icon" href="../../favicon.ico" sizes="32x32">
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://voyascope.org/mmx/partners/">
+  <meta property="og:image" content="https://voyascope.org/mmx/img/mmx-model.webp">
+  <meta property="og:title" content="MMX: Who Built What — VOYASCOPE">
+  <meta property="og:description" content="One spacecraft, many countries. Every fact linked to its source (unofficial, fan-made).">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"></noscript>
+  <link rel="stylesheet" href="../mmx.css">
+  <link rel="stylesheet" href="partners.css">
+  <script type="module" src="partners.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../../"><img src="../../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a>
+    <a class="open-app" href="../" lang="ja">MMX（日本語）<span aria-hidden="true">›</span></a>
+  </header>
+
+  <main>
+    <section class="hero-p wrap" aria-labelledby="title">
+      <p class="eyebrow mono">MARTIAN MOONS EXPLORATION · WHO BUILT WHAT</p>
+      <h1 id="title">One trip to Phobos, many countries</h1>
+      <p class="lead">Japan's MMX spacecraft left Earth on 20 October 2026. It is heading for Phobos, a moon of Mars, to bring a piece of it back home. Parts of it — and the people who will fly it — come from around the world.</p>
+      <p class="unofficial">VOYASCOPE is an <strong>unofficial, fan-made</strong> site. It is not connected with JAXA, NASA, CNES, DLR, ESA or any other agency. Every fact below links to the official page it comes from — please check there for the latest.</p>
+
+      <div class="pick" role="group" aria-label="Show one country">
+        <p class="pick-label mono">PICK YOUR COUNTRY</p>
+        <div class="chips" id="chips"></div>
+      </div>
+    </section>
+
+    <section class="wrap" aria-labelledby="map-title">
+      <h2 id="map-title" class="section-title"><span class="mono">01</span>Where on Earth</h2>
+      <p class="section-lead">Towns and antennas that work on MMX. Tap a dot to see what happens there.</p>
+      <div class="map-box">
+        <div class="zoom" role="group" aria-label="Map area">
+          <button type="button" data-view="world" aria-pressed="true">World</button>
+          <button type="button" data-view="europe" aria-pressed="false">Europe</button>
+          <button type="button" data-view="japan" aria-pressed="false">Japan</button>
+        </div>
+        <svg id="map" viewBox="0 0 360 180" role="img" aria-labelledby="map-title"></svg>
+        <p class="map-note">Dots are placed at town level and are approximate. Antenna dots (rings) belong to tracking networks that support MMX; which antenna is used on a given day is not published.</p>
+      </div>
+      <div class="place-card" id="place-card" aria-live="polite"></div>
+      <ul class="place-list" id="place-list"></ul>
+    </section>
+
+    <section class="wrap" aria-labelledby="craft-title">
+      <h2 id="craft-title" class="section-title"><span class="mono">02</span>On the spacecraft</h2>
+      <p class="section-lead">MMX is three spacecraft stacked together, plus a small rover. The parts your country made light up.</p>
+      <div class="craft-layout">
+        <figure class="craft">
+          <canvas id="craft" width="640" height="560" aria-label="VOYASCOPE's 3D model of MMX. The highlighted modules carry parts from the selected country."></canvas>
+          <figcaption>VOYASCOPE's own model, built by looking at official photos. Lit by <em>module</em>, not by instrument: where each instrument sits inside a module is not shown, and the rover's place on the side is approximate.</figcaption>
+        </figure>
+        <div class="modules" id="modules"></div>
+      </div>
+    </section>
+
+    <section class="wrap" aria-labelledby="when-title">
+      <h2 id="when-title" class="section-title"><span class="mono">03</span>When? — the open questions</h2>
+      <p class="section-lead">Each agency publishes its own schedule. Here they are side by side. Where they do not line up, we show both and do not pick one.</p>
+      <div class="when-box">
+        <svg id="when" role="img" aria-labelledby="when-title"></svg>
+        <ul class="when-key">
+          <li><span class="k k-bar"></span>Date or period given by the source</li>
+          <li><span class="k k-read"></span>Our reading of a phrase (see note)</li>
+          <li><span class="k k-overlap"></span>Where all sources overlap</li>
+        </ul>
+      </div>
+      <h3 class="sub">Open questions</h3>
+      <ol class="issues" id="issues"></ol>
+      <details class="claims">
+        <summary>What each source says, word for word</summary>
+        <div id="claims"></div>
+      </details>
+    </section>
+
+    <section class="wrap" aria-labelledby="src-title">
+      <h2 id="src-title" class="section-title"><span class="mono">04</span>Sources</h2>
+      <p class="section-lead">Checked on <span id="checked" class="mono"></span>. Quotes are kept short; names are written the way each agency writes them.</p>
+      <ul class="sources" id="sources"></ul>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    <p><strong>VOYASCOPE is an unofficial, fan-made work.</strong> It is not connected with any space agency or operator. IDEFIX® is written with ®, the way CNES and DLR write it.</p>
+    <p>No agency logos or images are used. The map outline is Natural Earth (public domain). The spacecraft is VOYASCOPE's own model (three.js, MIT License).</p>
+    <p class="mono">Trial page · 2026-10-23</p>
+  </footer>
+</body>
+</html>

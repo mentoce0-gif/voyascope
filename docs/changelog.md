@@ -6,6 +6,7 @@
 
 ## 2026-10-23
 
+- MMX の国際協力の英語ページ（試作）`web/mmx/partners/`（オーナー：案A と案D の両方・英語から・`/mmx/` に・時期の差分を課題に・IDEFIX® の名前 OK）。国を選ぶと地図のピンと模型のモジュールが光る。機関ごとの予定を帯で並べ、重ならないものを「Open questions」に（採取 DLR 2029／ESA 2030 など）。noindex、入口は `/mmx/` の一文だけ。読み込み 173KB（新しいグループ `mmx-partners` 上限 300KB）。詳しくは [`mmx-partners-study.md`](mmx-partners-study.md) の 9.
 - MMX の海外の参加者と「見える化」の検討（案）を [`mmx-partners-study.md`](mmx-partners-study.md) に（オーナーの「MMX 国際連携マップ 企画書」から。海外の子たちへの切り口）。JAXA の MMX Team・CNES のプレスリリース CP035-2026・DLR・ISAS ニュースで照合：参加は NASA・CNES・DLR・ESA・ASA（調整中）、RAX のレーザーはスペイン（INTA・バリャドリッド大学）。企画書の ⚠️ P-Sampler（JAXA の表にもある）・❓ 地上系（MIRS の地上系）が解けた。ローバー・採取の時期は資料で食い違う。おすすめは地球の画面の「ゆかりの地」。オーナーの OK はまだ
 
 ## 2026-10-21

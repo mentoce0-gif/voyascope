@@ -247,3 +247,6 @@ h1 { margin: 0; font-size: clamp(2.2rem, 6vw, 3.4rem); line-height: 1.15; letter
 .footer { margin-top: 56px; padding: 20px 0 40px; border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--text-dim); }
 .footer p { margin: 0 0 6px; }
 .footer strong { color: var(--text); }
+
+/* 英語のページ（partners/）への入口 */
+.intl { margin: 18px 0 6px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--navy-800); font-size: 0.92rem; }
