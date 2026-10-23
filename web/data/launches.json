@@ -2,57 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-23T11:39:25.002Z",
+  "fetched_at": "2026-10-23T21:24:47.515Z",
   "days_ahead": 45,
   "launches": [
     {
-      "id": "3621085f-deae-4f89-bd54-c0f96ee44421",
-      "net": "2026-10-23T19:25:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-10-23T19:39:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-17T13:59:34Z",
-      "rocket": {
-        "name": "Long March 4B",
-        "full_name": "Long March 4B"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 17,
-        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
-        "ja": "酒泉衛星発射センター",
-        "short": "酒泉",
-        "pad": "Launch Area 94 (SLS-2 / 603)",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 40.960482,
-          "lng": 100.298059
-        }
-      }
-    },
-    {
       "id": "f6af629d-39b5-4f86-bc0c-f8776444a858",
-      "net": "2026-10-23T21:30:00.000Z",
-      "precision": "min",
+      "net": "2026-10-23T22:28:53.000Z",
+      "precision": "sec",
       "window_end": "2026-10-24T01:30:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-23T07:27:42Z",
+      "updated": "2026-10-23T15:48:24Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -124,13 +85,13 @@
     },
     {
       "id": "e2886a96-5ce9-4f45-872f-4e25a00be837",
-      "net": "2026-10-26T05:00:00.000Z",
+      "net": "2026-10-27T04:45:00.000Z",
       "precision": "min",
-      "window_end": "2026-10-26T09:00:00.000Z",
+      "window_end": "2026-10-27T08:45:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-23T05:00:19Z",
+      "updated": "2026-10-23T14:05:56Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -163,13 +124,13 @@
     },
     {
       "id": "57ce0a39-d035-4f16-a418-bd6108f78199",
-      "net": "2026-10-29T04:17:00.000Z",
+      "net": "2026-10-30T04:02:00.000Z",
       "precision": "min",
-      "window_end": "2026-10-29T08:17:00.000Z",
+      "window_end": "2026-10-30T08:02:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-22T01:11:24Z",
+      "updated": "2026-10-23T14:05:57Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
