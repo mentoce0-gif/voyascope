@@ -3,26 +3,32 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "studio": "node scripts/music.mjs && remotion studio",
+    "studio": "node scripts/fetch-assets.mjs && node scripts/music.mjs && remotion studio",
     "stills": "node scripts/stills.mjs",
-    "render": "node scripts/music.mjs && remotion render VoyascopeTeaser out/voyascope-teaser.mp4 && remotion render VoyascopeTeaserSky out/voyascope-teaser-sky.mp4",
+    "render": "node scripts/fetch-assets.mjs && node scripts/music.mjs && remotion render VoyascopeTeaser out/voyascope-teaser.mp4 && remotion render VoyascopeTeaserSky out/voyascope-teaser-sky.mp4",
     "gif": "remotion render VoyascopeTeaserSky out/voyascope-preview-sky.gif --codec=gif --every-nth-frame=3 --scale=0.4",
     "typecheck": "tsc --noEmit -p .",
     "music": "node scripts/music.mjs",
-    "render:vertical": "node scripts/music.mjs himawari && remotion render VoyascopeTeaserVertical out/voyascope-teaser-vertical.mp4"
+    "render:vertical": "node scripts/fetch-assets.mjs && node scripts/music.mjs himawari && remotion render VoyascopeTeaserVertical out/voyascope-teaser-vertical.mp4",
+    "assets": "node scripts/fetch-assets.mjs",
+    "check": "python3 scripts/check-frames.py"
   },
   "dependencies": {
+    "@react-three/fiber": "^8.17.10",
     "@remotion/bundler": "^4.0.537",
     "@remotion/cli": "^4.0.537",
-    "@remotion/google-fonts": "^4.0.537",
+    "@remotion/fonts": "^4.0.537",
     "@remotion/renderer": "^4.0.537",
+    "@remotion/three": "^4.0.537",
     "@remotion/transitions": "^4.0.537",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "remotion": "^4.0.537"
+    "remotion": "^4.0.537",
+    "three": "^0.169.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
+    "@types/three": "^0.169.0",
     "typescript": "^5.6.3"
   }
 }

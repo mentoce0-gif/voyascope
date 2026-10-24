@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, interpolate, random, useCurrentFrame, useVideoConfig} from 'remotion';
 import {Badges, Captions, Pill, Readout, Scrim, Space, Tag, TmRow, clamp, ease, easeInOut} from '../components/ui';
 import {Globe} from '../components/Globe';
-import {Voyager} from '../components/Voyager';
+import {VoyagerModel} from '../components/VoyagerModel';
 import {beats} from '../script';
 import {facts} from '../facts';
 import {C, F} from '../theme';
@@ -106,10 +106,17 @@ export const Far: React.FC = () => {
 	const after = interpolate(t, [b.count.to, b.seconds], [0, 1], clamp);
 	const vScale = ((sFinal * 0.35) / vDist) * (1 + 0.08 * ease(after));
 	const vOn = interpolate(p, [0.9, 0.975], [0, 1], clamp);
-	const vX = VP.x + (0.035 / vDist) * FOC + (L.vertical ? 0 : width * 0.12 * vOn) - after * width * 0.03;
-	const vY = VP.y + (0.02 / vDist) * FOC + (L.vertical ? -height * 0.02 : 0);
-	const yaw = lerp(0.42, 0.95, easeInOut(after)) + (1 - vOn) * 0.2;
-	const sheen = interpolate(t, [b.count.to - 0.05, b.count.to + 0.9], [-0.3, 1.3], clamp);
+	// 模型は消失点（光の向かう先）から現れ、近づくにつれて定位置へ。皿が斜めに見え、磁力計のブームが右へのびる向き
+	const vk = vScale / sFinal; // 0 → 1（着いたとき）→ 1.08
+	const vTarget = L.vertical ? {x: 880, y: 900} : {x: 1500, y: 620}; // 模型の中心（皿はその左上にくる）
+	const vSize = (L.vertical ? 1180 : 1350) * vk;
+	const vX = VP.x + (vTarget.x - VP.x) * Math.min(1, vk) - after * width * 0.02;
+	const vY = VP.y + (vTarget.y - VP.y) * Math.min(1, vk);
+	const dish = {x: vX - 0.23 * vSize, y: vY - 0.09 * vSize}; // 皿のあたり
+	const yaw = lerp(0.9, 1.22, easeInOut(after)) - (1 - vOn) * 0.3; // ゆっくり回りこむ
+	// 追いかけている光の先頭：ふだんは消失点、ボイジャー1号が近づくと皿へ（届く）
+	const hk = Math.min(1, vk) * vOn;
+	const headScr = {x: VP.x + (dish.x - VP.x) * hk, y: VP.y + (dish.y - VP.y) * hk};
 	const vGlow = interpolate(t, [b.count.to, b.count.to + 0.25, b.count.to + 2.5], [0, 1, 0.25], clamp);
 	const hours = 24 * p;
 	const counting = interpolate(t, [b.count.from, b.count.from + 0.3], [0, 1], clamp);
@@ -307,10 +314,10 @@ export const Far: React.FC = () => {
 							<circle cx={VP.x} cy={VP.y} r={helioR} fill="none" stroke={C.ref} strokeWidth={2} strokeDasharray="3 12" />
 						</g>
 					) : null}
-					{t >= b.warp - 0.3 && t < b.count.to ? (
-						<g opacity={interpolate(t, [b.warp - 0.3, b.warp + 0.2], [0, 1], clamp)}>
-							<circle cx={VP.x} cy={VP.y} r={70} fill="url(#sun-core)" opacity={0.5} />
-							<circle cx={VP.x} cy={VP.y} r={5} fill="#fff" />
+					{t >= b.warp - 0.3 && t < b.count.to + 0.1 ? (
+						<g opacity={interpolate(t, [b.warp - 0.3, b.warp + 0.2, b.count.to - 0.1, b.count.to + 0.1], [0, 1, 1, 0], clamp)}>
+							<circle cx={headScr.x} cy={headScr.y} r={70} fill="url(#sun-core)" opacity={0.5} />
+							<circle cx={headScr.x} cy={headScr.y} r={5} fill="#fff" />
 						</g>
 					) : null}
 				</g>
@@ -320,17 +327,16 @@ export const Far: React.FC = () => {
 					<g opacity={vOn}>
 						{done ? (
 							<circle
-								cx={vX}
-								cy={vY}
-								r={vScale * (1.2 + interpolate(t, [b.count.to, b.count.to + 1.2], [0, 5], clamp))}
+								cx={dish.x}
+								cy={dish.y}
+								r={vSize * 0.12 * (1.2 + interpolate(t, [b.count.to, b.count.to + 1.2], [0, 5], clamp))}
 								fill="none"
 								stroke={C.mint}
 								strokeWidth={2}
 								opacity={interpolate(t, [b.count.to, b.count.to + 1.2], [0.8, 0], clamp)}
 							/>
 						) : null}
-						<circle cx={vX} cy={vY} r={vScale * 2.4} fill={C.mint} opacity={0.06 * vGlow} filter="url(#far-blur-m)" />
-						<Voyager id="vgr" x={vX} y={vY} s={vScale} yaw={yaw} pitch={0.3} roll={-0.12} sheen={sheen} glow={vGlow} />
+						<circle cx={dish.x} cy={dish.y} r={vSize * 0.3} fill={C.mint} opacity={0.06 * vGlow} filter="url(#far-blur-m)" />
 					</g>
 				) : null}
 
@@ -341,6 +347,21 @@ export const Far: React.FC = () => {
 				<rect width={width} height={height} filter="url(#far-grain)" opacity={0.045} />
 			</svg>
 
+			{/* ボイジャー1号：NASA の3D模型 */}
+			{vOn > 0 ? (
+				<VoyagerModel
+					width={width}
+					height={height}
+					cx={vX}
+					cy={vY}
+					size={vSize}
+					yaw={yaw}
+					pitch={0.5}
+					roll={0.9}
+					arrive={t >= b.count.to ? (t - b.count.to) / 1.4 : -1}
+					opacity={vOn}
+				/>
+			) : null}
 			{/* タグ */}
 			<Tag x={SUN.x} y={SUN.y} dx={-70} dy={-90} text="太陽" color={C.amber} opacity={aOn * interpolate(t, [0.4, 1.0, b.swing - 0.3, b.swing], [0, 1, 1, 0], clamp)} size={26} />
 			<Tag
@@ -401,12 +422,12 @@ export const Far: React.FC = () => {
 				ここから先は「恒星間空間」
 			</div>
 			<Tag
-				x={vX - vScale * 0.6}
-				y={vY - vScale * 0.8}
-				dx={L.vertical ? -40 : -120}
-				dy={-80}
+				x={dish.x - vSize * 0.06}
+				y={dish.y + vSize * 0.1}
+				dx={L.vertical ? -40 : 60}
+				dy={L.vertical ? 110 : 190}
 				text="ボイジャー1号"
-				sub="VOYAGER 1 · 形はイメージ"
+				sub="VOYAGER 1 · 3D模型：NASA"
 				color={C.amber}
 				opacity={vOn * interpolate(t, [b.count.to - 0.4, b.count.to + 0.2], [0, 1], clamp)}
 			/>

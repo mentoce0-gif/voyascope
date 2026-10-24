@@ -39,12 +39,13 @@ const frames = args.length ? Object.fromEntries(args.map((f) => [`f${String(f).p
 const serveUrl = await bundle({entryPoint: path.join(root, 'src/index.ts'), webpackOverride, publicDir: path.join(root, 'public')});
 const browserExecutable = process.env.REMOTION_BROWSER ?? null;
 const chromeMode = process.env.REMOTION_CHROME_MODE ?? 'headless-shell';
-const composition = await selectComposition({serveUrl, id: COMP, browserExecutable, chromeMode});
+const chromiumOptions = {gl: process.env.REMOTION_GL ?? 'angle'};
+const composition = await selectComposition({serveUrl, id: COMP, browserExecutable, chromeMode, chromiumOptions});
 mkdirSync(path.join(root, 'out/stills'), {recursive: true});
 for (const [name, list] of Object.entries(frames)) {
 	for (const frame of list) {
 		const output = path.join(root, `out/stills/${VERTICAL ? 'v-' : ''}${VARIANT}-${name}-${String(frame).padStart(4, '0')}.png`);
-		await renderStill({serveUrl, composition, frame, output, browserExecutable, chromeMode});
+		await renderStill({serveUrl, composition, frame, output, browserExecutable, chromeMode, chromiumOptions});
 		console.log(output);
 	}
 }

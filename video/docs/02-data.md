@@ -38,4 +38,5 @@
 - **MMX の今の距離・速さ**：Horizons の値は「Post-launch trajectory from JAXA」だが、実際の追跡かどうかは確かめていない（handoff.md の「次」）。動画には出さない
 - **火星到着の日付**：「2027年度」は公表されているが、日付は仮（route.mjs の330日は仮の値）。航路の図には日付を書かず「模式図」と書く
 - **ボイジャー1号の今日の距離**：Horizons は1992年以降は予測の値（カードの note）。NASA の公表している 11/18 の節目だけを使う
-- **画像・ロゴ**：機体の写真（NASA など）、JAXA・NASA のロゴ、ESA の画像は使わない（すべて図形で描く。ロゴは VOYASCOPE のものだけ）
+- **画像・ロゴ**：機体の写真（NASA など）、JAXA・NASA のロゴ、ESA の画像は使わない（ロゴは VOYASCOPE のものだけ）
+- **例外：ボイジャー1号の3D模型**は NASA のもの（NASA Science「Voyager 3D Model」https://science.nasa.gov/resource/voyager-3d-model/ 、クレジット NASA Visualization Technology Applications and Development〈VTAD〉）。2026-10-24 オーナー：「出典記載の上ちゃんとボイジャーに」。NASA の素材は米国では著作権の対象外（NASA Images and Media Usage Guidelines https://www.nasa.gov/nasa-brand-center/images-and-media/ ）。出典は最後の画面とタグに、NASA の推奨と見えないように、NASA のロゴは使わない。ファイルはリポジトリに入れず `npm run assets` で取ってくる

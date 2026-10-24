@@ -58,14 +58,20 @@ ffmpeg -i out/voyascope-teaser.mp4 -vf "fps=10,scale=480:-1:flags=lanczos,split[
 
 X 向けの軽い MP4（目安 8〜10MB）：`ffmpeg -i out/voyascope-teaser.mp4 -c:v libx264 -crf 26 -preset slow -pix_fmt yuv420p out/voyascope-x.mp4`
 
-**フォント**：描画のときに Google Fonts から読む（`@remotion/google-fonts`）。ネットにつながっている必要がある。
-**ブラウザ**：ふつうは Remotion が自分で用意する。入っている Chrome/Chromium を使うときは：
+**素材**：`npm run assets` で public/assets/ に取ってくる（リポジトリには入れない。sha256 で確かめる）。render・studio は先にこれを実行する。
+- フォント：Zen Kaku Gothic New・JetBrains Mono（google/fonts のリポジトリから。描き出しのときにネットを使わない）
+- ボイジャー1号の3D模型：NASA Science「Voyager 3D Model」（クレジット NASA VTAD。https://science.nasa.gov/resource/voyager-3d-model/ ）
+
+**ブラウザ**：ふつうは Remotion が用意する描き出し専用のブラウザ（headless shell）。入っているものを使うときは：
 
 ```
-REMOTION_BROWSER=/path/to/chrome REMOTION_CHROME_MODE=chrome-for-testing npm run render
+REMOTION_BROWSER=/path/to/headless_shell npm run render
 ```
 
-（Claude Code のクラウドでは `/opt/pw-browsers/chromium` と `chrome-for-testing`。headless_shell はプロキシの証明書を信頼せず、フォントが読めない）
+（Claude Code のクラウドでは `/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell`。ふつうの Chromium〈chrome-for-testing〉では、描き終わる前のコマが撮られて画面が欠けることがあった）
+3D（three.js）を描くため、WebGL は angle（`remotion.config.ts`）。
+
+**欠けたコマがないか**：`npm run check -- out/voyascope-teaser.mp4`（前後のコマと明るさを比べる）
 
 ## 「ここをこうして」の直し方
 
@@ -97,4 +103,5 @@ REMOTION_BROWSER=/path/to/chrome REMOTION_CHROME_MODE=chrome-for-testing npm run
 - **ロゴ**：VOYASCOPE のロゴ（オーナーのもの。CONTENT_LICENSE では自由に使ってよいものとしては配っていない）を、オーナーの動画として使う
 - **陸地の形**：Natural Earth（パブリックドメイン。サイトと同じデータ）
 - **音楽**：コードで合成したもの（既存の曲・サンプルは使っていない）
-- **フォント**：Zen Kaku Gothic New・JetBrains Mono とも SIL Open Font License（Google Fonts から描画時に読むだけで、リポジトリには入れていない）
+- **フォント**：Zen Kaku Gothic New・JetBrains Mono とも SIL Open Font License（`npm run assets` で取ってくるだけで、リポジトリには入れていない）
+- **ボイジャー1号の3D模型**：NASA の素材は米国では著作権の対象外（NASA Images and Media Usage Guidelines）。出典を書き、NASA の推奨と見えないようにし、NASA のロゴは使わない。ファイルはリポジトリに入れない

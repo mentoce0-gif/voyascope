@@ -127,5 +127,6 @@ const ALL_SOURCES: Source[] = [
 	{label: 'MMX のミッション（JAXA）', url: mmx.mission.source},
 	{label: 'ボイジャー1号の打ち上げ（NASA）', url: voyager.launch_date.source},
 	{label: 'ボイジャー1号が1光日に届く日（NASA）', url: voyagerLightDay.when.source},
+	{label: 'ボイジャー1号の3D模型（NASA Science「Voyager 3D Model」・NASA VTAD）', url: 'https://science.nasa.gov/resource/voyager-3d-model/'},
 ];
 export const sourcesFor = (v: 'himawari' | 'sky') => ALL_SOURCES.filter((x) => !x.only || x.only === v);
