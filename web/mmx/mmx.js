@@ -28,6 +28,15 @@ async function loadLaunch() {
   if (!launchEvent) return;
   const now = new Date();
   const postponed = statusOf(launchEvent) === "postponed";
+  if (statusOf(launchEvent) === "done") { // 打ち上げ済み（公式の発表・中継で確かめた）：いまどこへの案内に（2026-10-24 サイトの見直し）
+    const box = document.querySelector(".countdown"); box.classList.add("launched");
+    box.querySelector(".cd-label").textContent = "打ち上げ済み";
+    $("#cd-time").innerHTML = '<a class="cd-now" href="now/">MMX は、いまどこ？ ›</a>';
+    $("#cd-when").textContent = `${whenText(launchEvent, now, { full: true })}に打ち上げ`;
+    const s2 = launchEvent.status?.source; if (s2) { const a = $("#cd-src"); a.href = s2; a.textContent = publisherOf(s2) || "公式"; a.parentNode.lastChild.textContent = ""; }
+    launchEvent.__done = true;
+    return;
+  }
   $("#cd-when").textContent = postponed
     ? "延期（新しい日時は、公式の発表を待ちます）"
     : `${whenText(launchEvent, now, { full: true })}の予定`;
@@ -44,6 +53,7 @@ async function loadLaunch() {
 
 function renderCountdown() {
   const now = new Date();
+  if (launchEvent?.__done) return;
   const el = $("#cd-time");
   if (launchEvent && statusOf(launchEvent) === "postponed") {
     el.textContent = "延期";
