@@ -408,6 +408,12 @@ VOYASCOPE は「みお」（JAXA）のページを、出来事に合わせて「
 - 2026年の月明かり（極大の夜の月齢・月の出入り）は国立天文台の原文があれば（アプリでも計算するので、なければ空欄でよい）
 - カードJSON は、`curation/events/orionids-2026.json` と同じ形（`kind` は `meteor`、`when_label` は「極大」）で、`leonids-2026`・`geminids-2026` の2つ
 
+**C37　しし座・ふたご座流星群の放射点と、星座の明るい星（C36 の続き）**
+C36 で極大・出現期間・数・母天体は確かめた。残りの2つを確かめる。どちらも、開けなかったページは「未確認」に書き、別のページの値で埋めない。
+- **放射点（赤経・赤緯、度、J2000）**：IAU 流星データセンター（MDC）の各流星群のページ（しし座＝LEO・コード 00013、ふたご座＝GEM・コード 00004。オリオン座は https://www.ta3.sk/IAUC22DB/MDC2022/Roje/pojedynczy_obiekt.php?kodstrumienia=00008 ）。表に何行もあるときは、それぞれの行の文献名・太陽黄経・赤経・赤緯をすべて書き、どの行を使うのがよいかを「食い違い・注意」に。MDC が開けなければ IMO の流星群の一覧（Working List of Visual Meteor Showers）の放射点
+- **星座の明るい星**（しし座・ふたご座の線を描く分。それぞれ6〜9個。しし座はレグルス・デネボラ・アルギエバなど、ふたご座はカストル・ポルックスなど）：IAU の星名一覧（https://iauarchive.eso.org/public/themes/naming_stars/ 。開けなければ https://www.iau.org/public/themes/naming_stars/ ）の名前・赤経・赤緯（J2000）。一覧に等級がなければ SIMBAD（https://simbad.cds.unistra.fr/ ）の V 等級を、星ごとのページの URL つきで。どの星どうしを線で結ぶか（星座線）は、公式の星座図（IAU の星座図 https://www.iau.org/public/themes/constellations/ ）で確かめられた範囲で
+- カードJSON は、`radiant` と `constellation`（オリオン座流星群のカード https://github.com/mentoce0-gif/voyascope/blob/main/curation/events/orionids-2026.json と同じ形）の部分だけ
+
 
 ---
 
