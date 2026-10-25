@@ -66,14 +66,16 @@ export function meteorNight(radiant, observer, now) {
   return { samples, best, dark: { start: samples[0].date, end: samples.at(-1).date }, moonLit: moonLit(mid), moonUp };
 }
 
-// 出す期間：出現期間（active。日本時間の日付）があればそのあいだ。なければ極大・見ごろの前の日から、一覧から消えるまで
+// 出す期間：出現期間（active。日本時間の日付）のはじめ（なければ極大・見ごろの前の日）から、極大・見ごろの次の日の終わり（予定の一覧から消えるとき）まで。
+// 出現期間がそれより早く終わるなら、そこまで（2026-10-25 オーナー：極大が過ぎた流星群は出し続けない）
 const JST = 9 * HOUR;
 const jstDayStart = (ymd) => Date.parse(`${ymd}T00:00:00Z`) - JST;
 export function meteorWindow(ev) {
   const a = ev.active?.value;
-  if (a) return { start: jstDayStart(a.from), end: jstDayStart(a.to) + 24 * HOUR };
   const span = eventSpan(ev);
-  return span && { start: span.start - 24 * HOUR, end: span.end };
+  if (!span) return a ? { start: jstDayStart(a.from), end: jstDayStart(a.to) + 24 * HOUR } : null;
+  if (!a) return { start: span.start - 24 * HOUR, end: span.end };
+  return { start: jstDayStart(a.from), end: Math.min(jstDayStart(a.to) + 24 * HOUR, span.end) };
 }
 export function activeMeteors(events, now) {
   const t = now.getTime();
