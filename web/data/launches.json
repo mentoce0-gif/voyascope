@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-24T20:50:05.416Z",
+  "fetched_at": "2026-10-25T04:41:45.803Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "6b95bcc8-1f88-4539-84fe-f63630138766",
-      "net": "2026-10-25T01:50:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-10-25T02:32:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-20T12:35:18Z",
-      "rocket": {
-        "name": "Long March 8A",
-        "full_name": "Long March 8A"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 8,
-        "name": "Wenchang Space Launch Site, People's Republic of China",
-        "ja": "文昌宇宙発射場",
-        "short": "文昌",
-        "pad": "Commercial LC-1",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 19.597275,
-          "lng": 110.930753
-        }
-      }
-    },
     {
       "id": "e2886a96-5ce9-4f45-872f-4e25a00be837",
       "net": "2026-10-27T04:45:00.000Z",
