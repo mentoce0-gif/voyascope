@@ -1173,7 +1173,20 @@ const OPEN_FROM_LAUNCH = 1.9; // 発射のあとは、航路のオープニン�
 const skipBtn = document.getElementById("skip"), replayBtn = document.getElementById("replay"), links = document.getElementById("links");
 const viewToggle = document.getElementById("view-toggle");
 viewToggle.textContent = track ? "全体を見る" : "MMX を追う";
-viewToggle.addEventListener("click", () => { track = !track; view.yaw = view.pitch = 0; view.zoom = 1; viewToggle.textContent = track ? "全体を見る" : "MMX を追う"; });
+const setTrack = (on) => { track = on; view.yaw = view.pitch = 0; view.zoom = 1; viewToggle.textContent = track ? "全体を見る" : "MMX を追う"; };
+viewToggle.addEventListener("click", () => setTrack(!track));
+// 全体の図からは、さっと払う（スワイプ）と MMX を追う画面へ（2026-10-25 オーナー）。ゆっくりなぞるのは、いままでどおり回す
+{
+  let sw = null;
+  const cv = renderer.domElement;
+  cv.addEventListener("pointerdown", (e) => { sw = e.isPrimary ? { x: e.clientX, y: e.clientY, t: performance.now() } : null; });
+  cv.addEventListener("pointerup", (e) => {
+    const g = sw; sw = null;
+    if (!g || !e.isPrimary || track || !FLYING || film || opening || launching || coastNow()) return;
+    if (performance.now() - g.t < 400 && Math.hypot(e.clientX - g.x, e.clientY - g.y) > 60) setTrack(true);
+  });
+  cv.addEventListener("pointercancel", () => { sw = null; });
+}
 const nowLinksEl = document.getElementById("nowlinks");
 // 下から：ただし書き → リンク → 字幕と丸い REPLAY を、実際の高さで積む（画面の高さが違っても重ならない）
 function layoutBottom() {
