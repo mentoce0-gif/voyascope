@@ -38,6 +38,15 @@
     "as_of": "2026-10-25",
     "note": "国立天文台「ふたご座流星群が極大（2026年12月）」。街明かりの中や極大でない時期には何分の1かに減ることがある"
   },
+  "radiant": {
+    "value": {
+      "ra": 113.0,
+      "dec": 32.4
+    },
+    "source": "https://www.ta3.sk/IAUC22DB/MDC2022/Roje/pojedynczy_obiekt.php?kodstrumienia=00004",
+    "as_of": "2026-10-26",
+    "note": "IAU 流星データセンター（00004 GEM）。Jenniskens 2023 の値（太陽黄経 261.6° のとき）"
+  },
   "parent": {
     "name": {
       "value": "フェートン（3200 Phaethon）",
@@ -75,5 +84,5 @@
       "url": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html"
     }
   ],
-  "updated_at": "2026-10-25"
+  "updated_at": "2026-10-26"
 }

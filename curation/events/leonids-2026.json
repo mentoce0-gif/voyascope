@@ -38,6 +38,15 @@
     "as_of": "2026-10-25",
     "note": "国立天文台「ほしぞら情報」2026年11月。街明かりの中や見ごろでない時期には数分の1になることがある"
   },
+  "radiant": {
+    "value": {
+      "ra": 154.4,
+      "dec": 21.4
+    },
+    "source": "https://www.ta3.sk/IAUC22DB/MDC2022/Roje/pojedynczy_obiekt.php?kodstrumienia=00013",
+    "as_of": "2026-10-26",
+    "note": "IAU 流星データセンター（00013 LEO）。Jenniskens 2023 の値（太陽黄経 236.3° のとき）"
+  },
   "parent": {
     "name": {
       "value": "テンペル・タットル彗星（55P/Tempel-Tuttle）",
@@ -71,5 +80,5 @@
       "url": "https://www.nao.ac.jp/astro/basic/major-meteor-shower.html"
     }
   ],
-  "updated_at": "2026-10-25"
+  "updated_at": "2026-10-26"
 }
