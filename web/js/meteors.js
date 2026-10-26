@@ -384,6 +384,8 @@ export function orbitSvg(ev, date) {
 const LABELS = {
   "draconids-2026": { center: { ra: 250, dec: 60 }, left: [1], up: [2, 3, 4, 5], down: [0, 1] }, // ラスタバン・エルタニンは放射点の下に寄せる
   "orionids-2026": { left: [0, 3], up: [0, 1, 2], hide: [5] },
+  "leonids-2026": { left: [5], up: [3, 4], hide: [2] }, // アダフェラは放射点のすぐそば（名前は放射点の文字と重なる）
+  "geminids-2026": { left: [0], hide: [5, 7] }, // プロプス・メクブダは隣の星と近すぎる
 };
 // 放射点のある星座のあたりの星の図（空を見上げた向き：上が北、左が東）
 export function constellationSvg(ev) {
