@@ -831,6 +831,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       tab,
       status: c.status,
       orbitMeta: `取得 ${dateTimeShortJa(new Date(c.orbit.fetched_at))}・基準時刻 ${dateTimeShortJa(new Date(c.orbit.epoch))}（CelesTrak）`,
+      fetchedAt: c.orbit.fetched_at,
     });
     detailBody.querySelector("[data-follow]")?.setAttribute("aria-pressed", String(follow));
     // ひまわりの最新画像が読めないときは、画像の枠ごと隠す（イラストは残る）

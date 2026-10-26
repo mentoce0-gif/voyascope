@@ -1,4 +1,5 @@
 // 機体の詳細パネル（タブ：概要／滞在／軌道／リンク）
+import { rxHtml } from "./rx.js";
 import { esc, numberJa, latJa, lngJa, dateTimeShortJa, plainDateJa } from "./format.js";
 import { RINGS, ringOf } from "./scale.js";
 import { summarizeStatus } from "./status.js";
@@ -246,7 +247,7 @@ function linksHtml(card, orbitMeta) {
     ${orbitMeta ? `<p class="k small">軌道データ：${esc(orbitMeta)}</p>` : ""}`;
 }
 
-export function renderPanel(el, { card, crewData, now, isSample, family, tab = "overview", orbitMeta, status, realNow = new Date() }) {
+export function renderPanel(el, { card, crewData, now, isSample, family, tab = "overview", orbitMeta, status, fetchedAt, realNow = new Date() }) {
   const aboard = teamsAboard(crewData, now);
   const statusSum = summarizeStatus(card, status, realNow);
   const showBanner = isSample || hasUnverified(card) || hasUnverified(aboard);
@@ -264,6 +265,7 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
         <div class="panel-title"><span class="class-chip" style="--c:${family.color}">${esc(CLASS_LABELS[card.class] ?? "")}</span><span class="amber">${esc(card.name.ja)}</span></div>
         <div class="panel-ja"><span class="panel-en">${esc(card.name.en)}</span>　<span class="k">NORAD ${card.norad_id}</span></div>
       </div>
+      ${fetchedAt ? rxHtml(fetchedAt, realNow) : ""}
       <div class="panel-actions">
         <button type="button" class="follow-mini narrow-only" data-follow aria-pressed="false" title="カメラがこの機体を追いかけます">追尾</button>
         <button type="button" class="close mono" data-close aria-label="詳細を閉じる">×</button>
