@@ -82,6 +82,7 @@ ${body}
     <p><a href="${up}missions/">一言でわかる一覧</a> · <a href="${up}">VOYASCOPE を開く</a></p>
   </footer>
 </main>
+<script src="${up}js/count.js" defer></script>
 </body>
 </html>
 `;
