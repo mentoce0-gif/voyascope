@@ -1,0 +1,21 @@
+# 一時的：GitHub の実行環境から CelesTrak に何が返るかを見るだけ（書き換え・コミットはしない）。調べ終わったら消す
+name: probe-celestrak
+on:
+  push:
+    branches: [claude/celestrak-probe]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: 応答を見る
+        run: |
+          UA="VOYASCOPE/1.0 (unofficial fan-made project; scheduled GitHub Actions job)"
+          for n in 25544 62876; do
+            echo "=== CATNR=$n"
+            curl -sS -A "$UA" -D headers.txt "https://celestrak.org/NORAD/elements/gp.php?CATNR=$n&FORMAT=JSON" -o body.txt -w "http %{http_code} ip %{remote_ip}\n"
+            cat headers.txt
+            head -c 400 body.txt; echo
+          done
+          echo "=== 自分の IP"; curl -sS https://api.ipify.org; echo
+          echo "=== DNS"; getent ahosts celestrak.org | head -5
