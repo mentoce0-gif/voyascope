@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseGpResponse, dueForFetch, isNewer, buildRecord, gpUrl, epochIso } from "../scripts/lib/orbits.mjs";
+import { parseGpResponse, dueForFetch, isNewer, buildRecord, gpUrl, epochIso, staleReport } from "../scripts/lib/orbits.mjs";
 import { satrecFromOrbit, positionAt, periodMinutes } from "../web/js/orbit.js";
 
 // 2026-09-28 にオーナーが取得した ISS の TLE と、同じ要素を OMM（JSON）で書いたもの
@@ -86,4 +86,16 @@ test("web/data/orbits/ のファイルはどれも読める", async () => {
     assert.ok(!Number.isNaN(Date.parse(orbit.fetched_at)), `${f}: fetched_at`);
     assert.ok(positionAt(satrecFromOrbit(orbit), new Date(orbit.epoch)), `${f}: 位置を計算できない`);
   }
+});
+
+test("新しいデータが来ていない機体：1機だけなら知らせるだけ、半分をこえたら止める", () => {
+  const now = new Date("2026-10-26T04:41:00Z");
+  const rec = (id, fetched_at) => ({ id, fetched_at });
+  const one = staleReport([rec("iss", "2026-10-26T00:00:00Z"), rec("qzs-2", "2026-10-18T04:34:34Z"), rec("xrism", "2026-10-25T20:00:00Z")], now);
+  assert.deepEqual(one.stale.map((r) => r.id), ["qzs-2"]);
+  assert.equal(one.alarm, false);
+  // 2026-10-24〜26：CelesTrak から古いデータが返り続けた
+  const many = staleReport([rec("iss", "2026-10-24T15:57:39Z"), rec("qzs-2", "2026-10-18T04:34:34Z"), rec("daichi-4", "2026-10-24T20:50:00Z")], now);
+  assert.equal(many.alarm, true);
+  assert.equal(staleReport([rec("iss", undefined)], now).alarm, true);
 });

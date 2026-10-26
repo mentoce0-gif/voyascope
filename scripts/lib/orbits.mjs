@@ -77,3 +77,14 @@ export function buildRecord({ id, noradId, omm, fetchedAt }) {
     omm,
   };
 }
+
+// 新しい軌道データが長く来ていない機体（fetched_at は新しいデータを受け取ったときだけ進む）。
+// 1機だけなら CelesTrak 側でその機体の更新が止まっていることがある（2026-10 のみちびき2号機）。
+// 半分をこえる機体で止まっていたら、取得の側の問題（2026-10-24〜26 は CelesTrak から古いデータが返り続けた）として知らせる
+export const STALE_HOURS = 36;
+export function staleReport(records, now = new Date(), hours = STALE_HOURS) {
+  const stale = records
+    .map((r) => ({ id: r.id, hours: (now.getTime() - Date.parse(r.fetched_at)) / 3600000 }))
+    .filter((r) => !(r.hours < hours));
+  return { stale, alarm: stale.length * 2 > records.length };
+}
