@@ -1174,6 +1174,22 @@ body { overflow: hidden; }
 .site-marker.is-ref .tag .ref-mark { margin-left: 2px; padding: 0 3px; font-size: 9px; vertical-align: 1px; }
 .site-marker.is-ref .ref-tip { left: 50%; right: auto; top: 54px; width: 230px; transform: translateX(-50%); }
 
+/* 軌道データが長く届いていない機体：印と一覧の行を灰色に。ホバー・フォーカスで説明（吹き出しは「参考」と同じ形で、実線） */
+.craft-marker.is-stale { --c: #7d8794; }
+.craft-marker.is-stale .ring { animation: none; opacity: 0.5; box-shadow: none; }
+.craft-marker.is-stale .core { box-shadow: none; }
+.craft-marker.is-stale .stale-tip { left: 50%; right: auto; top: 40px; width: 230px; transform: translateX(-50%); }
+.craft-item.is-stale { position: relative; color: var(--text-dim); }
+.craft-item.is-stale > :not(.stale-tip) { filter: grayscale(1); opacity: 0.55; }
+.stale-tip { border: 1px solid #7d8794; }
+@media (hover: hover) {
+  .craft-marker.is-stale:hover .stale-tip,
+  .craft-item.is-stale:hover .stale-tip { opacity: 1; visibility: visible; transition-delay: 0.25s, 0.25s; }
+}
+.craft-marker.is-stale:focus-visible .stale-tip,
+.craft-item.is-stale:focus-visible .stale-tip { opacity: 1; visibility: visible; transition-delay: 0s, 0s; }
+.craft-list li:last-child .craft-item.is-stale .stale-tip { top: auto; bottom: calc(100% + 4px); } /* 最後の行は上に */
+
 /* ---------- このアプリについて（ダイアログ） ---------- */
 dialog.card {
   width: min(560px, calc(100vw - 2 * var(--gutter)));
