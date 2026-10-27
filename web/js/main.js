@@ -36,8 +36,11 @@ const COLORS = {
   mint: "#5ef2c2",
   atmosphere: "#7fc4ff",
 };
-// 軌道データの基準時刻からこれ以上離れたら、位置がずれている可能性を知らせる
+// 軌道データ（基準時刻）がこれ以上届いていない機体は、印と一覧の行を灰色にして、ホバーで知らせる
 const STALE_DAYS = 7;
+const staleDays = (c) => (Date.now() - new Date(c.orbit.epoch)) / 86400000;
+const staleNote = (c) =>
+  `軌道データが ${Math.floor(staleDays(c))} 日間届いていません（最後のデータ：${dateTimeShortJa(new Date(c.orbit.epoch))}）。実際の位置とずれている可能性があります。`;
 
 const $ = (sel) => document.querySelector(sel);
 // 地球の上と一覧に出す短い名前（日本語の愛称が長いときは英語の略称）
@@ -167,6 +170,12 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     el.style.setProperty("--c", c.family.color);
     el.setAttribute("aria-label", `${c.card.name.ja} の詳細を開く`);
     el.innerHTML = `<span class="ring"></span><span class="core"></span><span class="tag">${esc(shortName(c))}</span>`;
+    c.stale = staleDays(c) > STALE_DAYS;
+    if (c.stale) {
+      el.classList.add("is-stale");
+      el.setAttribute("aria-label", `${c.card.name.ja} の詳細を開く（${staleNote(c)}）`);
+      el.insertAdjacentHTML("beforeend", `<span class="ref-tip stale-tip" aria-hidden="true">${esc(staleNote(c))}</span>`);
+    }
     el.addEventListener("click", (e) => {
       e.stopPropagation();
       select(c);
@@ -564,7 +573,9 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     }
     listEl.innerHTML = shown
       .map(
-        (c) => `<li><button type="button" class="craft-item" data-id="${c.id}" aria-current="${c === selected}">
+        (c) => `<li><button type="button" class="craft-item${c.stale ? " is-stale" : ""}" data-id="${c.id}" aria-current="${c === selected}"${
+          c.stale ? ` aria-description="${esc(staleNote(c))}"` : ""
+        }>
           ${
             c.card.image
               ? `<span class="craft-thumb" style="--c:${c.family.color}" aria-hidden="true"><img src="${esc(c.card.image.file)}" alt="" loading="lazy"></span>`
@@ -572,7 +583,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
           }
           <span class="craft-names"><span class="craft-id">${esc(shortName(c))}</span><span class="craft-ja">${esc(c.card.name.en)}${statusBadge(c)}</span></span>
           <span class="craft-alt mono"><span class="st-pip ${statusPip(c)}" aria-hidden="true"></span><span data-alt="${c.id}">--</span></span>
-          <span class="chev" aria-hidden="true">›</span>
+          <span class="chev" aria-hidden="true">›</span>${c.stale ? `<span class="ref-tip stale-tip" aria-hidden="true">${esc(staleNote(c))}</span>` : ""}
         </button></li>`,
       )
       .join("");
@@ -1447,13 +1458,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       // 通過の予報は10分ごと、または次の通過が終わったら作り直す
       if (pref && (Date.now() - passesAt > 600e3 || (passes[0] && passes[0].end.getTime() < Date.now()))) updateTonight();
 
-      const ageDays = Math.max(...craft.map((c) => Math.abs(now - new Date(c.orbit.epoch)) / 86400000));
-      let warning = "";
-      if (craft.some((c) => !c.pos)) {
-        warning = "この時刻の位置は、いまの軌道データでは計算できない機体があります。";
-      } else if (ageDays > STALE_DAYS) {
-        warning = `軌道データの基準時刻から ${Math.round(ageDays)} 日離れています。実際の位置とずれている可能性があります。`;
-      }
+      // 軌道データが古い機体は、印と一覧の行で知らせる（ここでは出さない）
+      const warning = craft.some((c) => !c.pos) ? "この時刻の位置は、いまの軌道データでは計算できない機体があります。" : "";
       if (warning !== lastWarning) {
         lastWarning = warning;
         els.warning.textContent = warning;
