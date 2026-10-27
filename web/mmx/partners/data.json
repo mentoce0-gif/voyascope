@@ -1,0 +1,229 @@
+{
+  "$comment": "MMX の国際協力の英語ページ（試作。docs/mmx-partners-study.md）のデータ。どの項目も sources の一次資料で確かめたもの（2026-10-23 確認）。地図のピンは町の単位の目安（approx）。curation/ にはまだ入れていない。直したら npm test（tests/mmx-partners.test.mjs）",
+  "checked": "2026-10-23",
+  "sources": {
+    "jaxa-team": { "publisher": "JAXA", "title": "MMX Team — MMX Partnerships", "lang": "en", "url": "https://www.mmx.jaxa.jp/en/team/" },
+    "jaxa-mission": { "publisher": "JAXA", "title": "MMX Mission", "lang": "en", "url": "https://www.mmx.jaxa.jp/en/mission/" },
+    "jaxa-presskit": { "publisher": "JAXA", "title": "MMX press kit (2026-09-18)", "lang": "ja", "url": "https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" },
+    "jaxa-launch": { "publisher": "JAXA", "title": "H3 F10 / MMX launch live stream", "lang": "ja", "url": "https://www.youtube.com/watch?v=sZGyK9jfoy4" },
+    "isas-psmp": { "publisher": "ISAS/JAXA", "title": "The development of the P-SMP flight model for MMX is now complete (2025-02-21)", "lang": "en", "url": "https://mmx-news.isas.jaxa.jp/?p=2570" },
+    "cnes-pr": { "publisher": "CNES", "title": "Press release CP035-2026 (2026-10-19)", "lang": "fr", "url": "https://cnes.fr/sites/default/files/2026-10/CP035-2026_-_Succes_MMX.pdf" },
+    "cnes-instruments": { "publisher": "CNES", "title": "MMX — Instruments", "lang": "fr", "url": "https://cnes.fr/projets/mmx/instruments" },
+    "cnes-details": { "publisher": "CNES", "title": "MMX — En détails", "lang": "fr", "url": "https://cnes.fr/projets/mmx/en-details" },
+    "dlr-facts": { "publisher": "DLR", "title": "MMX — Facts and figures", "lang": "en", "url": "https://www.dlr.de/en/research-and-transfer/projects-and-missions/mmx/facts-and-figures" },
+    "dlr-rax": { "publisher": "DLR", "title": "Raman Spectrometer for MMX (RAX)", "lang": "en", "url": "https://www.dlr.de/en/wr/research-transfer/projects/planetary-research/mission-martian-moons-exploration-mmx/raman-spektrometer-for-mmx-rax" },
+    "esa-infographic": { "publisher": "ESA", "title": "The Martian Moons eXploration (MMX) mission (2026-10-13)", "lang": "en", "url": "https://www.esa.int/ESA_Multimedia/Images/2026/10/The_Martian_Moons_eXploration_MMX_mission" },
+    "jpl-horizons": { "publisher": "NASA/JPL", "title": "Horizons — MMX (spacecraft), −239, object data (read 2026-10-21)", "lang": "en", "url": "https://ssd.jpl.nasa.gov/horizons/" },
+    "epsc-rax": { "publisher": "Schröder et al. (RAX team)", "title": "EPSC2026-872 (conference abstract)", "lang": "en", "url": "https://meetingorganizer.copernicus.org/EPSC2026/EPSC2026-872.html", "kind": "abstract" },
+    "apl": { "publisher": "Johns Hopkins APL", "title": "MEGANE", "lang": "en", "url": "https://megane.jhuapl.edu/" },
+    "oca": { "publisher": "Observatoire de la Côte d'Azur", "title": "OCA", "lang": "fr", "url": "https://www.oca.eu/fr/" },
+    "uva": { "publisher": "Universidad de Valladolid", "title": "UVa", "lang": "es", "url": "https://www.uva.es/" }
+  },
+  "countries": [
+    { "id": "JP", "flag": "🇯🇵", "name": "Japan", "lang": ["ja"] },
+    { "id": "US", "flag": "🇺🇸", "name": "United States", "lang": ["en-US"] },
+    { "id": "FR", "flag": "🇫🇷", "name": "France", "lang": ["fr"] },
+    { "id": "DE", "flag": "🇩🇪", "name": "Germany", "lang": ["de"] },
+    { "id": "ES", "flag": "🇪🇸", "name": "Spain", "lang": ["es"] },
+    { "id": "ESA", "flag": "🇪🇺", "name": "Europe (ESA)", "lang": [] },
+    { "id": "AU", "flag": "🇦🇺", "name": "Australia", "lang": ["en-AU"] }
+  ],
+  "modules": {
+    "outbound": "Outbound module (propulsion to Mars)",
+    "explore": "Exploration module (lands on Phobos)",
+    "return": "Return module (flies home)",
+    "rover": "IDEFIX® rover",
+    "ground": "On the ground",
+    "unplaced": "On the spacecraft — position not published"
+  },
+  "contributions": [
+    {
+      "id": "jaxa-lead", "countries": ["JP"], "who": "JAXA",
+      "part": "Mission lead: spacecraft, launch, mission control, sample return",
+      "role": "Japan builds the spacecraft, launches it, runs the mission and handles the samples when they come back.",
+      "modules": ["outbound", "explore", "return"],
+      "sources": ["cnes-details", "jaxa-team"]
+    },
+    {
+      "id": "jp-explore", "countries": ["JP"], "who": "JAXA, Rikkyo University, Chiba Institute of Technology, Osaka University",
+      "part": "TENGOO, OROCHI, LIDAR, MSA, C-SMP",
+      "role": "Cameras (TENGOO, OROCHI — Rikkyo Univ.), laser altimeter (LIDAR — Chiba Tech), ion mass analyser (MSA — Osaka Univ.) and the coring sampler (C-SMP — JAXA).",
+      "modules": ["explore"],
+      "sources": ["cnes-instruments", "dlr-facts", "jaxa-presskit"]
+    },
+    {
+      "id": "jp-return", "countries": ["JP"], "who": "JAXA, Chiba Institute of Technology",
+      "part": "CMDM, IREM, SHV, Sample Return Capsule",
+      "role": "Dust monitor (CMDM — Chiba Tech), radiation monitor (IREM), high-definition camera (SHV) and the capsule that carries the samples to Earth (SRC).",
+      "modules": ["return"],
+      "sources": ["cnes-instruments", "dlr-facts", "jaxa-presskit"]
+    },
+    {
+      "id": "megane", "countries": ["US"], "who": "NASA · built by Johns Hopkins APL",
+      "part": "MEGANE — gamma-ray and neutron spectrometer",
+      "role": "Reads which chemical elements are on Phobos's surface from the gamma rays and neutrons coming off it.",
+      "modules": ["explore"],
+      "sources": ["jaxa-team", "cnes-instruments", "dlr-facts", "apl"]
+    },
+    {
+      "id": "p-smp", "countries": ["US"], "who": "NASA · built by Honeybee Robotics",
+      "part": "P-SMP — pneumatic sampler",
+      "role": "Blows high-pressure nitrogen gas to lift surface grains into a container. It takes only the top layer, and backs up the coring sampler.",
+      "modules": ["explore"],
+      "sources": ["jaxa-team", "isas-psmp", "cnes-instruments"],
+      "note": "DLR's facts page lists P-SMP among the exploration-module instruments under “JAXA”. JAXA, CNES and ISAS say NASA provided it."
+    },
+    {
+      "id": "nasa-dsn", "countries": ["US"], "who": "NASA/JPL Deep Space Network",
+      "part": "Ground station support",
+      "role": "Helps track MMX, send commands and receive mission data, alongside JAXA's own stations.",
+      "modules": ["ground"],
+      "sources": ["jaxa-team", "jaxa-presskit"]
+    },
+    {
+      "id": "mirs", "countries": ["FR"], "who": "CNES · LIRA (Observatoire de Paris-PSL) · 9 French labs",
+      "part": "MIRS — near-infrared imaging spectrometer",
+      "role": "Finds out which minerals are on Phobos and Deimos from the light they reflect, and looks for water and organic matter. CNES built its ground segment and will operate it.",
+      "modules": ["explore"],
+      "sources": ["cnes-pr", "cnes-instruments", "jaxa-team", "dlr-facts"]
+    },
+    {
+      "id": "flight-dynamics", "countries": ["FR"], "who": "CNES",
+      "part": "Flight dynamics (since 2017)",
+      "role": "Helped design and check MMX's orbits around Phobos, including low ones; works on navigation and on Phobos's orbit and gravity field.",
+      "modules": ["ground"],
+      "sources": ["cnes-pr", "cnes-details", "jaxa-team"]
+    },
+    {
+      "id": "idefix", "countries": ["FR", "DE"], "who": "CNES and DLR",
+      "part": "IDEFIX® — the Phobos rover (about 25 kg)",
+      "role": "Scout, demonstrator and explorer: checks the ground before MMX lands, tests driving where gravity is nearly 2,000 times weaker than on Earth, and looks at the soil in detail down to 0.1 mm. Planned: 100 days, up to 100 m.",
+      "modules": ["rover"],
+      "sources": ["cnes-pr", "dlr-facts", "jaxa-team"]
+    },
+    {
+      "id": "idefix-fr", "countries": ["FR"], "who": "CNES · OCA · ISAE-SUPAERO · LAM",
+      "part": "Rover cameras, computer, power and radio",
+      "role": "Two navigation cameras, two wheel cameras and the central service module are French. OCA coordinates the rover science on the French side; ISAE-SUPAERO and LAM work on the camera science.",
+      "modules": ["rover"],
+      "sources": ["dlr-facts", "cnes-instruments", "cnes-pr"]
+    },
+    {
+      "id": "minirad", "countries": ["DE"], "who": "DLR",
+      "part": "miniRAD — infrared radiometer on the rover",
+      "role": "An infrared radiometer. It comes from MARA, an instrument on MASCOT — the small lander that rode on Hayabusa2.",
+      "modules": ["rover"],
+      "sources": ["cnes-instruments", "dlr-facts"]
+    },
+    {
+      "id": "rax", "countries": ["DE", "ES", "JP"], "who": "DLR · INTA & University of Valladolid · Univ. of Tokyo, JAXA & Rikkyo Univ.",
+      "part": "RAX — Raman spectrometer on the rover (1.5 kg)",
+      "role": "One instrument, three countries: Germany built the spectrometer, Spain the laser (a flight spare of the ExoMars laser), Japan the autofocus. It identifies minerals on Phobos's surface.",
+      "modules": ["rover"],
+      "sources": ["dlr-rax", "cnes-instruments"]
+    },
+    {
+      "id": "idefix-ops", "countries": ["FR", "DE"], "who": "CNES (Toulouse) and DLR MUSC (Cologne)",
+      "part": "Rover control centres",
+      "role": "The rover will be driven from Toulouse and Cologne, with the two teams taking turns.",
+      "modules": ["ground"],
+      "sources": ["dlr-facts", "cnes-pr"]
+    },
+    {
+      "id": "dlr-tests", "countries": ["DE"], "who": "DLR",
+      "part": "Test facilities",
+      "role": "A drop tower and microgravity simulation for testing.",
+      "modules": ["ground"],
+      "sources": ["jaxa-team"]
+    },
+    {
+      "id": "esa-ka", "countries": ["ESA"], "who": "ESA",
+      "part": "Ka-band deep-space communication equipment",
+      "role": "Radio equipment for talking to Earth. In return, two ESA scientists sit on the MMX science board.",
+      "modules": ["unplaced"],
+      "sources": ["jaxa-team", "cnes-details"]
+    },
+    {
+      "id": "esa-estrack", "countries": ["ESA"], "who": "ESA ESTRACK",
+      "part": "Ground station support",
+      "role": "Helps track MMX, send commands and receive mission data, alongside JAXA's own stations.",
+      "modules": ["ground"],
+      "sources": ["jaxa-team", "jaxa-presskit"]
+    },
+    {
+      "id": "asa", "countries": ["AU"], "who": "Australian Space Agency",
+      "part": "Partner — “international cooperation to be finalised” (JAXA)",
+      "role": "In 2031 the sample capsule is planned to land in the Woomera Prohibited Area in South Australia.",
+      "modules": ["ground"],
+      "sources": ["jaxa-team", "esa-infographic", "cnes-details"]
+    }
+  ],
+  "places": [
+    { "id": "tanegashima", "name": "Tanegashima", "host": "JP", "lat": 30.40, "lng": 130.97, "what": "Launch site. MMX lifted off on an H3 rocket on 20 Oct 2026, 04:41 JST.", "contributions": ["jaxa-lead"], "sources": ["jaxa-launch", "esa-infographic"] },
+    { "id": "sagamihara", "name": "Sagamihara", "local": "相模原", "host": "JP", "lat": 35.56, "lng": 139.40, "what": "MMX control room. The samples will be brought here after they land.", "contributions": ["jaxa-lead"], "sources": ["jaxa-presskit", "cnes-details"] },
+    { "id": "usuda", "name": "Usuda & Misasa", "local": "臼田・美笹", "host": "JP", "lat": 36.13, "lng": 138.36, "what": "JAXA's main deep-space antennas for MMX (64 m and 54 m).", "contributions": ["jaxa-lead"], "sources": ["jaxa-presskit"] },
+    { "id": "uchinoura", "name": "Uchinoura", "local": "内之浦", "host": "JP", "lat": 31.25, "lng": 131.08, "what": "One of JAXA's tracking stations for MMX.", "contributions": ["jaxa-lead"], "sources": ["jaxa-presskit"] },
+    { "id": "laurel", "name": "Laurel, Maryland", "host": "US", "lat": 39.16, "lng": -76.90, "what": "Johns Hopkins APL, where MEGANE was built.", "contributions": ["megane"], "sources": ["apl", "jaxa-team"] },
+    { "id": "goldstone", "name": "Goldstone", "host": "US", "lat": 35.43, "lng": -116.89, "what": "NASA Deep Space Network station. The network supports MMX tracking.", "contributions": ["nasa-dsn"], "sources": ["jaxa-presskit"], "network": true },
+    { "id": "madrid", "name": "Madrid", "host": "ES", "lat": 40.43, "lng": -4.25, "labelSide": "left", "what": "NASA Deep Space Network station. The network supports MMX tracking.", "contributions": ["nasa-dsn"], "sources": ["jaxa-presskit"], "network": true },
+    { "id": "canberra", "name": "Canberra", "host": "AU", "lat": -35.40, "lng": 148.98, "what": "NASA Deep Space Network station. The network supports MMX tracking.", "contributions": ["nasa-dsn"], "sources": ["jaxa-presskit"], "network": true },
+    { "id": "cebreros", "name": "Cebreros", "host": "ES", "lat": 40.45, "lng": -4.37, "what": "ESA ESTRACK deep-space station. The network supports MMX tracking.", "contributions": ["esa-estrack"], "sources": ["jaxa-presskit"], "network": true },
+    { "id": "malargue", "name": "Malargüe", "host": "AR", "lat": -35.78, "lng": -69.40, "what": "ESA ESTRACK deep-space station in Argentina. The network supports MMX tracking.", "contributions": ["esa-estrack"], "sources": ["jaxa-presskit"], "network": true },
+    { "id": "new-norcia", "name": "New Norcia", "host": "AU", "lat": -31.05, "lng": 116.19, "what": "ESA ESTRACK deep-space station. The network supports MMX tracking.", "contributions": ["esa-estrack"], "sources": ["jaxa-presskit"], "network": true },
+    { "id": "toulouse", "name": "Toulouse", "host": "FR", "lat": 43.60, "lng": 1.44, "what": "CNES Toulouse Space Centre — one of the two IDEFIX® control centres.", "contributions": ["idefix-ops", "idefix"], "sources": ["dlr-facts", "cnes-pr"] },
+    { "id": "cologne", "name": "Cologne", "local": "Köln", "host": "DE", "lat": 50.94, "lng": 6.96, "what": "DLR Microgravity User Support Center (MUSC) — the other IDEFIX® control centre.", "contributions": ["idefix-ops", "idefix"], "sources": ["dlr-facts"] },
+    { "id": "paris", "name": "Paris", "host": "FR", "lat": 48.84, "lng": 2.34, "what": "Observatoire de Paris-PSL / LIRA — leads the building of MIRS.", "contributions": ["mirs"], "sources": ["cnes-pr"] },
+    { "id": "nice", "name": "Nice", "host": "FR", "lat": 43.72, "lng": 7.30, "what": "Observatoire de la Côte d'Azur — coordinates IDEFIX® science on the French side.", "contributions": ["idefix-fr"], "sources": ["cnes-pr", "oca"] },
+    { "id": "valladolid", "name": "Valladolid", "host": "ES", "lat": 41.65, "lng": -4.72, "what": "University of Valladolid — built the RAX laser with INTA.", "contributions": ["rax"], "sources": ["dlr-rax", "uva"] },
+    { "id": "woomera", "name": "Woomera", "host": "AU", "lat": -31.20, "lng": 136.82, "what": "In 2031 the capsule with the Phobos samples is planned to land in the Woomera Prohibited Area.", "contributions": ["asa"], "sources": ["esa-infographic", "cnes-details"] }
+  ],
+  "timeline": {
+    "lead": "JAXA",
+    "milestones": [
+      { "id": "launch", "label": "Launch" },
+      { "id": "mars", "label": "Arrive at Mars" },
+      { "id": "qso", "label": "Start circling close to Phobos" },
+      { "id": "rover", "label": "IDEFIX® rover lands on Phobos" },
+      { "id": "sampling", "label": "MMX lands and takes samples" },
+      { "id": "leave", "label": "Leave Mars for home" },
+      { "id": "earth", "label": "Samples reach Earth" }
+    ],
+    "claims": [
+      { "milestone": "launch", "source": "jaxa-launch", "publisher": "JAXA", "from": "2026-10-20", "to": "2026-10-20", "text": "Lifted off 20 Oct 2026, 04:41 JST" },
+      { "milestone": "launch", "source": "cnes-pr", "publisher": "CNES", "from": "2026-10-20", "to": "2026-10-20", "text": "« lancée avec succès le 20 octobre 2026 »" },
+      { "milestone": "mars", "source": "jaxa-presskit", "publisher": "JAXA", "from": "2027-04", "to": "2028-03", "text": "火星圏到着：2027年度 (Japanese fiscal year 2027 = Apr 2027–Mar 2028)" },
+      { "milestone": "mars", "source": "jpl-horizons", "publisher": "NASA/JPL", "from": "2027-08", "to": "2027-08", "text": "Mars arrival “August, 2027” (trajectory from JAXA)" },
+      { "milestone": "mars", "source": "esa-infographic", "publisher": "ESA", "from": "2027-08", "to": "2027-08", "text": "“enter orbit around Mars in August 2027”" },
+      { "milestone": "mars", "source": "cnes-details", "publisher": "CNES", "from": "2027-08", "to": "2027-08", "text": "« insertion en orbite … prévu en août 2027 »" },
+      { "milestone": "mars", "source": "dlr-facts", "publisher": "DLR", "from": "2027-01", "to": "2027-12", "text": "Arrival in Mars orbit: 2027" },
+      { "milestone": "qso", "source": "esa-infographic", "publisher": "ESA", "from": "2027-09", "to": "2027-09", "text": "“orbit Phobos from September 2027”" },
+      { "milestone": "qso", "source": "jaxa-mission", "publisher": "JAXA", "text": "After arriving, MMX enters a quasi-satellite orbit around Phobos (no date given)" },
+      { "milestone": "rover", "source": "dlr-facts", "publisher": "DLR", "from": "2029-01", "to": "2029-12", "text": "Rover lands on Phobos: 2029" },
+      { "milestone": "rover", "source": "epsc-rax", "publisher": "RAX team (abstract)", "from": "2028-10", "to": "2029-03", "reading": "We draw “late 2028 to early 2029” as Oct 2028–Mar 2029.", "text": "“released … between late 2028 and early 2029”" },
+      { "milestone": "rover", "source": "jaxa-presskit", "publisher": "JAXA", "text": "最初にフォボスに着陸するのはローバ — the rover lands first, before the spacecraft (no date given)" },
+      { "milestone": "rover", "source": "cnes-details", "publisher": "CNES", "text": "Released during a rehearsal descent, about 50 m above the surface (no date given)" },
+      { "milestone": "sampling", "source": "dlr-facts", "publisher": "DLR", "from": "2029-01", "to": "2029-12", "text": "Sampling by explorer module: 2029" },
+      { "milestone": "sampling", "source": "esa-infographic", "publisher": "ESA", "from": "2030-01", "to": "2030-12", "text": "“in 2030 land and collect at least 10 grams of samples”" },
+      { "milestone": "sampling", "source": "jaxa-presskit", "publisher": "JAXA", "text": "フォボスに軟着陸・サンプル採取、2回の着陸を予定 — two landings planned (no date given)" },
+      { "milestone": "leave", "source": "jaxa-presskit", "publisher": "JAXA", "from": "2030-04", "to": "2031-03", "text": "火星圏離脱：2030年度 (Japanese fiscal year 2030 = Apr 2030–Mar 2031)" },
+      { "milestone": "leave", "source": "cnes-details", "publisher": "CNES", "from": "2030-11", "to": "2030-11", "text": "« jusqu'au mois de novembre 2030 »" },
+      { "milestone": "leave", "source": "esa-infographic", "publisher": "ESA", "from": "2030-11", "to": "2030-11", "text": "Return module starts heading home: “November 2030”" },
+      { "milestone": "leave", "source": "dlr-facts", "publisher": "DLR", "from": "2030-01", "to": "2030-12", "text": "Return module begins return flight: 2030" },
+      { "milestone": "earth", "source": "jaxa-presskit", "publisher": "JAXA", "from": "2031-04", "to": "2032-03", "text": "地球帰還：2031年度 (Japanese fiscal year 2031 = Apr 2031–Mar 2032)" },
+      { "milestone": "earth", "source": "cnes-details", "publisher": "CNES", "from": "2031-07", "to": "2031-07", "text": "« Il l'atteindra en juillet 2031 »" },
+      { "milestone": "earth", "source": "esa-infographic", "publisher": "ESA", "from": "2031-01", "to": "2031-12", "text": "Capsule lands at Woomera in 2031" },
+      { "milestone": "earth", "source": "dlr-facts", "publisher": "DLR", "from": "2031-01", "to": "2031-12", "text": "Return module lands on Earth: 2031" }
+    ],
+    "numbers": [
+      {
+        "id": "duration", "label": "How long the mission lasts",
+        "claims": [
+          { "source": "jaxa-mission", "publisher": "JAXA", "text": "“approximately five years”" },
+          { "source": "jaxa-presskit", "publisher": "JAXA", "text": "約５年間の軌道上運用 (about 5 years of operations in space)" },
+          { "source": "dlr-facts", "publisher": "DLR", "text": "Mission duration: “Six years” (project period 1 Jan 2020 – 31 Dec 2031)" }
+        ],
+        "issue": "5 years (JAXA) vs 6 years (DLR). They may count from different start and end points; neither page says."
+      }
+    ]
+  }
+}
