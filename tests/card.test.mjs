@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { teamsAboard } from "../web/js/card.js";
+import { teamsAboard, builderLine } from "../web/js/card.js";
 
 const team = (id, launch, ret) => ({
   id,
@@ -36,4 +36,12 @@ test("帰還の予定が月まで・年までのときは、その月・年が�
 
 test("データがなくても落ちない", () => {
   assert.deepEqual(teamsAboard(undefined, new Date()), []);
+});
+
+test("つくり手の行：種類つき。書いていない機体は出さない", () => {
+  const src = "https://example.org";
+  const card = { builder: { value: ["九州工業大学", "東京大学"], source: src }, builder_type: { value: "university", source: src } };
+  assert.equal(builderLine(card), '九州工業大学・東京大学<span class="k">（大学・高専）</span>');
+  assert.equal(builderLine({ builder: { value: "アークエッジ・スペース", source: src } }), "アークエッジ・スペース");
+  assert.equal(builderLine({}), null);
 });

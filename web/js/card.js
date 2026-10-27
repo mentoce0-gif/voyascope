@@ -36,6 +36,21 @@ const OPERATOR_TYPE_LABELS = {
   mixed: "混合",
 };
 
+// つくり手の種類（docs/cubesat-study.md の 12.）
+const BUILDER_TYPE_LABELS = {
+  university: "大学・高専",
+  company: "企業",
+  agency: "JAXA・研究機関",
+};
+
+// つくり手の行：「九州工業大学・…（大学・高専）」。書いていない機体は null
+export function builderLine(card) {
+  const who = factText(card.builder);
+  if (!who) return null;
+  const type = factText(card.builder_type, (v) => esc(BUILDER_TYPE_LABELS[v] ?? v));
+  return type ? `${who}<span class="k">（${type}）</span>` : who;
+}
+
 // 機体の画像（カードの image。公式の画像を出典・クレジットつきで）
 export const imageCredit = (img) =>
   `${esc(img.caption)}　<a href="${esc(img.source)}" target="_blank" rel="noopener noreferrer">${esc(img.credit)}</a>`;
@@ -181,6 +196,7 @@ function overviewHtml(card, aboard, family, statusSum, realNow) {
     .filter(Boolean)
     .map(nw);
   const scale = [
+    card.form_factor?.value && `大きさ ${esc(card.form_factor.value)}`,
     approxNumber(s.mass_kg) && `質量 ${approxNumber(s.mass_kg)}`,
     approxNumber(s.length_m) && `全長 ${approxNumber(s.length_m)}`,
   ]
@@ -206,6 +222,7 @@ function overviewHtml(card, aboard, family, statusSum, realNow) {
       }
       <div class="plate-rows">
         ${row("◉", "運用", operator)}
+        ${row("◇", "つくり手", builderLine(card))}
         ${row("◆", "状態", st.status)}
         ${row("◎", "軌道", orbitLine.join("　"))}
         ${row("▣", "規模", scale.join("　"))}

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>小さな衛星（試作）— VOYASCOPE</title>
+  <!-- 試作の部屋 03：小さな衛星（キューブサット）。docs/cubesat-study.md。VERTECS は掲載のお願いの返事を待っているので、ここでだけ見る -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#050e1f">
+  <!-- アプリと同じ部品（earth.js などの相対パス）をそのまま使うため、基準を web/ にそろえる -->
+  <base href="../../">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="lab/lab.css">
+  <link rel="stylesheet" href="lab/cubesat/cubesat.css">
+  <script src="vendor/globe.gl.min.js" defer></script>
+  <script type="module" src="lab/cubesat/lab.js"></script>
+</head>
+<body class="cs">
+  <header class="cs-head">
+    <p class="lab-eyebrow mono">VOYASCOPE LAB · 03</p>
+    <h1>小さな衛星</h1>
+    <div class="cs-switch" role="radiogroup" aria-label="表示">
+      <button type="button" role="radio" aria-checked="true" data-mode="all">すべて</button>
+      <button type="button" role="radio" aria-checked="false" data-mode="small">小さな衛星</button>
+    </div>
+  </header>
+
+  <div id="cs-globe" class="cs-globe" aria-label="地球と衛星"></div>
+  <p class="cs-hint k small" id="hint">立方体の印が、手のひらサイズの衛星。押すと詳しく見られます。</p>
+
+  <section class="cs-sheet" id="sheet" hidden aria-labelledby="cs-name">
+    <button type="button" class="cs-close" id="close" aria-label="閉じる">×</button>
+    <div id="sheet-body"></div>
+  </section>
+
+  <footer class="cs-foot k small">
+    試作です（パスワードつき・公開していません）。位置は公開の軌道データ（CelesTrak）からの計算による推定。※非公式ファンメイド作品です
+    · <a href="lab/">試作の部屋へ戻る</a>
+  </footer>
+</body>
+</html>

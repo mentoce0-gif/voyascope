@@ -1,0 +1,74 @@
+{
+  "id": "vertecs",
+  "norad_id": 69506,
+  "name": {
+    "ja": "VERTECS",
+    "en": "VERTECS"
+  },
+  "class": "science",
+  "operator": {
+    "value": ["九州工業大学", "関西学院大学", "東京都市大学", "金沢大学", "東京大学"],
+    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12360.html",
+    "as_of": "2026-10-27",
+    "note": "研究チーム（「ら」）の各機関のメンバーで運用"
+  },
+  "operator_type": {
+    "value": "civil",
+    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12360.html",
+    "as_of": "2026-10-27"
+  },
+  "builder": {
+    "value": ["九州工業大学", "関西学院大学", "東京都市大学", "金沢大学", "東京大学"],
+    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12360.html",
+    "as_of": "2026-10-27",
+    "note": "研究チーム（「ら」）。代表は九州工業大学"
+  },
+  "builder_type": {
+    "value": "university",
+    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12360.html",
+    "as_of": "2026-10-27"
+  },
+  "form_factor": {
+    "value": "6U",
+    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12173.html",
+    "as_of": "2026-10-27",
+    "note": "100mm × 226mm × 340mm"
+  },
+  "launch_date": {
+    "value": "2026-06-12",
+    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12173.html",
+    "as_of": "2026-10-27",
+    "note": "H3ロケット6号機（30形態試験機）。種子島宇宙センター"
+  },
+  "mission": {
+    "value": "宇宙のはじめからいままでに出された光の総量（宇宙背景放射）を可視光で観測し、天体ができてきた歴史を調べる",
+    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12173.html",
+    "as_of": "2026-10-27"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12360.html",
+    "as_of": "2026-10-27",
+    "note": "2026-09-04 に定常運用を開始。今後1年間、観測を続ける計画"
+  },
+  "stats": {
+    "length_m": {
+      "value": 0.34,
+      "unit": "m",
+      "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12173.html",
+      "as_of": "2026-10-27",
+      "note": "いちばん長い辺（100mm × 226mm × 340mm）"
+    }
+  },
+  "official_links": [
+    {
+      "label": "VERTECS プロジェクト",
+      "url": "https://vertecs-project.com/ja/home-jp/"
+    },
+    {
+      "label": "九州工業大学（定常運用の開始・2026-09-04）",
+      "url": "https://www.kyutech.ac.jp/whats-new/press/entry-12360.html"
+    }
+  ],
+  "updated_at": "2026-10-27"
+}
