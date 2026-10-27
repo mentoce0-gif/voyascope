@@ -1062,11 +1062,29 @@ function watchAt(t) {
   camera.fov = 42; camera.updateProjectionMatrix();
   camera.position.copy(watchCam.pos).add(V(Math.sin(t * 0.2) * 0.6, 0, Math.cos(t * 0.17) * 0.6)); camera.lookAt(watchCam.look);
   if (FLYING) { const free = freeOffset("overview"); camera.position.sub(watchCam.look).multiplyScalar(Math.min(1.5, Math.max(1, 300 / free))).add(watchCam.look); } // 空きが狭い画面では少し引く
+  // REPLAY の最後（いまの MMX へ）から全体の図へ：地球のそばの画角から、ひと続きで引いていく（2026-10-27 オーナー：もっと自然に）。
+  // 距離は対数で縮め（寄りから引きへ一定の速さに見える）、模式の大きな地球は、いまの地球の小さな印の大きさと場所へ縮みながら移る
+  let grow = 1; // MMX の模型は、引いていくあいだに大きくする（寄りの画角でいきなり大きく出ないように）
+  if (blendFrom) {
+    const k0 = Math.min(1, (performance.now() - blendFrom.t0) / 3600), k = k0 * k0 * (3 - 2 * k0);
+    grow = Math.max(0.03, k * k);
+    const endLook = watchCam.look, endPos = camera.position.clone();
+    const look = blendFrom.look.clone().lerp(endLook, k);
+    const d0 = Math.max(1e-3, blendFrom.pos.distanceTo(blendFrom.look)), d1 = endPos.distanceTo(endLook);
+    const dir = blendFrom.pos.clone().sub(blendFrom.look).normalize().lerp(endPos.clone().sub(endLook).normalize(), k).normalize();
+    camera.position.copy(look).add(dir.multiplyScalar(d0 * Math.pow(d1 / d0, k)));
+    camera.up.copy(blendFrom.up).lerp(V(0, 1, 0), k).normalize(); camera.lookAt(look); camera.up.set(0, 1, 0);
+    if (camera.view?.enabled) { camera.view.offsetX *= k; camera.view.offsetY *= k; camera.updateProjectionMatrix(); } // 絵を右へ寄せるのも少しずつ
+    earth.visible = k0 < 1; earthNow.visible = k0 >= 1;
+    earth.position.lerpVectors(earthPos, earthNow.position, k); earth.scale.setScalar(1 + (earthNow.scale.x / RE - 1) * k);
+    atm.uniforms.uA.value = 0.45 * (1 - k); route.uniforms.uMinS.value = sJoin * k; // 地球のそばの道は、引くにつれて消える
+    if (k0 >= 1) { blendFrom = null; earth.position.copy(earthPos); earth.scale.setScalar(1); }
+  }
   document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
   route.uniforms.uReveal.value = sMMX; route.uniforms.uFront.value = sMMX;
   const PERIOD = 5, RUN = 3.2, ph = t % PERIOD;
   route.uniforms.uPulse.value = ph < RUN ? -0.05 + (ph / RUN) * 1.1 : -1;
-  mmxHolder.visible = true; h3.visible = false; padLight.visible = false; mmxHolder.scale.setScalar(FLYING ? 0.9 : 0.35); mmx.rotation.y = 0.6 + t * 0.25;
+  mmxHolder.visible = true; h3.visible = false; padLight.visible = false; mmxHolder.scale.setScalar((FLYING ? 0.9 : 0.35) * grow); mmx.rotation.y = 0.6 + t * 0.25;
   // 光が MMX を通るとき、MMX の灯りが強まる
   const pass = Math.exp(-Math.pow((route.uniforms.uPulse.value - sMMX) * 30, 2));
   const up = route.uniforms.uPulse.value;
