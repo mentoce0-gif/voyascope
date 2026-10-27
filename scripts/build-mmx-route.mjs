@@ -1,5 +1,5 @@
 // MMX の「いまどこ」の航路の表（web/mmx/now/route.json）を作る。
-// 打ち上げ日の地球と、打ち上げ TOF 日後（仮。公式は「往路1年弱」「火星圏到着 2027年度」まで）の火星の位置（astronomy-engine）を、
+// 打ち上げ日の地球と、打ち上げ TOF 日後（仮。公式は「往路1年弱」「火星圏到着 2027年度」、ESA・CNES・Horizons は「2027年8月」まで。日は公表されていない）の火星の位置（astronomy-engine）を、
 // ランベルトの解（2点と飛行時間から軌道を出す）で結ぶ。打ち上げ日時（curation/events/mmx-launch.json）が変わったら作り直す：
 //   node scripts/build-mmx-route.mjs
 // 地球・火星の位置は計算、到着日は仮なので、画面には「模式図」と書く
@@ -44,14 +44,14 @@ function propagate(r, v, dt) { // 2体の数値積分（RK4、1日を細かく�
 const ev = JSON.parse(readFileSync(new URL("../curation/events/mmx-launch.json", import.meta.url)));
 const launch = new Date(ev.when.value.at);
 const check = process.argv.includes("--check");
-const tofs = check ? [] : [300, 320, 330, 340, 350];
+const tofs = check ? [] : [285, 293, 300, 307, 315];
 for (const tof of tofs) {
   const arr = new Date(launch.getTime() + tof * 864e5);
   const r1 = helio("Earth", launch), r2 = helio(Body.Mars, arr), L = lambert(r1, r2, tof);
   const vE = sub(helio("Earth", new Date(launch.getTime() + 864e5)), helio("Earth", new Date(launch.getTime() - 864e5))).map((x) => x / 2);
   console.log(tof, arr.toISOString().slice(0, 10), "angle", L.dth.toFixed(1), "vinf km/s", (norm(sub(L.v1, vE)) * 1731.456).toFixed(2));
 }
-const TOF = 330; // 仮（1年弱）
+const TOF = 300; // 仮。2027年8月中旬（到着の月は「2027年8月」：ESA・CNES・JPL Horizons の説明。日は公表されていない。2026-10-27 オーナー：330日〈9月中旬〉から直す）
 const arr = new Date(launch.getTime() + TOF * 864e5);
 const r1 = helio("Earth", launch), r2 = helio(Body.Mars, arr), L = lambert(r1, r2, TOF);
 const pts = []; let st = [r1, L.v1];
