@@ -55,6 +55,38 @@
         }
       ]
     },
+    "builder": {
+      "$ref": "common.schema.json#/$defs/fact",
+      "description": "つくり手（開発した機関。複数なら配列）。運用（operator）と違うことがある。キューブサットから使う（docs/cubesat-study.md の 12.）"
+    },
+    "builder_type": {
+      "description": "つくり手の種類（university=大学・高専 / company=企業 / agency=JAXA・研究機関）",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": {
+            "properties": {
+              "value": { "enum": ["university", "company", "agency"] }
+            }
+          }
+        }
+      ]
+    },
+    "form_factor": {
+      "description": "キューブサットの大きさ（U。1U は約10 cm の立方体）。例 \"6U\"。キューブサットのときだけ書く",
+      "allOf": [
+        { "$ref": "common.schema.json#/$defs/fact" },
+        {
+          "if": { "required": ["value"] },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?U$" }
+            }
+          }
+        }
+      ]
+    },
     "stats": {
       "type": "object",
       "description": "ゲージとランクはここから自動計算する（手で盛らない）",

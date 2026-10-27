@@ -21,6 +21,7 @@ const read = (dir) =>
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const host = (u) => new URL(u).hostname.replace(/^www\./, "");
+const BUILDER_TYPE = { university: "大学・高専", company: "企業", agency: "JAXA・研究機関" };
 const STATUS = { operating: "運用中", standby: "待機中", ended: "運用終了", not_launched: "打ち上げ前" };
 
 // 出典のついた値：配列は「・」でつなぐ。非公開は「非公開（運用者が公表していない）」
@@ -104,6 +105,8 @@ function cardPage(c, group) {
   const path = `missions/${c.id}/`;
   const rows = [];
   rows.push(["運用", `${esc(val(c.operator))}${cite(c.operator)}`]);
+  if (c.builder) rows.push(["つくり手", `${esc(val(c.builder))}${c.builder_type?.value ? `（${esc(BUILDER_TYPE[c.builder_type.value] ?? c.builder_type.value)}）` : ""}${cite(c.builder)}`]);
+  if (c.form_factor) rows.push(["大きさ", `${esc(val(c.form_factor))}${c.form_factor.note ? `（${esc(c.form_factor.note)}）` : ""}${cite(c.form_factor)}`]);
   rows.push(["打ち上げ", `${esc(val(c.launch_date))}${c.launch_date.note ? `（${esc(c.launch_date.note)}）` : ""}${cite(c.launch_date)}`]);
   if (c.status) rows.push(["いまの状態", `${esc(STATUS[c.status.value] ?? c.status.value)}${c.status.note ? `。${esc(c.status.note)}` : ""}${cite(c.status)}`]);
   if (c.location) rows.push(["いまどこ", `${esc(val(c.location))}${cite(c.location)}`]);
@@ -174,7 +177,9 @@ ${MISSION.links.map((l) => `    <li><a href="${esc(l.href)}" rel="noopener">${es
 }
 
 const probes = read("probes").map((c) => cardPage(c, "probe"));
-const craft = read("spacecraft").map((c) => cardPage(c, "craft"));
+// 地球の画面に出している機体（config/orbits.json）だけ。カードがあっても画面にまだ出していないもの（キューブサットの VERTECS など）は作らない
+const shownCraft = new Set(JSON.parse(readFileSync("config/orbits.json", "utf8")).objects.map((o) => o.id));
+const craft = read("spacecraft").filter((c) => shownCraft.has(c.id)).map((c) => cardPage(c, "craft"));
 const artemis = artemisPage();
 
 const listItems = (items) => items.map((p) => `    <li><a href="${p.path.replace(/^missions\//, "")}">${esc(p.name)}</a><span>${esc(p.one)}</span></li>`).join("\n");
