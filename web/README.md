@@ -36,7 +36,7 @@ npx serve web              # または python3 -m http.server -d web
 | `css/far.css` | 遠くを見る部屋の見た目（部屋を開いたときに読む） |
 | `favicon.svg`・`favicon.ico`・`apple-touch-icon.png` | タブ・ホーム画面のアイコン（ロゴの「O」と金色の輪。2026-10-08）。`favicon.svg` が元で、ico と png はそこから作った（16・32・48 と 180） |
 | `mmx/` | MMX を追う（予告）のページ（2026-10-05。https://voyascope.org/mmx/）。アプリからはまだリンクしない（JAXA 宇宙教育センター・日本宇宙少年団への紹介で使う）。打ち上げまでの残り時間は `data/events.json`、地球と火星の位置は `vendor/astronomy.min.js` と `js/far/distance.js` で計算。MMX の位置は描かない（点線の道のり・火星のまわりの図・模型はイメージ）。`img/` は模型の画像（`js/far/models.js` を描いたもの）と、2026-10-05 の PC の画面 |
-| `mmx/partners/` | MMX の国際協力（英語の試作、2026-10-23。noindex。入口は `mmx/` からだけ）。国を選ぶと、地図のピン（町の単位の目安）と模型のモジュール（`js/far/models.js` を部品の群れごとに色分け。機器の位置は描かない）が光る。「いつ」は機関ごとの予定を並べ、重ならないものを課題として出す（`timeline.js`）。データは `data.json`（どれも一次資料の出典つき。`curation/` にはまだ入れていない）。テストは `tests/mmx-partners.test.mjs` |
+| `mmx/partners/` | MMX の国際協力（英語の試作、2026-10-23。2026-10-27 に公開。noindex で、どこからもリンクしない〈URL を知っている人だけ。X の投稿の返信に貼る〉）。国を選ぶと、地図のピン（町の単位の目安）と模型のモジュール（`js/far/models.js` を部品の群れごとに色分け。機器の位置は描かない）が光る。「いつ」は機関ごとの予定を並べ、重ならないものを課題として出す（`timeline.js`）。データは `data.json`（どれも一次資料の出典つき。`curation/` にはまだ入れていない）。テストは `tests/mmx-partners.test.mjs` |
 | `data/orbits/iss.json` | 軌道データ（CelesTrak の OMM JSON。TLE でも動く。取得日時・エポック・出典URLを含む） |
 | `data/prefectures.json` | 都道府県の代表地点（`config/prefectures.json` のコピー） |
 | `data/craft-index.json` | 表示する機体の一覧（`npm run sync:web` で作る） |

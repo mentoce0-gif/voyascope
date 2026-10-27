@@ -84,7 +84,7 @@
 - **Cloudflare の AI の巡回の設定**（オーナーの操作）：AI の巡回を止める設定・robots.txt を自動で管理する設定がオンだと、`web/robots.txt` より優先される
 - **ブランチ `claude/perseverance-record-greeting`**：別のチャットの作業（パーサヴィアランスの走行距離の記録・「節目」のお知らせ）。PR はまだない。続けるか、そのチャットで決める
 - **フォボスの表面の画像**：NASA の Viking テクスチャが候補（投影法の確認が要る）
-- **MMX の海外の参加者の見える化**：英語の試作 `web/mmx/partners/`（2026-10-23。noindex、`/mmx/` からだけ）。判断待ち：IDEFIX のロゴ（どの画像か・その利用条件）、英語圏へ出す時期、PR にするか（[`mmx-partners-study.md`](mmx-partners-study.md) の 10.）
+- **MMX の海外の参加者の見える化**：英語の試作 https://voyascope.org/mmx/partners/ （2026-10-27 公開。noindex・どこからもリンクしない〈オーナー〉）。判断待ち：IDEFIX のロゴ（どの画像か・その利用条件）、noindex を外す時期・入口を置くか（[`mmx-partners-study.md`](mmx-partners-study.md) の 10.）
 - そのほか：サブタイトルの変更、見出しを明朝体にするか、英語版（案。JPL の教育の部署の反応しだい）
 
 ## 自動で動いているもの

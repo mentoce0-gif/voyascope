@@ -6,7 +6,19 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
 const data = await fetch("data.json").then((r) => r.json());
-const land = fetch("../../data/land-minimap.json").then((r) => r.json()).then((j) => j.d).catch(() => "");
+const land = fetch("../../data/land-minimap.json").then((r) => r.json()).then((j) => splitWrapped(j.d)).catch(() => "");
+// 日付変更線をまたぐ陸地は、地図の端から端へ横線（塗りの帯）になる。端へ飛ぶところで切って、切れた形ごとに閉じる（小さな島は外す）
+function splitWrapped(d) {
+  return d.match(/M[^M]*/g).map((sp) => {
+    const pts = [...sp.matchAll(/([\d.]+) ([\d.]+)/g)].map((m) => [+m[1], +m[2]]);
+    const xs = pts.map((p) => p[0]);
+    if (Math.max(...xs) - Math.min(...xs) <= 300) return sp;
+    if (pts.length < 10) return "";
+    const pieces = [[]];
+    pts.forEach((p, i) => { if (i && Math.abs(p[0] - pts[i - 1][0]) > 100) pieces.push([]); pieces.at(-1).push(p); });
+    return pieces.filter((q) => q.length > 2).map((q) => q.map((p, i) => `${i ? "L" : "M"}${p[0]} ${p[1]}`).join("") + "Z").join("");
+  }).join("");
+}
 const C = Object.fromEntries(data.countries.map((c) => [c.id, c]));
 const CONTRIB = Object.fromEntries(data.contributions.map((c) => [c.id, c]));
 const flag = (id) => C[id]?.flag ?? (id === "AR" ? "🇦🇷" : "");
