@@ -2,18 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-26T22:40:35.962Z",
+  "fetched_at": "2026-10-27T05:05:39.050Z",
   "days_ahead": 45,
   "launches": [
     {
       "id": "e2886a96-5ce9-4f45-872f-4e25a00be837",
-      "net": "2026-10-27T05:46:37.000Z",
+      "net": "2026-10-27T07:25:51.000Z",
       "precision": "sec",
       "window_end": "2026-10-27T08:45:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-26T21:03:46Z",
+      "updated": "2026-10-27T04:47:15Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -52,7 +52,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-23T14:05:57Z",
+      "updated": "2026-10-27T04:02:05Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -197,6 +197,45 @@
         "position": {
           "lat": 34.632,
           "lng": -120.611
+        }
+      }
+    },
+    {
+      "id": "a2423132-f965-423f-8b03-6891b775dc54",
+      "net": "2026-11-05T20:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-05T23:00:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-26T23:22:44Z",
+      "rocket": {
+        "name": "Long March 12",
+        "full_name": "Long March 12"
+      },
+      "provider": {
+        "name": "China Aerospace Science and Technology Corporation",
+        "ja": "中国航天科技集団（CASC）"
+      },
+      "mission": {
+        "name": "SatNet LEO Group TBD?",
+        "placeholder": false,
+        "type": "Communications",
+        "type_ja": "通信",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 8,
+        "name": "Wenchang Space Launch Site, People's Republic of China",
+        "ja": "文昌宇宙発射場",
+        "short": "文昌",
+        "pad": "Commercial LC-2",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 19.59755,
+          "lng": 110.936481
         }
       }
     },
