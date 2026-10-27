@@ -440,6 +440,10 @@ body { overflow: hidden; }
 .panel-title { font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
 .panel-en { font-size: 0.8rem; font-weight: 400; color: var(--text-dim); letter-spacing: 0.05em; }
 .panel-ja { font-size: 0.9rem; color: var(--mint); }
+/* 地球側のカード：名前は1行（種別のラベルは上の行。長い名前は card.js の fitName で字を小さくする） */
+.panel-title.one-line .class-chip { display: table; margin: 0 0 4px; }
+.panel-title.one-line .name { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.panel-head > div:first-child { min-width: 0; }
 .panel-actions { display: flex; gap: 8px; flex: none; }
 /* 名前の横の「受信」：最近の取得で新しい軌道データが来たら光ってちらつく／来ていれば点灯／2日来ていなければ消える */
 .rx { margin-left: auto; align-self: center; flex: none; display: flex; align-items: center; gap: 6px; color: var(--mint); }

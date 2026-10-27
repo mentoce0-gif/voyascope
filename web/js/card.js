@@ -279,7 +279,7 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
   el.innerHTML = `
     <header class="panel-head">
       <div>
-        <div class="panel-title"><span class="class-chip" style="--c:${family.color}">${esc(CLASS_LABELS[card.class] ?? "")}</span><span class="amber">${esc(card.name.ja)}</span></div>
+        <div class="panel-title one-line"><span class="class-chip" style="--c:${family.color}">${esc(CLASS_LABELS[card.class] ?? "")}</span><span class="amber name">${esc(card.name.ja)}</span></div>
         <div class="panel-ja"><span class="panel-en">${esc(card.name.en)}</span>　<span class="k">NORAD ${card.norad_id}</span></div>
       </div>
       ${fetchedAt ? rxHtml(fetchedAt, realNow) : ""}
@@ -304,7 +304,22 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
     <div class="tab-body" role="tabpanel">${bodies[current]()}</div>
     <p class="panel-foot">軌道は公開データからの計算による推定です。<br>※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
   `;
+  fitName(el.querySelector(".panel-title.one-line .name"));
   return current;
+}
+
+// 名前は1行で（2026-10-27 オーナー：「XRISM（クリズム）」が「ム）」だけ次の行に落ちていた）。
+// 種別のラベルは上の行にして、それでも入らない長い名前は、字を少しずつ小さくして収める（いちばん小さくて 0.95rem）
+function fitName(n) {
+  if (!n) return;
+  n.style.fontSize = "";
+  const fit = () => {
+    let size = parseFloat(getComputedStyle(n).fontSize);
+    const min = parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.95;
+    while (n.scrollWidth > n.clientWidth + 1 && size > min) { size = Math.max(min, size - 1); n.style.fontSize = `${size}px`; }
+  };
+  fit();
+  document.fonts?.ready.then(fit); // 字体が届くと幅が変わる
 }
 
 export function updatePanelLive(el, { pos, periodMin, place }) {
