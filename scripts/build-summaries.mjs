@@ -177,8 +177,8 @@ ${MISSION.links.map((l) => `    <li><a href="${esc(l.href)}" rel="noopener">${es
 }
 
 const probes = read("probes").map((c) => cardPage(c, "probe"));
-// 地球の画面に出している機体（config/orbits.json）だけ。カードがあっても画面にまだ出していないもの（キューブサットの VERTECS など）は作らない
-const shownCraft = new Set(JSON.parse(readFileSync("config/orbits.json", "utf8")).objects.map((o) => o.id));
+// 地球の画面に出している機体（config/orbits.json の、lab でないもの）だけ。カードがあっても画面にまだ出していないもの（キューブサットの VERTECS など）は作らない
+const shownCraft = new Set(JSON.parse(readFileSync("config/orbits.json", "utf8")).objects.filter((o) => !o.lab).map((o) => o.id));
 const craft = read("spacecraft").filter((c) => shownCraft.has(c.id)).map((c) => cardPage(c, "craft"));
 const artemis = artemisPage();
 

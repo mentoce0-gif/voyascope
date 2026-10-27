@@ -268,3 +268,20 @@
 | ONGLAISAT | 報告でも未確認 | 入れない |
 
 カードの形（スキーマ）に足したもの：`builder`（つくり手）・`builder_type`（university / company / agency）・`form_factor`（例 "6U"）。カードの詳細に「つくり手」の行と「大きさ 6U」が出る（書いた機体だけ）。「一言でわかる」は地球の画面に出している機体だけ作るようにした（VERTECS のページが「地球のまわりで見る」とリンクしてしまうため）
+
+## 14. 試作の部屋 03「小さな衛星」と掲載のお願い（2026-10-27）
+
+- **オーナー**：アークエッジと VERTECS には「ここに映してもいい？引用と、必要に応じて指示いただいた文言つきで」とメールで確かめてから出す。下書きは voyascope-research の `research/outreach/2026-10-27-cubesat-permission.md`（VERTECS はプロジェクトのメール、アークエッジは問い合わせフォーム）
+- **試作**：`web/lab/cubesat/`（パスワードつきの /lab/cubesat/）
+  - 「すべて」：VERTECS は名前なしの立方体の印だけ（家族の色＝気象・科学のティール。紺のふちどり）
+  - 「小さな衛星」：VERTECS の名前と「6U」が出て、XRISM が光り、ほかの機体は薄くなる。下に「どちらも地球のすぐまわりを回る、宇宙を見る望遠鏡。VERTECS は可視光、XRISM は X線で見る」
+  - 印を押すと詳細：任務・つくり手・打ち上げ・いま（運用中・計算した高さ）→ **ものさし**（6U の面を 1U ずつ区切って 10 cm の目盛りと → 押すたびに XRISM 8 m・ひので 10 m・ISS 109 m を同じ縮尺の棒で足す。倍率はカードの公式の値から計算）→ **同じ仕事の大きい仲間**（XRISM を押すと地球の上で一緒に光る／JWST は九州工業大学の発表の原文をそのまま引用）
+  - 手のひらの絵は描いていない（大きさの数字に出典がないため。「10 cm」の目盛りで代える）
+- **データ**：`config/orbits.json` に `{ "id": "vertecs", "lab": true }`。軌道は6時間ごとに取るが、アプリの一覧（craft-index）・「一言でわかる」には入れない。ただし `data/cards/vertecs.json`・`data/orbits/vertecs.json` は voyascope.org の URL で読める（どこからもリンクしない。中身は公開のリポジトリにある事実と同じ）
+- 画像：`docs/screenshots/cubesat-lab/`
+
+| すべて | 小さな衛星 | ものさし（6U） | ものさし（ISS まで） |
+|---|---|---|---|
+| ![](screenshots/cubesat-lab/sp-all-2026-10-27.webp) | ![](screenshots/cubesat-lab/sp-small-2026-10-27.webp) | ![](screenshots/cubesat-lab/sp-sheet0-2026-10-27.webp) | ![](screenshots/cubesat-lab/sp-sheet3-2026-10-27.webp) |
+
+気づいたこと：スマホでは XRISM が画面の端にかかることがある（いまは VERTECS を真ん中にしているだけ）。返事が来て本番へ入れるときは、2機が両方入る向きにカメラを合わせる

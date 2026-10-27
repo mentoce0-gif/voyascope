@@ -2,7 +2,7 @@
 // web/ だけを配信する（npx serve web）ため、リポジトリ内の他のフォルダは直接読めない。
 // 元ファイルを変えたら npm run sync:web を実行する。--check で「書き出したものが古くないか」だけ確かめる。
 //
-// - 機体：config/orbits.json に並んだ順。カードは curation/（出典確認済み）を優先し、なければ examples/（見本）
+// - 機体：config/orbits.json に並んだ順（"lab": true は一覧に入れない。カードだけ書き出す）。カードは curation/（出典確認済み）を優先し、なければ examples/（見本）
 // - 運用状況：config/status.json にある機体だけ、自動取得したファイルの場所を載せる
 // - 乗員：その機体に向かったチーム（teams/ の destination）と、その飛行士（astronauts/）を1つのファイルにまとめる
 //   いま乗っているかどうか（打ち上げ済み・未帰還）はアプリ側で判断する
@@ -31,7 +31,7 @@ const { objects } = readJson("config/orbits.json");
 const statusIds = new Set(readJson("config/status.json").qzss.map((c) => c.id));
 const craft = [];
 
-for (const { id } of objects) {
+for (const { id, lab } of objects) {
   const src = cardSource(id);
   if (!src) {
     console.log(`カードがないので表示しない: ${id}`);
@@ -58,6 +58,8 @@ for (const { id } of objects) {
     outputs.push([`web/${crew}`, JSON.stringify(data, null, 2) + "\n"]);
   }
 
+  // 試作の部屋だけで使う機体：カードと軌道は書き出すが、アプリの一覧（craft-index）には入れない
+  if (lab) continue;
   craft.push({
     id,
     card: `data/cards/${id}.json`,
