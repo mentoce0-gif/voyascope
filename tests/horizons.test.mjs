@@ -158,3 +158,14 @@ test("web/data/horizons.json：Horizons のカードの表だけ。値は丸め�
     }
   }
 });
+
+test("軌道のデータが途中で終わるとき：終わりの日時を読み、その手前までの日数に縮める（案A。2026-10-23）", async () => {
+  const { ephemerisEnd, daysBefore } = await import("../scripts/lib/horizons.mjs");
+  // Horizons の返事の形（文言は Horizons のエラーの形に合わせた見本。日時だけを読む）
+  const api = { signature: { version: "1.2" }, result: 'No ephemeris for target "MMX (spacecraft)" after A.D. 2026-DEC-01 00:00:00.0000 TDB' };
+  const end = ephemerisEnd(api);
+  assert.equal(end.toISOString(), "2026-12-01T00:00:00.000Z");
+  assert.equal(daysBefore(new Date("2026-10-20T15:00:00Z"), end), 41);
+  assert.equal(ephemerisEnd({ result: "Target body name: X (-1)" }), null);
+  assert.equal(daysBefore(new Date("2026-11-30T15:00:00Z"), end), 0);
+});

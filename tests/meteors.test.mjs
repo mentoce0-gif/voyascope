@@ -92,15 +92,25 @@ test("ちりの群れ：流れ星（光）は、放射点の側の半球の大�
 import { meteorWindow, orbitPoint, earthPoint, meteorStoryHtml, peakDate, nearestOrbitPoint } from "../web/js/meteors.js";
 import { readFileSync } from "node:fs";
 
-test("出現期間（active）があれば、そのあいだ（日本時間）だけ。ちりも今夜の欄もこれに合わせる", () => {
+test("出現期間（active）があれば、そのはじめ（日本時間）から。終わりは出現期間の終わりか、極大の次の日の終わりの早いほう", () => {
   const w = meteorWindow({ ...ev(), active: { value: { from: "2026-10-06", to: "2026-10-10" }, source: src } });
   assert.equal(new Date(w.start).toISOString(), "2026-10-05T15:00:00.000Z");
-  assert.equal(new Date(w.end).toISOString(), "2026-10-10T15:00:00.000Z");
+  assert.equal(new Date(w.end).toISOString(), "2026-10-09T15:00:00.000Z"); // 極大 10/8 の次の日の終わり
   const withActive = [{ ...ev(), active: { value: { from: "2026-10-06", to: "2026-10-10" }, source: src } }];
   assert.equal(activeMeteors(withActive, new Date("2026-10-05T14:59:00Z")).length, 0);
   assert.equal(activeMeteors(withActive, new Date("2026-10-06T00:00:00Z")).length, 1);
-  assert.equal(activeMeteors(withActive, new Date("2026-10-10T14:59:00Z")).length, 1);
-  assert.equal(activeMeteors(withActive, new Date("2026-10-10T15:00:00Z")).length, 0);
+  assert.equal(activeMeteors(withActive, new Date("2026-10-09T14:59:00Z")).length, 1);
+  assert.equal(activeMeteors(withActive, new Date("2026-10-09T15:00:00Z")).length, 0);
+  // 出現期間が極大より早く終わるなら、そこまで
+  const short = meteorWindow({ ...ev(), active: { value: { from: "2026-10-06", to: "2026-10-08" }, source: src } });
+  assert.equal(new Date(short.end).toISOString(), "2026-10-08T15:00:00.000Z");
+});
+
+test("オリオン座流星群（極大 10/22、出現期間 11/7 まで）は、10/23 が終わったら出さない", () => {
+  const card = JSON.parse(readFileSync("curation/events/orionids-2026.json", "utf8"));
+  assert.equal(activeMeteors([card], new Date("2026-10-23T14:59:00Z")).length, 1);
+  assert.equal(activeMeteors([card], new Date("2026-10-23T15:00:00Z")).length, 0);
+  assert.equal(activeMeteors([card], new Date("2026-11-01T00:00:00Z")).length, 0);
 });
 
 test("しくみの図：21P の通り道が黄道を横切る点のそばを、地球が10月8日ごろに通る（JPL の軌道要素）", () => {

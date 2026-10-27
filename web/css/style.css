@@ -441,6 +441,22 @@ body { overflow: hidden; }
 .panel-en { font-size: 0.8rem; font-weight: 400; color: var(--text-dim); letter-spacing: 0.05em; }
 .panel-ja { font-size: 0.9rem; color: var(--mint); }
 .panel-actions { display: flex; gap: 8px; flex: none; }
+/* 名前の横の「受信」：最近の取得で新しい軌道データが来たら光ってちらつく／来ていれば点灯／2日来ていなければ消える */
+.rx { margin-left: auto; align-self: center; flex: none; display: flex; align-items: center; gap: 6px; color: var(--mint); }
+.rx-icon { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.rx-icon circle { fill: currentColor; stroke: none; }
+.rx-text { display: flex; flex-direction: column; line-height: 1.15; }
+.rx-label { font-size: 0.78rem; letter-spacing: 0.08em; }
+.rx-ago { font-size: 0.66rem; color: var(--text-dim); }
+.rx-on .rx-icon, .rx-new .rx-icon { filter: drop-shadow(0 0 4px var(--mint)); }
+.rx-new .rx-w1 { animation: rx-flick 1.6s steps(1, end) infinite; }
+.rx-new .rx-w2 { animation: rx-flick 1.6s steps(1, end) 0.2s infinite; }
+.rx-new .rx-icon circle { animation: rx-glow 1.6s ease-in-out infinite; }
+.rx-off { color: var(--text-dim); opacity: 0.45; }
+.rx-off .rx-w1, .rx-off .rx-w2 { stroke-dasharray: 2 3; }
+@keyframes rx-flick { 0%, 100% { opacity: 1; } 12% { opacity: 0.25; } 18% { opacity: 1; } 30% { opacity: 0.4; } 36% { opacity: 1; } }
+@keyframes rx-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .rx-new .rx-w1, .rx-new .rx-w2, .rx-new .rx-icon circle { animation: none; } }
 .follow-mini {
   width: 34px;
   height: 34px;

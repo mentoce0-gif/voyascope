@@ -5,9 +5,10 @@
 // - 必要な機体だけを、1機につき1回だけ取る
 // - 前回の取得から2時間（GP データの更新間隔）たっていなければ取りに行かない
 // - 200 以外の応答や、おかしな中身を受けたら、再試行せずにその場で失敗して終わる（人間に知らせる）
+// - node scripts/fetch-orbits.mjs --check-age：半分をこえる機体で新しいデータが36時間以上来ていなければ失敗で終わる（知らせる）
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
-import { gpUrl, parseGpResponse, dueForFetch, isNewer, buildRecord } from "./lib/orbits.mjs";
+import { gpUrl, parseGpResponse, dueForFetch, isNewer, buildRecord, staleReport, STALE_HOURS } from "./lib/orbits.mjs";
 
 const USER_AGENT = "VOYASCOPE/1.0 (unofficial fan-made project; scheduled GitHub Actions job)";
 const OUT_DIR = "web/data/orbits";
@@ -15,6 +16,18 @@ const force = process.argv.includes("--force");
 
 const { objects } = JSON.parse(readFileSync("config/orbits.json", "utf8"));
 mkdirSync(OUT_DIR, { recursive: true });
+
+// --check-age：取りに行かずに、新しいデータが長く来ていない機体を調べる（取得のあとに Actions が実行する）
+if (process.argv.includes("--check-age")) {
+  const records = objects.map(({ id }) => `${OUT_DIR}/${id}.json`).filter(existsSync).map((p) => JSON.parse(readFileSync(p, "utf8")));
+  const { stale, alarm } = staleReport(records);
+  for (const r of stale) console.log(`::warning::${r.id}：新しい軌道データが ${Number.isFinite(r.hours) ? Math.round(r.hours) : "∞"} 時間来ていません`);
+  if (alarm) {
+    console.error(`${records.length}機のうち${stale.length}機で、新しい軌道データが ${STALE_HOURS} 時間以上来ていません。CelesTrak から古いデータが返っているか、取得に失敗しています（「軌道データを取得」のログを見てください）。`);
+    process.exit(1);
+  }
+  process.exit(0);
+}
 
 for (const { id, norad_id: noradId } of objects) {
   const path = `${OUT_DIR}/${id}.json`;

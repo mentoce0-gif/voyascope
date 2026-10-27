@@ -51,6 +51,9 @@ jobs:
           git add web/data/orbits web/data/status web/data/launches.json
           git commit -m "軌道データ・運用状況・打ち上げ予定を自動更新（CelesTrak・みちびき・Launch Library 2）"
           git push
+      - name: 新しい軌道データが長く来ていなければ知らせる
+        if: ${{ !cancelled() }}
+        run: node scripts/fetch-orbits.mjs --check-age
       - name: 運用状況の取得に失敗していたら知らせる
         if: steps.status.outcome == 'failure'
         run: |
