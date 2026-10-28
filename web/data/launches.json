@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-28T05:42:52.339Z",
+  "fetched_at": "2026-10-28T12:55:24.130Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -52,7 +52,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-26T12:04:31Z",
+      "updated": "2026-10-28T08:54:47Z",
       "rocket": {
         "name": "GSLV Mk II",
         "full_name": "GSLV Mk. II"
