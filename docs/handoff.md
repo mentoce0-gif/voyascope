@@ -71,6 +71,11 @@
 
 - **もとの「いまどこ」**（2026-10-20 オーナー：「もったいないけど今後編集しなくていい」）：ブランチ `backlog/mmx-now-v1`（コミット 2b8de5b）。地球のそばを大きく回る模式の道・地球を止めた全体の図の版。計画と計算に合わせた版（PR #64）に置きかえた。使うことがあれば、そこから取り出す
 
+- **英語版（2026-10-28 オーナー：いったん考えるのを止める。記録だけ）**：オーナーの考え＝教えても関心のない人は関心がない。日本の宇宙好きは「これまで親しんだもの」に惹かれる（仮説）。**対象は海外の X ユーザー・新しいもの好き**。旗「English version coming soon」を出し、英文で「感想をくれる人募集」を X に投稿して意見をもらう
+  - Claude Code の案（未決定）：リポジトリは分けず `voyascope.org/en/`（データ・Horizons の取り方〈JPL に了承済み〉・CI を共有）。旗は起動画面に小さく。最初に触ってもらうのは MMX の「いまどこ」（動画を本文・リンクは返信）。英語の範囲は `missions/` と MMX のいまどこから小さく
+  - 投稿の下書き（本文 243／返信 約175）：「Building VOYASCOPE, an unofficial fan-made web app that shows where spacecraft are right now, like JAXA's MMX, heading to Mars since Oct 20. / English version coming soon. Looking for people to try it and share honest feedback. Replies welcome!」 返信「Open it now to follow MMX on its way to Mars: https://voyascope.org/mmx/now/ Unofficial fan-made work, not affiliated with JAXA. Please check JAXA's official sources for the latest.」
+  - 決めること：① `/en/` で分けないでよいか ② 旗の場所 ③ 英文の「非公式ファンメイド」の書き方（ルール5）④ 最初に触ってもらうもの。**オーナーが再開するまで、こちらから進めない**
+
 ## 返事待ち
 
 | 相手 | 送ったもの | 日付 | 記録 |
