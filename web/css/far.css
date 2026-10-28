@@ -242,6 +242,8 @@ dialog.far-card-dialog::backdrop { background: rgba(5, 14, 31, 0.7); backdrop-fi
 .far-card-inner .pc-kicker { margin: 0; font: 10px/1.6 var(--font-mono); letter-spacing: 0.2em; color: var(--mint); }
 .far-card-inner .pc-title { margin: 12px 0 4px; padding-right: 44px; font-size: 26px; font-weight: 500; line-height: 1.45; text-wrap: balance; color: var(--text); }
 .far-card-inner .pc-en { margin: 0 0 14px; font-size: 12px; color: var(--text-dim); }
+.far-card-inner .pc-more { margin: 12px 0 0; font-size: 13px; }
+.far-card-inner .pc-more a { display: inline-flex; align-items: center; min-height: 44px; color: var(--mint); text-underline-offset: 3px; }
 .pc-facts { display: grid; margin: 0; }
 .pc-row { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: 2px 14px; padding: 12px 0 8px; border-top: 1px solid rgba(143, 179, 168, 0.2); }
 .pc-row dt { padding-top: 2px; font-size: 12px; color: var(--mint); }

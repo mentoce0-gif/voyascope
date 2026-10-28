@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { sunEci, isSunlit, observerOf, skyAt, findVisiblePasses, dir8, heightWord, MIN_ELEVATION, SUN_BELOW } from "../web/js/passes.js";
+import { sunEci, isSunlit, observerOf, skyAt, findVisiblePasses, dir8, heightWord, brightIndex, brightWord, sunGap, sunGapWord, MIN_ELEVATION, SUN_BELOW } from "../web/js/passes.js";
 import { satrecFromOrbit } from "../web/js/orbit.js";
 
 const decl = (d) => {
@@ -80,4 +80,30 @@ test("太陽が真上にある地点：秋分のころの正午（UTC）は赤�
   // 6時間後は西へ約90°
   const q = subsolarPoint(new Date("2026-09-23T18:00:00Z"));
   assert.ok(Math.abs(q.lng + 90) < 5, `経度 ${q.lng}`);
+});
+
+test("明るさの目安：近くて正面から日が当たるほど明るい", () => {
+  const deg = Math.PI / 180;
+  assert.ok(brightIndex(420, 60 * deg) < brightIndex(1500, 60 * deg), "遠いほど暗い");
+  assert.ok(brightIndex(600, 40 * deg) < brightIndex(600, 140 * deg), "横・後ろから当たるほど暗い");
+  assert.equal(brightWord(brightIndex(420, 60 * deg)), "明るい"); // ほぼ真上
+  assert.equal(brightWord(brightIndex(1500, 120 * deg)), "暗め"); // 地平線の近く
+  assert.equal(brightWord(1), "ふつう");
+});
+
+test("通過には、いちばん明るいときの明るさが付く", () => {
+  const obs = observerOf(pref("滋賀"));
+  const passes = findVisiblePasses(satrec, obs, new Date(orbit.epoch), { days: 10, limit: 10 });
+  for (const p of passes) assert.ok(Number.isFinite(p.bright));
+});
+
+test("日の入り・日の出からの時間：東京 2026-09-30 の 18:27 は、日の入り（計算で 17:27 ごろ）から約1時間", () => {
+  const obs = observerOf(pref("東京"));
+  const gap = sunGap(obs, new Date("2026-09-30T09:27:00Z")); // 18:27 JST
+  assert.equal(gap.kind, "set");
+  assert.ok(Math.abs(gap.minutes - 60) <= 3, `${gap.minutes} 分`);
+  const morning = sunGap(obs, new Date("2026-09-30T20:00:00Z")); // 10/1 5:00 JST
+  assert.equal(morning.kind, "rise");
+  assert.match(sunGapWord(morning), /^日の出の約\d+分前$/);
+  assert.equal(sunGapWord({ kind: "set", minutes: 43 }), "日の入りから約45分");
 });

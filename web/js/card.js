@@ -215,6 +215,7 @@ function overviewHtml(card, aboard, family, statusSum, realNow) {
           : ""
       }
       ${card.mission && !card.mission.undisclosed ? `<p class="ov-lead">${factText(card.mission)}</p>` : `<p class="ov-lead k">任務は公表されていません。</p>`}
+      <p class="ov-more"><a href="missions/${esc(card.id)}/">一言でわかる（要点と出典）<span aria-hidden="true"> ›</span></a></p>
       ${
         card.catchphrase
           ? `<p class="ov-catch">「${esc(card.catchphrase)}」<span class="k">　キャッチコピーは創作です</span></p>`

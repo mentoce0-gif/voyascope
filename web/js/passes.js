@@ -38,16 +38,45 @@ export function isSunlit(satEci, sun) {
   return Math.hypot(px, py, pz) > EARTH_RADIUS_KM;
 }
 
+// 観測地の位置（地球に固定した座標、km。WGS84・高さ0）
+function observerEcf({ latitude, longitude }) {
+  const f = 1 / 298.257223563;
+  const e2 = f * (2 - f);
+  const n = EARTH_RADIUS_KM / Math.sqrt(1 - e2 * Math.sin(latitude) ** 2);
+  return {
+    x: n * Math.cos(latitude) * Math.cos(longitude),
+    y: n * Math.cos(latitude) * Math.sin(longitude),
+    z: n * (1 - e2) * Math.sin(latitude),
+  };
+}
+
+// 位相角（機体から見た、太陽と観測地のあいだの角度、ラジアン）。0 は「真後ろから日が当たって満月のよう」
+function phaseAngle(satEcf, sunEcf, obsEcf) {
+  const a = { x: sunEcf.x - satEcf.x, y: sunEcf.y - satEcf.y, z: sunEcf.z - satEcf.z };
+  const b = { x: obsEcf.x - satEcf.x, y: obsEcf.y - satEcf.y, z: obsEcf.z - satEcf.z };
+  const c = (a.x * b.x + a.y * b.y + a.z * b.z) / (Math.hypot(a.x, a.y, a.z) * Math.hypot(b.x, b.y, b.z));
+  return Math.acos(Math.max(-1, Math.min(1, c)));
+}
+
+// 明るさの指数（等級と同じ向き：小さいほど明るい）。距離 1000 km・位相角 0° を 0 とする相対値で、ISS の等級そのものではない
+//   距離の2乗で暗くなる分と、一様に光を散らす球（ランバート球）の欠け方の分だけを見る
+export function brightIndex(rangeKm, phase) {
+  const f = (Math.sin(phase) + (Math.PI - phase) * Math.cos(phase)) / Math.PI;
+  return 5 * Math.log10(rangeKm / 1000) - 2.5 * Math.log10(Math.max(f, 1e-4));
+}
+
+// 明るさの目安（3段階）。真上近くを日が正面から当たって通ると「明るい」、低く遠く・横から当たると「暗め」
+export function brightWord(index) {
+  if (index <= 0.5) return "明るい";
+  if (index <= 2) return "ふつう";
+  return "暗め";
+}
+
 export const observerOf = (pref) => ({
   latitude: degreesToRadians(pref.lat),
   longitude: degreesToRadians(pref.lng),
   height: 0,
 });
-
-function lookAt(observer, eci, gmst) {
-  const la = ecfToLookAngles(observer, eciToEcf(eci, gmst));
-  return { az: ((la.azimuth * DEG) % 360 + 360) % 360, el: la.elevation * DEG };
-}
 
 // ある時刻の、観測地から見た機体と太陽
 export function skyAt(satrec, observer, date) {
@@ -55,9 +84,43 @@ export function skyAt(satrec, observer, date) {
   if (!pv?.position || typeof pv.position === "boolean") return null;
   const gmst = gstime(date);
   const sun = sunEci(date);
-  const sat = lookAt(observer, pv.position, gmst);
-  const sunEl = lookAt(observer, sun, gmst).el;
-  return { ...sat, sunEl, sunlit: isSunlit(pv.position, sun) };
+  const satEcf = eciToEcf(pv.position, gmst);
+  const sunEcf = eciToEcf(sun, gmst);
+  const la = ecfToLookAngles(observer, satEcf);
+  const sunEl = ecfToLookAngles(observer, sunEcf).elevation * DEG;
+  return {
+    az: ((la.azimuth * DEG) % 360 + 360) % 360,
+    el: la.elevation * DEG,
+    rangeKm: la.rangeSat,
+    phase: phaseAngle(satEcf, sunEcf, observerEcf(observer)),
+    sunEl,
+    sunlit: isSunlit(pv.position, sun),
+  };
+}
+
+// 観測地の太陽の高さ（度）
+export function sunElevation(observer, date) {
+  return ecfToLookAngles(observer, eciToEcf(sunEci(date), gstime(date))).elevation * DEG;
+}
+
+// 日の入り・日の出：太陽の上の縁が地平線に重なる高さ（大気で浮き上がって見える分を含む、−0.833°）
+const SUN_SET_EL = -0.833;
+
+// 通過が、日の入りから何分後か（夕方〜夜中）、日の出の何分前か（明け方）。1分きざみで探す
+export function sunGap(observer, date) {
+  const t0 = date.getTime();
+  const evening = (date.getUTCHours() + 9) % 24 >= 12; // 日本時間の午後
+  for (let m = 1; m <= 16 * 60; m++) {
+    const t = new Date(t0 + (evening ? -m : m) * 60000);
+    if (sunElevation(observer, t) > SUN_SET_EL) return { kind: evening ? "set" : "rise", minutes: m };
+  }
+  return null;
+}
+
+export function sunGapWord(gap) {
+  if (!gap) return "";
+  const m = gap.minutes < 120 ? `約${Math.max(5, Math.round(gap.minutes / 5) * 5)}分` : `約${Math.round(gap.minutes / 30) / 2}時間`;
+  return gap.kind === "set" ? `日の入りから${m}` : `日の出の${m}前`;
 }
 
 export const isVisible = (s) => !!s && s.el >= MIN_ELEVATION && s.sunEl <= SUN_BELOW && s.sunlit;
@@ -70,8 +133,9 @@ export function findVisiblePasses(satrec, observer, start, { days = 5, stepSec =
   for (let t = start.getTime(); t <= end && passes.length < limit; t += stepSec * 1000) {
     const s = skyAt(satrec, observer, new Date(t));
     if (isVisible(s)) {
-      if (!cur) cur = { start: new Date(t), startAz: s.az, maxEl: s.el, maxAz: s.az, maxAt: new Date(t), track: [] };
+      if (!cur) cur = { start: new Date(t), startAz: s.az, maxEl: s.el, maxAz: s.az, maxAt: new Date(t), bright: Infinity, track: [] };
       if (s.el > cur.maxEl) Object.assign(cur, { maxEl: s.el, maxAz: s.az, maxAt: new Date(t) });
+      cur.bright = Math.min(cur.bright, brightIndex(s.rangeKm, s.phase)); // 通過のうち、いちばん明るいとき
       cur.end = new Date(t);
       cur.endAz = s.az;
       cur.track.push({ az: s.az, el: s.el });

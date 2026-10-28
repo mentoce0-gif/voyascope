@@ -1301,6 +1301,17 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     history.replaceState(null, "", location.pathname);
     openFar("pushed").finally(() => dispatchEvent(new Event("voyascope:tour-return")));
   }
+  // 「一言でわかる」（missions/）から来たとき（?craft=iss・?probe=juno）：その機体を選んで追う／遠くを見る部屋でカードを開く（2026-10-28 オーナー）
+  const deep = new URLSearchParams(location.search);
+  const deepCraft = craft.find((c) => c.id === deep.get("craft"));
+  const deepProbe = deep.get("probe");
+  if (deepCraft || deepProbe) history.replaceState(null, "", location.pathname);
+  if (deepCraft) {
+    select(deepCraft);
+    setFollow(true);
+  } else if (deepProbe) {
+    openFar("pushed").then(() => roomOpen && far.openCard(deepProbe));
+  }
 
   // ---------- スマホ：MMX のアイコン（これまで「遠くを見る」があった場所。2026-10-19 オーナー） ----------
   // 押すと MMX の「いまどこ」（mmx/now/。2026-10-19 オーナー）。打ち上げの前の1週間・当日の計画の流れのあいだは、ゆっくり光る
