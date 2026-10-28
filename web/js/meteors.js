@@ -363,7 +363,7 @@ export function orbitSvg(ev, date) {
   const ax = (Number(ex) + 18 * Math.cos(ang)).toFixed(1);
   const ay = (Number(ey) - 18 * Math.sin(ang)).toFixed(1);
   return `<svg class="story-svg" viewBox="0 0 260 230" role="img" aria-label="太陽を北から見た図：地球の通り道と、彗星の通り道（ちりの帯）が近づくところを、地球が${peak.getMonth() + 1}月${peak.getDate()}日ごろに通る">
-    <defs><marker id="st-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5ef2c2"/></marker></defs>
+    <defs><marker id="st-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#5c9dff"/></marker></defs>
     <path d="${pathOf(north)}" class="story-dust"/>
     <path d="${pathOf(south)}" class="story-dust south"/>
     <path d="${pathOf(north)}" class="story-comet"/>

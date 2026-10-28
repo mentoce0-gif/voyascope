@@ -1,13 +1,13 @@
 /* 遠くを見る部屋（M7）。部屋を開いたときだけ読む（js/far/room.js）。
    見た目は合わせた試作（docs/design/far-room-visual-merged.html）と同じ：画面いっぱいの宇宙（3D の航路を飛ぶ）に、
    Codex 案の表示（左下に大きな名前と説明・右上に距離・下に物差し・右下に「その先へ →」）を重ねる。下へスクロールすると距離のはしご。
-   色と文字は style.css と同じ（navy / amber / mint、Zen Kaku Gothic New と JetBrains Mono） */
+   色と文字は style.css と同じ（2026-10-28 の配色：青＝操作・選択／緑＝ライブ／琥珀＝警告。Zen Kaku Gothic New と JetBrains Mono） */
 
 /* ---------- 部屋（画面いっぱいのダイアログ） ---------- */
 dialog.far-room {
   --dim: var(--text-dim);
-  --line: rgba(143, 179, 168, 0.2);
-  --mint-line: rgba(94, 242, 194, 0.45);
+  --line: rgba(165, 175, 190, 0.2);
+  --mint-line: rgba(92, 157, 255, 0.45);
   --side: 5%;
   position: fixed;
   inset: 0;
@@ -18,32 +18,32 @@ dialog.far-room {
   margin: 0;
   padding: 0;
   border: 0;
-  background: var(--navy-900);
+  background: var(--bg);
   color: var(--text);
   font-size: 14px;
   line-height: 1.6;
   overflow: hidden;
 }
 dialog.far-room[open] { display: flex; flex-direction: column; }
-dialog.far-room::backdrop { background: var(--navy-900); }
+dialog.far-room::backdrop { background: var(--bg); }
 .far-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: none; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); } /* 下へなぞって飛ぶので、ページの引き下ろしを起こさない */
 .far-room button, .far-room a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .far-room svg.i { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-.far-room :focus-visible { outline: 2px solid var(--amber); outline-offset: 4px; }
-.far-room .eyebrow { margin: 0; font: 10px/1.6 var(--font-mono); letter-spacing: 0.2em; color: var(--mint); }
+.far-room :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.far-room .eyebrow { margin: 0; font: 10px/1.6 var(--font-mono); letter-spacing: 0.2em; color: var(--text-dim); }
 .far-room .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* ---------- 飛ぶ舞台 ---------- */
-.far-room .journey { position: relative; height: calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: 560px; max-height: 1300px; overflow: hidden; isolation: isolate; background: var(--navy-900); }
+.far-room .journey { position: relative; height: calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: 560px; max-height: 1300px; overflow: hidden; isolation: isolate; background: var(--bg); }
 .journey .viewport { position: absolute; inset: 0; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
 .journey .viewport:active { cursor: grabbing; }
 .journey .viewport:focus-visible { outline-offset: -4px; }
 .journey .space { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
 .journey .vignette { position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(90deg, rgba(5, 14, 31, 0.55), transparent 52%), linear-gradient(0deg, #050e1f 0%, rgba(5, 14, 31, 0.62) 10%, transparent 36%, transparent 80%, rgba(5, 14, 31, 0.45)); }
-.journey .warp-vignette { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
-.journey .flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 46%, rgba(94, 242, 194, 0.26), transparent 62%); }
-.journey .flash.gate { background: radial-gradient(circle at 50% 46%, rgba(255, 181, 71, 0.42), transparent 66%); }
+  background: linear-gradient(90deg, rgba(8, 12, 20, 0.55), transparent 52%), linear-gradient(0deg, #080c14 0%, rgba(8, 12, 20, 0.62) 10%, transparent 36%, transparent 80%, rgba(8, 12, 20, 0.45)); }
+.journey .warp-vignette { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(243, 246, 252, 0.1) 72%, rgba(8, 12, 20, 0.85) 100%); }
+.journey .flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 46%, rgba(92, 157, 255, 0.26), transparent 62%); }
+.journey .flash.gate { background: radial-gradient(circle at 50% 46%, rgba(243, 246, 252, 0.42), transparent 66%); }
 .journey .overlay { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 
 /* 上の帯：地球へ戻る・VOYASCOPE・音・距離のはしご */
@@ -54,98 +54,98 @@ dialog.far-room::backdrop { background: var(--navy-900); }
   flex: none;
   min-height: 44px;
   padding: 0 16px;
-  border: 1px solid var(--mint-dim);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(5, 14, 31, 0.5);
-  color: var(--mint);
+  background: rgba(24, 33, 45, 0.82);
+  color: var(--text);
   font: inherit;
   font-size: 13px;
   cursor: pointer;
   white-space: nowrap;
 }
-@media (hover: hover) { .far-room .far-back:hover { background: var(--mint-faint); } }
+@media (hover: hover) { .far-room .far-back:hover { background: var(--line); } }
 .far-room .j-brand { display: flex; align-items: center; gap: 18px; min-width: 0; }
 .far-room .j-brand img { display: block; height: 22px; width: auto; }
 .far-room .brand-room { padding-left: 18px; border-left: 1px solid var(--line); font-size: 12px; letter-spacing: 0.15em; color: var(--dim); white-space: nowrap; }
 .far-room .top-actions { display: flex; align-items: center; gap: 18px; margin-left: auto; }
 .far-room .round { appearance: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: none; color: var(--text); cursor: pointer; }
 .far-room .round .on { display: none; }
-.far-room .round[aria-pressed="true"] { color: var(--mint); border-color: var(--mint-line); }
+.far-room .round[aria-pressed="true"] { color: var(--accent); border-color: var(--mint-line); }
 .far-room .round[aria-pressed="true"] .on { display: inline; }
 .far-room .round[aria-pressed="true"] .off { display: none; }
 .far-room .map-link { appearance: none; display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 0; border: 0; background: none; color: var(--text); font: inherit; font-size: 12px; letter-spacing: 0.08em; cursor: pointer; }
 .far-room .map-link svg { width: 16px; }
 
-.journey .telemetry { position: absolute; right: var(--side); top: 132px; text-align: right; pointer-events: none; text-shadow: 0 0 2px #050e1f, 0 1px 3px #050e1f, 0 1px 12px #050e1f, 0 0 26px rgba(5, 14, 31, 0.85); } /* 明るい木星の上でも読める */
+.journey .telemetry { position: absolute; right: var(--side); top: 132px; text-align: right; pointer-events: none; text-shadow: 0 0 2px #080c14, 0 1px 3px #080c14, 0 1px 12px #080c14, 0 0 26px rgba(8, 12, 20, 0.85); } /* 明るい木星の上でも読める */
 .journey .metric-label { font-size: 11px; letter-spacing: 0.16em; color: var(--dim); }
-.journey .metric-label .approx { margin-left: 6px; font-size: 10px; letter-spacing: 0; color: var(--amber); }
-.journey .distance { margin: 6px 0 10px; font: 400 clamp(26px, 2.6vw, 40px)/1.05 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; color: var(--amber); white-space: nowrap; }
+.journey .metric-label .approx { margin-left: 6px; font-size: 10px; letter-spacing: 0; color: var(--hi); }
+.journey .distance { margin: 6px 0 10px; font: 400 clamp(26px, 2.6vw, 40px)/1.05 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.03em; color: var(--hi); white-space: nowrap; }
 .journey .distance small { margin-left: 8px; font-size: 12px; letter-spacing: 0; color: var(--dim); }
 .journey .submetrics { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 16px; font: 11px var(--font-mono); color: var(--dim); }
 .journey .submetrics b { font-weight: 400; color: var(--text); }
 .journey .speed { margin-top: 8px; font: 11px var(--font-mono); color: var(--dim); }
-.journey .speed.warp { color: var(--amber); }
+.journey .speed.warp { color: var(--hi); }
 .journey .speed .fiction { margin-left: 6px; padding: 0 5px; border: 1px solid currentColor; border-radius: 3px; font: 10px var(--font-body); }
 
 .journey .top-status { position: absolute; left: var(--side); top: 134px; display: flex; align-items: center; gap: 8px; font-size: 11px; letter-spacing: 0.14em; color: var(--dim); pointer-events: none; }
-.journey .status-dot { width: 5px; height: 5px; flex-shrink: 0; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px var(--mint); }
+.journey .status-dot { width: 5px; height: 5px; flex-shrink: 0; border-radius: 50%; background: var(--accent); }
 
 /* うしろの窓：離れていく地球（見かけの大きさは本当の値） */
 .journey .rear { position: absolute; left: var(--side); top: 164px; margin: 0; display: flex; align-items: center; gap: 12px; pointer-events: none; transition: opacity 0.6s; }
 .journey .rear[data-off="true"] { opacity: 0; }
 .journey .rear canvas { display: block; width: 76px; height: 76px; }
-.journey .rear figcaption { display: grid; gap: 3px; font-size: 10px; letter-spacing: 0.08em; color: var(--dim); text-shadow: 0 1px 8px #050e1f; }
+.journey .rear figcaption { display: grid; gap: 3px; font-size: 10px; letter-spacing: 0.08em; color: var(--dim); text-shadow: 0 1px 8px #080c14; }
 .journey .rear figcaption b { font: 400 11px var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text); }
 
 .journey .chapter-rail { position: absolute; left: 25px; top: 44%; display: flex; flex-direction: column; align-items: center; gap: 16px; font: 10px var(--font-mono); color: var(--dim); pointer-events: none; }
 .journey .rail-line { position: relative; width: 1px; height: 105px; background: var(--line); }
-.journey .rail-line i { position: absolute; left: 0; top: 0; width: 1px; height: 0; background: var(--amber); }
+.journey .rail-line i { position: absolute; left: 0; top: 0; width: 1px; height: 0; background: var(--hi); }
 
-.journey .scene-tag { position: absolute; left: 74%; bottom: 250px; display: flex; flex-direction: column; align-items: flex-start; font: 11px var(--font-mono); letter-spacing: 0.2em; color: var(--text); pointer-events: none; transition: opacity 0.4s; text-shadow: 0 1px 10px #050e1f; }
+.journey .scene-tag { position: absolute; left: 74%; bottom: 250px; display: flex; flex-direction: column; align-items: flex-start; font: 11px var(--font-mono); letter-spacing: 0.2em; color: var(--text); pointer-events: none; transition: opacity 0.4s; text-shadow: 0 1px 10px #080c14; }
 .journey .scene-tag small { margin-top: 8px; font: 11px var(--font-body); letter-spacing: 0.06em; color: var(--dim); }
-.journey .tag-line { width: 43px; height: 1px; margin-bottom: 14px; background: var(--mint); opacity: 0.65; }
+.journey .tag-line { width: 43px; height: 1px; margin-bottom: 14px; background: var(--accent); opacity: 0.65; }
 .journey.moving .scene-tag, .journey.rest .scene-tag { opacity: 0; }
 
-.journey .story { position: absolute; left: 8.5%; bottom: 224px; width: min(520px, 46vw); pointer-events: none; transition: opacity 0.6s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); text-shadow: 0 2px 30px rgba(5, 14, 31, 0.6); }
+.journey .story { position: absolute; left: 8.5%; bottom: 224px; width: min(520px, 46vw); pointer-events: none; transition: opacity 0.6s, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); text-shadow: 0 2px 30px rgba(8, 12, 20, 0.6); }
 .journey .story-title { margin: 22px 0; font-size: clamp(52px, 6vw, 90px); font-weight: 500; line-height: 1.25; letter-spacing: 0.07em; text-wrap: balance; color: var(--text); }
 .journey .story p { max-width: 440px; margin: 0; font-size: 14px; line-height: 2.1; letter-spacing: 0.05em; color: var(--dim); }
-.journey .hero-meta { margin-top: 16px; font: 12px/1.9 var(--font-mono); color: var(--amber); }
+.journey .hero-meta { margin-top: 16px; font: 12px/1.9 var(--font-mono); color: var(--hi); }
 .journey .hero-meta small { display: block; margin-top: 2px; font: 11px var(--font-body); color: var(--dim); }
-.journey .hero-event { margin-top: 8px; font-size: 12px; line-height: 1.8; color: var(--amber); }
+.journey .hero-event { margin-top: 8px; font-size: 12px; line-height: 1.8; color: var(--hi); }
 .journey .hero-event .ev-left { color: var(--dim); }
 .journey .detail-link { appearance: none; display: inline-flex; align-items: center; gap: 24px; min-height: 44px; margin-top: 10px; padding: 0; border: 0; border-bottom: 1px solid var(--line); background: none; font: inherit; font-size: 13px; color: var(--text); cursor: pointer; pointer-events: auto; }
-.journey .detail-link span { font: 18px var(--font-mono); color: var(--mint); }
+.journey .detail-link span { font: 18px var(--font-mono); color: var(--accent); }
 /* 月の停留所：アルテミス2号の旅へ。光るオリオンの印 */
-.journey .tour-link { color: var(--amber); text-decoration: none; gap: 12px; }
-.journey .tour-link span { color: var(--amber); }
-.journey .orion-dot { width: 9px; height: 9px; border-radius: 50%; background: #fff6d8; box-shadow: 0 0 6px 2px rgba(255, 181, 71, 0.9), 0 0 14px 4px rgba(255, 181, 71, 0.45); animation: orion-pulse 2.4s ease-in-out infinite; }
-@keyframes orion-pulse { 50% { box-shadow: 0 0 3px 1px rgba(255, 181, 71, 0.6), 0 0 8px 2px rgba(255, 181, 71, 0.25); } }
+.journey .tour-link { color: var(--hi); text-decoration: none; gap: 12px; }
+.journey .tour-link span { color: var(--hi); }
+.journey .orion-dot { width: 9px; height: 9px; border-radius: 50%; background: #fff6d8; box-shadow: 0 0 6px 2px rgba(243, 246, 252, 0.9), 0 0 14px 4px rgba(243, 246, 252, 0.45); animation: orion-pulse 2.4s ease-in-out infinite; }
+@keyframes orion-pulse { 50% { box-shadow: 0 0 3px 1px rgba(243, 246, 252, 0.6), 0 0 8px 2px rgba(243, 246, 252, 0.25); } }
 @media (prefers-reduced-motion: reduce) { .journey .orion-dot { animation: none; } }
 @media (min-width: 901px) { .journey.encounter .story { width: min(600px, 48vw); } }
 .journey.encounter .story-title { margin: 14px 0 16px; font-size: clamp(32px, 3.4vw, 50px); line-height: 1.38; letter-spacing: 0.03em; word-break: keep-all; }
 .journey.moving .story, .journey.rest .story { opacity: 0; transform: translateY(24px); }
 .journey.moving .story button, .journey.rest .story button { visibility: hidden; }
 
-.journey .travel-label { position: absolute; left: 8.5%; bottom: 250px; display: flex; flex-direction: column; gap: 16px; opacity: 0; transform: translateY(20px); transition: opacity 0.6s, transform 0.8s; pointer-events: none; text-shadow: 0 2px 24px rgba(5, 14, 31, 0.7); }
+.journey .travel-label { position: absolute; left: 8.5%; bottom: 250px; display: flex; flex-direction: column; gap: 16px; opacity: 0; transform: translateY(20px); transition: opacity 0.6s, transform 0.8s; pointer-events: none; text-shadow: 0 2px 24px rgba(8, 12, 20, 0.7); }
 .journey .travel-label > span { font-size: 31px; letter-spacing: 0.15em; }
-.journey .travel-label small { font: 11px/1.7 var(--font-mono); letter-spacing: 0.12em; color: var(--mint); }
+.journey .travel-label small { font: 11px/1.7 var(--font-mono); letter-spacing: 0.12em; color: var(--accent); }
 .journey.moving .travel-label, .journey.rest .travel-label { opacity: 1; transform: none; }
 
 .journey .journey-controls { position: absolute; left: 8.5%; right: var(--side); bottom: 128px; display: flex; align-items: center; justify-content: space-between; gap: 24px; pointer-events: none; }
 .journey .journey-controls button { pointer-events: auto; }
 .journey .interaction-hint { margin: 0; display: flex; align-items: center; gap: 12px; font-size: 12px; letter-spacing: 0.08em; color: var(--dim); }
-.journey .interaction-hint svg { width: 16px; height: 28px; color: var(--mint); }
+.journey .interaction-hint svg { width: 16px; height: 28px; color: var(--accent); }
 .journey .interaction-hint small { display: block; margin-top: 5px; font-size: 10px; opacity: 0.75; }
 .journey .primary { appearance: none; display: flex; align-items: center; gap: 26px; min-height: 58px; margin-left: auto; padding: 0; border: 0; background: none; color: var(--text); font: inherit; text-align: right; font-size: 15px; letter-spacing: 0.1em; cursor: pointer; }
 .journey .primary-text { display: grid; gap: 3px; }
 .journey .primary-text small { font-size: 10px; letter-spacing: 0.04em; color: var(--dim); }
-.journey .primary .arrow { display: grid; place-items: center; width: 58px; height: 58px; border: 1px solid rgba(94, 242, 194, 0.5); border-radius: 50%; color: var(--mint); background: rgba(7, 20, 43, 0.5); transition: background 0.25s, transform 0.4s; }
-@media (hover: hover) { .journey .primary:hover .arrow { background: rgba(94, 242, 194, 0.13); transform: translateX(4px); } }
+.journey .primary .arrow { display: grid; place-items: center; width: 58px; height: 58px; border: 1px solid rgba(92, 157, 255, 0.5); border-radius: 50%; color: var(--accent); background: rgba(24, 33, 45, 0.5); transition: background 0.25s, transform 0.4s; }
+@media (hover: hover) { .journey .primary:hover .arrow { background: rgba(92, 157, 255, 0.13); transform: translateX(4px); } }
 
 .journey .bottom-panel { position: absolute; left: var(--side); right: var(--side); bottom: 0; height: 104px; pointer-events: none; }
 .journey .bottom-panel button { pointer-events: auto; }
 .journey .ruler-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 4px; font-size: 10px; letter-spacing: 0.06em; color: var(--dim); }
-.journey .ruler-head .mono { color: var(--amber); }
+.journey .ruler-head .mono { color: var(--hi); }
 .journey .ruler { display: block; width: 100%; height: 34px; }
 .journey .footline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .journey .footline p { margin: 0; font-size: 10px; color: var(--dim); }
@@ -154,31 +154,31 @@ dialog.far-room::backdrop { background: var(--navy-900); }
 .journey.model-on .model-note { opacity: 0.75; } /* 探査機の模型が見えているあいだだけ */
 /* そばで観測中：ドラッグで周りから眺められることを知らせる（1回なぞったら出さない）。
    PC の右下は、下のボタン（上の端が下から 186px）から上へ積む：注記 → この案内 → 英名の札。画面が低くても重ならない */
-.journey .look-hint { position: absolute; left: 74%; bottom: 222px; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 11px; letter-spacing: 0.06em; color: var(--mint); opacity: 0; transition: opacity 0.5s; pointer-events: none; text-shadow: 0 1px 8px #050e1f; }
+.journey .look-hint { position: absolute; left: 74%; bottom: 222px; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 11px; letter-spacing: 0.06em; color: var(--accent); opacity: 0; transition: opacity 0.5s; pointer-events: none; text-shadow: 0 1px 8px #080c14; }
 .journey .look-hint svg { width: 16px; height: 16px; }
 .journey.encounter:not(.looked) .look-hint { opacity: 0.9; }
 .journey .story-en { display: none; }
 /* 先へ進むボタン：そばで観測中は、ゆっくり脈打って「ここから先へ」と知らせる */
-@keyframes far-nudge { 0% { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0.5); } 70% { box-shadow: 0 0 0 14px rgba(94, 242, 194, 0); } 100% { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0); } }
-.journey.encounter .primary .arrow { border-color: var(--mint); animation: far-nudge 2.2s ease-out infinite; }
+@keyframes far-nudge { 0% { box-shadow: 0 0 0 0 rgba(92, 157, 255, 0.5); } 70% { box-shadow: 0 0 0 14px rgba(92, 157, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(92, 157, 255, 0); } }
+.journey.encounter .primary .arrow { border-color: var(--accent); animation: far-nudge 2.2s ease-out infinite; }
 
 /* 次の行き先の照準（3D の位置に重ねる） */
 .journey .reticle { position: absolute; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; transform: translate3d(-999px, -999px, 0); will-change: transform; }
-.journey .reticle i { position: absolute; width: 8px; height: 8px; border: 1.5px solid var(--mint); }
+.journey .reticle i { position: absolute; width: 8px; height: 8px; border: 1.5px solid var(--accent); }
 .journey .reticle i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; }
 .journey .reticle i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; }
 .journey .reticle i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; }
 .journey .reticle i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; }
-.journey .reticle-label { position: absolute; left: 0; top: 0; display: grid; gap: 1px; transform: translate3d(-999px, -999px, 0); white-space: nowrap; font: 10px var(--font-mono); letter-spacing: 0.12em; color: var(--mint); text-shadow: 0 0 6px #050e1f, 0 0 2px #050e1f; will-change: transform; }
+.journey .reticle-label { position: absolute; left: 0; top: 0; display: grid; gap: 1px; transform: translate3d(-999px, -999px, 0); white-space: nowrap; font: 10px var(--font-mono); letter-spacing: 0.12em; color: var(--accent); text-shadow: 0 0 6px #080c14, 0 0 2px #080c14; will-change: transform; }
 .journey .reticle-label b { font: 500 12px var(--font-body); letter-spacing: 0.04em; color: var(--text); }
 
 /* 火星の地面を見る望遠の窓 */
-.journey .lens { position: absolute; left: 0; top: 0; border: 1px solid var(--mint-line); border-radius: 50%; box-shadow: 0 0 0 5px rgba(5, 14, 31, 0.35), 0 0 30px rgba(94, 242, 194, 0.16); opacity: 0; transition: opacity 0.4s; }
+.journey .lens { position: absolute; left: 0; top: 0; border: 1px solid var(--mint-line); border-radius: 50%; box-shadow: 0 0 0 5px rgba(8, 12, 20, 0.35), 0 0 30px rgba(92, 157, 255, 0.16); opacity: 0; transition: opacity 0.4s; }
 .journey .lens.on { opacity: 1; }
-.journey .lens span { position: absolute; left: 50%; top: 100%; transform: translate(-50%, 8px); white-space: nowrap; font-size: 10px; letter-spacing: 0.06em; color: var(--dim); text-shadow: 0 1px 8px #050e1f; }
-.journey .lens-line { position: absolute; left: 0; top: 0; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(94, 242, 194, 0.7), rgba(94, 242, 194, 0.15)); opacity: 0; transition: opacity 0.4s; }
+.journey .lens span { position: absolute; left: 50%; top: 100%; transform: translate(-50%, 8px); white-space: nowrap; font-size: 10px; letter-spacing: 0.06em; color: var(--dim); text-shadow: 0 1px 8px #080c14; }
+.journey .lens-line { position: absolute; left: 0; top: 0; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, rgba(92, 157, 255, 0.7), rgba(92, 157, 255, 0.15)); opacity: 0; transition: opacity 0.4s; }
 .journey .lens-line.on { opacity: 1; }
-.journey .lens-pin { position: absolute; left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border: 1.5px solid var(--mint); border-radius: 50%; opacity: 0; transition: opacity 0.4s; }
+.journey .lens-pin { position: absolute; left: 0; top: 0; width: 12px; height: 12px; margin: -6px 0 0 -6px; border: 1.5px solid var(--accent); border-radius: 50%; opacity: 0; transition: opacity 0.4s; }
 .journey .lens-pin.on { opacity: 1; }
 
 /* ---------- 距離のはしご（Codex 案の形） ---------- */
@@ -193,38 +193,38 @@ dialog.far-room::backdrop { background: var(--navy-900); }
 .far-room .lad-step { position: relative; display: grid; grid-template-columns: 175px minmax(0, 1fr); min-height: 120px; }
 .far-room .lad-step::before { content: ""; position: absolute; left: 155px; top: 8px; bottom: -8px; width: 1px; background: var(--line); }
 .far-room .lad-label { position: relative; padding: 24px 30px 28px 0; }
-.far-room .lad-label::after { content: ""; position: absolute; right: 16px; top: 31px; width: 7px; height: 7px; border: 1px solid var(--mint); border-radius: 50%; background: var(--navy-900); }
+.far-room .lad-label::after { content: ""; position: absolute; right: 16px; top: 31px; width: 7px; height: 7px; border: 1px solid var(--accent); border-radius: 50%; background: var(--bg); }
 .far-room .lad-scale { margin: 0; font-size: 14px; font-weight: 500; color: var(--text); }
 .far-room .lad-label small { display: block; margin-top: 6px; font-size: 11px; color: var(--dim); }
 .far-room .lad-content { min-width: 0; padding: 4px 0 30px 33px; }
 .far-room .lad-places { list-style: none; margin: 0; padding: 0; }
 .far-room .lad-place { appearance: none; display: grid; grid-template-columns: 43px minmax(0, 1fr) auto 22px; align-items: center; gap: 20px; width: 100%; min-height: 44px; padding: 20px 0; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: background 0.2s; }
-@media (hover: hover) { .far-room .lad-place:hover { background: rgba(12, 33, 64, 0.6); } } /* 指で押したあとに色が残らないように */
+@media (hover: hover) { .far-room .lad-place:hover { background: rgba(32, 43, 57, 0.6); } } /* 指で押したあとに色が残らないように */
 .far-room .lad-num { font-size: 11px; color: var(--dim); }
 .far-room .lad-main { display: grid; gap: 3px; min-width: 0; }
 .far-room .lad-name { font-size: 16px; font-weight: 500; line-height: 1.6; }
-.far-room .lad-place.light-day .lad-name { color: var(--amber); }
+.far-room .lad-place.light-day .lad-name { color: var(--hi); }
 .far-room .lad-how { font-size: 11px; line-height: 1.8; color: var(--dim); }
-.far-room .lad-ev { font-size: 11px; line-height: 1.7; color: var(--amber); }
+.far-room .lad-ev { font-size: 11px; line-height: 1.7; color: var(--hi); }
 .far-room .lad-ev .ev-left { color: var(--dim); }
-.far-room .lad-dist { font-size: 13px; color: var(--amber); text-align: right; white-space: nowrap; }
+.far-room .lad-dist { font-size: 13px; color: var(--hi); text-align: right; white-space: nowrap; }
 .far-room .lad-dist small { display: block; margin-top: 6px; font: 11px var(--font-body); color: var(--dim); }
 .far-room .lad-place.probe:is([data-card]) .lad-dist { color: var(--dim); font-size: 12px; }
-.far-room .lad-arrow { font-size: 22px; color: var(--mint); }
+.far-room .lad-arrow { font-size: 22px; color: var(--accent); }
 .far-room .li-tag { margin-left: 8px; padding: 0 6px; border: 1px solid var(--text-dim); border-radius: 3px; font-size: 10px; font-weight: 400; color: var(--text-dim); vertical-align: 2px; }
 .far-room .lad-empty { display: flex; align-items: center; gap: 24px; padding: 22px 0 0; font-size: 12px; color: var(--dim); }
 .far-room .lad-empty::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 .far-room .lad-ten { margin: 12px 0 0; text-align: right; font-size: 10px; letter-spacing: 0.1em; color: var(--dim); }
-.far-room .lad-ten span { color: var(--mint); }
+.far-room .lad-ten span { color: var(--accent); }
 .far-room .lad-pending { margin-top: 56px; padding-top: 34px; border-top: 1px solid var(--line); }
 .far-room .lad-pending-title { margin: 14px 0 6px; font-size: 21px; font-weight: 500; letter-spacing: 0.06em; }
 .far-room .closing { padding: 96px 0 84px; text-align: center; }
 .far-room .closing-copy { margin: 22px 0; font-size: 42px; font-weight: 500; line-height: 1.7; letter-spacing: 0.14em; }
-.far-room .again { appearance: none; min-height: 44px; padding: 0 8px; border: 0; background: none; font: inherit; font-size: 13px; letter-spacing: 0.1em; color: var(--mint); cursor: pointer; }
+.far-room .again { appearance: none; min-height: 44px; padding: 0 8px; border: 0; background: none; font: inherit; font-size: 13px; letter-spacing: 0.1em; color: var(--accent); cursor: pointer; }
 
 /* 距離の出し方 */
 .far-room .far-about { max-width: 780px; margin: 0 auto; padding: 0 0 40px; }
-.far-room .far-h3 { margin: 18px 0 4px; font-size: 1rem; font-weight: 500; color: var(--mint); }
+.far-room .far-h3 { margin: 18px 0 4px; font-size: 1rem; font-weight: 500; color: var(--accent); }
 .far-room .far-note { margin: 8px 0; font-size: 0.8rem; line-height: 1.75; color: var(--text-dim); }
 .far-room .far-note b { color: var(--text); font-weight: 700; }
 .far-room .far-about-list { margin: 6px 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: 0.8rem; line-height: 1.75; color: var(--text-dim); }
@@ -232,29 +232,29 @@ dialog.far-room::backdrop { background: var(--navy-900); }
 /* Horizons の出典（JPL SSD の希望の形）：長い URL が画面からはみ出さないように折り返す */
 .far-credit, .far-card-inner .credit { overflow-wrap: anywhere; }
 .far-credit { display: inline-block; margin-top: 4px; font-size: 0.85em; color: var(--text-dim); }
-.far-credit a, .far-card-inner .credit a { color: var(--mint); }
+.far-credit a, .far-card-inner .credit a { color: var(--accent); }
 
 /* ---------- 探査機のカード（くわしい。試作の形） ---------- */
-dialog.far-card-dialog { width: min(580px, calc(100vw - 32px)); max-height: 82svh; border: 1px solid var(--line); border-radius: 0; background: rgba(7, 20, 43, 0.97); box-shadow: 0 30px 180px #050e1f; }
-dialog.far-card-dialog::backdrop { background: rgba(5, 14, 31, 0.7); backdrop-filter: blur(8px); }
+dialog.far-card-dialog { width: min(580px, calc(100vw - 32px)); max-height: 82svh; border: 1px solid var(--line); border-radius: 16px; background: rgba(32, 43, 57, 0.97); box-shadow: 0 30px 180px #080c14; }
+dialog.far-card-dialog::backdrop { background: rgba(8, 12, 20, 0.7); backdrop-filter: blur(8px); }
 .far-card-inner.card-inner { padding: 44px 34px 24px; }
 .far-card-inner .close { top: 6px; right: 8px; width: 44px; height: 44px; border: 0; font-size: 26px; color: var(--dim); }
-.far-card-inner .pc-kicker { margin: 0; font: 10px/1.6 var(--font-mono); letter-spacing: 0.2em; color: var(--mint); }
+.far-card-inner .pc-kicker { margin: 0; font: 10px/1.6 var(--font-mono); letter-spacing: 0.2em; color: var(--accent); }
 .far-card-inner .pc-title { margin: 12px 0 4px; padding-right: 44px; font-size: 26px; font-weight: 500; line-height: 1.45; text-wrap: balance; color: var(--text); }
 .far-card-inner .pc-en { margin: 0 0 14px; font-size: 12px; color: var(--text-dim); }
 .pc-facts { display: grid; margin: 0; }
-.pc-row { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: 2px 14px; padding: 12px 0 8px; border-top: 1px solid rgba(143, 179, 168, 0.2); }
-.pc-row dt { padding-top: 2px; font-size: 12px; color: var(--mint); }
+.pc-row { display: grid; grid-template-columns: 5.5em minmax(0, 1fr); gap: 2px 14px; padding: 12px 0 8px; border-top: 1px solid rgba(165, 175, 190, 0.2); }
+.pc-row dt { padding-top: 2px; font-size: 12px; color: var(--accent); }
 .pc-row dd { margin: 0; font-size: 13px; line-height: 1.9; }
-.pc-row dd .mono { color: var(--amber); }
+.pc-row dd .mono { color: var(--hi); }
 .pc-ev + .pc-ev { margin-top: 4px; }
-.far-card-inner h3 { margin: 18px 0 4px; padding-top: 12px; border-top: 1px solid rgba(143, 179, 168, 0.2); font-size: 12px; font-weight: 400; color: var(--mint); }
+.far-card-inner h3 { margin: 18px 0 4px; padding-top: 12px; border-top: 1px solid rgba(165, 175, 190, 0.2); font-size: 12px; font-weight: 400; color: var(--accent); }
 .far-card-inner .link-list a { display: inline-block; padding: 6px 0; font-size: 12px; }
-.far-room .src { margin-left: 6px; font-size: 0.72rem; color: var(--mint); text-underline-offset: 3px; white-space: nowrap; }
+.far-room .src { margin-left: 6px; font-size: 0.72rem; color: var(--accent); text-underline-offset: 3px; white-space: nowrap; }
 
 /* ---------- スマホ ---------- */
 @media (max-width: 900px) {
-  .journey .vignette { background: linear-gradient(0deg, #050e1f 0%, rgba(5, 14, 31, 0.94) 17%, rgba(5, 14, 31, 0.62) 40%, transparent 60%, rgba(5, 14, 31, 0.25) 84%, rgba(5, 14, 31, 0.45)); }
+  .journey .vignette { background: linear-gradient(0deg, #080c14 0%, rgba(8, 12, 20, 0.94) 17%, rgba(8, 12, 20, 0.62) 40%, transparent 60%, rgba(8, 12, 20, 0.25) 84%, rgba(8, 12, 20, 0.45)); }
   .far-room .topbar { height: 72px; gap: 12px; padding: 0 20px; }
   .far-room .far-back { padding: 0 14px; font-size: 12.5px; }
   .far-room .j-brand img { height: 15px; }
@@ -407,7 +407,7 @@ dialog.far-card-dialog::backdrop { background: rgba(5, 14, 31, 0.7); backdrop-fi
   border: 1px solid var(--panel-border);
   border-radius: 8px;
   overflow: hidden;
-  background: var(--navy-900);
+  background: var(--bg);
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -424,12 +424,12 @@ dialog.far-card-dialog::backdrop { background: rgba(5, 14, 31, 0.7); backdrop-fi
   gap: 2px;
   text-align: right;
   pointer-events: none;
-  text-shadow: 0 0 8px var(--navy-900), 0 0 2px var(--navy-900);
+  text-shadow: 0 0 8px var(--bg), 0 0 2px var(--bg);
 }
-.fly-km { font-size: clamp(18px, 5.2vw, 32px); line-height: 1.15; color: var(--amber); font-variant-numeric: tabular-nums; }
+.fly-km { font-size: clamp(18px, 5.2vw, 32px); line-height: 1.15; color: var(--hi); font-variant-numeric: tabular-nums; }
 .fly-sub { font-size: 12px; color: var(--text); font-variant-numeric: tabular-nums; }
-.fly-warp { font-size: 12px; color: var(--mint); }
-.fly-warp[data-warp="true"] { color: var(--amber); }
+.fly-warp { font-size: 12px; color: var(--accent); }
+.fly-warp[data-warp="true"] { color: var(--hi); }
 .fly-hint {
   position: absolute;
   inset: 44% 0 auto;
@@ -438,7 +438,7 @@ dialog.far-card-dialog::backdrop { background: rgba(5, 14, 31, 0.7); backdrop-fi
   color: var(--text);
   pointer-events: none;
   transition: opacity 0.4s;
-  text-shadow: 0 0 8px var(--navy-900);
+  text-shadow: 0 0 8px var(--bg);
 }
 .fly-card {
   position: absolute;
@@ -450,9 +450,9 @@ dialog.far-card-dialog::backdrop { background: rgba(5, 14, 31, 0.7); backdrop-fi
   max-height: calc(100% - 150px);
   overflow: auto;
   padding: 10px 12px;
-  border: 1px solid var(--mint-dim);
-  border-radius: 8px;
-  background: rgba(12, 33, 64, 0.93);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(32, 43, 57, 0.93);
   font-size: 0.82rem;
   line-height: 1.6;
   cursor: auto;
@@ -461,27 +461,27 @@ dialog.far-card-dialog::backdrop { background: rgba(5, 14, 31, 0.7); backdrop-fi
   transition: opacity 0.3s, transform 0.3s;
 }
 .fly-card[data-off="true"] { opacity: 0; transform: translateY(8px); pointer-events: none; }
-.fc-name { font-size: 0.98rem; font-weight: 700; color: var(--mint); }
-.fc-dist .mono { color: var(--amber); font-size: 0.95rem; }
+.fc-name { font-size: 0.98rem; font-weight: 700; color: var(--text); }
+.fc-dist .mono { color: var(--hi); font-size: 0.95rem; }
 .fc-how { color: var(--text-dim); font-size: 0.74rem; }
 .fc-lt .mono { color: var(--text); }
 .fc-line, .fc-ev { margin: 2px 0 0; }
-.fc-ev { color: var(--amber); font-size: 0.78rem; }
+.fc-ev { color: var(--hi); font-size: 0.78rem; }
 .fc-more {
   appearance: none;
   justify-self: start;
   margin-top: 4px;
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid var(--mint-dim);
+  border: 1px solid var(--line);
   border-radius: 999px;
-  background: transparent;
-  color: var(--mint);
+  background: var(--surface);
+  color: var(--text);
   font: inherit;
   font-size: 0.8rem;
   cursor: pointer;
 }
-.fc-more:hover { background: var(--mint-faint); }
+.fc-more:hover { background: var(--line); }
 .fc-tag {
   margin-left: 8px;
   padding: 0 6px;

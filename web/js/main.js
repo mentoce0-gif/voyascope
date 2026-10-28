@@ -32,8 +32,7 @@ import { activeMeteors, meteorHtml, meteorStoryHtml, radiantDirection, createStr
 import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
 
 const COLORS = {
-  navy: "#07142b",
-  mint: "#5ef2c2",
+  navy: "#080c14",
   atmosphere: "#7fc4ff",
 };
 // 軌道データ（基準時刻）がこれ以上届いていない機体は、印と一覧の行を灰色にして、ホバーで知らせる
@@ -50,32 +49,6 @@ const shortName = (c) => (c.card.name.ja.length <= 7 ? c.card.name.ja : c.card.n
 const isNarrow = () => matchMedia("(max-width: 900px)").matches;
 // 予定の始まりの時刻（射場のピンを日付の順に並べるため）
 const eventSpanStart = (ev) => eventSpan(ev)?.start ?? NaN;
-
-// ---------- 起動画面のノイズ ----------
-function startNoise(canvas) {
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return () => {};
-  const ctx = canvas.getContext("2d");
-  const w = (canvas.width = 160);
-  const h = (canvas.height = 100);
-  const img = ctx.createImageData(w, h);
-  let running = true;
-  let last = 0;
-  const frame = (t) => {
-    if (!running) return;
-    if (t - last > 70) {
-      last = t;
-      for (let i = 0; i < img.data.length; i += 4) {
-        const v = (Math.random() * 255) | 0;
-        img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-        img.data[i + 3] = 255;
-      }
-      ctx.putImageData(img, 0, 0);
-    }
-    requestAnimationFrame(frame);
-  };
-  requestAnimationFrame(frame);
-  return () => (running = false);
-}
 
 // options：fetch に足す指定（あとから読む重いデータは priority: "low"。対応していないブラウザは無視する）
 // 起動の見張り（index.html）に、まだ届いていないものを知らせる
@@ -286,7 +259,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     .pathPointLat((p) => p[0])
     .pathPointLng((p) => p[1])
     .pathPointAlt((p) => p[2])
-    .pathColor((d) => d.color ?? "rgba(94, 242, 194, 0.38)")
+    .pathColor((d) => d.color ?? "rgba(243, 246, 252, 0.3)")
     .pathDashLength((d) => (d.solid ? 1 : 0.012))
     .pathDashGap((d) => (d.solid ? 0 : 0.008))
     .pathStroke((d) => (d.solid ? 1.2 : null))
@@ -987,6 +960,12 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   const speedCycle = $("#speed-cycle");
   const SPEEDS = speedButtons.map((b) => Number(b.dataset.speed));
   let dragging = false;
+  // つまみの左（いままで）を青く塗るための進み具合（CSS の --tl）
+  const paintSlider = () => {
+    const pct = ((Number(slider.value) - Number(slider.min)) / (Number(slider.max) - Number(slider.min))) * 100;
+    slider.style.setProperty("--tl", `${pct.toFixed(2)}%`);
+  };
+  paintSlider();
   const syncControls = () => {
     playBtn.dataset.playing = String(clock.playing);
     playBtn.setAttribute("aria-label", clock.playing ? "一時停止" : "再生");
@@ -997,6 +976,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   slider.addEventListener("input", () => {
     dragging = true;
     clock.jumpToOffset(Number(slider.value) * 60000);
+    paintSlider();
   });
   slider.addEventListener("change", () => {
     dragging = false;
@@ -1442,7 +1422,13 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       els.badge.textContent = live ? "LIVE" : durationJa(clock.offset());
       els.badge.dataset.paused = String(!live && !clock.playing);
       els.badge.setAttribute("aria-label", live ? "いまの時刻を表示中" : `現在に戻る（いまは ${els.badge.textContent}）`); // 「停止中」は CSS で足す（スマホでは再生ボタンの形で分かるので出さない）
-      if (!dragging) slider.value = String(Math.round(clock.offset() / 60000));
+      if (!dragging) {
+        const v = String(Math.round(clock.offset() / 60000));
+        if (slider.value !== v) {
+          slider.value = v;
+          paintSlider();
+        }
+      }
       for (const c of craft) {
         const n = listEl.querySelector(`[data-alt="${c.id}"]`);
         if (n) n.textContent = c.pos ? `約 ${Math.round(c.pos.altKm).toLocaleString("ja-JP")} km` : "--";
@@ -1476,7 +1462,6 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
 const FROM_TOUR = new URLSearchParams(location.search).get("from") === "artemis2";
 async function boot() {
   bootWatch.started = true;
-  const stopNoise = startNoise($("#noise"));
   const status = $("#boot-status");
   const startBtn = $("#start");
   let data;
@@ -1541,7 +1526,6 @@ async function boot() {
       bootEl.classList.add("leaving");
       setTimeout(() => {
         bootEl.hidden = true;
-        stopNoise();
         document.documentElement.classList.remove("from-tour");
       }, 650);
     });

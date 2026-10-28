@@ -29,12 +29,12 @@ export function speedText(km, v) {
 export const passedStop = (stops, p) => [...stops].reverse().find((s) => p >= Math.log10(s.km) - 0.02) ?? null;
 
 const COLORS = {
-  sky: "#050e1f",
+  sky: "#080c14",
   star: "228,236,247",
   text: "#e4ecf7",
   dim: "#8ea3c2",
-  mint: "#5ef2c2",
-  amber: "#ffb547",
+  mint: "#5c9dff", // 2026-10-28 の配色：青（名前は前のまま）
+  amber: "#f3f6fc", // 同：白（琥珀は警告だけに使う）
 };
 
 export function createFly(root, { stops: initialStops, reduceMotion = false, coarse = false, onPass = () => {} }) {

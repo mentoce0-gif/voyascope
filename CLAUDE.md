@@ -75,7 +75,7 @@ research/ の内容をカード化するときの手順：
 - コミットメッセージは日本語で、何をしたかが一目で分かるように書く
 - スキーマやアプリの変更はブランチを切ってPRにする（CIを通すため）。ドキュメントの軽微な修正は main に直接でもよい
 - 依存パッケージを増やすときは、理由をPRに書く
-- 見た目：配色は navy / amber / mint、フォントは Zen Kaku Gothic New（本文）と JetBrains Mono（計器表示）
+- 見た目：[`docs/design/visual-system.md`](docs/design/visual-system.md)（2026-10-28 に刷新）。黒に近い紺の背景・操作と選択は青・緑はライブだけ・琥珀は警告だけ。フォントは Zen Kaku Gothic New（本文）と JetBrains Mono（計器表示）
 
 ## タスク完了時の報告
 

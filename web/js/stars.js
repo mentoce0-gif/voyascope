@@ -24,7 +24,7 @@ const TINTS = [
   [255, 208, 170],
 ];
 
-export function starfieldDataUrl({ width = 4096, height = 2048, count = 9000, seed = 20261001, base = "#050d1f" } = {}) {
+export function starfieldDataUrl({ width = 4096, height = 2048, count = 9000, seed = 20261001, base = "#080c14" } = {}) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;

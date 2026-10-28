@@ -923,7 +923,7 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
   // 光：太陽の光らしい白い主光（影をつくる）と、弱い補助光。補助光はカメラについて回り、主光も「カメラから見て左上の前」の向きを保つ。
   // 主光の影は、見ている模型のまわりだけを測る（render で毎回置き直す）
   camera.add(new THREE.AmbientLight(0xc9d6e6, 0.12));
-  for (const [hex, inten, from] of [[0xffcf9a, 0.55, [5, 2, -4]], [0x5ef2c2, 0.12, [-6, -2, 1]]]) {
+  for (const [hex, inten, from] of [[0xffcf9a, 0.55, [5, 2, -4]], [0x5c9dff, 0.12, [-6, -2, 1]]]) {
     const L = new THREE.DirectionalLight(hex, inten);
     L.position.set(...from);
     camera.add(L);
@@ -939,7 +939,7 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
   // 1光日の輪（アンバー）
   const gate = new THREE.Group();
   {
-    const ringMat = flatMat(0xffb547, 0.95);
+    const ringMat = flatMat(0xf3f6fc, 0.95);
     gate.add(new THREE.Mesh(new THREE.TorusGeometry(1, 0.0075, 8, 220), ringMat));
     gate.add(new THREE.Mesh(new THREE.TorusGeometry(1.08, 0.003, 6, 220), ringMat));
     const ticks = [];
@@ -949,8 +949,8 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
     }
     const tg = new THREE.BufferGeometry();
     tg.setAttribute("position", new THREE.Float32BufferAttribute(ticks, 3));
-    gate.add(new THREE.LineSegments(tg, flatMat(0xffb547, 0.8)));
-    const halo = glowMesh(0xffb547, 0.1);
+    gate.add(new THREE.LineSegments(tg, flatMat(0xf3f6fc, 0.8)));
+    const halo = glowMesh(0x5c9dff, 0.1);
     halo.scale.setScalar(3.2);
     gate.add(halo);
     gate.userData.halo = halo;
@@ -1492,14 +1492,14 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
   function drawRuler(km) {
     const w = rulerW, c = rctx, y = 10, x0 = 1, x1 = w - 5, len = x1 - x0;
     c.clearRect(0, 0, w, 34);
-    c.strokeStyle = "rgba(94,242,194,0.35)";
+    c.strokeStyle = "rgba(92,157,255,0.35)";
     c.lineWidth = 1;
     c.beginPath();
     c.moveTo(x0, y + 0.5);
     c.lineTo(x1, y + 0.5);
     c.stroke();
     const step = niceStep(km), minor = step / 5;
-    c.strokeStyle = "rgba(94,242,194,0.28)";
+    c.strokeStyle = "rgba(92,157,255,0.28)";
     for (let k = 0; k * minor <= km * 1.0001 && k < 400; k++) {
       const x = Math.round(x0 + ((k * minor) / km) * len) + 0.5, major = k % 5 === 0;
       c.beginPath();
@@ -1510,14 +1510,14 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
     for (const pl of STOPS) {
       if (pl.km > km * 1.0001) continue;
       const x = x0 + (pl.km / km) * len;
-      c.fillStyle = pl.kind === "light-day" ? "#ffb547" : "#5ef2c2";
+      c.fillStyle = pl.kind === "light-day" ? "#f3f6fc" : "#5c9dff";
       c.shadowColor = c.fillStyle;
       c.shadowBlur = 6;
       c.fillRect(Math.round(x) - 1, y - 5, 2, 10);
       c.shadowBlur = 0;
     }
-    c.fillStyle = "#ffb547";
-    c.shadowColor = "rgba(255,181,71,0.6)";
+    c.fillStyle = "#f3f6fc";
+    c.shadowColor = "rgba(243,246,252,0.6)";
     c.shadowBlur = 8;
     c.beginPath();
     c.arc(x1, y + 0.5, 3.5, 0, Math.PI * 2);
@@ -1531,7 +1531,7 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
     c.textAlign = "right";
     c.fillText("現在地", x1 + 4, y + 12);
     c.textAlign = "center";
-    c.fillStyle = "rgba(94,242,194,0.85)";
+    c.fillStyle = "rgba(92,157,255,0.85)";
     c.fillText(`1目盛り＝${kmShortJa(minor, 2)}`, w / 2, y + 12);
   }
   function drawRear(km, alpha) {
@@ -1547,10 +1547,10 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
     bg.addColorStop(1, "rgba(5,14,31,0.92)");
     c.fillStyle = bg;
     c.fill();
-    c.strokeStyle = "rgba(94,242,194,0.45)";
+    c.strokeStyle = "rgba(92,157,255,0.45)";
     c.lineWidth = 1;
     c.stroke();
-    c.strokeStyle = "rgba(94,242,194,0.18)";
+    c.strokeStyle = "rgba(92,157,255,0.18)";
     for (const [a, b, d, e] of [[cx, cy - R + 4, cx, cy - R + 10], [cx, cy + R - 4, cx, cy + R - 10], [cx - R + 4, cy, cx - R + 10, cy], [cx + R - 4, cy, cx + R - 10, cy]]) {
       c.beginPath();
       c.moveTo(a, b);
