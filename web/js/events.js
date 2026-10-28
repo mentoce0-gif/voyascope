@@ -266,7 +266,7 @@ export function eventPanelHtml(ev, now, { flowHtml = null } = {}) {
   return `
     <header class="panel-head">
       <div>
-        <div class="panel-title"><span class="class-chip" style="--c:#5c9dff">${esc(chip)}</span><span class="amber">${esc(ev.title.ja)}</span></div>
+        <div class="panel-title"><span class="class-chip" style="--c:#5ef2c2">${esc(chip)}</span><span class="amber">${esc(ev.title.ja)}</span></div>
         <div class="panel-ja"><span class="panel-en">${esc(ev.title.en)}</span>　<span class="k nw">${esc(regionsText(ev))}</span></div>
       </div>
       <div class="panel-actions">
