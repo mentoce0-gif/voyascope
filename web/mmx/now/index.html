@@ -594,7 +594,10 @@ const helioObjs = [];
 {
   const hu = { ...route.uniforms, uMinS: { value: 0 } }; // ほかの値は道と同じものを使い、地球のそばを消す値だけ別に
   const pts = [], ps = [], lp = [], ls = [];
-  for (let i = 0; i <= 200 * k0; i++) { const sv = sSep + (sJoin - sSep) * i / (200 * k0); pts.push(...atHelio(sv).toArray()); ps.push(sv); }
+  // 点の間隔は、ほかの道の遠いところと同じくらい（約0.1）に。細かくしすぎると、重ね塗りで白く光り、通ってきた道のように見える（2026-10-28 オーナー：スマホで食い違って見えた）
+  let hl = 0; for (let k = 1; k <= k0; k++) hl += tr[k].distanceTo(tr[k - 1]);
+  const nDots = Math.max(8, Math.round(hl / 0.1));
+  for (let i = 0; i <= nDots; i++) { const sv = sSep + (sJoin - sSep) * i / nDots; pts.push(...atHelio(sv).toArray()); ps.push(sv); }
   for (let i = 0; i < 600; i++) { const a0 = sSep + (sJoin - sSep) * i / 600, a1 = sSep + (sJoin - sSep) * (i + 1) / 600; lp.push(...atHelio(a0).toArray(), ...atHelio(a1).toArray()); ls.push(a0, a1); }
   const pg = new THREE.BufferGeometry(); pg.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3)); pg.setAttribute("aS", new THREE.Float32BufferAttribute(ps, 1));
   const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(lp, 3)); lg.setAttribute("aS", new THREE.Float32BufferAttribute(ls, 1));
