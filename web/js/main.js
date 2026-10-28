@@ -30,6 +30,7 @@ import {
 import { pendingGreetings, greetingHtml, loadSeen, saveSeen } from "./greetings.js";
 import { activeMeteors, meteorHtml, meteorStoryHtml, radiantDirection, createStream } from "./meteors.js";
 import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
+import { count } from "./count.js";
 
 const COLORS = {
   navy: "#07142b",
@@ -594,6 +595,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   const worldSection = $("#world-section");
   // fromView：表示切替から呼ばれたとき（表示切替を呼び返さない）
   const showListFilter = (id, { fromView = false } = {}) => {
+    if (id === "tonight" && listFilter !== "tonight") count("tonight");
     listFilter = id;
     const tonight = id === "tonight";
     const planned = id === "planned";
@@ -1261,6 +1263,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     roomOpen = true;
     globe.pauseAnimation();
     far.open();
+    count("far");
     if (entry === "pushed") history.pushState({ far: true }, "", "#far");
   }
   // スマホの列の「遠くを見る」：地球へぐにゅっと寄ってから部屋を開く（動きを減らす設定ではすぐ開く）
@@ -1305,7 +1308,10 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   const deep = new URLSearchParams(location.search);
   const deepCraft = craft.find((c) => c.id === deep.get("craft"));
   const deepProbe = deep.get("probe");
-  if (deepCraft || deepProbe) history.replaceState(null, "", location.pathname);
+  if (deepCraft || deepProbe) {
+    history.replaceState(null, "", location.pathname);
+    count("from-missions");
+  }
   if (deepCraft) {
     select(deepCraft);
     setFollow(true);
@@ -1532,6 +1538,7 @@ async function boot() {
       // 押した手ごたえを先に描いてから、重い起動（地球の 3D）をする。押してから画面が変わるまで止まって見えないように（INP。2026-10-21 Cloudflare の計測）
       startBtn.disabled = true;
       $("#start-label").textContent = "起動中…";
+      if (!FROM_TOUR) count("start"); // ツアーから戻るときは自動で押すので数えない
       requestAnimationFrame(() => setTimeout(launch, 0));
     },
     { once: true },

@@ -173,12 +173,24 @@
 - AI の巡回プログラムの3つの分け方（Grok：Cloudflare ブログ 2026-07-01）・「Disallow AI Training」（2026-09-15）：今回は開いていない。robots.txt の方針（学習は断る）に関わるので、次に見るときに照合する
 - GoatCounter・Matomo・Plausible などの細かい条件、EU の GDPR・ePrivacy、米国の COPPA の原文（チャッピーも未確認）
 
-### 「このアプリについて」に足す文の案（**まだ足していない**。オーナーが決める。ルール5）
+### 「このアプリについて」の文（2026-10-28 オーナー OK・足した）
 
 > このサイトがどのくらい見られているかを知るために、Cloudflare Web Analytics を使っています。Cloudflare の説明では、Cookie は使わず、IP アドレスなどの個人の情報は取り除かれます。数はおおよその目安です。
 
-### 次の手（案。オーナーの OK のあとで）
+### 出来事の回数（2026-10-28 オーナー「やってみよう」・作った）
 
-1. 上の文を「このアプリについて」に足す
-2. Workers Analytics Engine で、人を見分けない出来事の数を数える：「観測を開始」・部屋を開いた（遠く・MMX・SKY）・「今夜」を開いた・「一言でわかる」から来た。送るのは出来事の名前と日付だけ（県・時刻の細かさ・端末の情報は送らない）。Worker の入口（`src/`）に小さな受け口を足す
-3. 英語版を出すときに、EU の訪問を数えるかを決める
+- しくみ：画面（`web/js/count.js` の `count(名前)`）→ `navigator.sendBeacon("/e", 名前)` → Worker（`src/lab-worker.js` の `/e`）→ Workers Analytics Engine のデータセット `voyascope_events`（`wrangler.jsonc` の `EVENTS`）。記録するのは**出来事の名前と時刻だけ**（`blobs: [名前]`）。IP アドレス・国・端末・県は記録しない。決まった名前のほかは捨てる。本番（voyascope.org）のときだけ送る
+- 数えるもの：`start`（観測を開始）・`far`（遠くを見る部屋）・`tonight`（今夜を開いた）・`from-missions`（一言でわかるから来た）・`mmx-now`・`sky`・`artemis2`（それぞれのページを開いた）。足すときは `count.js` の `EVENT_NAMES` に足す（Worker も同じ一覧を使う）
+- 無料の範囲：書き込み1日10万。超えた分は記録されないだけ（画面には何も起きない）。データは3か月残る
+- 見方（オーナー）：Cloudflare で「Account Analytics: Read」の API トークンを作り、次を実行する（`ACCOUNT_ID` は GitHub の Secrets の `CLOUDFLARE_ACCOUNT_ID` と同じ）
+
+```bash
+curl -s "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/analytics_engine/sql" -H "Authorization: Bearer $TOKEN" --data "SELECT blob1 AS name, SUM(_sample_interval) AS times FROM voyascope_events WHERE timestamp > NOW() - INTERVAL '7' DAY GROUP BY name ORDER BY times DESC"
+```
+
+- 気をつけること：Analytics Engine を使うのは、このアカウントで初めて。**マージのあとの最初の公開（deploy-cloudflare）が通るか見る**。通らなければ、Cloudflare のダッシュボードで Analytics Engine を有効にするか、`wrangler.jsonc` の `analytics_engine_datasets` を外して公開し直す（ほかの公開を止めないため）
+
+### 次の手
+
+1. 2週間ほど数を見て、「観測を開始」まで進む割合（`start` ÷ Web Analytics のトップのページビュー）を出す
+2. 英語版を出すときに、EU の訪問を数えるかを決める

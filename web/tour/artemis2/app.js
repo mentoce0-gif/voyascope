@@ -11,6 +11,9 @@ import {
 } from "./world.js";
 import { TARGETS, moonAxesAt } from "./lunar.js";
 import { MISSION, RESULTS } from "./mission.js";
+import { count } from "../../js/count.js";
+
+count("artemis2");
 
 const PLACES = (await fetch("moon-places.json").then((r) => r.json())).places;
 // 月面に降りたもの（NASA NSSDCA の一覧と、各機関の公式の発表。moon-landers.json のコメント）
