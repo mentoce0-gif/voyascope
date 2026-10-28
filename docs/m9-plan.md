@@ -139,26 +139,46 @@
 
 ## 7. アクセス計測（Cloudflare Web Analytics）の整理（2026-10-28）
 
-オーナー（2026-10-28）：「もう使っているが、VOYASCOPE の仕様上、正確な訪問数の判定が難しいと FB をもらった覚えがある。正確な手段があるなら、冒頭のページに文言を足して記録へ」
+オーナー（2026-10-28）：「もう使っているが、VOYASCOPE の仕様上、正確な訪問数の判定が難しいと FB をもらった覚えがある。正確な手段があるなら、冒頭のページに文言を足して記録へ」→ 新しい手がないか、チャッピー C39・Grok G5 で探した。下は Claude Code が公式ページで照合した結果（2026-10-28）。照合の記録の下書きは voyascope-research の `research/verification/2026-10-28-c39-g5.md` に置く（オーナーが置く）。
 
-**結論：正確な訪問数を出す手段はない**（どの方法でも、数え漏れか、数えすぎのどちらかが残る）。VOYASCOPE では「増えたか・減ったか」の目安として使うのがよい。
+### 結論
 
-以下は Claude の理解で、Cloudflare の公式の説明とはまだ照合していない（照合するならチャッピーに：何を集めるか・Cookie を使うか・「訪問」の数え方）。
+- **正確な人数を出す手段はない**（どの方法でも、数え漏れか数えすぎが残る）。Web Analytics の「訪問」は人数ではない
+- いちばん足りないのは「人数の精度」ではなく、**「観測を開始」を押したか・どの部屋を開いたか**が分からないこと。これは **Workers Analytics Engine** で、人を見分けない「出来事の数」として数えられる（無料の範囲・作る量は小さい）。作るかはオーナーが決める（ルール5）
+- 海外向けに気をつけること：**無料のドメインで自動で有効になった Web Analytics は、EU からの訪問を数えない設定が初期値**（下の表の5）。英語版で海外の反応を見るなら、EU を数えるかを決める（GDPR に関わるのでルール5）
 
-| 方法 | 数え漏れ | 数えすぎ |
+### 照合できた事実
+
+| # | 事実 | 出典（公式） |
 |---|---|---|
-| Web Analytics（いま。ページに小さな JavaScript が入り、開いたことを知らせる） | 広告ブロッカー・JavaScript が止まった画面・X などのアプリ内ブラウザで知らせが届かないとき | 少ない（JavaScript を動かす巡回プログラムは数えうる） |
-| Cloudflare の配信の記録（届いたリクエストの数） | ほぼない | 巡回プログラム・画像やデータの読み込みも数える。人の数ではない |
-| 自前の数え方（Worker で数える） | 同じ | 同じ。しかもサーバ側の仕組みが増える（「サーバを持たない」方針と当たる） |
+| 1 | 「訪問」は、リファラー（どこから来たか）がこのサイトと違うページビュー。1回の訪問に複数のページビューが入る。ページビューは HTML の成功した応答 | https://developers.cloudflare.com/web-analytics/data-metrics/high-level-metrics/ |
+| 2 | 自分で決めた出来事（カスタムイベント）は "Not yet"。見られるのは過去6か月。クエリ文字列（`?craft=` など）は記録しない。ビーコンは広告ブロッカーで止まる・通信の状況で欠ける | https://developers.cloudflare.com/web-analytics/faq/ |
+| 3 | 1ページのアプリは、Soft Navigations API・Navigation API・History API（pushState・popstate）で、道が変わるたびに数える（2026-08-20 更新）。hashchange の記述はない | https://developers.cloudflare.com/web-analytics/get-started/web-analytics-spa/ |
+| 4 | 2026-08-21 に数え方を改善。「ページビューと訪問の数が変わることがある」 | https://developers.cloudflare.com/changelog/post/2026-08-21-improved-soft-navigation-measurement-for-single-page-applications/ |
+| 5 | 無料のドメインは 2025-10-15 から自動で有効。**EU の訪問は除く（ダッシュボードで変えられる）**。Cookie・localStorage は使わない、IP アドレスなどの個人の情報はエッジで取り除く、IP・User Agent・フィンガープリントで人を追わない | https://blog.cloudflare.com/the-rum-diaries-enabling-web-analytics-by-default/ （2025-09-17） |
+| 6 | Workers Analytics Engine：保存は3か月、1回の呼び出しで250点まで。無料プランは書き込み1日10万・読み出し1日1万。いまは課金していない | https://developers.cloudflare.com/analytics/analytics-engine/limits/ ・ https://developers.cloudflare.com/analytics/analytics-engine/pricing/ |
+| 7 | 配信の記録（ゾーンの Analytics）は、全プランで30日以上見られるように（2026-10-02） | https://developers.cloudflare.com/changelog/post/2026-10-02-30-days-analytics-on-every-plan/ |
+| 8 | Counterscale：自分で置く・MIT・Cookie とフィンガープリントなし・無料の Workers で1日5万ページビューまで。出来事を数える機能はページに書かれていない | https://counterscale.dev/ |
+| 9 | 個人情報保護委員会：特定の個人との対応関係が排斥されている統計情報は「個人関連情報」に当たらない | https://www.ppc.go.jp/all_faq_index/faq2-q2-8/ |
 
-VOYASCOPE の仕様で、とくにずれやすいところ：
+### VOYASCOPE に当てはめると
 
-- 地球の画面は1ページのアプリなので、「観測を開始」を押したか・どの部屋を開いたかは数えられない（ページを開いた数だけ）
-- `mmx/now/`・`missions/`・`sky/` などは別のページとして数える。1人が何ページも見ると、ページの数は増える
-- 10/1〜21 の「米国 110」には巡回プログラムが混ざっていると見られる（`mmx-partners-study.md`）
+- 遠くを見る部屋を開くと `#far` を pushState している。表の3から、部屋を開くたびにページビューとして数えられている**かもしれない**（確かめていない）。だとすると、ページビューは人の動きより多めに出る
+- 10/1〜21 の「米国 110」を巡回プログラムと決めつけない（国の割合だけでは見分けられない。チャッピーの注意）
+- 「一言でわかる」からの `?craft=` は数えない（表の2）。どのリンクから来たかを知りたければ、別の手（Analytics Engine）が要る
 
-「このアプリについて」に足す文の案（**まだ足していない**。足すかはオーナーが決める。ルール5）：
+### 照合できなかったもの（使わない）
 
-> このサイトがどのくらい見られているかを知るために、Cloudflare Web Analytics を使っています。Cookie は使わず、あなたを見分ける情報は集めていません。数はおおよその目安です。
+- X の iOS アプリがリンクを先に読み込み、サイトの数がふくらむ話（Grok：The Verge 2025-11-07）：記事が開けず、X の公式の説明もない
+- AI の巡回プログラムの3つの分け方（Grok：Cloudflare ブログ 2026-07-01）・「Disallow AI Training」（2026-09-15）：今回は開いていない。robots.txt の方針（学習は断る）に関わるので、次に見るときに照合する
+- GoatCounter・Matomo・Plausible などの細かい条件、EU の GDPR・ePrivacy、米国の COPPA の原文（チャッピーも未確認）
 
-（「Cookie は使わず」「見分ける情報は集めていない」は Cloudflare の説明を照合してから書く）
+### 「このアプリについて」に足す文の案（**まだ足していない**。オーナーが決める。ルール5）
+
+> このサイトがどのくらい見られているかを知るために、Cloudflare Web Analytics を使っています。Cloudflare の説明では、Cookie は使わず、IP アドレスなどの個人の情報は取り除かれます。数はおおよその目安です。
+
+### 次の手（案。オーナーの OK のあとで）
+
+1. 上の文を「このアプリについて」に足す
+2. Workers Analytics Engine で、人を見分けない出来事の数を数える：「観測を開始」・部屋を開いた（遠く・MMX・SKY）・「今夜」を開いた・「一言でわかる」から来た。送るのは出来事の名前と日付だけ（県・時刻の細かさ・端末の情報は送らない）。Worker の入口（`src/`）に小さな受け口を足す
+3. 英語版を出すときに、EU の訪問を数えるかを決める
