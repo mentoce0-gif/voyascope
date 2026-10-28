@@ -2,7 +2,7 @@
 
 > **新しいチャットは、`CLAUDE.md` とこのファイルを読んでから始める。** チャットは目的ごとに1つ（例：「MMX 打ち上げ対応」「Cloudflare への切り替え」「チャッピーの報告の照合」）。
 > 区切りごとに Claude Code がこのファイルを更新する（古くなった行は消す）。日ごとの記録は [`changelog.md`](changelog.md)、全体の計画は [`roadmap.md`](roadmap.md)。
-> 最終更新：2026-10-27（日本のキューブサットの検討（案））
+> 最終更新：2026-10-28（MMX の「いまどこ」の直し：到着日・PC の全体の図・REPLAY・全体の図の道）
 
 ## 公開先とリポジトリ
 
@@ -22,6 +22,7 @@
 1. **MMX は打ち上げ・分離済み**（2026-10-20 4:41:03 打ち上げ、5:52ごろ分離。JAXA の打上げライブ中継で確認＝出典 https://www.youtube.com/watch?v=sZGyK9jfoy4）→ 段取りは [タスク020](tasks/020-mmx-after-launch.md)
    - 済み：出来事 `done`＋いってらっしゃい（10/27 まで）・MMX のカードを運用中・「一言でわかる」作り直し（PR #51・#54）
    - **いまどこ**（`web/mmx/now/`）：はじめて開くと航路のオープニング → 打ち上げから5日までは「MMX を追う」視点、そのあとは全体の図（`TRACK_DAYS`）。全体の図から、さっと払う（スワイプ）と「MMX を追う」へ（ゆっくりなぞると回す。戻るのはボタン。2026-10-25）。上の計器（X+経過・LIFTOFF〜MMX SEP〜NOW の弧・速さの推定 EST〈計画の軌道から〉・F10/H3-24L/MMX）、REPLAY（打ち上げ〜分離をスワイプで。打ち上げのはじめは種子島の正面から）、MISSION・ARCHIVE・SITE のリンク。計画の流れ（速度・高度・事象名）は `launch-plan.js`（改訂版の表2、C33）
+   - **10/27〜28 の直し**（PR #89・#90・#92）：到着日（仮）は打ち上げから300日後＝2027-08-15（ESA・CNES・Horizons の「2027年8月」の中ごろ。日は未公表）。PC（横に広い画面）の全体の図は、左の文字の列の右の空きに合わせて軌道の面を斜め（最大40°）から見る（`watchWide`）。REPLAY はマウスのホイールでも1段ずつ（PC の案内は「スクロールで次へ」）、最後から全体の図へは3.6秒でひと続きに引く。**全体の図の道は、太陽から見た本当の道**（打ち上げ〜地球のそばを離れるまでも route.json の点。MMX の模型・いまの地球と同じ座標）。地球のそばを誇張した模式の道は、打ち上げの日・MMX を追う画面・REPLAY だけ（全体の図に混ぜると、MMX が線から離れて見える）
    - **次**：JAXA の打上げ結果のお知らせが出たら、出来事・カード・挨拶の出典を中継から差し替える／脚・パドル展開の JAXA 発表が出たら、いまどこのただし書きを「展開を確認」に（C34：計画では分離後すぐ展開、模型は JAXA の航行イメージ図5 の形）／Horizons（−239）の説明で実際の追跡か確かめたら、距離・速度と「月までの約○倍」（案1）
    - 模型の段階（往路モジュールの切り離し＝2027年度の火星圏到着のあと、探査モジュール＝ダイモスのあと）は、JAXA の発表を確かめて切り替える（C33）
    - X の投稿の下書き：`voyascope-research` の `research/outreach/2026-10-12-x-mmx-drafts.md`（本番はオーナーが「私口調」で）
@@ -103,6 +104,7 @@
 - 依頼文は `prompts/src/` を直して `npm run build:prompts`（生成された `prompts/*.md` を直接直すと CI が落ちる）
 - `web/data/` は `curation/` から `npm run sync:web` で作る。CI と同じ確かめ：`npm run validate`・`npm test`・`node scripts/sync-web-data.mjs --check`・`node scripts/build-prompts.mjs --check`・`node scripts/check-size.mjs`
 - 新しい調査はチャッピーに頼む（依頼文は `prompts/chappy-research.md` から、そのタスクだけを抜き出して渡す）。報告が来たら `voyascope-research` の `research/chappy/` に保存 → 公式ページで照合して `research/verification/` に記録 → 確かめられたものだけ `curation/` へ
+- 「いまどこ」（`web/mmx/now/`）を Playwright で見るとき：この環境のブラウザでは画面のアニメーションが進まない（ずっと最初の場面のまま）。`window.watchAt(t)`・`trackAt`・`coastAt`・`filmGo(i)` を直接呼んで描かせてから撮る。ブラウザの拡大・縮小は、画面の大きさを 1/倍率 にして `deviceScaleFactor` を倍率にすると近い
 - ブラウザでの確認：Playwright（`createRequire('/opt/node-tools/node_modules/')`、Chromium は `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`、WebGL は SwiftShader）。アプリは「観測を開始」を押してから。この環境のブラウザは外の https を開けない（証明書）ので、公開先は curl で確かめる
 - ひまわり9号の軌道要素は、CelesTrak 側で 9/29 から新しくなっていない（静止衛星なので表示はほぼ同じ。足元の「軌道データ取得」は、いちばん古い日を出す）
 - 予告ページの旅のしおりと打ち上げの流れは、公式（プレスキット・MMX サイト・打上げ計画書）を照合したもの。`curation/` にはまだ入れていない
