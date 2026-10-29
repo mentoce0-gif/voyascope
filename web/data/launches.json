@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-29T13:01:52.317Z",
+  "fetched_at": "2026-10-29T22:45:52.845Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -52,7 +52,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-29T06:12:36Z",
+      "updated": "2026-10-29T18:34:20Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -169,7 +169,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-28T19:26:10Z",
+      "updated": "2026-10-29T17:31:04Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -325,7 +325,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-28T19:26:40Z",
+      "updated": "2026-10-29T17:31:03Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -431,6 +431,45 @@
         "position": {
           "lat": 45.996034,
           "lng": 63.564003
+        }
+      }
+    },
+    {
+      "id": "dff42a2e-f047-48d7-b260-3888d3a4fe33",
+      "net": "2026-11-26T20:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-26T21:30:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-29T21:51:22Z",
+      "rocket": {
+        "name": "Spectrum",
+        "full_name": "Spectrum"
+      },
+      "provider": {
+        "name": "Isar Aerospace",
+        "ja": null
+      },
+      "mission": {
+        "name": "AT-Astra and Others (Spectrum Flight 3)",
+        "placeholder": false,
+        "type": "Technology",
+        "type_ja": "技術の試験",
+        "orbit": "Sun-Synchronous Orbit",
+        "orbit_ja": "太陽同期軌道"
+      },
+      "site": {
+        "location_id": 161,
+        "name": "Andøya Spaceport",
+        "ja": null,
+        "short": null,
+        "pad": "Orbital Launch Pad",
+        "country": "NOR",
+        "country_ja": "ノルウェー",
+        "position": {
+          "lat": 69.1084,
+          "lng": 15.5895
         }
       }
     }
