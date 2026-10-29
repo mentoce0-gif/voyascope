@@ -77,7 +77,7 @@
 ## オーナーの判断待ち
 
 - **M13「ニュースの次に開く」の進め方**：目安の数字・最初の段（N0・N1）・計り方（Search Console／Cloudflare Web Analytics はルール5）・増やす主題の範囲 → [`news-next-plan.md`](news-next-plan.md) の 6.
-- **NASA Space Apps Challenge 2026（11/14〜15）に出るか**（2026-10-20 オーナーが提案）：公式のチーム作りの案内では、作業は大会の開始（11/14 9:00 現地）から。いまの VOYASCOPE をそのまま出すのは趣旨に合わない → 出るなら48時間で新しく作る小品（M13 の試し）。成果物の権利・オープンソースの要否・既存コードの扱いは参加規約（https://www.spaceappschallenge.org/legal/）で確かめる（ルール5。2026-10-20 は公式サイトが応答せず未確認）。課題の発表は 10/28
+- **NASA Space Apps Challenge 2026（11/14〜15）に出るか**（2026-10-20 オーナーが提案。10/29 に課題を確認）：課題は14件（公式サイトはこの環境から読めず、参加チームの公開リポジトリと記事から集めた）。M13 に近いのは「Abandoned but not Forgotten」（月・火星に残した NASA の機材の物語。初心者・若者の部あり。アルテミス2号のページの「着陸」と主題が重なる）と「CLPS Lunar Mission Browser」（月の着陸地点と時期をくらべる。中級・上級）。作業は大会の開始から・既存のコードはそのまま出さない。規約（https://www.spaceappschallenge.org/legal/）は、提出物を NASA が表示・複製・配布してよいこと、過去の版ではオリジナル部分を OSI のオープンソース（指定がなければ Apache 2.0）に → 本体（All rights reserved）とは別のリポジトリで（ルール5。2026年版の権利の節は未確認）
 - **中継の埋め込み**（ルール5）：いまはリンクだけ。判断材料は [`roadmap.md`](roadmap.md) の「オーナーの判断待ち」
 - **旧リポジトリの自動更新を止める**（オーナーの操作）：`voyascope-archive` の Settings → Actions → General →「Disable actions」。止まるまで、6時間ごとに失敗の知らせが届き、データを二重に取りに行く
 - **連絡の受け口**：`contact@voyascope.org` のような転送アドレス（Cloudflare の Email Routing）、GitHub の Issue テンプレート（誤りの報告・要望）、中高生向けのフォーム（個人情報の扱いはルール5）
