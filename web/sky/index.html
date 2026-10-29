@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SKY OBSERVER（試験版）— VOYASCOPE</title>
+  <!-- SKY OBSERVER（試験版）：空を見る（流星群・ISS）。オーナーと ChatGPT の素案 v0.4 をもとに、本物の計算・向きのセンサーにつないだもの。
+       試作の部屋 02 から、2026-10-21 に鍵なしの /sky/ へ（オーナー：オリオン座流星群の夜に「試してみて」と投稿する）。試験版のあいだは検索に出さない -->
+  <meta name="robots" content="noindex">
+  <meta name="description" content="スマホをかざして、流星群の放射点や ISS の方向を探す。流れた数を数えて、観測ログを X に。VOYASCOPE の試験版（非公式ファンメイド作品）。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://voyascope.org/sky/">
+  <meta property="og:image" content="https://voyascope.org/assets/earth/hero-1600.webp">
+  <meta property="og:title" content="SKY OBSERVER（試験版）— VOYASCOPE">
+  <meta property="og:description" content="スマホをかざして、流星群の放射点や ISS を探す。数えて、観測ログを X に（非公式ファンメイド作品）。">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#050e1f">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+  <link rel="stylesheet" href="sky.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <main class="app" id="app">
+    <div class="sky-bg" aria-hidden="true"></div>
+    <header class="top" id="top"></header>
+    <div class="page" id="page"><p class="loading mono">LOADING…</p></div>
+    <div class="toast" id="toast" role="status" hidden></div>
+    <nav class="tabs" id="tabs" aria-label="メインメニュー"></nav>
+    <div class="sheet-layer" id="sheet" hidden></div>
+  </main>
+</body>
+</html>

@@ -4,7 +4,7 @@
 
 | ファイル | 相手 | タスク |
 |---|---|---|
-| `chappy-research.md` | チャッピー（ChatGPT） | C1〜C30：一次ソース調査（出典URL＋原文の引用つき） |
+| `chappy-research.md` | チャッピー（ChatGPT） | C1〜C38：一次ソース調査（出典URL＋原文の引用つき） |
 | `grok-news.md` | Grok | G1〜G4：速報（公式URLのあり・なしを区別）。G4 は「次の出来事」の延期・日付の変更 |
 | `codex-far-room-visual.md` | Codex（ほかの AI でも可） | 遠くを見る部屋の見た目の試作（1回だけ。Claude Code の試作と同じ条件で比べる。事実は依頼文の固定データだけを使わせる） |
 | `codex-far-room-models.md` | Codex | 遠くを見る部屋の探査機の模型（10機ぶん・9つ）。three.js のコードで形を作る。公式の3Dファイルは使わない（C18 の結果、2026-10-04） |

@@ -3,8 +3,8 @@
   "id": "qzs-6",
   "source": "https://sys.qzss.go.jp/dod/constellation.html",
   "source_label": "みちびきウェブサイト「衛星運用状況」",
-  "page_updated": "2026-10-18",
-  "fetched_at": "2026-10-19T13:15:56.341Z",
+  "page_updated": "2026-10-24",
+  "fetched_at": "2026-10-29T05:48:28.608Z",
   "name": "QZS06",
   "svn": "007",
   "services": [
@@ -51,5 +51,15 @@
       "naqu": null
     }
   ],
-  "notices": []
+  "notices": [
+    {
+      "number": "2026260",
+      "type": "PNT_FCSTDV",
+      "kind": "forecast",
+      "svn": "007",
+      "subject": "SVN007 (PRN200) FORECAST OUTAGE JDAY 303/1859 - JDAY 307/1859",
+      "start": "2026-10-30T18:59:00.000Z",
+      "stop": "2026-11-03T18:59:00.000Z"
+    }
+  ]
 }

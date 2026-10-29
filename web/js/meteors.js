@@ -3,7 +3,7 @@
 import { gstime, eciToEcf, ecfToLookAngles } from "../vendor/satellite.min.js";
 import { sunEci, dir8, SUN_BELOW } from "./passes.js";
 import { eventSpan, whenText } from "./events.js";
-import { esc } from "./format.js";
+import { esc, obsRadar } from "./format.js";
 
 const DEG = 180 / Math.PI;
 const FAR_KM = 1e12; // 星のように遠い方向として扱う
@@ -66,14 +66,16 @@ export function meteorNight(radiant, observer, now) {
   return { samples, best, dark: { start: samples[0].date, end: samples.at(-1).date }, moonLit: moonLit(mid), moonUp };
 }
 
-// 出す期間：出現期間（active。日本時間の日付）があればそのあいだ。なければ極大・見ごろの前の日から、一覧から消えるまで
+// 出す期間：出現期間（active。日本時間の日付）のはじめ（なければ極大・見ごろの前の日）から、極大・見ごろの次の日の終わり（予定の一覧から消えるとき）まで。
+// 出現期間がそれより早く終わるなら、そこまで（2026-10-25 オーナー：極大が過ぎた流星群は出し続けない）
 const JST = 9 * HOUR;
 const jstDayStart = (ymd) => Date.parse(`${ymd}T00:00:00Z`) - JST;
 export function meteorWindow(ev) {
   const a = ev.active?.value;
-  if (a) return { start: jstDayStart(a.from), end: jstDayStart(a.to) + 24 * HOUR };
   const span = eventSpan(ev);
-  return span && { start: span.start - 24 * HOUR, end: span.end };
+  if (!span) return a ? { start: jstDayStart(a.from), end: jstDayStart(a.to) + 24 * HOUR } : null;
+  if (!a) return { start: span.start - 24 * HOUR, end: span.end };
+  return { start: jstDayStart(a.from), end: Math.min(jstDayStart(a.to) + 24 * HOUR, span.end) };
 }
 export function activeMeteors(events, now) {
   const t = now.getTime();
@@ -150,7 +152,7 @@ const credit = (url) => `<span class="k">出典：<a href="${esc(url)}" target="
 
 export function meteorHtml(ev, observer, prefName, now) {
   const name = ev.title.ja;
-  const head = `<h3 class="meteor-title">${esc(name)}</h3>
+  const head = `<div class="card-head"><h3 class="meteor-title">${esc(name)}</h3></div>
     <p class="small">${esc(ev.when_label ?? "極大")}：${esc(whenText(ev, now, { full: true }))}${ev.when.note ? `<span class="k">（${esc(ev.when.note)}）</span>` : ""}　${credit(ev.when.source)}</p>
     ${ev.rate?.value ? `<p class="small">流れ星の数：${esc(ev.rate.value)}　${credit(ev.rate.source)}</p>` : ""}`;
   if (!observer) return `<section class="meteor">${head}<p class="k small">県を選ぶと、放射点がどの方角・高さにあるかが出ます。</p></section>`;
@@ -163,7 +165,7 @@ export function meteorHtml(ev, observer, prefName, now) {
   return `<section class="meteor">
     ${head}
     <p class="small">${esc(prefName)}から：${radiantWords(night)}</p>
-    ${radiantChart(night)}
+    ${obsRadar(radiantChart(night), "meteor", name)}
     <p class="k small">放射点の位置の${credit(ev.radiant.source).replace('<span class="k">', "<span>")}</p>
     <p class="small">${moonText}</p>
     ${ev.parent?.orbit?.value || ev.constellation ? `<button type="button" class="btn mono meteor-story-btn" data-meteor-story="${esc(ev.id)}">しくみの図を見る</button>` : ""}
@@ -382,6 +384,8 @@ export function orbitSvg(ev, date) {
 const LABELS = {
   "draconids-2026": { center: { ra: 250, dec: 60 }, left: [1], up: [2, 3, 4, 5], down: [0, 1] }, // ラスタバン・エルタニンは放射点の下に寄せる
   "orionids-2026": { left: [0, 3], up: [0, 1, 2], hide: [5] },
+  "leonids-2026": { left: [5], up: [3, 4], hide: [2] }, // アダフェラは放射点のすぐそば（名前は放射点の文字と重なる）
+  "geminids-2026": { left: [0], hide: [5, 7] }, // プロプス・メクブダは隣の星と近すぎる
 };
 // 放射点のある星座のあたりの星の図（空を見上げた向き：上が北、左が東）
 export function constellationSvg(ev) {

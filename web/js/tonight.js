@@ -1,6 +1,7 @@
 // 今夜・頭の上：県を選ぶと、ISS が見える通過の時刻・方角・空の図を出す
-import { esc } from "./format.js";
+import { esc, obsRadar } from "./format.js";
 import { dir8, heightWord } from "./passes.js";
+import { SKIES, obsLogText, postUrl } from "./obslog.js";
 
 const TZ = "Asia/Tokyo"; // 県単位の予報なので日本時間で出す
 const STORAGE_KEY = "voyascope.prefecture";
@@ -80,6 +81,26 @@ export function renderPrefSelect(select, prefectures, current) {
     prefectures.map((p) => `<option value="${p.code}"${p.code === current ? " selected" : ""}>${esc(p.name)}</option>`).join("");
 }
 
+// 観測ログ（見えた通過を X に貼れる形に）。通過が始まってからだけ投稿・コピーできる
+export function obsLogHtml(pass, now, sky) {
+  if (!pass) return "";
+  const ready = pass.start <= now;
+  const text = obsLogText(pass, sky);
+  return `<div class="obslog" aria-labelledby="obslog-title">
+    <h3 id="obslog-title" class="obslog-title mono">OBS-LOG <span class="k small">${esc(whenWord(pass.start, now))} ${esc(clockWord(pass.start))}の通過</span></h3>
+    <div class="obslog-sky" role="group" aria-label="空の様子">${SKIES.map(
+      (s) => `<button type="button" class="btn small" aria-pressed="${s.id === sky}" data-sky="${s.id}"><span aria-hidden="true">${s.mark}</span> ${s.label}</button>`,
+    ).join("")}</div>
+    <pre class="obslog-text mono" data-obslog-text>${esc(text)}</pre>
+    <div class="obslog-actions">
+      ${ready
+        ? `<a class="btn" href="${esc(postUrl(text))}" target="_blank" rel="noopener">X で投稿</a><button type="button" class="btn" data-obslog-copy>コピー</button>`
+        : `<p class="k small">通過が始まったら、投稿・コピーできます。</p>`}
+    </div>
+    <p class="k small">写真は、載せたい人だけ投稿の画面で添えてください。場所（県）は入れていません。</p>
+  </div>`;
+}
+
 export function renderTonight(el, { pref, passes, now, jumpable }) {
   if (!pref) {
     el.innerHTML = `<p class="k small">県を選ぶと、ISS が見える時刻と方角が出ます。位置情報は使いません（選んだ県はこのブラウザにだけ保存します）。</p>`;
@@ -93,10 +114,10 @@ export function renderTonight(el, { pref, passes, now, jumpable }) {
   const minutes = Math.max(1, Math.round((p.end - p.start) / 60000));
   el.innerHTML = `
     <div class="pass-main">
-      <div class="pass-when">${esc(whenWord(p.start, now))}　<span class="pass-time mono">${esc(clockWord(p.start))}</span></div>
+      <div class="card-head"><div class="pass-when">${esc(whenWord(p.start, now))}　<span class="pass-time mono">${esc(clockWord(p.start))}</span></div></div>
       <div class="pass-dir"><strong>${dir8(p.startAz)}</strong>から<strong>${dir8(p.endAz)}</strong>へ　<span class="k">約${minutes}分</span></div>
       <div class="pass-height k">いちばん高いとき：${heightWord(p.maxEl)}（${dir8(p.maxAz)}の空、約${Math.round(p.maxEl)}°）</div>
-      ${skyChart(p)}
+      ${obsRadar(skyChart(p), "iss", "ISS")}
       ${jumpable(p) ? `<button type="button" class="btn mono pass-jump" data-jump="0">この時刻の地球を見る</button>` : ""}
     </div>
     ${

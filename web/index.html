@@ -21,6 +21,8 @@
   <script>if (/[?&]from=artemis2(&|$)/.test(location.search)) document.documentElement.classList.add("from-tour");</script>
   <!-- 3D 表示のライブラリ（約500KB）は最初に読み始める。実行は js/main.js がする（ほかの読み込みを止めないため） -->
   <link rel="preload" href="vendor/globe.gl.min.js" as="script">
+  <!-- 起動画面でいちばん大きく見える絵（スマホは地球の画像・PC はロゴ）を、3D のライブラリより先に届ける（LCP。2026-10-21 Cloudflare の計測で、遅い回線だとロゴまで約10秒） -->
+  <link rel="preload" href="assets/earth/hero-1600.webp" as="image" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- フォントは画面の表示を止めずに読む。届くまでは端末の文字で出し、届いたら入れ替わる -->
@@ -36,7 +38,7 @@
     <div class="hero-bg" aria-hidden="true"></div>
     <canvas id="noise" aria-hidden="true"></canvas>
     <div class="hero-main">
-      <h1 class="logo"><img src="assets/brand/logo-1200.webp" alt="VOYASCOPE" width="1200" height="207"></h1>
+      <h1 class="logo"><img src="assets/brand/logo-1200.webp" srcset="assets/brand/logo-600.webp 600w, assets/brand/logo-1200.webp 1200w" sizes="min(80vw, 560px)" alt="VOYASCOPE" width="1200" height="207" fetchpriority="high"></h1>
       <p class="subtitle">今、宇宙を旅する者たち。</p>
       <button id="start" class="btn btn-primary hero-start" type="button" disabled>
         <span id="start-label">読み込み中…</span><span class="chev" aria-hidden="true">›</span>

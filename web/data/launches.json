@@ -2,57 +2,57 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-20T04:51:41.885Z",
+  "fetched_at": "2026-10-29T22:45:52.845Z",
   "days_ahead": 45,
   "launches": [
     {
-      "id": "3b430f81-0ff1-4d85-8a1a-cef0de326198",
-      "net": "2026-10-20T10:30:00.000Z",
-      "precision": "sec",
-      "window_end": "2026-10-20T11:30:00.000Z",
+      "id": "20d5676e-111b-40e3-8923-b218c3665ca2",
+      "net": "2026-10-30T18:21:00.000Z",
+      "precision": "min",
+      "window_end": "2026-10-30T21:00:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-19T23:34:44Z",
+      "updated": "2026-10-29T12:40:42Z",
       "rocket": {
-        "name": "Falcon 9",
-        "full_name": "Falcon 9 Block 5"
+        "name": "GSLV Mk II",
+        "full_name": "GSLV Mk. II"
       },
       "provider": {
-        "name": "SpaceX",
-        "ja": "スペースX"
+        "name": "Indian Space Research Organization",
+        "ja": "インド宇宙研究機関（ISRO）"
       },
       "mission": {
-        "name": "Bandwagon 5 (Dedicated Mid-Inclination Rideshare)",
+        "name": "IRNSS-1L (NVS-03)",
         "placeholder": false,
-        "type": "Dedicated Rideshare",
-        "type_ja": "相乗り（複数の衛星）",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
+        "type": "Navigation",
+        "type_ja": "測位",
+        "orbit": "Geostationary Transfer Orbit",
+        "orbit_ja": "静止トランスファー軌道"
       },
       "site": {
-        "location_id": 12,
-        "name": "Cape Canaveral SFS, FL, USA",
-        "ja": "ケープカナベラル宇宙軍基地",
-        "short": "ケープカナベラル",
-        "pad": "Space Launch Complex 40",
-        "country": "USA",
-        "country_ja": "アメリカ",
+        "location_id": 14,
+        "name": "Satish Dhawan Space Centre, India",
+        "ja": "サティシュ・ダワン宇宙センター",
+        "short": "スリハリコタ",
+        "pad": "Satish Dhawan Space Centre Second Launch Pad",
+        "country": "IND",
+        "country_ja": "インド",
         "position": {
-          "lat": 28.56194122,
-          "lng": -80.57735736
+          "lat": 13.7199,
+          "lng": 80.2304
         }
       }
     },
     {
-      "id": "f6af629d-39b5-4f86-bc0c-f8776444a858",
-      "net": "2026-10-20T23:10:02.000Z",
-      "precision": "sec",
-      "window_end": "2026-10-21T02:14:00.000Z",
+      "id": "57ce0a39-d035-4f16-a418-bd6108f78199",
+      "net": "2026-10-31T03:48:00.000Z",
+      "precision": "min",
+      "window_end": "2026-10-31T07:48:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-20T04:38:09Z",
+      "updated": "2026-10-29T18:34:20Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -62,7 +62,7 @@
         "ja": "スペースX"
       },
       "mission": {
-        "name": "Starlink Group 15-15",
+        "name": "Starlink Group 15-18",
         "placeholder": false,
         "type": "Communications",
         "type_ja": "通信",
@@ -84,17 +84,173 @@
       }
     },
     {
-      "id": "c6f8b6b0-6bae-460a-99bb-c12a3d29effd",
-      "net": "2026-10-21T03:35:00.000Z",
+      "id": "426bd2a5-02dd-4fbd-9f4d-2b8439c3a1ff",
+      "net": "2026-11-02T08:45:00.000Z",
       "precision": "hour",
-      "window_end": "2026-10-21T03:50:00.000Z",
+      "window_end": "2026-11-02T18:15:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-28T18:45:02Z",
+      "rocket": {
+        "name": "Electron",
+        "full_name": "Electron"
+      },
+      "provider": {
+        "name": "Rocket Lab",
+        "ja": "ロケットラボ"
+      },
+      "mission": {
+        "name": "The Sea God Surveys (iQPS Launch 9)",
+        "placeholder": false,
+        "type": "Earth Science",
+        "type_ja": "地球観測",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 10,
+        "name": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
+        "ja": "マヒア半島の発射場",
+        "short": "マヒア",
+        "pad": "Unknown Pad",
+        "country": "NZL",
+        "country_ja": "ニュージーランド",
+        "position": {
+          "lat": -39.260881,
+          "lng": 177.865826
+        }
+      }
+    },
+    {
+      "id": "f3f201cd-0ff9-4ff7-9aaa-1d22c399c75a",
+      "net": "2026-11-03T00:10:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-03T00:33:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-15T21:06:22Z",
+      "updated": "2026-10-28T19:41:36Z",
       "rocket": {
-        "name": "Ceres-1S",
-        "full_name": "Ceres-1S"
+        "name": "Kinetica 2",
+        "full_name": "Kinetica 2"
+      },
+      "provider": {
+        "name": "CAS Space",
+        "ja": null
+      },
+      "mission": {
+        "name": "SpaceSail Polar Group TBD?",
+        "placeholder": false,
+        "type": "Communications",
+        "type_ja": "通信",
+        "orbit": "Polar Orbit",
+        "orbit_ja": "極軌道"
+      },
+      "site": {
+        "location_id": 17,
+        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
+        "ja": "酒泉衛星発射センター",
+        "short": "酒泉",
+        "pad": "Launch Area 140",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 40.81748,
+          "lng": 100.21939
+        }
+      }
+    },
+    {
+      "id": "54d471e8-695c-4fa7-a3cf-dbd8b389e8ae",
+      "net": "2026-11-03T01:42:00.000Z",
+      "precision": "min",
+      "window_end": "2026-11-03T05:42:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-29T17:31:04Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "USSF-432",
+        "placeholder": false,
+        "type": "Government/Top Secret",
+        "type_ja": "政府（内容は非公開）",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 11,
+        "name": "Vandenberg SFB, CA, USA",
+        "ja": "ヴァンデンバーグ宇宙軍基地",
+        "short": "ヴァンデンバーグ",
+        "pad": "Space Launch Complex 4E",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 34.632,
+          "lng": -120.611
+        }
+      }
+    },
+    {
+      "id": "9e27a1ed-e81a-4918-b32b-0380cf3a9f8f",
+      "net": "2026-11-04T05:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-04T09:00:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-28T19:12:07Z",
+      "rocket": {
+        "name": "Mir",
+        "full_name": "Mir"
+      },
+      "provider": {
+        "name": "Agency for Defense Development",
+        "ja": null
+      },
+      "mission": {
+        "name": "Demo Flight",
+        "placeholder": false,
+        "type": "Test Flight",
+        "type_ja": "試験飛行",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 3,
+        "name": "Sea Launch",
+        "ja": null,
+        "short": null,
+        "pad": "ADD Offshore launch platform",
+        "country": "KOR",
+        "country_ja": "韓国",
+        "position": {
+          "lat": 33.216667,
+          "lng": 126.366667
+        }
+      }
+    },
+    {
+      "id": "e91d1da2-819b-4523-95bf-39ac7daa871d",
+      "net": "2026-11-04T21:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-05T02:00:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-28T19:41:41Z",
+      "rocket": {
+        "name": "Ceres-2",
+        "full_name": "Ceres-2"
       },
       "provider": {
         "name": "Galactic Energy",
@@ -109,184 +265,67 @@
         "orbit_ja": null
       },
       "site": {
-        "location_id": 185,
-        "name": "Haiyang Oriental Spaceport",
-        "ja": null,
-        "short": null,
-        "pad": "Rizhao offshore launch location",
+        "location_id": 17,
+        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
+        "ja": "酒泉衛星発射センター",
+        "short": "酒泉",
+        "pad": "Launch Area 95A",
         "country": "CHN",
         "country_ja": "中国",
         "position": {
-          "lat": 35.391667,
-          "lng": 119.598667
+          "lat": 40.969117,
+          "lng": 100.343333
         }
       }
     },
     {
-      "id": "7766f3bb-674c-4c71-b986-963bd633fcfe",
-      "net": "2026-10-21T07:00:00.000Z",
-      "precision": "min",
-      "window_end": "2026-10-21T08:45:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-19T22:25:48Z",
-      "rocket": {
-        "name": "Electron",
-        "full_name": "Electron"
-      },
-      "provider": {
-        "name": "Rocket Lab",
-        "ja": "ロケットラボ"
-      },
-      "mission": {
-        "name": "We're Not Hawking Around (3x HawkEye 360)",
-        "placeholder": false,
-        "type": "Earth Science",
-        "type_ja": "地球観測",
-        "orbit": "Sun-Synchronous Orbit",
-        "orbit_ja": "太陽同期軌道"
-      },
-      "site": {
-        "location_id": 10,
-        "name": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
-        "ja": "マヒア半島の発射場",
-        "short": "マヒア",
-        "pad": "Rocket Lab Launch Complex 1A",
-        "country": "NZL",
-        "country_ja": "ニュージーランド",
-        "position": {
-          "lat": -39.262833,
-          "lng": 177.864469
-        }
-      }
-    },
-    {
-      "id": "6b95bcc8-1f88-4539-84fe-f63630138766",
-      "net": "2026-10-22T02:57:00.000Z",
+      "id": "a2423132-f965-423f-8b03-6891b775dc54",
+      "net": "2026-11-05T20:00:00.000Z",
       "precision": "hour",
-      "window_end": "2026-10-22T03:15:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-16T11:48:38Z",
+      "window_end": "2026-11-05T23:00:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-26T23:22:44Z",
       "rocket": {
-        "name": "Long March 8A",
-        "full_name": "Long March 8A"
+        "name": "Long March 12",
+        "full_name": "Long March 12"
       },
       "provider": {
         "name": "China Aerospace Science and Technology Corporation",
         "ja": "中国航天科技集団（CASC）"
       },
       "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
+        "name": "SatNet LEO Group TBD?",
+        "placeholder": false,
+        "type": "Communications",
+        "type_ja": "通信",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
       },
       "site": {
         "location_id": 8,
         "name": "Wenchang Space Launch Site, People's Republic of China",
         "ja": "文昌宇宙発射場",
         "short": "文昌",
-        "pad": "Commercial LC-1",
+        "pad": "Commercial LC-2",
         "country": "CHN",
         "country_ja": "中国",
         "position": {
-          "lat": 19.597275,
-          "lng": 110.930753
+          "lat": 19.59755,
+          "lng": 110.936481
         }
       }
     },
     {
-      "id": "9648124f-8568-46d2-86d7-4b4d6f12187f",
-      "net": "2026-10-23T10:15:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-10-23T10:28:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-17T14:12:16Z",
-      "rocket": {
-        "name": "Long March 6A",
-        "full_name": "Long March 6A"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 19,
-        "name": "Taiyuan Satellite Launch Center, People's Republic of China",
-        "ja": "太原衛星発射センター",
-        "short": "太原",
-        "pad": "Launch Complex 9A",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 38.8583,
-          "lng": 111.5802
-        }
-      }
-    },
-    {
-      "id": "3621085f-deae-4f89-bd54-c0f96ee44421",
-      "net": "2026-10-23T19:25:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-10-23T19:39:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-17T13:59:34Z",
-      "rocket": {
-        "name": "Long March 4B",
-        "full_name": "Long March 4B"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 17,
-        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
-        "ja": "酒泉衛星発射センター",
-        "short": "酒泉",
-        "pad": "Launch Area 94 (SLS-2 / 603)",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 40.960482,
-          "lng": 100.298059
-        }
-      }
-    },
-    {
-      "id": "e2886a96-5ce9-4f45-872f-4e25a00be837",
-      "net": "2026-10-24T05:29:00.000Z",
+      "id": "3cdb9dee-b5cb-406c-bbd1-06a219930fb7",
+      "net": "2026-11-06T02:21:00.000Z",
       "precision": "min",
-      "window_end": "2026-10-24T09:29:00.000Z",
+      "window_end": "2026-11-06T06:21:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-16T16:02:46Z",
+      "updated": "2026-10-29T17:31:03Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -296,7 +335,7 @@
         "ja": "スペースX"
       },
       "mission": {
-        "name": "Starlink Group 15-16",
+        "name": "Starlink Group 15-21",
         "placeholder": false,
         "type": "Communications",
         "type_ja": "通信",
@@ -318,14 +357,14 @@
       }
     },
     {
-      "id": "57ce0a39-d035-4f16-a418-bd6108f78199",
-      "net": "2026-10-28T04:31:00.000Z",
+      "id": "6aa7b90b-e5ed-45d8-a52e-04fbf399d178",
+      "net": "2026-11-10T03:03:00.000Z",
       "precision": "min",
-      "window_end": "2026-10-28T08:31:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-19T14:24:48Z",
+      "window_end": "2026-11-10T07:03:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-28T18:57:38Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -335,10 +374,10 @@
         "ja": "スペースX"
       },
       "mission": {
-        "name": "Starlink Group 15-18",
+        "name": "USSF-xxx (\"R-5\")",
         "placeholder": false,
-        "type": "Communications",
-        "type_ja": "通信",
+        "type": "Government/Top Secret",
+        "type_ja": "政府（内容は非公開）",
         "orbit": "Low Earth Orbit",
         "orbit_ja": "低軌道"
       },
@@ -392,6 +431,45 @@
         "position": {
           "lat": 45.996034,
           "lng": 63.564003
+        }
+      }
+    },
+    {
+      "id": "dff42a2e-f047-48d7-b260-3888d3a4fe33",
+      "net": "2026-11-26T20:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-26T21:30:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-29T21:51:22Z",
+      "rocket": {
+        "name": "Spectrum",
+        "full_name": "Spectrum"
+      },
+      "provider": {
+        "name": "Isar Aerospace",
+        "ja": null
+      },
+      "mission": {
+        "name": "AT-Astra and Others (Spectrum Flight 3)",
+        "placeholder": false,
+        "type": "Technology",
+        "type_ja": "技術の試験",
+        "orbit": "Sun-Synchronous Orbit",
+        "orbit_ja": "太陽同期軌道"
+      },
+      "site": {
+        "location_id": 161,
+        "name": "Andøya Spaceport",
+        "ja": null,
+        "short": null,
+        "pad": "Orbital Launch Pad",
+        "country": "NOR",
+        "country_ja": "ノルウェー",
+        "position": {
+          "lat": 69.1084,
+          "lng": 15.5895
         }
       }
     }

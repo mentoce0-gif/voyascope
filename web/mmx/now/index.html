@@ -158,6 +158,15 @@
   body.tm-watch .tm-row { display: flex; } body.tm-watch .tm-alt-q, body.tm-watch .tm-plan { display: none; } body.tm-watch .tm-est { display: inline; }
   .film-hint { margin-top: 10px; font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .2em; color: var(--amber); pointer-events: auto; cursor: pointer; animation: hint-up 1.6s ease-in-out infinite; }
   .film-hint b { font-size: 16px; }
+  /* PC など横に広い画面（2026-10-23 オーナー）：計器・字幕・REPLAY・リンクを左の幅 460px の列にまとめる（弧の文字が横に伸びない） */
+  @media (min-width: 700px) {
+    .tm { right: auto; width: 440px; }
+    body.nl-on .cap { right: auto; width: 300px; }
+    .replay-big { right: auto; left: 330px; }
+    .nowlinks { left: 14px; right: auto; width: 440px; margin: 0; }
+    body.pre .links { left: 16px; right: auto; width: 440px; margin: 0; }
+    .note { right: auto; max-width: 460px; }
+  }
   .warp-vignette { position: fixed; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 46%, transparent 40%, rgba(255, 181, 71, 0.1) 72%, rgba(5, 14, 31, 0.85) 100%); }
 </style>
 </head>
@@ -182,7 +191,7 @@
     <div class="tm-meta"><span>FLIGHT<b>F10</b></span><span>TYPE<b>H3-24L</b></span><span>PAYLOAD<b>MMX</b></span></div>
   </div>
   <div class="cap" aria-live="polite"><div class="k" id="capk"></div><div class="t" id="capt"></div><div class="s" id="caps"></div></div>
-  <button type="button" class="replay-big" id="replay-big" hidden aria-label="打ち上げから いまの位置までをふり返る（スワイプで進む）"><svg class="ri" viewBox="0 0 16 12" aria-hidden="true"><path d="M8 1 2 6l6 5zM15 1 9 6l6 5z"/></svg><span class="rb-en">REPLAY</span><span class="rb-ja">打ち上げから<br>いまの位置まで</span></button>
+  <button type="button" class="replay-big" id="replay-big" hidden aria-label="打ち上げから いまの位置までをふり返る（スワイプ・スクロール・→キーで進む）"><svg class="ri" viewBox="0 0 16 12" aria-hidden="true"><path d="M8 1 2 6l6 5zM15 1 9 6l6 5z"/></svg><span class="rb-en">REPLAY</span><span class="rb-ja">打ち上げから<br>いまの位置まで</span></button>
   <nav class="nowlinks" id="nowlinks" hidden aria-label="公式のページ">
     <a class="nl" href="https://www.mmx.jaxa.jp/mission/" target="_blank" rel="noopener" aria-label="MMX のミッション（JAXA）"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c3 2.5 4.5 6 4.5 10l-2 4h-5l-2-4C7.5 8 9 4.5 12 2z"/><circle cx="12" cy="9.5" r="1.6"/><path d="M9.5 16l-3 3 .5-4M14.5 16l3 3-.5-4M11 19.5l1 2.5 1-2.5"/></svg><span class="tx"><span class="ce">MISSION</span><small>ミッション</small></span><span class="chev" aria-hidden="true">›</span></a>
     <a class="nl arc" href="https://www.youtube.com/watch?v=sZGyK9jfoy4" target="_blank" rel="noopener" aria-label="打上げライブ中継のアーカイブ（JAXA の YouTube）"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.2v5.6l4.6-2.8z"/></svg><span class="tx"><span class="ce">ARCHIVE</span><small>公式配信<wbr>アーカイブ</small></span><span class="chev" aria-hidden="true">›</span></a>
@@ -203,7 +212,7 @@
       <a class="xbar xtag" href="https://x.com/search?q=%23MMX&amp;f=live" target="_blank" rel="noopener" aria-label="X で「#MMX」の新しい投稿を見る（X のページが開きます）"><span class="xm">𝕏</span><span class="xt"><span class="ce">#MMX</span><small>みんなの投稿</small></span></a>
     </div>
   </nav>
-  <details class="note" id="note"><summary><span class="ni" aria-hidden="true">i</span>模式図・出典・非公式のファンメイド作品<span class="nc" aria-hidden="true">＋</span></summary><div class="note-body">模式図<wbr>（位置は計算・到着日は仮・<wbr>大きさは実際の比ではない）。<wbr>打ち上げ後の位置は、<wbr>公式で確かめてから出す。<wbr>出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">ISS の高さ（NASA）</a>・<wbr><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。<wbr>MMX の形は、JAXA の<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">航行イメージ（計画書 図5）</a>（計画）にもとづく。<wbr>速さ（EST）は、計画の軌道から計算した太陽に対する速さの推定。<wbr>非公式のファンメイド作品</div></details>
+  <details class="note" id="note"><summary><span class="ni" aria-hidden="true">i</span>模式図・出典・非公式のファンメイド作品<span class="nc" aria-hidden="true">＋</span></summary><div class="note-body">模式図<wbr>（位置は計算・到着日は仮〈<a href="https://cnes.fr/projets/mmx/en-details" target="_blank" rel="noopener">CNES</a> の「2027年8月」の中ごろに置いた〉・<wbr>大きさは実際の比ではない）。<wbr>打ち上げ後の位置は、<wbr>公式で確かめてから出す。<wbr>出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">ISS の高さ（NASA）</a>・<wbr><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。<wbr>MMX の形は、JAXA の<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">航行イメージ（計画書 図5）</a>（計画）にもとづく。<wbr>速さ（EST）は、計画の軌道から計算した太陽に対する速さの推定。<wbr>非公式のファンメイド作品</div></details>
   <div class="tag" id="tag-tane">種子島</div>
   <div class="tag" id="tag-mmx">MMX</div>
   <div class="tag amber" id="tag-h3">H3ロケット10号機（MMX を搭載）</div>
@@ -291,10 +300,17 @@ const streak = (() => {
 })();
 
 // ---------- 太陽系（模式。大きさ・距離は実際の比ではない） ----------
-// 打ち上げ日の地球と、約1年弱後（仮に330日後）の火星の位置（astronomy-engine）と、その2点を結ぶ軌道（ランベルトの解）。
+// 打ち上げ日の地球と、約1年弱後（仮に300日後＝2027年8月中旬。到着の月は ESA・CNES・Horizons の「2027年8月」。2026-10-27 に330日から直した）の火星の位置（astronomy-engine）と、その2点を結ぶ軌道（ランベルトの解）。
 // 計算は scratchpad の route.mjs。1 AU = 10。黄道面を水平に
 const [RT, EVENTS] = await Promise.all([fetch("route.json").then((r) => r.json()), fetch("../../data/events.json", { cache: "no-cache" }).then((r) => r.json())]);
 const EV = EVENTS.events.find((e) => e.id === "mmx-launch");
+// 地球からの距離：JPL Horizons の計算値（週に1回取った表。JAXA の軌道。2026-10-21 オーナー）。表がない・期間の外なら、計画の軌道からの推定
+const HZ = await fetch("../../data/horizons.json", { cache: "no-cache" }).then((r) => r.json()).then((h) => (h.probes?.mmx ? { ...h.probes.mmx, step: h.step_hours * 3600000 } : null)).catch(() => null);
+const hzKm = (d) => { if (!HZ) return null; const x = (d.getTime() - Date.parse(HZ.start)) / HZ.step, i = Math.floor(x); if (i < 0 || i >= HZ.km.length - 1) return null; return HZ.km[i] + (HZ.km[i + 1] - HZ.km[i]) * (x - i); };
+if (HZ) { // ただし書きに Horizons の出典（SSD の希望の形）と、軌道のもとのデータ（説明に書かれた機関）
+  const dl = new Date(HZ.downloaded), y = dl.getUTCFullYear(), m = dl.toLocaleString("en-US", { month: "long", timeZone: "UTC" }), dd = dl.getUTCDate();
+  document.querySelector(".note-body").insertAdjacentHTML("beforeend", `<br>地球からの距離：Solar System Dynamics. (Downloaded ${y}, ${m} ${dd}). <a href="https://ssd.jpl.nasa.gov/horizons/" target="_blank" rel="noopener">Horizons System</a>. https://ssd.jpl.nasa.gov（軌道のもとのデータは JAXA）`);
+}
 const ISS_KM = await fetch("../../data/cards/iss.json").then((r) => r.json()).then((c) => c.stats?.altitude_km?.value ?? 0).catch(() => 0);
 const NOW = new Date();
 const PH = EV ? mmxPhase(EV, NOW) : { phase: "before", launchAt: Date.parse(RT.launch) };
@@ -324,8 +340,11 @@ const subA = (a, b) => a.map((v, i) => v - b[i]), addA = (a, b) => a.map((v, i) 
 // いまの地球から MMX まで・月までの距離（km。MMX は計画の軌道からの推定）
 function nearNow(d = new Date()) {
   const days = (d.getTime() - Date.parse(RT.launch)) / 864e5, mH = mmxHelioAU(days), eH = helioAU("Earth", d), mG = moonGeoAU(d);
-  const toE = subA(eH, mH), toM = subA(addA(eH, mG), mH);
-  return { eH, mH, toE, toM, dE: lenA(toE) * AU_KM0, dM: lenA(toM) * AU_KM0, moonEarth: lenA(mG) * AU_KM0 };
+  let toE = subA(eH, mH);
+  const hk = hzKm(d); // Horizons の距離があれば、方向は計画の軌道のまま、距離を合わせる
+  if (hk) toE = toE.map((x) => x * (hk / AU_KM0) / lenA(toE));
+  const toM = addA(toE, mG);
+  return { eH, mH: subA(eH, toE), toE, toM, dE: lenA(toE) * AU_KM0, dM: lenA(toM) * AU_KM0, moonEarth: lenA(mG) * AU_KM0, hz: !!hk };
 }
 
 // 太陽
@@ -511,6 +530,7 @@ for (let d = 0; d < L; ) { const s = d / L; const p = at(s); dots.push(...p.toAr
 const dg = new THREE.BufferGeometry();
 dg.setAttribute("position", new THREE.Float32BufferAttribute(dots, 3));
 dg.setAttribute("aS", new THREE.Float32BufferAttribute(ss, 1));
+const routeLineMats = []; // 光の筋の線の材質（全体の図の太陽から見た道にも、同じ見た目を使う）
 const route = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   uniforms: { uReveal: { value: 0 }, uMMX: { value: 0.16 }, uFront: { value: 0.16 }, uTime: { value: 0 }, uPx: { value: devicePixelRatio }, uPulse: { value: -1 }, uMinS: { value: 0 } },
@@ -543,12 +563,12 @@ const routeObj = new THREE.Points(dg, route); scene.add(routeObj);
   const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(lp, 3)); lg.setAttribute("aS", new THREE.Float32BufferAttribute(ls, 1));
   for (const w of [0, 1, 2]) {
     const m = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: route.uniforms,
-      vertexShader: `attribute float aS; uniform float uReveal, uMMX, uFront, uPulse; varying float vLit, vHead, vPast, vPulse, vPlan; void main(){ vPulse = exp(-pow((aS - uPulse) * 70., 2.)) + .4 * exp(-pow((aS - uPulse + .03) * 25., 2.)) * step(aS, uPulse); vPlan = step(uMMX, aS);
+      vertexShader: `attribute float aS; uniform float uReveal, uMMX, uFront, uPulse, uMinS; varying float vLit, vHead, vPast, vPulse, vPlan, vMin; void main(){ vMin = step(uMinS, aS); vPulse = exp(-pow((aS - uPulse) * 70., 2.)) + .4 * exp(-pow((aS - uPulse + .03) * 25., 2.)) * step(aS, uPulse); vPlan = step(uMMX, aS);
         vPast = step(aS, uMMX) * step(aS, uReveal); vLit = step(uMMX, aS) * step(aS, uFront); vHead = vLit * exp(-(uFront - aS) * 40.);
         vec3 p = position + vec3(0., ${(w * 0.012).toFixed(3)}, 0.);
         gl_Position = projectionMatrix*modelViewMatrix*vec4(p,1.); }`,
-      fragmentShader: `varying float vLit, vHead, vPast, vPulse, vPlan; void main(){ vec3 c = mix(vec3(.37,.95,.76), vec3(1.,.74,.32), max(vHead, vPulse * vPlan)); gl_FragColor = vec4(c, .12 + .55 * vPast + (.75 * vLit + .4 * vHead + vPulse) ${w ? "* .5" : ""}); }` });
-    scene.add(new THREE.LineSegments(lg, m));
+      fragmentShader: `varying float vLit, vHead, vPast, vPulse, vPlan, vMin; void main(){ vec3 c = mix(vec3(.37,.95,.76), vec3(1.,.74,.32), max(vHead, vPulse * vPlan)); gl_FragColor = vec4(c, (.12 + .55 * vPast + (.75 * vLit + .4 * vHead + vPulse) ${w ? "* .5" : ""}) * vMin); }` });
+    scene.add(new THREE.LineSegments(lg, m)); routeLineMats.push(m);
   }
 }
 
@@ -563,6 +583,28 @@ pinLift(false);
 // ---------- MMX（アプリの模型） ----------
 // いまどこ：打ち上げを公式で確かめるまでは種子島（推測で打ち上がったと描かない）。確かめたあとは、計画の軌道の上を日数で進める
 const sJoin = sOf(join);
+// 全体の図の、打ち上げから地球のそばを離れるまでの道（2026-10-28 オーナー：PC で拡大・縮小すると、MMX が軌道の絵から離れて見える）。
+// 上の道は、打ち上げの日の地球を止めて、地球のそばを大きく誇張して描いた模式（打ち上げの日・MMX を追う画面のため）。全体の図では、それを消して、
+// 太陽から見た本当の道（route.json の計画の軌道の点。MMX・いまの地球と同じ座標）をつなぐ。aS は sMMX と同じ対応（打ち上げ sSep 〜 合流 sJoin）にして、
+// 実績・計画の色分けと、流れる光を、そのまま続けて使う
+const helioS = (k) => lerp(sSep, sJoin, k / Math.max(1, k0));
+const atHelio = (s) => { const k = Math.max(0, Math.min(k0, (s - sSep) / Math.max(1e-9, sJoin - sSep) * k0)), i = Math.min(k0 - 1, Math.floor(k)); return tr[i].clone().lerp(tr[i + 1], k - i); };
+const atView = (s) => (viewMode === "overview" && s < sJoin ? atHelio(s) : at(s)); // 全体の図で、光の先端を置くところ
+const helioObjs = [];
+{
+  const hu = { ...route.uniforms, uMinS: { value: 0 } }; // ほかの値は道と同じものを使い、地球のそばを消す値だけ別に
+  const pts = [], ps = [], lp = [], ls = [];
+  // 点の間隔は、ほかの道の遠いところと同じくらい（約0.1）に。細かくしすぎると、重ね塗りで白く光り、通ってきた道のように見える（2026-10-28 オーナー：スマホで食い違って見えた）
+  let hl = 0; for (let k = 1; k <= k0; k++) hl += tr[k].distanceTo(tr[k - 1]);
+  const nDots = Math.max(8, Math.round(hl / 0.1));
+  for (let i = 0; i <= nDots; i++) { const sv = sSep + (sJoin - sSep) * i / nDots; pts.push(...atHelio(sv).toArray()); ps.push(sv); }
+  for (let i = 0; i < 600; i++) { const a0 = sSep + (sJoin - sSep) * i / 600, a1 = sSep + (sJoin - sSep) * (i + 1) / 600; lp.push(...atHelio(a0).toArray(), ...atHelio(a1).toArray()); ls.push(a0, a1); }
+  const pg = new THREE.BufferGeometry(); pg.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3)); pg.setAttribute("aS", new THREE.Float32BufferAttribute(ps, 1));
+  const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(lp, 3)); lg.setAttribute("aS", new THREE.Float32BufferAttribute(ls, 1));
+  helioObjs.push(new THREE.Points(pg, Object.assign(route.clone(), { uniforms: hu })));
+  for (const m of routeLineMats) helioObjs.push(new THREE.LineSegments(lg, Object.assign(m.clone(), { uniforms: hu })));
+  for (const o of helioObjs) { o.visible = false; scene.add(o); }
+}
 const sMMX = (() => {
   if (!FLYING) return 0;
   const f = transferProgress(PH.days, RT.tof);              // 0〜1（打ち上げ〜火星に着く日〈仮〉）
@@ -579,7 +621,7 @@ mmxHolder.position.copy(mmxPos);
 mmxHolder.scale.setScalar(MMX_S);
 mmxHolder.lookAt(mmxPos.clone().add(mmxDir));
 mmx.rotation.set(0.3, 0.6, 0.15);
-const mmxGlow = glow(0x5ef2c2, 0.7, mmxPos); mmxGlow.uniforms.uA.value = 0.0;
+const mmxGlow = glow(0x5ef2c2, 0.7, mmxPos); mmxGlow.uniforms.uA.value = 0.0; const mmxGlowBoard = billboards[billboards.length - 1];
 // MMX の影：太陽の光が MMX 自身に落とす影（まわりだけを測る）
 // 模型を小さく置くので、しわの凹凸も同じ割合で弱める（そのままだとざらついて見える）
 const bumpDone = new Set();
@@ -783,7 +825,20 @@ const comet = glow(0xffffff, 1.1, V(0, 0, 0)); comet.uniforms.uA.value = 0;
 const watchCenter = earthPos.clone().add(marsPos).multiplyScalar(0.12);
 const R_FIT = 17;
 const watchH = () => { const half = Math.tan((42 / 2) * Math.PI / 180) * Math.min(1, W / H); return R_FIT / half; };
-const watchCam = { get pos() { return watchCenter.clone().add(V(0, watchH(), watchH() * 0.18)); }, get look() { return watchCenter.clone(); } };
+// PC など横に広い画面（2026-10-27 オーナー：スマホの縮尺に近く、左右の余白が目立つ）：文字の列（左 460px）の右の空きに合わせて、
+// 軌道の面を斜めから見る（円が横長の楕円になる）。横の空きいっぱいに火星の軌道が入る距離にする
+const WIDE_COL = 460;
+const watchWide = () => {
+  if (W < 700 || W / H < 1.15) return null;
+  const tan = Math.tan((42 / 2) * Math.PI / 180), wf = W - WIDE_COL;
+  const tilt = Math.acos(Math.min(1, Math.max(Math.cos(40 * Math.PI / 180), H / wf))); // 楕円の縦横比 ≒ 空きの縦横比（傾きは40°まで）
+  const d = 1.1 * Math.max(R_FIT * H / (wf * tan), R_FIT * Math.cos(tilt) / tan);
+  return { tilt, d };
+};
+const watchCam = {
+  get pos() { const w = watchWide(); return w ? watchCenter.clone().add(V(0, w.d * Math.cos(w.tilt), w.d * Math.sin(w.tilt))) : watchCenter.clone().add(V(0, watchH(), watchH() * 0.18)); },
+  get look() { return watchCenter.clone(); }
+};
 // ---------- 打ち上げ前：種子島に立つ H3 ロケットを、ゆっくり回りながら見る ----------
 function padAt(t, lt = -1) {
   nowObjs("plan");
@@ -890,7 +945,7 @@ const view = { yaw: 0, pitch: 0, zoom: 1 };
   });
   const up = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch0 = 0; };
   cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
-  cv.addEventListener("wheel", (e) => { if (!PRE) view.zoom = Math.max(0.5, Math.min(2.2, view.zoom * (1 + e.deltaY * 0.001))); }, { passive: true });
+  cv.addEventListener("wheel", (e) => { if (!PRE && !film) view.zoom = Math.max(0.5, Math.min(2.2, view.zoom * (1 + e.deltaY * 0.001))); }, { passive: true });
 }
 
 // ---------- 撮影用（2026-10-20 オーナー。撮り終えたら消す）：⏪ で、発射から MMX の分離までをスワイプで1つずつ ----------
@@ -904,13 +959,14 @@ const filmBtn = document.getElementById("replay"), replayBig = document.getEleme
 const nowEl = () => Date.now() - PH.launchAt;
 const REPLAY_HTML = '<svg class="ri" viewBox="0 0 16 12" aria-hidden="true"><path d="M8 1 2 6l6 5zM15 1 9 6l6 5z"/></svg>REPLAY', NOW_HTML = '<i class="nd" aria-hidden="true"></i>NOW';
 filmBtn.innerHTML = NOW_HTML; filmBtn.setAttribute("aria-label", "いまの位置に戻る");
-const filmHint = document.createElement("div"); filmHint.className = "film-hint"; filmHint.hidden = true; filmHint.innerHTML = "スワイプで次へ <b>›</b>"; document.querySelector(".cap").append(filmHint); // 字幕の下に（重ならないように）
+const FINE = matchMedia("(hover: hover) and (pointer: fine)").matches, GO = FINE ? "スクロール" : "スワイプ"; // マウスの画面では「スクロール」（ホイールで進む）
+const filmHint = document.createElement("div"); filmHint.className = "film-hint"; filmHint.hidden = true; filmHint.innerHTML = `${GO}で次へ <b>›</b>`; document.querySelector(".cap").append(filmHint); // 字幕の下に（重ならないように）
 const filmGo = (i) => {
   if (i >= FILM_STEPS.length) { if (film) blendFrom = { pos: camera.position.clone(), look: coastLook.clone(), up: camera.up.clone(), t0: performance.now() }; film = null; filmHint.hidden = true; capCache = ""; tmKey = ""; nowLinksSync(); return; }
   const from = film ? simEl() : FILM_STEPS[0];
   if (i === 0) filmIntro = performance.now(); // 撮影のはじめは、種子島の正面から
   const to = FILM_STEPS[i] < 0 ? nowEl() : FILM_STEPS[i];
-  film = { i, from, to, t0: performance.now(), ms: FILM_STEPS[i] < 0 ? 2600 : 1600 }; filmHint.hidden = false; filmHint.innerHTML = i === FILM_STEPS.length - 1 ? "スワイプで いまの MMX へ <b>›</b>" : "スワイプで次へ <b>›</b>"; capCache = ""; tmKey = ""; nowLinksSync();
+  film = { i, from, to, t0: performance.now(), ms: FILM_STEPS[i] < 0 ? 2600 : 1600 }; filmHint.hidden = false; filmHint.innerHTML = i === FILM_STEPS.length - 1 ? `${GO}で いまの MMX へ <b>›</b>` : `${GO}で次へ <b>›</b>`; capCache = ""; tmKey = ""; nowLinksSync();
 };
 filmBtn.addEventListener("click", () => film && filmGo(FILM_STEPS.length));
 replayBig.addEventListener("click", () => filmGo(0));
@@ -919,6 +975,16 @@ replayBig.addEventListener("click", () => filmGo(0));
   addEventListener("touchstart", (e) => { if (film && e.touches.length === 1 && !e.target.closest("a,button")) { fx = e.touches[0].clientX; fy = e.touches[0].clientY; } }, { passive: true });
   addEventListener("touchend", (e) => { if (fx == null) return; const dx = e.changedTouches[0].clientX - fx, dy = e.changedTouches[0].clientY - fy; fx = fy = null; if (Math.abs(dx) > 40 || Math.abs(dy) > 40) filmGo(film.i + 1); });
   addEventListener("keydown", (e) => { if (film && (e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === " ")) filmGo(film.i + 1); });
+  // PC：マウスのホイール（トラックパッドの2本指）でも、スワイプと同じく次へ（2026-10-27 オーナー）。
+  // 1回のひと回しで1つだけ進むように、量をためて、進んだら少し待つ（トラックパッドの惰性で飛ばない）
+  let wsum = 0, wlock = 0;
+  addEventListener("wheel", (e) => {
+    if (!film) { wsum = 0; return; }
+    const now = performance.now();
+    if (now < wlock) { wlock = Math.max(wlock, now + 250); return; } // 惰性のあいだは待ち続ける
+    wsum += Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+    if (Math.abs(wsum) >= 60) { wsum = 0; wlock = now + 450; filmGo(film.i + 1); }
+  }, { passive: true });
   filmHint.addEventListener("click", () => film && filmGo(film.i + 1));
 }
 window.filmGo = filmGo;
@@ -996,7 +1062,9 @@ if (coastNow()) { tagH3.textContent = "H3＋MMX"; document.querySelector(".circ.
 const tagMarsNow = document.getElementById("tag-marsnow"), tagMoon = document.getElementById("tag-moon");
 let allLines = null;
 let watchMMX = V(0, 0, 0);
+let viewMode = "plan";
 function nowObjs(mode) {
+  viewMode = mode;
   if (camera.view?.enabled) camera.clearViewOffset();
   if (mode !== "overview") mmxHolder.position.copy(mmxPos);
   if (!allLines) { allLines = []; scene.traverse((o) => { if (o.isLineSegments || o.isLine) allLines.push(o); }); } // "plan"（打ち上げ前・打ち上げの日・オープニング）／"overview"／"track"
@@ -1004,6 +1072,8 @@ function nowObjs(mode) {
   earthNow.visible = mode !== "plan"; moonLocal.visible = mode === "track"; marsNow.visible = mode === "overview";
   route.uniforms.uMinS.value = mode === "overview" ? sJoin : 0;
   for (const o of allLines) o.visible = mode !== "track"; // MMX のそばでは、太陽系の大きさの線（公転の線など）を出さない
+  for (const o of helioObjs) o.visible = mode === "overview";
+  if (mode !== "overview") mmxGlowBoard.position.copy(mmxPos);
   if (mode === "plan") { tagMarsNow.style.opacity = 0; tagMoon.style.opacity = 0; tags.mars.textContent = "火星"; }
 }
 function watchAt(t) {
@@ -1018,16 +1088,35 @@ function watchAt(t) {
   hudAt(FLYING ? "watch" : "off", Date.now() - PH.launchAt);
   camera.fov = 42; camera.updateProjectionMatrix();
   camera.position.copy(watchCam.pos).add(V(Math.sin(t * 0.2) * 0.6, 0, Math.cos(t * 0.17) * 0.6)); camera.lookAt(watchCam.look);
-  if (FLYING) { const free = freeOffset(); camera.position.sub(watchCam.look).multiplyScalar(Math.min(1.5, Math.max(1, 300 / free))).add(watchCam.look); } // 空きが狭い画面では少し引く
+  if (FLYING) { const free = freeOffset("overview"); camera.position.sub(watchCam.look).multiplyScalar(Math.min(1.5, Math.max(1, 300 / free))).add(watchCam.look); } // 空きが狭い画面では少し引く
+  // REPLAY の最後（いまの MMX へ）から全体の図へ：地球のそばの画角から、ひと続きで引いていく（2026-10-27 オーナー：もっと自然に）。
+  // 距離は対数で縮め（寄りから引きへ一定の速さに見える）、模式の大きな地球は、いまの地球の小さな印の大きさと場所へ縮みながら移る
+  let grow = 1; // MMX の模型は、引いていくあいだに大きくする（寄りの画角でいきなり大きく出ないように）
+  if (blendFrom) {
+    const k0 = Math.min(1, (performance.now() - blendFrom.t0) / 3600), k = k0 * k0 * (3 - 2 * k0);
+    grow = Math.max(0.03, k * k);
+    const endLook = watchCam.look, endPos = camera.position.clone();
+    const look = blendFrom.look.clone().lerp(endLook, k);
+    const d0 = Math.max(1e-3, blendFrom.pos.distanceTo(blendFrom.look)), d1 = endPos.distanceTo(endLook);
+    const dir = blendFrom.pos.clone().sub(blendFrom.look).normalize().lerp(endPos.clone().sub(endLook).normalize(), k).normalize();
+    camera.position.copy(look).add(dir.multiplyScalar(d0 * Math.pow(d1 / d0, k)));
+    camera.up.copy(blendFrom.up).lerp(V(0, 1, 0), k).normalize(); camera.lookAt(look); camera.up.set(0, 1, 0);
+    if (camera.view?.enabled) { camera.view.offsetX *= k; camera.view.offsetY *= k; camera.updateProjectionMatrix(); } // 絵を右へ寄せるのも少しずつ
+    earth.visible = k0 < 1; earthNow.visible = k0 >= 1;
+    earth.position.lerpVectors(earthPos, earthNow.position, k); earth.scale.setScalar(1 + (earthNow.scale.x / RE - 1) * k);
+    atm.uniforms.uA.value = 0.45 * (1 - k); route.uniforms.uMinS.value = sJoin * k; // 地球のそばの道は、引くにつれて消える
+    if (k0 >= 1) { blendFrom = null; earth.position.copy(earthPos); earth.scale.setScalar(1); }
+  }
   document.getElementById("vig").style.opacity = 0; streak.uniforms.uA.value = 0;
   route.uniforms.uReveal.value = sMMX; route.uniforms.uFront.value = sMMX;
   const PERIOD = 5, RUN = 3.2, ph = t % PERIOD;
   route.uniforms.uPulse.value = ph < RUN ? -0.05 + (ph / RUN) * 1.1 : -1;
-  mmxHolder.visible = true; h3.visible = false; padLight.visible = false; mmxHolder.scale.setScalar(FLYING ? 0.9 : 0.35); mmx.rotation.y = 0.6 + t * 0.25;
+  mmxHolder.visible = true; h3.visible = false; padLight.visible = false; mmxHolder.scale.setScalar((FLYING ? 0.9 : 0.35) * grow); mmx.rotation.y = 0.6 + t * 0.25;
   // 光が MMX を通るとき、MMX の灯りが強まる
   const pass = Math.exp(-Math.pow((route.uniforms.uPulse.value - sMMX) * 30, 2));
   const up = route.uniforms.uPulse.value;
-  if (up >= 0 && up <= 1) { billboards.find((b) => b.material === comet).position.copy(at(up)); comet.uniforms.uC.value.set(up < sMMX ? 0x9ff7d8 : 0xffc76b); comet.uniforms.uA.value = 0.95; comet.uniforms.uS.value = 1.6; } else comet.uniforms.uA.value = 0;
+  if (up >= 0 && up <= 1) { billboards.find((b) => b.material === comet).position.copy(atView(up)); comet.uniforms.uC.value.set(up < sMMX ? 0x9ff7d8 : 0xffc76b); comet.uniforms.uA.value = 0.95; comet.uniforms.uS.value = 1.6; } else comet.uniforms.uA.value = 0;
+  mmxGlowBoard.position.copy(watchMMX); // MMX の光は、模型のいるところに（地球のそばの模式の道の上ではなく）
   mmxGlow.uniforms.uS.value = 2.4; mmxGlow.uniforms.uA.value = 0.55 + 0.45 * pass;
   pinRing.uniforms.uA.value = 0; pinGlow.uniforms.uA.value = 0.6; pinGlow.uniforms.uS.value = 0.12; place(tagH3, pinWorld, 0);
   phobosOrbit.uniforms.uA.value = 0.2; phobosGlow.uniforms.uA.value = Math.exp(-Math.pow((route.uniforms.uPulse.value - 1) * 20, 2)); phobosGlow.uniforms.uS.value = 1.2;
@@ -1047,7 +1136,8 @@ const TRACK_DAYS = 5;
 let track = FLYING && PH.days < TRACK_DAYS;
 const tagEarth = document.getElementById("tag-earth");
 // 上の計器と下の字幕のあいだ（空いているところ）の真ん中に、絵の中心を寄せる。空きの高さを返す
-function freeOffset() {
+function freeOffset(kind) {
+  if (W >= 700) { const wide = kind === "overview" && watchWide(); camera.setViewOffset(W, H, -(wide ? WIDE_COL / 2 : Math.min(240, W * 0.16)), wide ? H * 0.06 : 0, W, H); return Math.max(260, H * 0.8); } // 横に広い画面：文字は左の列なので、絵は右へ寄せる（全体の図は、列の右の空きの真ん中へ。手前の側が遠近で大きく下へはみ出すので、少し上へ）
   const tmB = document.getElementById("tm").getBoundingClientRect().bottom || 200, capT = document.querySelector(".cap").getBoundingClientRect().top || H * 0.6;
   camera.setViewOffset(W, H, 0, H / 2 - (tmB + capT) / 2, W, H);
   return Math.max(120, capT - tmB);
@@ -1124,8 +1214,8 @@ function watchCaption() {
   else if (PH.phase === "flying") {
     // 地球からの距離（計画の軌道からの推定）と、いまの月までの距離とのくらべ（2026-10-20 オーナー）
     const nn = nearNow(new Date(now));
-    k = "NOW（計画の軌道から計算・模式）"; t = "MMX は、いまこのあたり";
-    sub = `打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b>・地球から <b>約${Math.round(nn.dE / 1e4).toLocaleString()}万km</b><wbr>（月までの約${(nn.dE / nn.moonEarth).toFixed(1)}倍・推定）`;
+    k = nn.hz ? "NOW（距離は Horizons・絵は模式）" : "NOW（計画の軌道から計算・模式）"; t = '<span class="nw">MMX は、</span><br><span class="nw">いまこのあたり</span>'; // 「MMX は、」で改行（2026-10-21 オーナー）
+    sub = `<span class="nw">打ち上げから <b>${Math.floor(PH.days + (now - NOW.getTime()) / 86400000)}日</b></span>・<span class="nw">地球から <b>約${Math.round(nn.dE / 1e4).toLocaleString()}万km</b></span><wbr>（月までの約${(nn.dE / nn.moonEarth).toFixed(1)}倍・${nn.hz ? "JPL Horizons" : "推定"}）`;
   }
   else if (PH.phase === "postponed") { k = "延期"; t = "MMX は、<wbr>種子島で<wbr>待っています"; sub = "新しい日時は JAXA の発表で"; }
   else if (now >= PH.launchAt) {
@@ -1153,7 +1243,20 @@ const OPEN_FROM_LAUNCH = 1.9; // 発射のあとは、航路のオープニン�
 const skipBtn = document.getElementById("skip"), replayBtn = document.getElementById("replay"), links = document.getElementById("links");
 const viewToggle = document.getElementById("view-toggle");
 viewToggle.textContent = track ? "全体を見る" : "MMX を追う";
-viewToggle.addEventListener("click", () => { track = !track; view.yaw = view.pitch = 0; view.zoom = 1; viewToggle.textContent = track ? "全体を見る" : "MMX を追う"; });
+const setTrack = (on) => { track = on; view.yaw = view.pitch = 0; view.zoom = 1; viewToggle.textContent = track ? "全体を見る" : "MMX を追う"; };
+viewToggle.addEventListener("click", () => setTrack(!track));
+// 全体の図からは、さっと払う（スワイプ）と MMX を追う画面へ（2026-10-25 オーナー）。ゆっくりなぞるのは、いままでどおり回す
+{
+  let sw = null;
+  const cv = renderer.domElement;
+  cv.addEventListener("pointerdown", (e) => { sw = e.isPrimary ? { x: e.clientX, y: e.clientY, t: performance.now() } : null; });
+  cv.addEventListener("pointerup", (e) => {
+    const g = sw; sw = null;
+    if (!g || !e.isPrimary || track || !FLYING || film || opening || launching || coastNow()) return;
+    if (performance.now() - g.t < 400 && Math.hypot(e.clientX - g.x, e.clientY - g.y) > 60) setTrack(true);
+  });
+  cv.addEventListener("pointercancel", () => { sw = null; });
+}
 const nowLinksEl = document.getElementById("nowlinks");
 // 下から：ただし書き → リンク → 字幕と丸い REPLAY を、実際の高さで積む（画面の高さが違っても重ならない）
 function layoutBottom() {
@@ -1187,7 +1290,7 @@ const idle = (t) => (PRE ? padAt(t) : coastNow() || film ? coastAt(t) : track ? 
 window.idleAt = idle;
 window.launchAt = (lt) => { launching = true; fromLaunch = true; sync(); padAt(0, lt); };
 window.openAt = (t) => { opening = true; launching = false; sync(); renderAt(t); };
-addEventListener("resize", () => { W = vw(); H = vh(); renderer.setSize(W, H); camera.aspect = W / H; camera.updateProjectionMatrix(); measureBubble(); });
+addEventListener("resize", () => { W = vw(); H = vh(); renderer.setPixelRatio(devicePixelRatio); route.uniforms.uPx.value = devicePixelRatio; /* ブラウザの拡大・縮小で変わる */ renderer.setSize(W, H); camera.aspect = W / H; camera.updateProjectionMatrix(); measureBubble(); });
 if (!navigator.webdriver) {
   const loop = () => {
     let t = (performance.now() - t0) / 1000;

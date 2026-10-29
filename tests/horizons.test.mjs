@@ -61,11 +61,17 @@ test("応答を読む：形が違えば止める（version・ちがう対象・�
 });
 
 test("いまのカード：Horizons の探査機は、説明の原文がいまの応答にある（2026-10-04）", () => {
-  assert.equal(horizonsCards.length, 6);
+  assert.equal(horizonsCards.length, 7); // 2026-10-21 MMX を足した
   for (const c of horizonsCards) {
     const fx = FIX[c.id];
     assert.ok(fx, `${c.id} の応答の見本がない`);
     assert.equal(fx.command, c.distance.horizons_id, c.id);
+    if (fx.quotesOnly) { // 表の形が違う見本：説明の原文と対象だけ
+      const text = fx.response.result.replace(/\s+/g, " ");
+      assert.match(text, new RegExp(`Target body name: .*\\(${c.distance.horizons_id}\\)`), c.id);
+      for (const q of c.distance.datasheet_quotes ?? []) assert.ok(text.includes(q), `${c.id}：${q}`);
+      continue;
+    }
     const p = parseHorizons(fx.response, { command: c.distance.horizons_id, quotes: c.distance.datasheet_quotes ?? [], days: 2 });
     assert.deepEqual(p.missingQuotes, [], c.id);
     if (c.distance.supplier) assert.ok(c.distance.datasheet_quotes?.length, `${c.id}：supplier には原文が要る`);
@@ -131,7 +137,8 @@ test("はしご：Horizons の表があれば段に並び、なければ「準�
   const t = new Date(Date.parse(Object.values(table.probes)[0].start) + 6 * 3600000);
   const withTable = ladderHtml(roomItems(curation, t, table), { now: t, upcoming: [], v1Event: null });
   const pend = (html) => (html.split("いまの距離は準備中")[1] ?? "");
-  for (const c of horizonsCards) assert.doesNotMatch(pend(withTable), new RegExp(`data-card="${c.id}"`), `${c.id} は段に並ぶはず`);
+  // 置いてある表にまだない機体（足したばかりで、次の週1回の取得を待っている）は除く
+  for (const c of horizonsCards.filter((c) => table.probes[c.id])) assert.doesNotMatch(pend(withTable), new RegExp(`data-card="${c.id}"`), `${c.id} は段に並ぶはず`);
   assert.match(withTable, /1000万 km〜[\s\S]*はやぶさ２/);
   const without = ladderHtml(roomItems(curation, now, null), { now, upcoming: [], v1Event: null });
   for (const c of horizonsCards) assert.match(pend(without), new RegExp(`data-card="${c.id}"`), `${c.id} は準備中のはず`);
@@ -150,4 +157,15 @@ test("web/data/horizons.json：Horizons のカードの表だけ。値は丸め�
       assert.equal(km, roundSig(km, 5), `${id}: ${km} は丸めていない`);
     }
   }
+});
+
+test("軌道のデータが途中で終わるとき：終わりの日時を読み、その手前までの日数に縮める（案A。2026-10-23）", async () => {
+  const { ephemerisEnd, daysBefore } = await import("../scripts/lib/horizons.mjs");
+  // Horizons の返事の形（文言は Horizons のエラーの形に合わせた見本。日時だけを読む）
+  const api = { signature: { version: "1.2" }, result: 'No ephemeris for target "MMX (spacecraft)" after A.D. 2026-DEC-01 00:00:00.0000 TDB' };
+  const end = ephemerisEnd(api);
+  assert.equal(end.toISOString(), "2026-12-01T00:00:00.000Z");
+  assert.equal(daysBefore(new Date("2026-10-20T15:00:00Z"), end), 41);
+  assert.equal(ephemerisEnd({ result: "Target body name: X (-1)" }), null);
+  assert.equal(daysBefore(new Date("2026-11-30T15:00:00Z"), end), 0);
 });

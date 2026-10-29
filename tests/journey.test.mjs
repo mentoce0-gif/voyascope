@@ -75,7 +75,9 @@ test("停留所：Horizons の表があれば、はやぶさ２・パーカー�
   assert.equal(ids[0], "moon");
   assert.equal(ids.at(-1), "light-day");
   for (const id of ["jwst", "hayabusa2", "parker-solar-probe", "bepicolombo", "perseverance", "juno", "new-horizons", "voyager-2"]) assert.ok(ids.includes(id), id);
-  assert.ok(!ids.includes(GATE_COMPANION) && !ids.includes("mmx"));
+  assert.ok(!ids.includes(GATE_COMPANION));
+  // MMX は、表に MMX があれば停留所に（2026-10-23 から Horizons の表に入った）。なければ並ばない
+  assert.equal(ids.includes("mmx"), !!table.probes.mmx);
   for (let i = 1; i < stops.length; i++) assert.ok(stops[i].km >= stops[i - 1].km, `${stops[i].id} の順`);
   const hz = stops.find((st) => st.id === "hayabusa2");
   assert.equal(hz.tag, "計算値");

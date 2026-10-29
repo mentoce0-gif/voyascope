@@ -1,4 +1,5 @@
 // 機体の詳細パネル（タブ：概要／滞在／軌道／リンク）
+import { rxHtml } from "./rx.js";
 import { esc, numberJa, latJa, lngJa, dateTimeShortJa, plainDateJa } from "./format.js";
 import { RINGS, ringOf } from "./scale.js";
 import { summarizeStatus } from "./status.js";
@@ -34,6 +35,21 @@ const OPERATOR_TYPE_LABELS = {
   military: "軍事",
   mixed: "混合",
 };
+
+// つくり手の種類（docs/cubesat-study.md の 12.）
+const BUILDER_TYPE_LABELS = {
+  university: "大学・高専",
+  company: "企業",
+  agency: "JAXA・研究機関",
+};
+
+// つくり手の行：「九州工業大学・…（大学・高専）」。書いていない機体は null
+export function builderLine(card) {
+  const who = factText(card.builder);
+  if (!who) return null;
+  const type = factText(card.builder_type, (v) => esc(BUILDER_TYPE_LABELS[v] ?? v));
+  return type ? `${who}<span class="k">（${type}）</span>` : who;
+}
 
 // 機体の画像（カードの image。公式の画像を出典・クレジットつきで）
 export const imageCredit = (img) =>
@@ -180,6 +196,7 @@ function overviewHtml(card, aboard, family, statusSum, realNow) {
     .filter(Boolean)
     .map(nw);
   const scale = [
+    card.form_factor?.value && `大きさ ${esc(card.form_factor.value)}`,
     approxNumber(s.mass_kg) && `質量 ${approxNumber(s.mass_kg)}`,
     approxNumber(s.length_m) && `全長 ${approxNumber(s.length_m)}`,
   ]
@@ -205,6 +222,7 @@ function overviewHtml(card, aboard, family, statusSum, realNow) {
       }
       <div class="plate-rows">
         ${row("◉", "運用", operator)}
+        ${row("◇", "つくり手", builderLine(card))}
         ${row("◆", "状態", st.status)}
         ${row("◎", "軌道", orbitLine.join("　"))}
         ${row("▣", "規模", scale.join("　"))}
@@ -246,7 +264,7 @@ function linksHtml(card, orbitMeta) {
     ${orbitMeta ? `<p class="k small">軌道データ：${esc(orbitMeta)}</p>` : ""}`;
 }
 
-export function renderPanel(el, { card, crewData, now, isSample, family, tab = "overview", orbitMeta, status, realNow = new Date() }) {
+export function renderPanel(el, { card, crewData, now, isSample, family, tab = "overview", orbitMeta, status, fetchedAt, realNow = new Date() }) {
   const aboard = teamsAboard(crewData, now);
   const statusSum = summarizeStatus(card, status, realNow);
   const showBanner = isSample || hasUnverified(card) || hasUnverified(aboard);
@@ -261,9 +279,10 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
   el.innerHTML = `
     <header class="panel-head">
       <div>
-        <div class="panel-title"><span class="class-chip" style="--c:${family.color}">${esc(CLASS_LABELS[card.class] ?? "")}</span><span class="amber">${esc(card.name.ja)}</span></div>
+        <div class="panel-title one-line"><span class="class-chip" style="--c:${family.color}">${esc(CLASS_LABELS[card.class] ?? "")}</span><span class="amber name">${esc(card.name.ja)}</span></div>
         <div class="panel-ja"><span class="panel-en">${esc(card.name.en)}</span>　<span class="k">NORAD ${card.norad_id}</span></div>
       </div>
+      ${fetchedAt ? rxHtml(fetchedAt, realNow) : ""}
       <div class="panel-actions">
         <button type="button" class="follow-mini narrow-only" data-follow aria-pressed="false" title="カメラがこの機体を追いかけます">追尾</button>
         <button type="button" class="close mono" data-close aria-label="詳細を閉じる">×</button>
@@ -285,7 +304,22 @@ export function renderPanel(el, { card, crewData, now, isSample, family, tab = "
     <div class="tab-body" role="tabpanel">${bodies[current]()}</div>
     <p class="panel-foot">軌道は公開データからの計算による推定です。<br>※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
   `;
+  fitName(el.querySelector(".panel-title.one-line .name"));
   return current;
+}
+
+// 名前は1行で（2026-10-27 オーナー：「XRISM（クリズム）」が「ム）」だけ次の行に落ちていた）。
+// 種別のラベルは上の行にして、それでも入らない長い名前は、字を少しずつ小さくして収める（いちばん小さくて 0.95rem）
+function fitName(n) {
+  if (!n) return;
+  n.style.fontSize = "";
+  const fit = () => {
+    let size = parseFloat(getComputedStyle(n).fontSize);
+    const min = parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.95;
+    while (n.scrollWidth > n.clientWidth + 1 && size > min) { size = Math.max(min, size - 1); n.style.fontSize = `${size}px`; }
+  };
+  fit();
+  document.fonts?.ready.then(fit); // 字体が届くと幅が変わる
 }
 
 export function updatePanelLive(el, { pos, periodMin, place }) {

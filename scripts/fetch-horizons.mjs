@@ -10,7 +10,7 @@
 
 import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { queryUrl, parseHorizons, probeTable, tableStart, tableCovers, VersionError, DAYS, STEP_HOURS } from "./lib/horizons.mjs";
+import { queryUrl, parseHorizons, probeTable, tableStart, tableCovers, VersionError, ephemerisEnd, daysBefore, DAYS, STEP_HOURS } from "./lib/horizons.mjs";
 
 // Fair Use：製品名・版・連絡先を入れた、このアプリだけの User-Agent
 const USER_AGENT = "VOYASCOPE/1.0 (unofficial fan-made project; +https://github.com/mentoce0-gif/voyascope)";
@@ -35,10 +35,29 @@ for (const [i, card] of cards.entries()) {
   if (i) await sleep(WAIT_MS);
   const { horizons_id: command, datasheet_quotes: quotes = [] } = card.distance;
   try {
-    const res = await fetch(queryUrl(command, start), { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
-    const text = await res.text();
-    if (res.status !== 200) throw new Error(`HTTP ${res.status} ${text.slice(0, 120)}`);
-    const parsed = parseHorizons(JSON.parse(text), { command, quotes });
+    const get = async (days) => {
+      const res = await fetch(queryUrl(command, start, days), { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
+      const text = await res.text();
+      if (res.status !== 200) throw new Error(`HTTP ${res.status} ${text.slice(0, 120)}`);
+      return JSON.parse(text);
+    };
+    let api = await get(DAYS), days = DAYS;
+    // 軌道のデータが途中で終わっている（運用機関の軌道の期間の外）ときだけ、その手前までに縮めて、もう一度だけ頼む
+    const end = ephemerisEnd(api);
+    if (end) {
+      days = daysBefore(start, end);
+      if (days < 1) throw new Error(`軌道のデータが ${end.toISOString()} までで、表を作れません`);
+      console.log(`${card.id}（${command}）：軌道のデータは ${end.toISOString().slice(0, 16)} まで。${days} 日ぶんに縮めて頼み直します`);
+      await sleep(WAIT_MS);
+      api = await get(days);
+    }
+    let parsed;
+    try { parsed = parseHorizons(api, { command, quotes, days }); }
+    catch (e) { // 読めないときは、Horizons の返事の初めを添えて知らせる（形を確かめるため）
+      if (e instanceof VersionError) throw e;
+      const head = String(api?.error ?? api?.result ?? "").replace(/\s+/g, " ").slice(0, 240);
+      throw new Error(`${e.message}｜返事の初め：${head}`);
+    }
     probes[card.id] = probeTable(parsed, { downloaded: now, start });
     for (const q of parsed.missingQuotes) changed.push(`${card.id}：説明に「${q}」がありません`);
     console.log(`${card.id}（${command}）：${parsed.km.length} 日ぶん。きょうの距離 約 ${(parsed.km[0] / 1e8).toFixed(2)} 億 km`);

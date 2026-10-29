@@ -26,5 +26,7 @@ Disallow: /
 # それ以外（Google-Extended と、検索・AI の検索と引用：OAI-SearchBot・ChatGPT-User・Claude-SearchBot・Claude-User・PerplexityBot・Googlebot・Bingbot など）は許可
 User-agent: *
 Allow: /
+# 試作の部屋（パスワードつき）
+Disallow: /lab/
 
 Sitemap: https://voyascope.org/sitemap.xml

@@ -49,6 +49,12 @@
       "label": "MMX のいまどこ（mmx/now/）を開いたときに読むもの（ページ・航路の表・three.js r128・探査機の模型・地球の画像・予定）。2026-10-19",
       "max_kb": 520,
       "files": ["mmx/now/*", "vendor/three-r128.min.js", "js/far/models.js", "js/events.js", "js/launch-plan.js", "vendor/astronomy.min.js", "assets/earth/day-2048.jpg", "data/events.json", "data/cards/iss.json"]
+    },
+    {
+      "id": "mmx-partners",
+      "label": "MMX の国際協力（mmx/partners/、英語の試作）を開いたときに読むもの（ページ・データ・陸地の線・three.js r128・探査機の模型）。2026-10-23",
+      "max_kb": 300,
+      "files": ["mmx/partners/*", "mmx/mmx.css", "data/land-minimap.json", "vendor/three-r128.min.js", "js/far/models.js"]
     }
   ],
   "max_file_kb": 600,

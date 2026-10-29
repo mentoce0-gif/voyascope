@@ -163,7 +163,7 @@ body { overflow: hidden; }
 }
 .hero-start .chev { font-size: 1.3rem; line-height: 1; }
 .boot-status {
-  min-height: 4.5em;
+  min-height: 4.8em; /* 読み込めたあとの3行（1.6 × 3）。足りないと、出たときに上の文字が押し上がる（CLS） */
   margin: 1.6rem 0 0;
   font-size: 0.74rem;
   line-height: 1.6;
@@ -440,7 +440,27 @@ body { overflow: hidden; }
 .panel-title { font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
 .panel-en { font-size: 0.8rem; font-weight: 400; color: var(--text-dim); letter-spacing: 0.05em; }
 .panel-ja { font-size: 0.9rem; color: var(--mint); }
+/* 地球側のカード：名前は1行（種別のラベルは上の行。長い名前は card.js の fitName で字を小さくする） */
+.panel-title.one-line .class-chip { display: table; margin: 0 0 4px; }
+.panel-title.one-line .name { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.panel-head > div:first-child { min-width: 0; }
 .panel-actions { display: flex; gap: 8px; flex: none; }
+/* 名前の横の「受信」：最近の取得で新しい軌道データが来たら光ってちらつく／来ていれば点灯／2日来ていなければ消える */
+.rx { margin-left: auto; align-self: center; flex: none; display: flex; align-items: center; gap: 6px; color: var(--mint); }
+.rx-icon { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.rx-icon circle { fill: currentColor; stroke: none; }
+.rx-text { display: flex; flex-direction: column; line-height: 1.15; }
+.rx-label { font-size: 0.78rem; letter-spacing: 0.08em; }
+.rx-ago { font-size: 0.66rem; color: var(--text-dim); }
+.rx-on .rx-icon, .rx-new .rx-icon { filter: drop-shadow(0 0 4px var(--mint)); }
+.rx-new .rx-w1 { animation: rx-flick 1.6s steps(1, end) infinite; }
+.rx-new .rx-w2 { animation: rx-flick 1.6s steps(1, end) 0.2s infinite; }
+.rx-new .rx-icon circle { animation: rx-glow 1.6s ease-in-out infinite; }
+.rx-off { color: var(--text-dim); opacity: 0.45; }
+.rx-off .rx-w1, .rx-off .rx-w2 { stroke-dasharray: 2 3; }
+@keyframes rx-flick { 0%, 100% { opacity: 1; } 12% { opacity: 0.25; } 18% { opacity: 1; } 30% { opacity: 0.4; } 36% { opacity: 1; } }
+@keyframes rx-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@media (prefers-reduced-motion: reduce) { .rx-new .rx-w1, .rx-new .rx-w2, .rx-new .rx-icon circle { animation: none; } }
 .follow-mini {
   width: 34px;
   height: 34px;
@@ -807,6 +827,19 @@ body { overflow: hidden; }
 .sky-label { fill: var(--amber); font-size: 9px; text-anchor: middle; font-family: var(--font-body); }
 .meteor { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--mint-dim); }
 .meteor-title { margin: 0 0 4px; font-size: 0.95rem; color: var(--mint); }
+/* レーダー（空の図）の右下に、空を見る（/sky/）への丸い OBS ボタン */
+.radar-wrap { position: relative; }
+.obs-round { position: absolute; right: 4px; bottom: 4px; width: 60px; height: 60px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; color: #041a22; background: var(--mint); text-decoration: none; box-shadow: 0 0 0 4px rgba(94, 242, 194, 0.15), 0 0 18px rgba(94, 242, 194, 0.45); }
+.obs-round .mono { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; }
+.obs-round:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+/* カードの見出しの右上に、空を見る（/sky/）への OBS ボタン */
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.obs-btn { flex: 0 0 auto; display: inline-grid; grid-template-columns: auto auto; align-items: center; column-gap: 5px; padding: 5px 9px; min-height: 44px; border: 1px solid var(--mint-dim); border-radius: 10px; color: var(--mint); text-decoration: none; background: rgba(94, 242, 194, 0.06); line-height: 1.1; }
+.obs-btn:hover { background: var(--mint-faint); }
+.obs-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.obs-btn svg { grid-row: span 2; }
+.obs-btn .mono { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; }
+.obs-btn small { font-size: 0.6rem; color: var(--amber); }
 .meteor-path { fill: none; stroke: var(--mint); stroke-width: 1.6; stroke-dasharray: 3 3; }
 .meteor-dot { fill: var(--mint); }
 .meteor-label { fill: var(--mint); text-anchor: start; }
@@ -814,6 +847,15 @@ body { overflow: hidden; }
 .pass-more { list-style: none; margin: 8px 0 0; padding: 6px 0 0; border-top: 1px solid var(--panel-border); display: grid; gap: 4px; font-size: 0.8rem; }
 .pass-more li { display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
 .tonight-note { margin-top: 8px !important; line-height: 1.5; }
+.obslog { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--panel-border); display: grid; gap: 8px; }
+.obslog-title { margin: 0; font-size: 0.85rem; letter-spacing: 0.12em; color: var(--amber); font-weight: 400; }
+.obslog-title .k { letter-spacing: 0; font-family: var(--font-body); }
+.obslog-sky { display: flex; gap: 6px; flex-wrap: wrap; }
+.obslog-sky .btn { min-height: 44px; padding: 0 12px; }
+.obslog-text { margin: 0; padding: 10px 12px; border: 1px solid var(--mint-dim); border-radius: 8px; background: rgba(2, 10, 24, 0.6); font-size: 0.78rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; color: var(--text); user-select: all; }
+.obslog-actions { display: flex; gap: 8px; }
+.obslog-actions .btn { flex: 1; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+.obslog p { margin: 0; }
 .tonight-chip {
   appearance: none;
   margin-left: auto;
@@ -905,6 +947,9 @@ body { overflow: hidden; }
   border-radius: 8px;
   background: rgba(94, 242, 194, 0.07);
 }
+.event-countdown.has-obs { position: relative; padding-right: 84px; min-height: 76px; justify-content: center; }
+.event-countdown .obs-round .mono { font-size: 0.66rem; color: inherit; letter-spacing: 0.1em; }
+.event-countdown.has-obs .obs-round { right: 10px; bottom: auto; top: 50%; transform: translateY(-50%); width: 56px; height: 56px; }
 .event-countdown .mono { font-size: 1.35rem; font-weight: 700; color: var(--mint); letter-spacing: 0.02em; }
 .event-h { margin: 14px 0 6px; font-size: 0.85rem; color: var(--mint); }
 .event-rows .plate-row { grid-template-columns: 24px 4.3em 1fr; } /* 「予備期間」「ロケット」を1行に */
@@ -1132,6 +1177,22 @@ body { overflow: hidden; }
 .site-marker.is-ref .diamond { border-style: dashed; box-shadow: none; }
 .site-marker.is-ref .tag .ref-mark { margin-left: 2px; padding: 0 3px; font-size: 9px; vertical-align: 1px; }
 .site-marker.is-ref .ref-tip { left: 50%; right: auto; top: 54px; width: 230px; transform: translateX(-50%); }
+
+/* 軌道データが長く届いていない機体：印と一覧の行を灰色に。ホバー・フォーカスで説明（吹き出しは「参考」と同じ形で、実線） */
+.craft-marker.is-stale { --c: #7d8794; }
+.craft-marker.is-stale .ring { animation: none; opacity: 0.5; box-shadow: none; }
+.craft-marker.is-stale .core { box-shadow: none; }
+.craft-marker.is-stale .stale-tip { left: 50%; right: auto; top: 40px; width: 230px; transform: translateX(-50%); }
+.craft-item.is-stale { position: relative; color: var(--text-dim); }
+.craft-item.is-stale > :not(.stale-tip) { filter: grayscale(1); opacity: 0.55; }
+.stale-tip { border: 1px solid #7d8794; }
+@media (hover: hover) {
+  .craft-marker.is-stale:hover .stale-tip,
+  .craft-item.is-stale:hover .stale-tip { opacity: 1; visibility: visible; transition-delay: 0.25s, 0.25s; }
+}
+.craft-marker.is-stale:focus-visible .stale-tip,
+.craft-item.is-stale:focus-visible .stale-tip { opacity: 1; visibility: visible; transition-delay: 0s, 0s; }
+.craft-list li:last-child .craft-item.is-stale .stale-tip { top: auto; bottom: calc(100% + 4px); } /* 最後の行は上に */
 
 /* ---------- このアプリについて（ダイアログ） ---------- */
 dialog.card {
