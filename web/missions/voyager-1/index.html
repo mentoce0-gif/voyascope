@@ -51,6 +51,12 @@ ul { margin: 0; padding-left: 1.2em; }
 .tl li.now .d { color: var(--mint); }
 .tl .st { margin-left: 6px; font-size: 12px; color: var(--dim); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 0 6px; }
 .scale { padding-left: 1.2em; }
+.vis { margin: 4px 0 14px; }
+.vis canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; background: #050e1f; }
+.vis .act { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+.vis button { font: 12px "Zen Kaku Gothic New", system-ui, sans-serif; color: var(--dim); background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.vis button:hover { color: var(--text); border-color: var(--mint); }
+.vis button[disabled] { opacity: .5; cursor: default; }
 .scale li { margin: 6px 0; }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: var(--dim); font-size: 13px; }
 @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
@@ -67,17 +73,20 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 
   <section class="q" aria-labelledby="q1">
     <h2 id="q1"><span class="qn">Q1</span>何？</h2>
+    <figure class="vis" data-q="1" hidden></figure>
     <p class="one">木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った。いまもデータを送っている<span class="src">出典：<a href="https://science.nasa.gov/mission/voyager/voyager-1/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></p>
     <p class="sub">運用：NASA・JPL<span class="src">出典：<a href="https://science.nasa.gov/mission/voyager/voyager-1/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></p>
   </section>
 
   <section class="q" aria-labelledby="q2">
     <h2 id="q2"><span class="qn">Q2</span>いま何が起きた？</h2>
+    <figure class="vis" data-q="2" hidden></figure>
     <p class="happen"><span class="tag">運用中</span>電力を節約するため、観測装置を少しずつ止めながら運用している（2026年4月17日に1台止めた）<span class="src">出典：<a href="https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></p>
   </section>
 
   <section class="q" aria-labelledby="q3">
     <h2 id="q3"><span class="qn">Q3</span>どこ？</h2>
+    <figure class="vis" data-q="3" hidden></figure>
     <p>太陽圏の外の「恒星間空間」を飛んでいる。人がつくったもので、いちばん遠くにある<span class="src">出典：<a href="https://science.nasa.gov/mission/voyager/voyager-1/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></p>
     <p class="big">地球から <b>約258億 km</b></p>
     <span class="src">2026年10月26日の値・<a href="https://ssd.jpl.nasa.gov/horizons/" rel="noopener">JPL Horizons</a> の計算値</span>
@@ -86,6 +95,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 
   <section class="q" aria-labelledby="q4">
     <h2 id="q4"><span class="qn">Q4</span>これまで→これから</h2>
+    <figure class="vis" data-q="4" hidden></figure>
     <ol class="tl">
       <li class="past"><span class="d">1977年9月5日</span>打ち上げ<span class="src">出典：<a href="https://science.nasa.gov/mission/voyager/voyager-1/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></li>
       <li class="now"><span class="d">いま</span>運用中</li>
@@ -95,6 +105,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 
   <section class="q" aria-labelledby="q5">
     <h2 id="q5"><span class="qn">Q5</span>どれくらい？</h2>
+    <figure class="vis" data-q="5" hidden></figure>
     <ul class="scale">
       <li>光で <b>約23時間56分</b>（地球から送った電波が届くまで）</li>
       <li>太陽までの <b>約174倍</b>（太陽まで 約1億4,900万 km）</li>
@@ -107,6 +118,8 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
     <li><a href="https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/" rel="noopener">NASA「Where Are Voyager 1 and Voyager 2 Now?」</a></li>
   </ul>
   <p class="src">VOYASCOPE のカードの最終確認：2026-10-04</p>
+  <script type="application/json" id="vis-data">{"id":"voyager-1","group":"probe","model":"voyager","name":"ボイジャー1号","q1":{"text":"木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った。いまもデータを送っている","src":"science.nasa.gov"},"q2":{"label":"運用中","note":"電力を節約するため、観測装置を少しずつ止めながら運用している（2026年4月17日に1台止めた）","asOf":"2026-10-03","src":"science.nasa.gov"},"q3":{"km":25841000000,"text":"約258億 km","when":"2026年10月26日の値","src":"JPL Horizons","moonKm":370919,"sunKm":148753280},"q4":[{"d":"1977年9月5日","label":"打ち上げ","kind":"past"},{"d":"いま","label":"運用中","kind":"now"},{"d":"2026年11月18日","label":"ボイジャー1号が地球から1光日に","kind":"next"}],"q5":{"light":"約23時間56分","lightSec":86196.29784015448,"src":"光の速さ（定義の値）から計算","ratio":"太陽までの約174倍"}}</script>
+  <script type="module" src="../visual.js"></script>
   <footer>
     <p>VOYASCOPE は非公式のファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
     <p>ここに書いた事実は、それぞれの出典（一次情報）で確かめてください。VOYASCOPE は、公式の発表への入口です。</p>

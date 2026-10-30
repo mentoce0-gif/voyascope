@@ -51,6 +51,12 @@ ul { margin: 0; padding-left: 1.2em; }
 .tl li.now .d { color: var(--mint); }
 .tl .st { margin-left: 6px; font-size: 12px; color: var(--dim); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 0 6px; }
 .scale { padding-left: 1.2em; }
+.vis { margin: 4px 0 14px; }
+.vis canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; background: #050e1f; }
+.vis .act { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+.vis button { font: 12px "Zen Kaku Gothic New", system-ui, sans-serif; color: var(--dim); background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.vis button:hover { color: var(--text); border-color: var(--mint); }
+.vis button[disabled] { opacity: .5; cursor: default; }
 .scale li { margin: 6px 0; }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: var(--dim); font-size: 13px; }
 @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
@@ -67,17 +73,20 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 
   <section class="q" aria-labelledby="q1">
     <h2 id="q1"><span class="qn">Q1</span>何？</h2>
+    <figure class="vis" data-q="1" hidden></figure>
     <p class="one">JAXA の「みお」と ESA の MPO、2機の探査機を水星のまわりに送り、水星を同時に観測する<span class="src">出典：<a href="https://mio.isas.jaxa.jp/mission/" rel="noopener">mio.isas.jaxa.jp</a> · 2026-10-03 確認</span></p>
     <p class="sub">運用：ESA・JAXA（「みお」は JAXA、MPO は ESA が担当）<span class="src">出典：<a href="https://mio.isas.jaxa.jp/mission/" rel="noopener">mio.isas.jaxa.jp</a> · 2026-10-03 確認</span></p>
   </section>
 
   <section class="q" aria-labelledby="q2">
     <h2 id="q2"><span class="qn">Q2</span>いま何が起きた？</h2>
+    <figure class="vis" data-q="2" hidden></figure>
     <p class="happen"><span class="tag">運用中</span>ESA の最新情報（2026年9月28日の更新）<span class="src">出典：<a href="https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury" rel="noopener">esa.int</a> · 2026-10-03 確認</span></p>
   </section>
 
   <section class="q" aria-labelledby="q3">
     <h2 id="q3"><span class="qn">Q3</span>どこ？</h2>
+    <figure class="vis" data-q="3" hidden></figure>
     <p>8年かけて太陽系の内側を旅し、いま水星に着こうとしている（最後の接近の途中）<span class="src">出典：<a href="https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury" rel="noopener">esa.int</a> · 2026-10-03 確認</span></p>
     <p class="big">地球から <b>約1億1,400万 km</b></p>
     <span class="src">2026年10月26日の値・<a href="https://ssd.jpl.nasa.gov/horizons/" rel="noopener">JPL Horizons</a> の計算値（軌道は ESA から）</span>
@@ -86,6 +95,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 
   <section class="q" aria-labelledby="q4">
     <h2 id="q4"><span class="qn">Q4</span>これまで→これから</h2>
+    <figure class="vis" data-q="4" hidden></figure>
     <ol class="tl">
       <li class="past"><span class="d">2018年10月20日</span>打ち上げ<span class="src">出典：<a href="https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/BepiColombo_factsheet" rel="noopener">esa.int</a> · 2026-10-03 確認</span></li>
       <li class="now"><span class="d">いま</span>運用中</li>
@@ -96,6 +106,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 
   <section class="q" aria-labelledby="q5">
     <h2 id="q5"><span class="qn">Q5</span>どれくらい？</h2>
+    <figure class="vis" data-q="5" hidden></figure>
     <ul class="scale">
       <li>光で <b>約6分20秒</b>（地球から送った電波が届くまで）</li>
       <li>月までの <b>約307倍</b>（月まで 約37万1,000 km）</li>
@@ -108,6 +119,8 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
     <li><a href="https://mio.isas.jaxa.jp/mission/" rel="noopener">JAXA 水星磁気圏探査機「みお」</a></li>
   </ul>
   <p class="src">VOYASCOPE のカードの最終確認：2026-10-04</p>
+  <script type="application/json" id="vis-data">{"id":"bepicolombo","group":"probe","model":"bepicolombo","name":"ベピコロンボ（みお）","q1":{"text":"JAXA の「みお」と ESA の MPO、2機の探査機を水星のまわりに送り、水星を同時に観測する","src":"mio.isas.jaxa.jp"},"q2":{"label":"運用中","note":"ESA の最新情報（2026年9月28日の更新）","asOf":"2026-10-03","src":"esa.int"},"q3":{"km":114050000,"text":"約1億1,400万 km","when":"2026年10月26日の値","src":"JPL Horizons","moonKm":370919,"sunKm":148753280},"q4":[{"d":"2018年10月20日","label":"打ち上げ","kind":"past"},{"d":"いま","label":"運用中","kind":"now"},{"d":"2026年11月21日","label":"ベピコロンボが水星を回る軌道に入る","kind":"next"},{"d":"2026年12月9日〜10日","label":"「みお」と MPO が分かれる","kind":"next"}],"q5":{"light":"約6分20秒","lightSec":380.42985057349244,"src":"光の速さ（定義の値）から計算","ratio":"月までの約307倍"}}</script>
+  <script type="module" src="../visual.js"></script>
   <footer>
     <p>VOYASCOPE は非公式のファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
     <p>ここに書いた事実は、それぞれの出典（一次情報）で確かめてください。VOYASCOPE は、公式の発表への入口です。</p>

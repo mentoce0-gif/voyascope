@@ -19,7 +19,7 @@
 
 ## いまの優先（日付順）
 
-0. **次の目標 M13「ニュースの次に開く」**（2026-10-20 オーナー）→ [`news-next-plan.md`](news-next-plan.md)。**N0・N1 を作った（2026-10-30）**：一言ページ（`web/missions/`）を5つの問い（何？・いま何が起きた？・どこ？・これまで→これから・どれくらい？）に、ニュース台帳は Grok の G5 →（照合）→ `voyascope-research` の `research/news-ledger/YYYY-MM.csv` → `node scripts/news-coverage.mjs` でカバー率・新しさ。**次**：11月はじめに G5（対象：2026-10）で最初の台帳 → 数を見て N3 の候補を決める
+0. **次の目標 M13「ニュースの次に開く」**（2026-10-20 オーナー）→ [`news-next-plan.md`](news-next-plan.md)。**N0・N1 を作った（2026-10-30）**：一言ページ（`web/missions/`）を5つの問い（何？・いま何が起きた？・どこ？・これまで→これから・どれくらい？）に、ニュース台帳は Grok の G5 →（照合）→ `voyascope-research` の `research/news-ledger/YYYY-MM.csv` → `node scripts/news-coverage.mjs` でカバー率・新しさ。各問いに three.js の図（6秒でくり返す。切り抜いて X に出せる形・画像と動画の保存。`web/missions/visual.js`）。**次**：11月はじめに G5（対象：2026-10）で最初の台帳 → 数を見て N3 の候補を決める
 1. **MMX は打ち上げ・分離済み**（2026-10-20 4:41:03 打ち上げ、5:52ごろ分離。JAXA の打上げライブ中継で確認＝出典 https://www.youtube.com/watch?v=sZGyK9jfoy4）→ 段取りは [タスク020](tasks/020-mmx-after-launch.md)
    - 済み：出来事 `done`＋いってらっしゃい（10/27 まで）・MMX のカードを運用中・「一言でわかる」作り直し（PR #51・#54）
    - **いまどこ**（`web/mmx/now/`）：はじめて開くと航路のオープニング → 打ち上げから5日までは「MMX を追う」視点、そのあとは全体の図（`TRACK_DAYS`）。全体の図から、さっと払う（スワイプ）と「MMX を追う」へ（ゆっくりなぞると回す。戻るのはボタン。2026-10-25）。上の計器（X+経過・LIFTOFF〜MMX SEP〜NOW の弧・速さの推定 EST〈計画の軌道から〉・F10/H3-24L/MMX）、REPLAY（打ち上げ〜分離をスワイプで。打ち上げのはじめは種子島の正面から）、MISSION・ARCHIVE・SITE のリンク。計画の流れ（速度・高度・事象名）は `launch-plan.js`（改訂版の表2、C33）

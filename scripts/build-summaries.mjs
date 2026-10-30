@@ -84,6 +84,12 @@ ul { margin: 0; padding-left: 1.2em; }
 .tl li.now .d { color: var(--mint); }
 .tl .st { margin-left: 6px; font-size: 12px; color: var(--dim); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 0 6px; }
 .scale { padding-left: 1.2em; }
+.vis { margin: 4px 0 14px; }
+.vis canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; background: #050e1f; }
+.vis .act { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+.vis button { font: 12px "Zen Kaku Gothic New", system-ui, sans-serif; color: var(--dim); background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.vis button:hover { color: var(--text); border-color: var(--mint); }
+.vis button[disabled] { opacity: .5; cursor: default; }
 .scale li { margin: 6px 0; }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: var(--dim); font-size: 13px; }
 @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
@@ -152,16 +158,29 @@ function whenJa(w) {
 }
 const EVENT_STATE = { done: "済み", postponed: "延期", cancelled: "中止" };
 
+// 問いごとの節。見出しの下の figure に、visual.js が three.js の図（6秒でくり返す）を描く。
+// JavaScript がないときは figure は隠れたまま（文字だけで読める）
 const sec = (n, q, body) => `
   <section class="q" aria-labelledby="q${n}">
     <h2 id="q${n}"><span class="qn">Q${n}</span>${q}</h2>
+    <figure class="vis" data-q="${n}" hidden></figure>
 ${body}
   </section>`;
+// 図のデータ（visual.js が読む）。ページに書いた値だけを渡す
+const MODEL_KEY = { "voyager-1": "voyager", "voyager-2": "voyager" };
+const MODEL_IDS = new Set(["jwst", "parker-solar-probe", "bepicolombo", "perseverance", "mmx", "hayabusa2", "juno", "new-horizons", "voyager-1", "voyager-2"]);
 
 // 探査機・地球のまわりの機体
 function cardPage(c, group) {
   const path = `missions/${c.id}/`;
   const parts = [];
+  const V = {
+    id: c.id,
+    group,
+    model: MODEL_IDS.has(c.id) ? MODEL_KEY[c.id] ?? c.id : null,
+    name: c.name.ja,
+    q1: { text: c.mission.value, src: host(c.mission.source) },
+  };
 
   // Q1 何？
   parts.push(sec(1, "何？", `    <p class="one">${esc(c.mission.value)}${cite(c.mission)}</p>
@@ -170,6 +189,7 @@ function cardPage(c, group) {
   // Q2 いま何が起きた？（カードの「いまの状態」。日付は出典を確かめた日）
   if (c.status) {
     const st = STATUS[c.status.value] ?? c.status.value;
+    V.q2 = { label: st, note: c.status.note ?? "", asOf: c.status.as_of, src: host(c.status.source) };
     parts.push(sec(2, "いま何が起きた？", `    <p class="happen"><span class="tag">${esc(st)}</span>${c.status.note ? esc(c.status.note) : ""}${cite(c.status)}</p>`));
   }
 
@@ -181,7 +201,16 @@ function cardPage(c, group) {
     const alt = c.stats?.altitude_km;
     where.push(`    <p>地球のまわりを回っている${alt ? `（高さ 約${esc(alt.value.toLocaleString("ja-JP"))} km）${cite(alt)}` : ""}</p>`);
   }
+  if (group === "craft") V.q3 = { altKm: c.stats?.altitude_km?.value ?? null, src: c.stats?.altitude_km ? host(c.stats.altitude_km.source) : "" };
   if (dist && dist.km > 0) {
+    V.q3 = {
+      km: dist.km,
+      text: `約${kmJa(dist.km)}`,
+      when: dist.method === "dated" ? `${ymd(dist.at)}の公式の値` : REF_LABEL,
+      src: dist.method === "horizons" ? "JPL Horizons" : dist.method === "planet" ? "計算（Astronomy Engine）" : host(c.distance.source),
+      moonKm: Math.round(bodyDistanceKm("Moon", REF)),
+      sunKm: Math.round(bodyDistanceKm("Sun", REF)),
+    };
     const how =
       dist.method === "horizons" ? `${esc(REF_LABEL)}・<a href="https://ssd.jpl.nasa.gov/horizons/" rel="noopener">JPL Horizons</a> の計算値${dist.supplier ? `（軌道は ${esc(dist.supplier)} から）` : ""}`
       : dist.method === "planet" ? `${esc(REF_LABEL)}・いる惑星までの距離を計算`
@@ -211,6 +240,11 @@ function cardPage(c, group) {
   const li = (i) => `      <li class="${i.past ? "past" : "next"}"><span class="d">${esc(i.text)}</span>${esc(i.label)}${i.state ? `<span class="st">${esc(i.state)}</span>` : ""}${cite(i.f)}</li>`;
   const nowLi = `      <li class="now"><span class="d">いま</span>${esc(c.status ? STATUS[c.status.value] ?? "" : "")}</li>`;
   const tl = [...items.slice(0, nowAt < 0 ? items.length : nowAt).map(li), nowLi, ...(nowAt < 0 ? [] : items.slice(nowAt).map(li))];
+  V.q4 = [
+    ...items.slice(0, nowAt < 0 ? items.length : nowAt).map((i) => ({ d: i.text, label: i.label, kind: "past" })),
+    { d: "いま", label: c.status ? STATUS[c.status.value] ?? "" : "", kind: "now" },
+    ...(nowAt < 0 ? [] : items.slice(nowAt).map((i) => ({ d: i.text, label: i.label + (i.state ? `（${i.state}）` : ""), kind: "next" }))),
+  ];
   if (nowAt < 0) tl.push(`      <li class="next none"><span class="d">これから</span>公式に日付の出ている予定は、まだ載せていません</li>`);
   parts.push(sec(4, "これまで→これから", `    <ol class="tl">
 ${tl.join("\n")}
@@ -223,15 +257,25 @@ ${tl.join("\n")}
     const approx = dist.method === "dated" || dist.method === "typical";
     const lt = lightTimeJa(lightSeconds(dist.km), { approx }).replace(/ /g, "");
     scale.push(`      <li>光で <b>${esc(approx ? lt : `約${lt}`)}</b>（地球から送った電波が届くまで）</li>`);
+    V.q5 = { light: approx ? lt : `約${lt}`, lightSec: lightSeconds(dist.km), src: "光の速さ（定義の値）から計算" };
     // くらべる相手：月の1,000倍までは月、その先は太陽（どちらも REF の日の計算）
     const moon = bodyDistanceKm("Moon", REF);
     const sun = bodyDistanceKm("Sun", REF);
     const [name, ref] = dist.km / moon <= 1000 ? ["月", moon] : ["太陽", sun];
     const r = dist.km / ref;
+    if (r >= 1.5) V.q5.ratio = `${name}までの約${r >= 100 ? Math.round(r).toLocaleString("ja-JP") : r.toFixed(r >= 10 ? 0 : 1)}倍`;
     if (r >= 1.5) scale.push(`      <li>${name}までの <b>約${esc(r >= 100 ? Math.round(r).toLocaleString("ja-JP") : r.toFixed(r >= 10 ? 0 : 1))}倍</b>（${name}まで 約${esc(kmJa(ref))}）</li>`);
   }
   if (group === "craft") {
     const st = c.stats ?? {};
+    V.q5 = {
+      periodMin: st.period_min?.value ?? null,
+      speed: st.speed_km_s?.value ?? null,
+      lengthM: st.length_m?.value ?? null,
+      massT: st.mass_kg ? Math.round(st.mass_kg.value / 1000) : null,
+      altKm: st.altitude_km?.value ?? null,
+      src: host((st.period_min ?? st.speed_km_s ?? st.length_m ?? st.mass_kg ?? { source: c.mission.source }).source),
+    };
     if (st.speed_km_s) scale.push(`      <li>速さ：秒速 <b>約${esc(st.speed_km_s.value)} km</b>${cite(st.speed_km_s)}</li>`);
     if (st.period_min) scale.push(`      <li>地球を1周：<b>約${esc(st.period_min.value)}分</b>${cite(st.period_min)}</li>`);
     if (st.length_m) scale.push(`      <li>大きさ：<b>約${esc(st.length_m.value.toLocaleString("ja-JP"))} m</b>${st.length_m.note ? `（${esc(st.length_m.note)}）` : ""}${cite(st.length_m)}</li>`);
@@ -250,7 +294,9 @@ ${parts.join("\n")}
   <ul>
 ${c.official_links.map((l) => `    <li><a href="${esc(l.url)}" rel="noopener">${esc(l.label)}</a></li>`).join("\n")}
   </ul>
-  <p class="src">VOYASCOPE のカードの最終確認：${esc(c.updated_at)}</p>`;
+  <p class="src">VOYASCOPE のカードの最終確認：${esc(c.updated_at)}</p>
+  <script type="application/json" id="vis-data">${JSON.stringify(V).replace(/</g, "\\u003c")}</script>
+  <script type="module" src="../visual.js"></script>`;
   return {
     path,
     one: c.mission.value,

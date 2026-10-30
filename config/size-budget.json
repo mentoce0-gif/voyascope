@@ -51,6 +51,12 @@
       "files": ["mmx/now/*", "vendor/three-r128.min.js", "js/far/models.js", "js/events.js", "js/launch-plan.js", "vendor/astronomy.min.js", "assets/earth/day-2048.jpg", "data/events.json", "data/cards/iss.json"]
     },
     {
+      "id": "missions",
+      "label": "「一言でわかる」ページ（missions/〇〇/）を開いたときに読むもの（ページ・5つの問いの図・three.js r128・探査機の模型・地球の画像）。いちばん大きいページで数える。2026-10-30",
+      "max_kb": 500,
+      "files": ["missions/mmx/index.html", "missions/visual.js", "vendor/three-r128.min.js", "js/far/models.js", "assets/earth/day-2048.jpg"]
+    },
+    {
       "id": "mmx-partners",
       "label": "MMX の国際協力（mmx/partners/、英語の試作）を開いたときに読むもの（ページ・データ・陸地の線・three.js r128・探査機の模型）。2026-10-23",
       "max_kb": 300,

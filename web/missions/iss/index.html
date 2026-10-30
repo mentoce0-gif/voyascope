@@ -51,6 +51,12 @@ ul { margin: 0; padding-left: 1.2em; }
 .tl li.now .d { color: var(--mint); }
 .tl .st { margin-left: 6px; font-size: 12px; color: var(--dim); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 0 6px; }
 .scale { padding-left: 1.2em; }
+.vis { margin: 4px 0 14px; }
+.vis canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; background: #050e1f; }
+.vis .act { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+.vis button { font: 12px "Zen Kaku Gothic New", system-ui, sans-serif; color: var(--dim); background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.vis button:hover { color: var(--text); border-color: var(--mint); }
+.vis button[disabled] { opacity: .5; cursor: default; }
 .scale li { margin: 6px 0; }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: var(--dim); font-size: 13px; }
 @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
@@ -67,23 +73,27 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 
   <section class="q" aria-labelledby="q1">
     <h2 id="q1"><span class="qn">Q1</span>何？</h2>
+    <figure class="vis" data-q="1" hidden></figure>
     <p class="one">宇宙で科学研究と技術の実証をする拠点<span class="src">出典：<a href="https://www.nasa.gov/news-release/nasa-names-new-station-manager-space-operations-deputy/" rel="noopener">nasa.gov</a> · 2026-09-30 確認</span></p>
     <p class="sub">運用：NASA・Roscosmos・JAXA・ESA・CSA<span class="src">出典：<a href="https://oig.nasa.gov/wp-content/uploads/2024/02/IG-23-004.pdf" rel="noopener">oig.nasa.gov</a> · 2026-09-30 確認</span></p>
   </section>
 
   <section class="q" aria-labelledby="q2">
     <h2 id="q2"><span class="qn">Q2</span>いま何が起きた？</h2>
+    <figure class="vis" data-q="2" hidden></figure>
     <p class="happen"><span class="tag">運用中</span>参加機関は2030年までの運用を約束している（NASA の FAQ）<span class="src">出典：<a href="https://www.nasa.gov/international-space-station/space-station-overview/" rel="noopener">nasa.gov</a> · 2026-09-30 確認</span></p>
   </section>
 
   <section class="q" aria-labelledby="q3">
     <h2 id="q3"><span class="qn">Q3</span>どこ？</h2>
+    <figure class="vis" data-q="3" hidden></figure>
     <p>地球のまわりを回っている（高さ 約400 km）<span class="src">出典：<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" rel="noopener">nasa.gov</a> · 2026-09-30 確認</span></p>
     <a class="go" href="../../">VOYASCOPE で見る（地球のまわり）</a>
   </section>
 
   <section class="q" aria-labelledby="q4">
     <h2 id="q4"><span class="qn">Q4</span>これまで→これから</h2>
+    <figure class="vis" data-q="4" hidden></figure>
     <ol class="tl">
       <li class="past"><span class="d">1998年11月20日</span>打ち上げ<span class="src">出典：<a href="https://www.nasa.gov/missions/station/the-international-space-station-20-years-of-communications-excellence/" rel="noopener">nasa.gov</a> · 2026-09-30 確認</span></li>
       <li class="now"><span class="d">いま</span>運用中</li>
@@ -93,6 +103,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 
   <section class="q" aria-labelledby="q5">
     <h2 id="q5"><span class="qn">Q5</span>どれくらい？</h2>
+    <figure class="vis" data-q="5" hidden></figure>
     <ul class="scale">
       <li>速さ：秒速 <b>約7.8 km</b><span class="src">出典：<a href="https://www.nasa.gov/missions/station/spot-the-station-frequently-asked-questions/" rel="noopener">nasa.gov</a> · 2026-09-30 確認</span></li>
       <li>地球を1周：<b>約90分</b><span class="src">出典：<a href="https://eol.jsc.nasa.gov/Tools/orbitTutorial.htm" rel="noopener">eol.jsc.nasa.gov</a> · 2026-09-30 確認</span></li>
@@ -107,6 +118,8 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
     <li><a href="https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/International_Space_Station" rel="noopener">ESA 国際宇宙ステーション</a></li>
   </ul>
   <p class="src">VOYASCOPE のカードの最終確認：2026-09-30</p>
+  <script type="application/json" id="vis-data">{"id":"iss","group":"craft","model":null,"name":"国際宇宙ステーション","q1":{"text":"宇宙で科学研究と技術の実証をする拠点","src":"nasa.gov"},"q2":{"label":"運用中","note":"参加機関は2030年までの運用を約束している（NASA の FAQ）","asOf":"2026-09-30","src":"nasa.gov"},"q3":{"altKm":400,"src":"nasa.gov"},"q4":[{"d":"1998年11月20日","label":"打ち上げ","kind":"past"},{"d":"いま","label":"運用中","kind":"now"}],"q5":{"periodMin":90,"speed":7.8,"lengthM":109,"massT":420,"altKm":400,"src":"eol.jsc.nasa.gov"}}</script>
+  <script type="module" src="../visual.js"></script>
   <footer>
     <p>VOYASCOPE は非公式のファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
     <p>ここに書いた事実は、それぞれの出典（一次情報）で確かめてください。VOYASCOPE は、公式の発表への入口です。</p>
