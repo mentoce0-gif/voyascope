@@ -105,7 +105,7 @@
 
 ### 入口：SpaceTips の帯と SCOPE のランチャー（2026-10-30 オーナー：名前は SpaceTips、A＋C 案）
 
-- 名前：「一言でわかる」の一覧と各ページを **SpaceTips** と呼ぶ（候補に SpaceNewsClips もあったが、「SpaceNews」は宇宙業界のニュースメディアの名前なので避けた。商標の確認は J-PlatPat でオーナーが）
+- 名前：「一言でわかる」の一覧と各ページを **SpaceTips** と呼ぶ（候補に SpaceNewsClips もあったが、「SpaceNews」は宇宙業界のニュースメディアの名前なので避けた。2026-10-30 にオーナーが J-PlatPat で確認し、該当なし）
 - **帯**（地球の画面の下、スマホも PC も）：最近の出来事（済んで30日以内）・近い予定（60日以内）を6秒ごとに入れかえて「MMX の打ち上げから10日」「あと19日：ボイジャー1号が地球から1光日に」。押すとその機体の5つの問い。材料は `data/tips.json`（`build-summaries.mjs` が、ページのある機体のカードの events から作る）、文は `web/js/tips.js`（日本時間の日付で数える。月だけの予定・中止は出さない。何もなければ「ニュースで見た名前を、5つの問いで」→ 一覧）
 - **SCOPE**（スマホの右下）：押したまま指をすべらせて、離したところへ（OBS 地球を見る・TIPS SpaceTips・FAR 遠くを見る・MMX いまどこ）。押して離すだけなら開いたまま、もう一度押して選ぶ。キーボード（Enter・矢印・Esc）でも。`web/js/launcher.js`。PC は上の部屋の帯に「SpaceTips」
 - 画面：[`screenshots/m13-launcher/`](screenshots/m13-launcher/)

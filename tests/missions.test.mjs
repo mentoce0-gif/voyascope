@@ -48,3 +48,13 @@ test("visual.js は three.js の絞った版にない部品を使わない", () 
   for (const [, name] of src.matchAll(/THREE\.(\w+)/g)) assert.ok(exported.has(name), `THREE.${name} は web/vendor/three-r128.min.js にない`);
   assert.ok(existsSync(new URL("../js/far/models.js", dir)));
 });
+
+test("カードの画像（og:image）は、ページの機体の画像があればそれ・なければトップの画像。指した画像は web/ にある", () => {
+  for (const id of [...ids, "artemis2"]) {
+    const m = html(id).match(/<meta property="og:image" content="https:\/\/voyascope\.org\/(assets\/og\/[\w-]+\.jpg)">/);
+    assert.ok(m, `${id} og:image`);
+    assert.ok(existsSync(new URL(`../web/${m[1]}`, import.meta.url)), `${id} ${m[1]}`);
+  }
+  assert.match(html("mmx"), /assets\/og\/mmx\.jpg/);
+  assert.match(readFileSync(new URL("../web/index.html", import.meta.url), "utf8"), /og:image" content="https:\/\/voyascope\.org\/assets\/og\/home\.jpg"/);
+});
