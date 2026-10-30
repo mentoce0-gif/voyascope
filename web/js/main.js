@@ -30,6 +30,8 @@ import {
 import { pendingGreetings, greetingHtml, loadSeen, saveSeen } from "./greetings.js";
 import { activeMeteors, meteorHtml, meteorStoryHtml, radiantDirection, createStream } from "./meteors.js";
 import { showsCraft, showsEvent, showsLaunch, loadView, saveView, isViewMode } from "./view.js";
+import { tipLines, FALLBACK as TIPS_FALLBACK } from "./tips.js";
+import { createLauncher } from "./launcher.js";
 
 const COLORS = {
   navy: "#07142b",
@@ -1251,9 +1253,11 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
       far = await loadFar();
     } catch (e) {
       console.error(e);
-      const label = opener === farBtn ? farLabel : opener === farChip ? farChip.querySelector(".vs-long") : farNav;
-      label.textContent = "読み込めませんでした";
-      setTimeout(() => (label.textContent = "遠くを見る"), 4000);
+      const label = opener === farBtn ? farLabel : opener === farChip ? farChip.querySelector(".vs-long") : opener.id === "scope-fab" ? null : farNav;
+      if (label) {
+        label.textContent = "読み込めませんでした";
+        setTimeout(() => (label.textContent = "遠くを見る"), 4000);
+      }
       return;
     } finally {
       opener.removeAttribute("aria-busy");
@@ -1317,6 +1321,52 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     setInterval(updateMmx, 30000);
   }
   centerView(viewMode, false);
+
+  // ---------- SpaceTips の帯と SCOPE のランチャー（M13、2026-10-30 オーナー：A＋C 案） ----------
+  // 帯：最近の出来事・近い予定を6秒ごとに入れかえる。押すとその機体の「一言でわかる」ページ（5つの問い）。
+  //   日数は見ている人の「いま」（タイムラインの時刻ではない）で数える。data/tips.json が読めないときは帯を出さない
+  const tipsBar = $("#tips-bar"), tipsDots = $("#tips-dots");
+  fetch("data/tips.json")
+    .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+    .then(({ items }) => {
+      let lines = tipLines(items, Date.now()).slice(0, 4);
+      if (!lines.length) lines = [TIPS_FALLBACK];
+      let i = 0;
+      const show = (k, swap = true) => {
+        const t = lines[k];
+        $("#tips-line").textContent = t.text;
+        $("#tips-sub").textContent = t.name === TIPS_FALLBACK.name ? "SpaceTips・一言でわかる一覧" : `${t.name}・5つの問いで見る`;
+        tipsBar.href = t.href;
+        tipsBar.setAttribute("aria-label", `SpaceTips：${t.text}（${t.name}の5つの問いを開く）`);
+        tipsDots.innerHTML = lines.length > 1 ? lines.map((_, j) => `<i class="${j === k ? "on" : ""}"></i>`).join("") : "";
+        if (swap) {
+          tipsBar.classList.remove("swap");
+          void tipsBar.offsetWidth;
+          tipsBar.classList.add("swap");
+        }
+      };
+      tipsBar.hidden = false;
+      show(0, false);
+      // 動きを減らす設定・帯にフォーカスやマウスがあるときは入れかえない
+      const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let hold = false;
+      for (const [ev, v] of [["pointerenter", true], ["pointerleave", false], ["focus", true], ["blur", false]]) tipsBar.addEventListener(ev, () => (hold = v));
+      if (lines.length > 1 && !still) setInterval(() => !hold && !document.hidden && show((i = (i + 1) % lines.length)), 6000);
+    })
+    .catch((e) => console.warn("SpaceTips の帯を出せませんでした", e));
+
+  // SCOPE：押したまま指をすべらせて選ぶ・押して離せば開いたまま（スマホ。PC は上の部屋の帯に SpaceTips）
+  const scopeFab = $("#scope-fab");
+  createLauncher({
+    fab: scopeFab,
+    items: [
+      { label: "OBS", sub: "地球を見る", action: () => {} },
+      { label: "TIPS", sub: "SpaceTips", accent: true, action: () => location.assign("missions/") },
+      { label: "FAR", sub: "遠くを見る", action: () => openFar("pushed", scopeFab) },
+      { label: "MMX", sub: "いまどこ", hidden: () => !mmxEv, action: () => location.assign("mmx/now/") },
+    ],
+  });
+  for (const type of ["pointerenter", "focus", "touchstart"]) scopeFab.addEventListener(type, () => loadFar().catch(() => {}), { passive: true, once: true });
 
   // ---------- このアプリについて ----------
   const about = $("#about");

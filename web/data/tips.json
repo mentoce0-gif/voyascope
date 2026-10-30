@@ -1,0 +1,60 @@
+{
+ "items": [
+  {
+   "id": "bepicolombo-mercury-orbit",
+   "card": "bepicolombo",
+   "name": "ベピコロンボ（みお）",
+   "title": "ベピコロンボが水星を回る軌道に入る",
+   "when": {
+    "date": "2026-11-21"
+   },
+   "status": "scheduled",
+   "href": "missions/bepicolombo/"
+  },
+  {
+   "id": "bepicolombo-mio-separation",
+   "card": "bepicolombo",
+   "name": "ベピコロンボ（みお）",
+   "title": "「みお」と MPO が分かれる",
+   "when": {
+    "from": "2026-12-09",
+    "to": "2026-12-10"
+   },
+   "status": "scheduled",
+   "href": "missions/bepicolombo/"
+  },
+  {
+   "id": "hayabusa2-earth-swingby",
+   "card": "hayabusa2",
+   "name": "はやぶさ２",
+   "title": "はやぶさ2 の地球スイングバイ",
+   "when": {
+    "month": "2027-12"
+   },
+   "status": "scheduled",
+   "href": "missions/hayabusa2/"
+  },
+  {
+   "id": "mmx-launch",
+   "card": "mmx",
+   "name": "火星衛星探査機（MMX）",
+   "title": "MMX の打ち上げ",
+   "when": {
+    "at": "2026-10-19T19:41:03Z"
+   },
+   "status": "done",
+   "href": "missions/mmx/"
+  },
+  {
+   "id": "voyager-1-one-light-day",
+   "card": "voyager-1",
+   "name": "ボイジャー1号",
+   "title": "ボイジャー1号が地球から1光日に",
+   "when": {
+    "at": "2026-11-18T10:16:07Z"
+   },
+   "status": "scheduled",
+   "href": "missions/voyager-1/"
+  }
+ ]
+}

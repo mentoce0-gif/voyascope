@@ -121,7 +121,7 @@ ${body}
   <footer>
     <p>VOYASCOPE は非公式のファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
     <p>ここに書いた事実は、それぞれの出典（一次情報）で確かめてください。VOYASCOPE は、公式の発表への入口です。</p>
-    <p><a href="${up}missions/">一言でわかる一覧</a> · <a href="${up}">VOYASCOPE を開く</a></p>
+    <p><a href="${up}missions/">SpaceTips（一言でわかる一覧）</a> · <a href="${up}">VOYASCOPE を開く</a></p>
   </footer>
 </main>
 </body>
@@ -286,7 +286,7 @@ ${scale.join("\n")}
     </ul>${dist && dist.km > 0 ? `\n    <span class="src">光の速さ（秒速 299,792.458 km、定義の値）と、月・太陽の位置の計算から。${esc(REF_LABEL)}</span>` : ""}`));
 
   const body = `
-  <p class="kicker">一言でわかる</p>
+  <p class="kicker">SpaceTips｜一言でわかる</p>
   <h1>${esc(c.name.ja)}</h1>
   <p class="en">${esc(c.name.en)}</p>
 ${parts.join("\n")}
@@ -355,7 +355,7 @@ const artemis = artemisPage();
 
 const listItems = (items) => items.map((p) => `    <li><a href="${p.path.replace(/^missions\//, "")}">${esc(p.name)}</a><span>${esc(p.one)}</span></li>`).join("\n");
 const indexBody = `
-  <p class="kicker">一言でわかる</p>
+  <p class="kicker">SpaceTips｜一言でわかる</p>
   <h1>宇宙を旅する者たちを、一言で</h1>
   <p>ニュースで見た名前を、5つの問い（何？・いま何が起きた？・どこ？・これまで→これから・どれくらい？）で。書いてあることには、すべて出典があります。</p>
   <h2>ミッション</h2>
@@ -374,13 +374,13 @@ const index = {
   path: "missions/",
   html: page({
     path: "missions/",
-    title: "一言でわかる — VOYASCOPE",
+    title: "SpaceTips（一言でわかる） — VOYASCOPE",
     description: "VOYASCOPE が載せている探査機・人工衛星・ミッションを、一言と要点で。すべて出典つき。",
     body: indexBody,
     jsonld: {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      name: "一言でわかる — VOYASCOPE",
+      name: "SpaceTips（一言でわかる） — VOYASCOPE",
       url: `${SITE}/missions/`,
       inLanguage: "ja",
       isPartOf: { "@type": "WebSite", name: "VOYASCOPE", url: `${SITE}/` },
@@ -395,7 +395,17 @@ ${["", "tour/artemis2/", ...pages.map((p) => p.path)].map((p) => `  <url><loc>${
 </urlset>
 `;
 
-const outputs = [...pages.map((p) => [join(ROOT, "web", p.path, "index.html"), p.html]), [join(ROOT, "web", "sitemap.xml"), sitemap]];
+// SpaceTips の帯（地球の画面の下。web/js/tips.js が日付から「〇〇から N日」「あと N日」にする）の材料：
+// ページのある機体の出来事（カードの events）だけ
+const tips = [...read("probes"), ...read("spacecraft").filter((c) => shownCraft.has(c.id))].flatMap((c) =>
+  (c.events ?? [])
+    .map((id) => EVENTS.get(id))
+    .filter(Boolean)
+    .map((e) => ({ id: e.id, card: c.id, name: c.name.ja, title: e.title.ja, when: e.when.value, status: e.status?.value ?? "scheduled", href: `missions/${c.id}/` })),
+);
+const tipsJson = JSON.stringify({ items: tips }, null, 1) + "\n";
+
+const outputs = [...pages.map((p) => [join(ROOT, "web", p.path, "index.html"), p.html]), [join(ROOT, "web", "sitemap.xml"), sitemap], [join(ROOT, "web", "data", "tips.json"), tipsJson]];
 let stale = 0;
 for (const [file, text] of outputs) {
   const now = existsSync(file) ? readFileSync(file, "utf8") : null;

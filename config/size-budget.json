@@ -29,6 +29,7 @@
         "assets/earth/night-2048.jpg",
         "data/places.json",
         "data/land-minimap.json",
+        "data/tips.json",
         "assets/craft/*"
       ]
     },
