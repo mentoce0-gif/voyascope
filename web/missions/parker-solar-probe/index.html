@@ -32,6 +32,32 @@ ul { margin: 0; padding-left: 1.2em; }
 .list li { margin: 10px 0; }
 .list a { font-weight: 700; }
 .list span { display: block; color: var(--dim); font-size: 14px; }
+.q { margin-top: 8px; }
+.q h2 { display: flex; align-items: baseline; gap: 10px; }
+.qn { font: 700 12px "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.1em; color: var(--navy); background: var(--mint); border-radius: 4px; padding: 2px 6px; }
+.sub { color: var(--dim); font-size: 14px; margin: 8px 0 0; }
+.happen { margin: 0; padding: 14px 16px; background: var(--navy2); border-radius: 12px; }
+.tag { display: inline-block; margin-right: 8px; padding: 0 8px; border: 1px solid var(--mint); border-radius: 999px; color: var(--mint); font-size: 13px; }
+.big { font-size: 1.15rem; margin: 12px 0 0; }
+.big b, .scale b { color: var(--amber); }
+.tl { list-style: none; margin: 0; padding: 0 0 0 18px; border-left: 2px solid rgba(255,255,255,.18); }
+.tl li { position: relative; margin: 0 0 14px; }
+.tl li::before { content: ""; position: absolute; left: -25px; top: 0.55em; width: 10px; height: 10px; border-radius: 50%; background: var(--dim); }
+.tl li.now::before { background: var(--mint); box-shadow: 0 0 0 4px rgba(94,242,194,.25); }
+.tl li.next::before { background: var(--navy); border: 2px solid var(--amber); width: 6px; height: 6px; }
+.tl li.now { color: var(--mint); font-weight: 700; }
+.tl li.none { color: var(--dim); font-size: 14px; }
+.tl .d { display: block; color: var(--dim); font: 12px "JetBrains Mono", ui-monospace, monospace; }
+.tl li.now .d { color: var(--mint); }
+.tl .st { margin-left: 6px; font-size: 12px; color: var(--dim); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 0 6px; }
+.scale { padding-left: 1.2em; }
+.vis { margin: 4px 0 14px; }
+.vis canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 12px; background: #050e1f; }
+.vis .act { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+.vis button { font: 12px "Zen Kaku Gothic New", system-ui, sans-serif; color: var(--dim); background: transparent; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.vis button:hover { color: var(--text); border-color: var(--mint); }
+.vis button[disabled] { opacity: .5; cursor: default; }
+.scale li { margin: 6px 0; }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: var(--dim); font-size: 13px; }
 @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
 </style>
@@ -41,28 +67,63 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 <main>
   <a class="brand" href="../../">VOYASCOPE</a>
 
-  <p class="kicker">一言で言うと</p>
+  <p class="kicker">SpaceTips｜一言でわかる</p>
   <h1>パーカー・ソーラー・プローブ</h1>
   <p class="en">Parker Solar Probe</p>
-  <p class="one">「太陽にさわる」ための探査機。2021年に、はじめてコロナ（太陽の上の方の大気）の中を飛んだ<span class="src">出典：<a href="https://science.nasa.gov/mission/parker-solar-probe/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></p>
-  <h2>要点</h2>
-  <dl>
-    <dt>運用</dt><dd>NASA・Johns Hopkins APL<span class="src">出典：<a href="https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></dd>
-    <dt>打ち上げ</dt><dd>2018-08-12<span class="src">出典：<a href="https://science.nasa.gov/mission/parker-solar-probe/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></dd>
-    <dt>いまの状態</dt><dd>運用中。2026年9月7日に「正常に動いている」という信号が届いた<span class="src">出典：<a href="https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></dd>
-    <dt>いまどこ</dt><dd>太陽のまわりを回っている。2026年9月の最接近では、太陽から約610万kmまで近づき、時速約69万kmで飛んだ<span class="src">出典：<a href="https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></dd>
-  </dl>
+
+  <section class="q" aria-labelledby="q1">
+    <h2 id="q1"><span class="qn">Q1</span>何？</h2>
+    <figure class="vis" data-q="1" hidden></figure>
+    <p class="one">「太陽にさわる」ための探査機。2021年に、はじめてコロナ（太陽の上の方の大気）の中を飛んだ<span class="src">出典：<a href="https://science.nasa.gov/mission/parker-solar-probe/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></p>
+    <p class="sub">運用：NASA・Johns Hopkins APL（ジョンズ・ホプキンズ大学の応用物理研究所（APL）が、NASA のために運用している）<span class="src">出典：<a href="https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></p>
+  </section>
+
+  <section class="q" aria-labelledby="q2">
+    <h2 id="q2"><span class="qn">Q2</span>いま何が起きた？</h2>
+    <figure class="vis" data-q="2" hidden></figure>
+    <p class="happen"><span class="tag">運用中</span>2026年9月7日に「正常に動いている」という信号が届いた<span class="src">出典：<a href="https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></p>
+  </section>
+
+  <section class="q" aria-labelledby="q3">
+    <h2 id="q3"><span class="qn">Q3</span>どこ？</h2>
+    <figure class="vis" data-q="3" hidden></figure>
+    <p>太陽のまわりを回っている。2026年9月の最接近では、太陽から約610万kmまで近づき、時速約69万kmで飛んだ<span class="src">出典：<a href="https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></p>
+    <p class="big">地球から <b>約1億3,900万 km</b></p>
+    <span class="src">2026年10月26日の値・<a href="https://ssd.jpl.nasa.gov/horizons/" rel="noopener">JPL Horizons</a> の計算値</span>
+    <a class="go" href="../../">VOYASCOPE で見る（遠くを見る部屋）</a>
+  </section>
+
+  <section class="q" aria-labelledby="q4">
+    <h2 id="q4"><span class="qn">Q4</span>これまで→これから</h2>
+    <figure class="vis" data-q="4" hidden></figure>
+    <ol class="tl">
+      <li class="past"><span class="d">2018年8月12日</span>打ち上げ<span class="src">出典：<a href="https://science.nasa.gov/mission/parker-solar-probe/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></li>
+      <li class="now"><span class="d">いま</span>運用中</li>
+      <li class="next none"><span class="d">これから</span>公式に日付の出ている予定は、まだ載せていません</li>
+    </ol>
+  </section>
+
+  <section class="q" aria-labelledby="q5">
+    <h2 id="q5"><span class="qn">Q5</span>どれくらい？</h2>
+    <figure class="vis" data-q="5" hidden></figure>
+    <ul class="scale">
+      <li>光で <b>約7分42秒</b>（地球から送った電波が届くまで）</li>
+      <li>月までの <b>約374倍</b>（月まで 約37万1,000 km）</li>
+    </ul>
+    <span class="src">光の速さ（秒速 299,792.458 km、定義の値）と、月・太陽の位置の計算から。2026年10月26日の値</span>
+  </section>
   <h2>公式のページ</h2>
   <ul>
     <li><a href="https://science.nasa.gov/mission/parker-solar-probe/" rel="noopener">NASA「Parker Solar Probe」</a></li>
     <li><a href="https://science.nasa.gov/blogs/parker-solar-probe/2026/09/10/after-latest-swing-past-sun-nasas-parker-solar-probe-checks-in/" rel="noopener">NASA のブログ（2026年9月10日）</a></li>
   </ul>
-  <a class="go" href="../../">VOYASCOPE で見る（遠くを見る部屋）</a>
   <p class="src">VOYASCOPE のカードの最終確認：2026-10-04</p>
+  <script type="application/json" id="vis-data">{"id":"parker-solar-probe","group":"probe","model":"parker-solar-probe","name":"パーカー・ソーラー・プローブ","q1":{"text":"「太陽にさわる」ための探査機。2021年に、はじめてコロナ（太陽の上の方の大気）の中を飛んだ","src":"science.nasa.gov"},"q2":{"label":"運用中","note":"2026年9月7日に「正常に動いている」という信号が届いた","asOf":"2026-10-03","src":"science.nasa.gov"},"q3":{"km":138610000,"text":"約1億3,900万 km","when":"2026年10月26日の値","src":"JPL Horizons","moonKm":370919,"sunKm":148753280},"q4":[{"d":"2018年8月12日","label":"打ち上げ","kind":"past"},{"d":"いま","label":"運用中","kind":"now"}],"q5":{"light":"約7分42秒","lightSec":462.3531923541586,"src":"光の速さ（定義の値）から計算","ratio":"月までの約374倍"}}</script>
+  <script type="module" src="../visual.js"></script>
   <footer>
     <p>VOYASCOPE は非公式のファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
     <p>ここに書いた事実は、それぞれの出典（一次情報）で確かめてください。VOYASCOPE は、公式の発表への入口です。</p>
-    <p><a href="../../missions/">一言でわかる一覧</a> · <a href="../../">VOYASCOPE を開く</a></p>
+    <p><a href="../../missions/">SpaceTips（一言でわかる一覧）</a> · <a href="../../">VOYASCOPE を開く</a></p>
   </footer>
 </main>
 </body>

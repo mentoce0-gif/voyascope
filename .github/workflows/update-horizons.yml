@@ -33,15 +33,17 @@ jobs:
         id: fetch
         continue-on-error: true
         run: node scripts/fetch-horizons.mjs
+      - name: 「一言でわかる」ページの距離を作り直す（表のはじめの日の値を載せているため）
+        run: node scripts/build-summaries.mjs
       - name: 変化があればコミット
         run: |
-          if [ -z "$(git status --porcelain -- web/data/horizons.json)" ]; then
+          if [ -z "$(git status --porcelain -- web/data/horizons.json web/missions)" ]; then
             echo "変化なし"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add web/data/horizons.json
+          git add web/data/horizons.json web/missions
           git commit -m "探査機の距離を自動更新（JPL Horizons）"
           git pull --rebase origin main
           git push
