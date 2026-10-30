@@ -2,12 +2,16 @@
 //   人にも、検索・AI にも読めるように、JavaScript を使わない文字だけのページにする
 //   一言 ＝ カードの mission（出典つき）。要点もカードの値だけ（新しい事実は書かない）
 //   人物（astronauts・teams）は作らない（RULES.md の人物の細則）
+//   ニュースを見た次に開く形（M13 N1、2026-10-29 オーナー）：5つの問い（何？・いま何が起きた？・どこ？・
+//   これまで→これから・どれくらい？）の順に並べる。答えの材料がない問いは出さない
+//   距離は web/data/horizons.json の表のはじめの日の値（表が週1回変わると、このページも作り直す）
 //
 // 使い方：node scripts/build-summaries.mjs          … web/missions/ と web/sitemap.xml を書く
 //         node scripts/build-summaries.mjs --check  … 書かずに、いまのファイルと同じか確かめる（CI）
 import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { MISSION, RESULTS } from "../web/tour/artemis2/mission.js";
+import { probeDistance, bodyDistanceKm, lightSeconds, lightTimeJa, kmJa } from "../web/js/far/distance.js";
 
 const ROOT = new URL("..", import.meta.url).pathname;
 const SITE = "https://voyascope.org";
@@ -22,6 +26,17 @@ const read = (dir) =>
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const host = (u) => new URL(u).hostname.replace(/^www\./, "");
 const BUILDER_TYPE = { university: "大学・高専", company: "企業", agency: "JAXA・研究機関" };
+const JST = 9 * 3600000;
+const ymd = (iso) => {
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${y}年${m}月${d}日`;
+};
+const jstDay = (t) => new Date(Date.parse(t) + JST).toISOString().slice(0, 10);
+const EVENTS = new Map(read("events").map((e) => [e.id, e]));
+const HORIZONS = JSON.parse(readFileSync(join(ROOT, "web", "data", "horizons.json"), "utf8"));
+// 距離を出す日：Horizons の表のはじめの日（日本時間 0時）。表がなければ距離は出さない
+const REF = Object.values(HORIZONS.probes ?? {})[0]?.start ? new Date(Object.values(HORIZONS.probes)[0].start) : null;
+const REF_LABEL = REF ? `${ymd(jstDay(REF.toISOString()))}の値` : "";
 const STATUS = { operating: "運用中", standby: "待機中", ended: "運用終了", not_launched: "打ち上げ前" };
 
 // 出典のついた値：配列は「・」でつなぐ。非公開は「非公開（運用者が公表していない）」
@@ -50,6 +65,26 @@ ul { margin: 0; padding-left: 1.2em; }
 .list li { margin: 10px 0; }
 .list a { font-weight: 700; }
 .list span { display: block; color: var(--dim); font-size: 14px; }
+.q { margin-top: 8px; }
+.q h2 { display: flex; align-items: baseline; gap: 10px; }
+.qn { font: 700 12px "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.1em; color: var(--navy); background: var(--mint); border-radius: 4px; padding: 2px 6px; }
+.sub { color: var(--dim); font-size: 14px; margin: 8px 0 0; }
+.happen { margin: 0; padding: 14px 16px; background: var(--navy2); border-radius: 12px; }
+.tag { display: inline-block; margin-right: 8px; padding: 0 8px; border: 1px solid var(--mint); border-radius: 999px; color: var(--mint); font-size: 13px; }
+.big { font-size: 1.15rem; margin: 12px 0 0; }
+.big b, .scale b { color: var(--amber); }
+.tl { list-style: none; margin: 0; padding: 0 0 0 18px; border-left: 2px solid rgba(255,255,255,.18); }
+.tl li { position: relative; margin: 0 0 14px; }
+.tl li::before { content: ""; position: absolute; left: -25px; top: 0.55em; width: 10px; height: 10px; border-radius: 50%; background: var(--dim); }
+.tl li.now::before { background: var(--mint); box-shadow: 0 0 0 4px rgba(94,242,194,.25); }
+.tl li.next::before { background: var(--navy); border: 2px solid var(--amber); width: 6px; height: 6px; }
+.tl li.now { color: var(--mint); font-weight: 700; }
+.tl li.none { color: var(--dim); font-size: 14px; }
+.tl .d { display: block; color: var(--dim); font: 12px "JetBrains Mono", ui-monospace, monospace; }
+.tl li.now .d { color: var(--mint); }
+.tl .st { margin-left: 6px; font-size: 12px; color: var(--dim); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; padding: 0 6px; }
+.scale { padding-left: 1.2em; }
+.scale li { margin: 6px 0; }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: var(--dim); font-size: 13px; }
 @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
 `;
@@ -100,31 +135,121 @@ const ldPage = (name, description, url, dateModified, sameAs = []) => ({
   about: { "@type": "Thing", name, ...(sameAs.length ? { sameAs } : {}) },
 });
 
+// 出来事の日時（events.json の when）を「2026年11月21日」の形に。並べるための鍵も返す
+function whenJa(w) {
+  if (w.at) return { key: w.at, text: ymd(jstDay(w.at)) };
+  if (w.date) return { key: w.date, text: ymd(w.date) };
+  if (w.from) {
+    const [a, b] = [w.from, w.to ?? w.from];
+    const same = a.slice(0, 7) === b.slice(0, 7);
+    return { key: a, text: same && a !== b ? `${ymd(a)}〜${Number(b.slice(8))}日` : a === b ? ymd(a) : `${ymd(a)}〜${ymd(b)}` };
+  }
+  if (w.month) {
+    const [y, m] = w.month.split("-").map(Number);
+    return { key: `${w.month}-01`, text: `${y}年${m}月` };
+  }
+  return { key: "", text: "" };
+}
+const EVENT_STATE = { done: "済み", postponed: "延期", cancelled: "中止" };
+
+const sec = (n, q, body) => `
+  <section class="q" aria-labelledby="q${n}">
+    <h2 id="q${n}"><span class="qn">Q${n}</span>${q}</h2>
+${body}
+  </section>`;
+
 // 探査機・地球のまわりの機体
 function cardPage(c, group) {
   const path = `missions/${c.id}/`;
-  const rows = [];
-  rows.push(["運用", `${esc(val(c.operator))}${cite(c.operator)}`]);
-  if (c.builder) rows.push(["つくり手", `${esc(val(c.builder))}${c.builder_type?.value ? `（${esc(BUILDER_TYPE[c.builder_type.value] ?? c.builder_type.value)}）` : ""}${cite(c.builder)}`]);
-  if (c.form_factor) rows.push(["大きさ", `${esc(val(c.form_factor))}${c.form_factor.note ? `（${esc(c.form_factor.note)}）` : ""}${cite(c.form_factor)}`]);
-  rows.push(["打ち上げ", `${esc(val(c.launch_date))}${c.launch_date.note ? `（${esc(c.launch_date.note)}）` : ""}${cite(c.launch_date)}`]);
-  if (c.status) rows.push(["いまの状態", `${esc(STATUS[c.status.value] ?? c.status.value)}${c.status.note ? `。${esc(c.status.note)}` : ""}${cite(c.status)}`]);
-  if (c.location) rows.push(["いまどこ", `${esc(val(c.location))}${cite(c.location)}`]);
-  const go = group === "probe" ? "VOYASCOPE で見る（遠くを見る部屋）" : "VOYASCOPE で見る（地球のまわり）";
+  const parts = [];
+
+  // Q1 何？
+  parts.push(sec(1, "何？", `    <p class="one">${esc(c.mission.value)}${cite(c.mission)}</p>
+    <p class="sub">運用：${esc(val(c.operator))}${c.operator.note ? `（${esc(c.operator.note)}）` : ""}${cite(c.operator)}</p>`));
+
+  // Q2 いま何が起きた？（カードの「いまの状態」。日付は出典を確かめた日）
+  if (c.status) {
+    const st = STATUS[c.status.value] ?? c.status.value;
+    parts.push(sec(2, "いま何が起きた？", `    <p class="happen"><span class="tag">${esc(st)}</span>${c.status.note ? esc(c.status.note) : ""}${cite(c.status)}</p>`));
+  }
+
+  // Q3 どこ？
+  const where = [];
+  const dist = group === "probe" && REF ? probeDistance(c, REF, HORIZONS) : null;
+  if (c.location) where.push(`    <p>${esc(val(c.location))}${cite(c.location)}</p>`);
+  else if (group === "craft") {
+    const alt = c.stats?.altitude_km;
+    where.push(`    <p>地球のまわりを回っている${alt ? `（高さ 約${esc(alt.value.toLocaleString("ja-JP"))} km）${cite(alt)}` : ""}</p>`);
+  }
+  if (dist && dist.km > 0) {
+    const how =
+      dist.method === "horizons" ? `${esc(REF_LABEL)}・<a href="https://ssd.jpl.nasa.gov/horizons/" rel="noopener">JPL Horizons</a> の計算値${dist.supplier ? `（軌道は ${esc(dist.supplier)} から）` : ""}`
+      : dist.method === "planet" ? `${esc(REF_LABEL)}・いる惑星までの距離を計算`
+      : dist.method === "dated" ? `${esc(ymd(dist.at))}の公式の値${cite(c.distance)}`
+      : "公式の目安の値";
+    where.push(`    <p class="big">地球から <b>約${esc(kmJa(dist.km))}</b></p>
+    <span class="src">${how}</span>`);
+  }
+  const goHref = c.id === "mmx" ? "../../mmx/now/" : "../../";
+  const goText = c.id === "mmx" ? "MMX は、いまどこ？（VOYASCOPE）" : group === "probe" ? "VOYASCOPE で見る（遠くを見る部屋）" : "VOYASCOPE で見る（地球のまわり）";
+  where.push(`    <a class="go" href="${goHref}">${goText}</a>`);
+  parts.push(sec(3, "どこ？", where.join("\n")));
+
+  // Q4 これまで→これから（打ち上げ・出来事・いま）
+  const items = [];
+  const launchEvent = (c.events ?? []).some((id) => EVENTS.get(id)?.kind === "launch");
+  if (c.launch_date?.value && !launchEvent) items.push({ key: c.launch_date.value, text: ymd(c.launch_date.value), label: "打ち上げ", past: true, f: c.launch_date });
+  for (const id of c.events ?? []) {
+    const e = EVENTS.get(id);
+    if (!e) continue;
+    const w = whenJa(e.when.value);
+    const state = e.status?.value;
+    items.push({ key: w.key, text: w.text, label: e.title.ja, past: state === "done", state: EVENT_STATE[state], f: e.when });
+  }
+  items.sort((a, b) => (a.past === b.past ? a.key.localeCompare(b.key) : a.past ? -1 : 1));
+  const nowAt = items.findIndex((i) => !i.past);
+  const li = (i) => `      <li class="${i.past ? "past" : "next"}"><span class="d">${esc(i.text)}</span>${esc(i.label)}${i.state ? `<span class="st">${esc(i.state)}</span>` : ""}${cite(i.f)}</li>`;
+  const nowLi = `      <li class="now"><span class="d">いま</span>${esc(c.status ? STATUS[c.status.value] ?? "" : "")}</li>`;
+  const tl = [...items.slice(0, nowAt < 0 ? items.length : nowAt).map(li), nowLi, ...(nowAt < 0 ? [] : items.slice(nowAt).map(li))];
+  if (nowAt < 0) tl.push(`      <li class="next none"><span class="d">これから</span>公式に日付の出ている予定は、まだ載せていません</li>`);
+  parts.push(sec(4, "これまで→これから", `    <ol class="tl">
+${tl.join("\n")}
+    </ol>`));
+
+  // Q5 どれくらい？（ものさし）
+  const scale = [];
+  if (dist && dist.km > 0) {
+    // Horizons・計算の値は細かく、公式の目安・日付つきの値は丸めて「約」
+    const approx = dist.method === "dated" || dist.method === "typical";
+    const lt = lightTimeJa(lightSeconds(dist.km), { approx }).replace(/ /g, "");
+    scale.push(`      <li>光で <b>${esc(approx ? lt : `約${lt}`)}</b>（地球から送った電波が届くまで）</li>`);
+    // くらべる相手：月の1,000倍までは月、その先は太陽（どちらも REF の日の計算）
+    const moon = bodyDistanceKm("Moon", REF);
+    const sun = bodyDistanceKm("Sun", REF);
+    const [name, ref] = dist.km / moon <= 1000 ? ["月", moon] : ["太陽", sun];
+    const r = dist.km / ref;
+    if (r >= 1.5) scale.push(`      <li>${name}までの <b>約${esc(r >= 100 ? Math.round(r).toLocaleString("ja-JP") : r.toFixed(r >= 10 ? 0 : 1))}倍</b>（${name}まで 約${esc(kmJa(ref))}）</li>`);
+  }
+  if (group === "craft") {
+    const st = c.stats ?? {};
+    if (st.speed_km_s) scale.push(`      <li>速さ：秒速 <b>約${esc(st.speed_km_s.value)} km</b>${cite(st.speed_km_s)}</li>`);
+    if (st.period_min) scale.push(`      <li>地球を1周：<b>約${esc(st.period_min.value)}分</b>${cite(st.period_min)}</li>`);
+    if (st.length_m) scale.push(`      <li>大きさ：<b>約${esc(st.length_m.value.toLocaleString("ja-JP"))} m</b>${st.length_m.note ? `（${esc(st.length_m.note)}）` : ""}${cite(st.length_m)}</li>`);
+    if (st.mass_kg) scale.push(`      <li>重さ：<b>約${esc(Math.round(st.mass_kg.value / 1000).toLocaleString("ja-JP"))} トン</b>${cite(st.mass_kg)}</li>`);
+  }
+  if (scale.length) parts.push(sec(5, "どれくらい？", `    <ul class="scale">
+${scale.join("\n")}
+    </ul>${dist && dist.km > 0 ? `\n    <span class="src">光の速さ（秒速 299,792.458 km、定義の値）と、月・太陽の位置の計算から。${esc(REF_LABEL)}</span>` : ""}`));
+
   const body = `
-  <p class="kicker">一言で言うと</p>
+  <p class="kicker">一言でわかる</p>
   <h1>${esc(c.name.ja)}</h1>
   <p class="en">${esc(c.name.en)}</p>
-  <p class="one">${esc(c.mission.value)}${cite(c.mission)}</p>
-  <h2>要点</h2>
-  <dl>
-${rows.map(([k, v]) => `    <dt>${k}</dt><dd>${v}</dd>`).join("\n")}
-  </dl>
+${parts.join("\n")}
   <h2>公式のページ</h2>
   <ul>
 ${c.official_links.map((l) => `    <li><a href="${esc(l.url)}" rel="noopener">${esc(l.label)}</a></li>`).join("\n")}
   </ul>
-  <a class="go" href="../../">${go}</a>
   <p class="src">VOYASCOPE のカードの最終確認：${esc(c.updated_at)}</p>`;
   return {
     path,
@@ -186,7 +311,7 @@ const listItems = (items) => items.map((p) => `    <li><a href="${p.path.replace
 const indexBody = `
   <p class="kicker">一言でわかる</p>
   <h1>宇宙を旅する者たちを、一言で</h1>
-  <p>VOYASCOPE が載せている探査機・人工衛星・ミッションを、一言と要点で。書いてあることには、すべて出典があります。</p>
+  <p>ニュースで見た名前を、5つの問い（何？・いま何が起きた？・どこ？・これまで→これから・どれくらい？）で。書いてあることには、すべて出典があります。</p>
   <h2>ミッション</h2>
   <ul class="list">
 ${listItems([artemis])}
