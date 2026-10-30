@@ -561,6 +561,8 @@ body { overflow: hidden; }
 }
 .craft-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .ov-lead { margin: 0 0 10px !important; font-size: 0.95rem; line-height: 1.75; color: var(--text); }
+.ov-more { margin: -4px 0 12px !important; font-size: 0.85rem; }
+.ov-more a { display: inline-flex; align-items: center; min-height: 44px; color: var(--mint); text-underline-offset: 3px; }
 .ov-catch { margin: 0 0 10px !important; color: var(--mint); font-size: 0.9rem; font-weight: 700; }
 .ov-catch .k { font-weight: 400; font-size: 0.66rem; }
 .class-chip {
@@ -815,6 +817,11 @@ body { overflow: hidden; }
 .pass-dir { font-size: 0.9rem; }
 .pass-dir strong { color: var(--mint); }
 .pass-height { margin-top: 2px; }
+.pass-bright { margin-top: 2px; font-size: 0.85rem; }
+.pass-bright strong { font-weight: 700; }
+.pass-bright .bright-hi { color: var(--amber); }
+.pass-bright .bright-mid { color: var(--mint); }
+.pass-bright .bright-lo { color: var(--text-dim); }
 .sky-chart { display: block; width: 100%; max-width: 220px; margin: 6px auto 4px; }
 .sky-horizon { fill: rgba(8, 26, 54, 0.9); stroke: var(--mint-dim); stroke-width: 1; }
 .sky-ring { fill: none; stroke: rgba(94, 242, 194, 0.18); stroke-width: 0.8; }
@@ -1521,6 +1528,18 @@ dialog.greeting > .card-inner > .greet-actions .btn-primary { background: none; 
   .mmx-open .mi-foot { stroke: #dfe8ee; stroke-width: 2; stroke-linecap: round; }
   .mmx-open.soon { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0.6); animation: mmx-pulse 3.6s ease-out infinite; border-color: var(--mint-dim); }
   .mmx-open:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  /* 次の出来事：地球の左上（MMX のアイコンの向かい）に小さく。あと何日かを目立たせる（2026-10-28 オーナー）。押すと一覧の「予定」 */
+  .next-chip:not([hidden]) {
+    display: grid;
+    position: absolute; z-index: 19; left: 12px; top: calc(var(--top-h) + var(--switch-h) + 8px);
+    max-width: min(56vw, 240px); min-height: 52px; margin: 0; padding: 5px 12px;
+    border-radius: 14px; background: rgba(5, 14, 31, 0.72); backdrop-filter: blur(4px);
+    text-align: left; line-height: 1.4;
+  }
+  .next-chip .next-k { margin: 0; font-size: 0.6rem; letter-spacing: 0.08em; }
+  .next-chip .next-title { overflow: hidden; text-overflow: ellipsis; font-size: 0.72rem; color: var(--text); }
+  .next-chip .next-left { margin: 0; font-size: 0.85rem; }
+  #app.has-selected .next-chip { display: none; } /* 詳細を開くと地球が上へ寄るので、名札に重ねない */
   @keyframes mmx-pulse { 0% { box-shadow: 0 0 0 0 rgba(94, 242, 194, 0.55); } 70%, 100% { box-shadow: 0 0 0 14px rgba(94, 242, 194, 0); } }
   /* 「遠くを見る」へ入るとき：地球へぐにゅっと寄る */
   #globe.dive { animation: globe-dive 0.75s cubic-bezier(.55, -0.25, .7, .2) forwards; }

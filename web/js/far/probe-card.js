@@ -129,6 +129,7 @@ export function fullCardHtml(item, { now, upcoming }) {
         ${row("運用", `${esc(factValue(c.operator))}${note(c.operator)}${src(c.operator.source)}`)}
         ${row("打ち上げ", `${plainDateJa(c.launch_date.value)}${note(c.launch_date)}${src(c.launch_date.source)}`)}
       </dl>
+      <p class="pc-more"><a href="missions/${esc(c.id)}/">一言でわかる（要点と出典）<span aria-hidden="true"> ›</span></a></p>
       <h3>公式のページ</h3>
       <ul class="link-list">${c.official_links.map((l) => `<li><a href="${esc(l.url)}" ${ext}>${esc(l.label)}</a></li>`).join("")}</ul>
       <p class="k small">内容は ${plainDateJa(c.updated_at)} に公式のページで確かめたものです。※非公式ファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>

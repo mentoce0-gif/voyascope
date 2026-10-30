@@ -136,3 +136,61 @@
   - 「Migrate from Pages to Workers」：Workers は Pages より機能が広い（Cron Triggers など）
   - Web Analytics：無料。DNS を移さず、JavaScript を足すだけでも使える
 - このリポジトリ：フォーク0件・スター0件。Software Heritage に保存なし（いずれも 2026-10-04）
+
+## 7. アクセス計測（Cloudflare Web Analytics）の整理（2026-10-28）
+
+オーナー（2026-10-28）：「もう使っているが、VOYASCOPE の仕様上、正確な訪問数の判定が難しいと FB をもらった覚えがある。正確な手段があるなら、冒頭のページに文言を足して記録へ」→ 新しい手がないか、チャッピー C39・Grok G5 で探した。下は Claude Code が公式ページで照合した結果（2026-10-28）。照合の記録の下書きは voyascope-research の `research/verification/2026-10-28-c39-g5.md` に置く（オーナーが置く）。
+
+### 結論
+
+- **正確な人数を出す手段はない**（どの方法でも、数え漏れか数えすぎが残る）。Web Analytics の「訪問」は人数ではない
+- いちばん足りないのは「人数の精度」ではなく、**「観測を開始」を押したか・どの部屋を開いたか**が分からないこと。これは **Workers Analytics Engine** で、人を見分けない「出来事の数」として数えられる（無料の範囲・作る量は小さい）。作るかはオーナーが決める（ルール5）
+- 海外向けに気をつけること：**無料のドメインで自動で有効になった Web Analytics は、EU からの訪問を数えない設定が初期値**（下の表の5）。英語版で海外の反応を見るなら、EU を数えるかを決める（GDPR に関わるのでルール5）
+
+### 照合できた事実
+
+| # | 事実 | 出典（公式） |
+|---|---|---|
+| 1 | 「訪問」は、リファラー（どこから来たか）がこのサイトと違うページビュー。1回の訪問に複数のページビューが入る。ページビューは HTML の成功した応答 | https://developers.cloudflare.com/web-analytics/data-metrics/high-level-metrics/ |
+| 2 | 自分で決めた出来事（カスタムイベント）は "Not yet"。見られるのは過去6か月。クエリ文字列（`?craft=` など）は記録しない。ビーコンは広告ブロッカーで止まる・通信の状況で欠ける | https://developers.cloudflare.com/web-analytics/faq/ |
+| 3 | 1ページのアプリは、Soft Navigations API・Navigation API・History API（pushState・popstate）で、道が変わるたびに数える（2026-08-20 更新）。hashchange の記述はない | https://developers.cloudflare.com/web-analytics/get-started/web-analytics-spa/ |
+| 4 | 2026-08-21 に数え方を改善。「ページビューと訪問の数が変わることがある」 | https://developers.cloudflare.com/changelog/post/2026-08-21-improved-soft-navigation-measurement-for-single-page-applications/ |
+| 5 | 無料のドメインは 2025-10-15 から自動で有効。**EU の訪問は除く（ダッシュボードで変えられる）**。Cookie・localStorage は使わない、IP アドレスなどの個人の情報はエッジで取り除く、IP・User Agent・フィンガープリントで人を追わない | https://blog.cloudflare.com/the-rum-diaries-enabling-web-analytics-by-default/ （2025-09-17） |
+| 6 | Workers Analytics Engine：保存は3か月、1回の呼び出しで250点まで。無料プランは書き込み1日10万・読み出し1日1万。いまは課金していない | https://developers.cloudflare.com/analytics/analytics-engine/limits/ ・ https://developers.cloudflare.com/analytics/analytics-engine/pricing/ |
+| 7 | 配信の記録（ゾーンの Analytics）は、全プランで30日以上見られるように（2026-10-02） | https://developers.cloudflare.com/changelog/post/2026-10-02-30-days-analytics-on-every-plan/ |
+| 8 | Counterscale：自分で置く・MIT・Cookie とフィンガープリントなし・無料の Workers で1日5万ページビューまで。出来事を数える機能はページに書かれていない | https://counterscale.dev/ |
+| 9 | 個人情報保護委員会：特定の個人との対応関係が排斥されている統計情報は「個人関連情報」に当たらない | https://www.ppc.go.jp/all_faq_index/faq2-q2-8/ |
+
+### VOYASCOPE に当てはめると
+
+- 遠くを見る部屋を開くと `#far` を pushState している。表の3から、部屋を開くたびにページビューとして数えられている**かもしれない**（確かめていない）。だとすると、ページビューは人の動きより多めに出る
+- 10/1〜21 の「米国 110」を巡回プログラムと決めつけない（国の割合だけでは見分けられない。チャッピーの注意）
+- 「一言でわかる」からの `?craft=` は数えない（表の2）。どのリンクから来たかを知りたければ、別の手（Analytics Engine）が要る
+
+### 照合できなかったもの（使わない）
+
+- X の iOS アプリがリンクを先に読み込み、サイトの数がふくらむ話（Grok：The Verge 2025-11-07）：記事が開けず、X の公式の説明もない
+- AI の巡回プログラムの3つの分け方（Grok：Cloudflare ブログ 2026-07-01）・「Disallow AI Training」（2026-09-15）：今回は開いていない。robots.txt の方針（学習は断る）に関わるので、次に見るときに照合する
+- GoatCounter・Matomo・Plausible などの細かい条件、EU の GDPR・ePrivacy、米国の COPPA の原文（チャッピーも未確認）
+
+### 「このアプリについて」の文（2026-10-28 オーナー OK・足した）
+
+> このサイトがどのくらい見られているかを知るために、Cloudflare Web Analytics を使っています。Cloudflare の説明では、Cookie は使わず、IP アドレスなどの個人の情報は取り除かれます。数はおおよその目安です。
+
+### 出来事の回数（2026-10-28 オーナー「やってみよう」・作った）
+
+- しくみ：画面（`web/js/count.js` の `count(名前)`）→ `navigator.sendBeacon("/e", 名前)` → Worker（`src/lab-worker.js` の `/e`）→ Workers Analytics Engine のデータセット `voyascope_events`（`wrangler.jsonc` の `EVENTS`）。記録するのは**出来事の名前と時刻だけ**（`blobs: [名前]`）。IP アドレス・国・端末・県は記録しない。決まった名前のほかは捨てる。本番（voyascope.org）のときだけ送る
+- 数えるもの：`start`（観測を開始）・`far`（遠くを見る部屋）・`tonight`（今夜を開いた）・`from-missions`（一言でわかるから来た）・`mmx-now`・`sky`・`artemis2`（それぞれのページを開いた）。足すときは `count.js` の `EVENT_NAMES` に足す（Worker も同じ一覧を使う）
+- 無料の範囲：書き込み1日10万。超えた分は記録されないだけ（画面には何も起きない）。データは3か月残る
+- 見方（オーナー）：Cloudflare で「Account Analytics: Read」の API トークンを作り、次を実行する（`ACCOUNT_ID` は GitHub の Secrets の `CLOUDFLARE_ACCOUNT_ID` と同じ）
+
+```bash
+curl -s "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/analytics_engine/sql" -H "Authorization: Bearer $TOKEN" --data "SELECT blob1 AS name, SUM(_sample_interval) AS times FROM voyascope_events WHERE timestamp > NOW() - INTERVAL '7' DAY GROUP BY name ORDER BY times DESC"
+```
+
+- 気をつけること：Analytics Engine を使うのは、このアカウントで初めて。**マージのあとの最初の公開（deploy-cloudflare）が通るか見る**。通らなければ、Cloudflare のダッシュボードで Analytics Engine を有効にするか、`wrangler.jsonc` の `analytics_engine_datasets` を外して公開し直す（ほかの公開を止めないため）
+
+### 次の手
+
+1. 2週間ほど数を見て、「観測を開始」まで進む割合（`start` ÷ Web Analytics のトップのページビュー）を出す
+2. 英語版を出すときに、EU の訪問を数えるかを決める

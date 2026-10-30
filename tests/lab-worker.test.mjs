@@ -42,3 +42,24 @@ test("Basic の読み取り：「:」を含むパスワード", () => {
   assert.equal(passwordOf(basic("a", "b:c")), "b:c");
   assert.equal(passwordOf(null), null);
 });
+
+test("出来事の回数：決まった名前だけ、名前だけを記録する", async () => {
+  const points = [];
+  const env = { ASSETS, EVENTS: { writeDataPoint: (p) => points.push(p) } };
+  const post = (body, method = "POST") =>
+    worker.fetch(new Request("https://voyascope.org/e", method === "POST" ? { method, body } : { method }), env);
+  assert.equal((await post("start")).status, 204);
+  assert.equal((await post("far")).status, 204);
+  assert.equal((await post("tokyo-13")).status, 204); // 知らない名前は記録しない（返事は同じ）
+  assert.deepEqual(points, [
+    { blobs: ["start"], indexes: ["start"] },
+    { blobs: ["far"], indexes: ["far"] },
+  ]);
+  assert.equal((await post(null, "GET")).status, 405);
+  assert.equal((await post("x".repeat(100))).status, 413);
+});
+
+test("出来事の回数：データセットがないときは何もしない", async () => {
+  const res = await worker.fetch(new Request("https://voyascope.org/e", { method: "POST", body: "start" }), { ASSETS });
+  assert.equal(res.status, 204);
+});

@@ -2,6 +2,7 @@
 // 素案（オーナーと ChatGPT の v0.4）の画面の流れを引きつぎ、計算はアプリと同じ部品（passes.js・meteors.js）につないだ
 // 位置は県（県庁あたり）だけ。GPS は使わない。記録・写真はこの端末の中だけ（送らない）
 import { satrecFromOrbit } from "../js/orbit.js";
+import { count } from "../js/count.js";
 import { findVisiblePasses, observerOf, skyAt, dir8, sunEci, SUN_BELOW } from "../js/passes.js";
 import { radiantSky, meteorNight, moonEci, moonLit, activeMeteors } from "../js/meteors.js";
 import { whenWord, clockWord, loadPrefecture, savePrefecture } from "../js/tonight.js";
@@ -9,6 +10,8 @@ import { esc } from "../js/format.js";
 import { gstime, eciToEcf, ecfToLookAngles } from "../vendor/satellite.min.js";
 import { enu, rotation, cameraDir, project, steer, fists, absoluteAlpha } from "./orient.js";
 import { logText, postUrl, loadLogs, saveLogs } from "./share.js";
+
+count("sky");
 
 const $ = (q) => document.querySelector(q);
 const DEG = 180 / Math.PI;

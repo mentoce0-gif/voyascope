@@ -339,5 +339,5 @@ export async function createFarRoom({ events = [], onClose = () => {} } = {}) {
     if (room.open) room.close(); // 片づけは close のイベントで
   }
 
-  return { open, close, isOpen: () => room.open };
+  return { open, close, openCard, isOpen: () => room.open };
 }

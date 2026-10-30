@@ -1,7 +1,9 @@
-// 試作の部屋（/lab/）にだけパスワードをかける（2026-10-20 オーナー）。
+// 試作の部屋（/lab/）にだけパスワードをかける（2026-10-20 オーナー）。出来事の回数の受け口（/e）もここ（2026-10-28）。
 // ほかの道は Worker を通らず、web/ の静的なファイルをそのまま配る（wrangler.jsonc の assets.run_worker_first）。
 // パスワードはリポジトリに書かない。Cloudflare の Worker のシークレット LAB_PASSWORD に入れる（未設定のあいだは開かない）。
 // ※リポジトリは公開なので、/lab/ のファイルの中身は GitHub では見える。鍵は「公開のサイトで見つからないように」するためのもの
+
+import { EVENT_NAMES } from "../web/js/count.js";
 
 const REALM = "VOYASCOPE lab";
 
@@ -32,9 +34,22 @@ export function passwordOf(header) {
   }
 }
 
+// 出来事の回数（web/js/count.js から。2026-10-28 オーナー）：決まった名前だけを、Workers Analytics Engine に名前と時刻だけで記録する。
+// IP アドレス・国・端末の情報は記録しない。データセットを用意していない（EVENTS がない）ときは何もしない
+export async function countEvent(request, env) {
+  if (request.method !== "POST") return deny(405, "POST だけです。", { allow: "POST" });
+  if (Number(request.headers.get("content-length") ?? 0) > 64) return deny(413, "長すぎます。");
+  const body = await request.text();
+  if (body.length > 64) return deny(413, "長すぎます。");
+  const name = body.trim();
+  if (EVENT_NAMES.has(name)) env.EVENTS?.writeDataPoint({ blobs: [name], indexes: [name] });
+  return new Response(null, { status: 204, headers: { "cache-control": "no-store" } });
+}
+
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
+    if (pathname === "/e") return countEvent(request, env);
     if (pathname === "/lab" || pathname.startsWith("/lab/")) {
       if (!env.LAB_PASSWORD) return deny(503, "試作の部屋は準備中です。");
       const pw = passwordOf(request.headers.get("authorization"));

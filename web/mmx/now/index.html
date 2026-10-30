@@ -228,6 +228,8 @@ import { makeKit, MODELS } from "../../js/far/models.js";
 import { mmxPhase, transferProgress, untilText } from "./state.js";
 import { launchProgress, hms } from "../../js/launch-plan.js";
 import { GeoVector, Body as ABody, MakeTime } from "../../vendor/astronomy.min.js";
+import { count } from "../../js/count.js";
+count("mmx-now");
 
 // 大きさは、ピンチで変わる見える範囲（innerWidth）ではなく、ページの大きさで決める
 const vw = () => document.documentElement.clientWidth || innerWidth, vh = () => document.documentElement.clientHeight || innerHeight;

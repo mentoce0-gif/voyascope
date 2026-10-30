@@ -4,13 +4,17 @@
   // 公開は .github/workflows/deploy.yml（GitHub Actions から wrangler で）。キャッシュは web/_headers。
   "name": "voyascope",
   "compatibility_date": "2026-10-04",
-  // 試作の部屋（/lab/）のパスワードだけを見る小さな Worker（2026-10-20 オーナー）。ほかの道は Worker を通らない
+  // 試作の部屋（/lab/）のパスワードと、出来事の回数の受け口（/e）だけを見る小さな Worker（2026-10-20・10-28 オーナー）。ほかの道は Worker を通らない
   "main": "src/lab-worker.js",
   "assets": {
     "directory": "./web",
     "binding": "ASSETS",
-    "run_worker_first": ["/lab", "/lab/*"]
+    "run_worker_first": ["/lab", "/lab/*", "/e"]
   },
+  // 出来事の回数（「観測を開始」・部屋を開いた など。web/js/count.js → src/lab-worker.js の /e）。名前と時刻だけを記録（2026-10-28 オーナー）
+  "analytics_engine_datasets": [
+    { "binding": "EVENTS", "dataset": "voyascope_events" }
+  ],
   // 独自ドメイン（2026-10-04 オーナー決定）。Cloudflare が DNS と証明書を自動で用意する
   "routes": [
     { "pattern": "voyascope.org", "custom_domain": true }

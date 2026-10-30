@@ -110,12 +110,19 @@ function cardPage(c, group) {
   rows.push(["打ち上げ", `${esc(val(c.launch_date))}${c.launch_date.note ? `（${esc(c.launch_date.note)}）` : ""}${cite(c.launch_date)}`]);
   if (c.status) rows.push(["いまの状態", `${esc(STATUS[c.status.value] ?? c.status.value)}${c.status.note ? `。${esc(c.status.note)}` : ""}${cite(c.status)}`]);
   if (c.location) rows.push(["いまどこ", `${esc(val(c.location))}${cite(c.location)}`]);
-  const go = group === "probe" ? "VOYASCOPE で見る（遠くを見る部屋）" : "VOYASCOPE で見る（地球のまわり）";
+  // アプリへ戻る道：その機体を選んだ地球の画面・遠くを見る部屋のカード・MMX は「いまどこ」（2026-10-28 オーナー）
+  const [goHref, go] =
+    group !== "probe"
+      ? [`../../?craft=${c.id}`, "いまの位置を見る（VOYASCOPE の地球のまわり）"]
+      : c.id === "mmx"
+        ? ["../../mmx/now/", "いまどこを見る（VOYASCOPE の MMX の航路）"]
+        : [`../../?probe=${c.id}`, "VOYASCOPE で見る（遠くを見る部屋）"];
   const body = `
   <p class="kicker">一言で言うと</p>
   <h1>${esc(c.name.ja)}</h1>
   <p class="en">${esc(c.name.en)}</p>
   <p class="one">${esc(c.mission.value)}${cite(c.mission)}</p>
+  <a class="go" href="${esc(goHref)}">${go}</a>
   <h2>要点</h2>
   <dl>
 ${rows.map(([k, v]) => `    <dt>${k}</dt><dd>${v}</dd>`).join("\n")}
@@ -124,7 +131,7 @@ ${rows.map(([k, v]) => `    <dt>${k}</dt><dd>${v}</dd>`).join("\n")}
   <ul>
 ${c.official_links.map((l) => `    <li><a href="${esc(l.url)}" rel="noopener">${esc(l.label)}</a></li>`).join("\n")}
   </ul>
-  <a class="go" href="../../">${go}</a>
+  <a class="go" href="${esc(goHref)}">${go}</a>
   <p class="src">VOYASCOPE のカードの最終確認：${esc(c.updated_at)}</p>`;
   return {
     path,

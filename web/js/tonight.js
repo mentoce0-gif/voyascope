@@ -1,6 +1,6 @@
 // 今夜・頭の上：県を選ぶと、ISS が見える通過の時刻・方角・空の図を出す
 import { esc, obsRadar } from "./format.js";
-import { dir8, heightWord } from "./passes.js";
+import { dir8, heightWord, brightWord, observerOf, sunGap, sunGapWord } from "./passes.js";
 import { SKIES, obsLogText, postUrl } from "./obslog.js";
 
 const TZ = "Asia/Tokyo"; // 県単位の予報なので日本時間で出す
@@ -112,11 +112,13 @@ export function renderTonight(el, { pref, passes, now, jumpable }) {
   }
   const [p, ...rest] = passes;
   const minutes = Math.max(1, Math.round((p.end - p.start) / 60000));
+  const gap = sunGapWord(sunGap(observerOf(pref), p.start));
   el.innerHTML = `
     <div class="pass-main">
       <div class="card-head"><div class="pass-when">${esc(whenWord(p.start, now))}　<span class="pass-time mono">${esc(clockWord(p.start))}</span></div></div>
       <div class="pass-dir"><strong>${dir8(p.startAz)}</strong>から<strong>${dir8(p.endAz)}</strong>へ　<span class="k">約${minutes}分</span></div>
       <div class="pass-height k">いちばん高いとき：${heightWord(p.maxEl)}（${dir8(p.maxAz)}の空、約${Math.round(p.maxEl)}°）</div>
+      <div class="pass-bright">明るさの目安：<strong class="bright-${brightClass(p.bright)}">${brightWord(p.bright)}</strong>${gap ? `<span class="k">　${esc(gap)}</span>` : ""}</div>
       ${obsRadar(skyChart(p), "iss", "ISS")}
       ${jumpable(p) ? `<button type="button" class="btn mono pass-jump" data-jump="0">この時刻の地球を見る</button>` : ""}
     </div>
@@ -125,7 +127,7 @@ export function renderTonight(el, { pref, passes, now, jumpable }) {
         ? `<ul class="pass-more">${rest
             .map(
               (q, i) =>
-                `<li><span>${esc(whenWord(q.start, now))} ${esc(clockWord(q.start))}</span><span class="k">${dir8(q.startAz)}→${dir8(q.endAz)}・${heightWord(q.maxEl).replace(/（.*）/, "")}</span>${
+                `<li><span>${esc(whenWord(q.start, now))} ${esc(clockWord(q.start))}</span><span class="k">${dir8(q.startAz)}→${dir8(q.endAz)}・${heightWord(q.maxEl).replace(/（.*）/, "")}・${brightWord(q.bright)}</span>${
                   jumpable(q) ? `<button type="button" class="linklike small" data-jump="${i + 1}">見る</button>` : ""
                 }</li>`,
             )
@@ -135,6 +137,9 @@ export function renderTonight(el, { pref, passes, now, jumpable }) {
     ${notes()}`;
 }
 
+const brightClass = (index) => ({ 明るい: "hi", ふつう: "mid", 暗め: "lo" })[brightWord(index)];
+
 const notes = () => `<p class="tonight-note k small">
   ISS はとても明るく、街の中でも見えることがあります。ほかの人工衛星は、街の明かりの下ではほとんど見えません。<br>
+  明るさの目安は、ISS までの距離と、日の当たり方（太陽・ISS・見る人の角度）から計算した、通過どうしの比べです。<br>
   時刻と方角は、公開の軌道データから計算した県庁あたりでの目安です。数分ずれることがあり、天気（雲）は考えていません。</p>`;
