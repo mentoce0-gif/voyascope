@@ -5,6 +5,11 @@
 > PR の番号：#1〜#36 は作り直す前のリポジトリ（`voyascope-archive`、非公開）のもの。#1 から振り直した新しい番号は、このリポジトリのもの。
 
 
+
+## 2026-10-30（2）
+
+- リンクを貼ったときのカードの画像（og:image、1200×630）を作った（オーナー）。トップは地球の写真・ロゴ・「今、宇宙を旅する者たち。」・OBS・SpaceTips・FAR・「voyascope.org・非公式のファンメイド作品」・「地球の画像：NASA Blue Marble・Black Marble」（`web/assets/og/home.jpg`）。SpaceTips の各ページは Q1「何？」の図（名前・一言・出典・非公式つき）に右上のロゴ（`web/assets/og/<id>.jpg`、地球を描いたものは NASA の表記つき）。作るのは `scripts/build-og-images.mjs`（Playwright で描く。CI では作らない。一言・名前・模型を変えたら作り直す）。一覧・アルテミス2号のページはトップの画像
+- SpaceTips の名前：J-PlatPat で該当なし（オーナー確認）
 ## 2026-10-30
 
 - M13「ニュースの次に開く」の N0・N1（2026-10-29 オーナー：「N0 と N1 から始めて」）

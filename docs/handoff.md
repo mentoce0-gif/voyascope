@@ -116,7 +116,7 @@
 - **チャッピーの報告の URL は、貼り付けで消える**（ドメイン名だけ残る）。引用の文で検索して公式ページを探し、原文を確かめる。量が多いときは調べ物を別のエージェントに任せて、結果の表を `research/verification/` に保存する
 - 日本語の地名（月など）の確認先：JAXA デジタルアーカイブス（https://jda.jaxa.jp/ の検索。「かぐや」の映像の題名）
 - 時刻で変わる画面（打ち上げの日など）の確認：Playwright の `page.clock.install({ time })` で時計を合わせる
-- 「一言でわかる」ページ（`web/missions/`）：`curation/` を直したら `node scripts/build-summaries.mjs`（CI は `--check`）。入口は i ボタン（トップは「このアプリについて」）の中だけ
+- 「一言でわかる」ページ（`web/missions/`）：`curation/` を直したら `node scripts/build-summaries.mjs`（CI は `--check`）。カードの一言・名前・模型を変えたら、カードの画像も `CHROMIUM=/opt/pw-browsers/chromium-1194/chrome-linux/chrome node scripts/build-og-images.mjs <id>`（新しい機体のページを足したときも）。入口は i ボタン（トップは「このアプリについて」）の中だけ
 - 同じ日に PR をいくつも出すと、`docs/changelog.md`・`handoff.md` の同じ行で競合する。マージの前に main を取りこんで、両方の行を残す
 - 読み込みの上限は `config/size-budget.json`（グループごと）。上限を上げるのはオーナーの判断
 - `LICENSE`（All rights reserved）・`RULES.md`・`CONTENT_LICENSE.md` は、オーナーの承認なしに変えない。ライセンス・利用条件はルール5（判断材料だけ出す）

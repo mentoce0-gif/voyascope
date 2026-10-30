@@ -95,7 +95,10 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
 @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
 `;
 
-function page({ path, title, description, body, jsonld }) {
+// カードの画像（og:image）：ページの機体の画像があればそれ、なければトップの画像（scripts/build-og-images.mjs が作る）
+const ogImage = (id) => (id && existsSync(join(ROOT, "web", "assets", "og", `${id}.jpg`)) ? `${id}.jpg` : "home.jpg");
+
+function page({ path, title, description, body, jsonld, og }) {
   // リンクは相対で（GitHub Pages では /voyascope/ の下に置かれるため）
   const up = "../".repeat(path.split("/").filter(Boolean).length);
   return `<!doctype html>
@@ -110,6 +113,10 @@ function page({ path, title, description, body, jsonld }) {
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(description)}">
   <meta property="og:url" content="${SITE}/${path}">
+  <meta property="og:image" content="${SITE}/assets/og/${ogImage(og)}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="${up}favicon.svg" type="image/svg+xml">
   <style>${CSS}</style>
   <script type="application/ld+json">${JSON.stringify(jsonld)}</script>
@@ -303,6 +310,7 @@ ${c.official_links.map((l) => `    <li><a href="${esc(l.url)}" rel="noopener">${
     name: c.name.ja,
     html: page({
       path,
+      og: c.id,
       title: `${c.name.ja}を一言で — VOYASCOPE`,
       description: `${c.name.ja}（${c.name.en}）：${c.mission.value}`,
       body,
