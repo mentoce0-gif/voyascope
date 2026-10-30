@@ -19,7 +19,7 @@
 
 ## いまの優先（日付順）
 
-0. **次の目標 M13「ニュースの次に開く」**（2026-10-20 オーナー）→ [`news-next-plan.md`](news-next-plan.md)。**N0・N1 を作った（2026-10-30）**：一言ページ（`web/missions/`）を5つの問い（何？・いま何が起きた？・どこ？・これまで→これから・どれくらい？）に、ニュース台帳は Grok の G5 →（照合）→ `voyascope-research` の `research/news-ledger/YYYY-MM.csv` → `node scripts/news-coverage.mjs` でカバー率・新しさ。各問いに three.js の図（6秒でくり返す。切り抜いて X に出せる形・画像と動画の保存。`web/missions/visual.js`）。**入口は SpaceTips**（2026-10-30 オーナー）：地球の画面の下の帯（`js/tips.js`・`data/tips.json`）と、スマホの右下の SCOPE のランチャー（`js/launcher.js`。押したまま指で OBS・TIPS・FAR・MMX）。PC は部屋の帯に SpaceTips。**次**：11月はじめに G5（対象：2026-10）で最初の台帳 → 数を見て N3 の候補を決める
+0. **次の目標 M13「ニュースの次に開く」**（2026-10-20 オーナー）→ [`news-next-plan.md`](news-next-plan.md)。**N0・N1 を作った（2026-10-30）**：一言ページ（`web/missions/`）を5つの問い（何？・いま何が起きた？・どこ？・これまで→これから・どれくらい？）に、ニュース台帳は Grok の G5 →（照合）→ `voyascope-research` の `research/news-ledger/YYYY-MM.csv` → `node scripts/news-coverage.mjs` でカバー率・新しさ。各問いに three.js の図（6秒でくり返す。切り抜いて X に出せる形・画像と動画の保存。`web/missions/visual.js`）。**入口は SpaceTips**（2026-10-30 オーナー。名前は J-PlatPat で同じ商標が見つからないことをオーナーが確認済み、2026-10-30）：地球の画面の下の帯（`js/tips.js`・`data/tips.json`）と、スマホの右下の SCOPE のランチャー（`js/launcher.js`。押したまま指で OBS・TIPS・FAR・MMX）。PC は部屋の帯に SpaceTips。**次**：11月はじめに G5（対象：2026-10）で最初の台帳 → 数を見て N3 の候補を決める
 1. **MMX は打ち上げ・分離済み**（2026-10-20 4:41:03 打ち上げ、5:52ごろ分離。JAXA の打上げライブ中継で確認＝出典 https://www.youtube.com/watch?v=sZGyK9jfoy4）→ 段取りは [タスク020](tasks/020-mmx-after-launch.md)
    - 済み：出来事 `done`＋いってらっしゃい（10/27 まで）・MMX のカードを運用中・「一言でわかる」作り直し（PR #51・#54）
    - **いまどこ**（`web/mmx/now/`）：はじめて開くと航路のオープニング → 打ち上げから5日までは「MMX を追う」視点、そのあとは全体の図（`TRACK_DAYS`）。全体の図から、さっと払う（スワイプ）と「MMX を追う」へ（ゆっくりなぞると回す。戻るのはボタン。2026-10-25）。上の計器（X+経過・LIFTOFF〜MMX SEP〜NOW の弧・速さの推定 EST〈計画の軌道から〉・F10/H3-24L/MMX）、REPLAY（打ち上げ〜分離をスワイプで。打ち上げのはじめは種子島の正面から）、MISSION・ARCHIVE・SITE のリンク。計画の流れ（速度・高度・事象名）は `launch-plan.js`（改訂版の表2、C33）
@@ -80,7 +80,6 @@
 
 ## オーナーの判断待ち
 
-- **SpaceTips の商標の確認**（ルール5）：簡単な検索では同じ名前のアプリ・サービスは見つからなかった。J-PlatPat（https://www.j-platpat.inpit.go.jp/ ）で「SpaceTips」「スペースティップス」をオーナーが確かめる
 - **M13「ニュースの次に開く」の進め方**：目安の数字・計り方（Search Console／Cloudflare Web Analytics はルール5）・増やす主題の範囲 → [`news-next-plan.md`](news-next-plan.md) の 6.
 - **NASA Space Apps Challenge 2026（11/14〜15）に出るか**（2026-10-20 オーナーが提案。10/29 に課題を確認）：課題は14件（公式サイトはこの環境から読めず、参加チームの公開リポジトリと記事から集めた）。M13 に近いのは「Abandoned but not Forgotten」（月・火星に残した NASA の機材の物語。初心者・若者の部あり。アルテミス2号のページの「着陸」と主題が重なる）と「CLPS Lunar Mission Browser」（月の着陸地点と時期をくらべる。中級・上級）。作業は大会の開始から・既存のコードはそのまま出さない。規約（https://www.spaceappschallenge.org/legal/）は、提出物を NASA が表示・複製・配布してよいこと、過去の版ではオリジナル部分を OSI のオープンソース（指定がなければ Apache 2.0）に → 本体（All rights reserved）とは別のリポジトリで。**2026年版の規約（8/7 更新）を 10/29 にオーナーが貼って確認**：オリジナル部分は OSI のオープンソース（指定なしは Apache 2.0）・NASA 以外の素材も自由に使えるか OSI のものだけ・すべての出典を書く・参加は本名で、名前・居住地・国・写真を NASA が使ってよい・商品やサービスの宣伝になるものは不可・動画は自作で権利のあるものだけ（ルール5：判断はオーナー）
 - **Cloudflare Web Analytics**（ルール5・個人情報）：自動の設定で、すでに計測が動いている（2026-10-21 に気づいた。HTML にタグはない）。このまま使うか、使うなら「このアプリについて」に書くか（`m9-plan.md` の4）。書くなら、何を集めるかをチャッピーに調べてもらう
