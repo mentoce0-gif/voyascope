@@ -2,57 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-10-30T12:56:09.194Z",
+  "fetched_at": "2026-10-30T22:20:50.349Z",
   "days_ahead": 45,
   "launches": [
     {
-      "id": "20d5676e-111b-40e3-8923-b218c3665ca2",
-      "net": "2026-10-30T18:21:00.000Z",
-      "precision": "min",
-      "window_end": "2026-10-30T21:00:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-29T12:40:42Z",
-      "rocket": {
-        "name": "GSLV Mk II",
-        "full_name": "GSLV Mk. II"
-      },
-      "provider": {
-        "name": "Indian Space Research Organization",
-        "ja": "インド宇宙研究機関（ISRO）"
-      },
-      "mission": {
-        "name": "IRNSS-1L (NVS-03)",
-        "placeholder": false,
-        "type": "Navigation",
-        "type_ja": "測位",
-        "orbit": "Geostationary Transfer Orbit",
-        "orbit_ja": "静止トランスファー軌道"
-      },
-      "site": {
-        "location_id": 14,
-        "name": "Satish Dhawan Space Centre, India",
-        "ja": "サティシュ・ダワン宇宙センター",
-        "short": "スリハリコタ",
-        "pad": "Satish Dhawan Space Centre Second Launch Pad",
-        "country": "IND",
-        "country_ja": "インド",
-        "position": {
-          "lat": 13.7199,
-          "lng": 80.2304
-        }
-      }
-    },
-    {
       "id": "57ce0a39-d035-4f16-a418-bd6108f78199",
-      "net": "2026-10-31T03:48:00.000Z",
-      "precision": "min",
+      "net": "2026-10-31T04:02:22.000Z",
+      "precision": "sec",
       "window_end": "2026-10-31T07:48:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-29T18:34:20Z",
+      "updated": "2026-10-30T14:42:22Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -279,14 +240,53 @@
       }
     },
     {
-      "id": "a2423132-f965-423f-8b03-6891b775dc54",
-      "net": "2026-11-05T20:00:00.000Z",
+      "id": "711de6bc-f755-475b-a12f-ec5240da3a11",
+      "net": "2026-11-05T16:00:00.000Z",
       "precision": "hour",
-      "window_end": "2026-11-05T23:00:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-10-26T23:22:44Z",
+      "window_end": "2026-11-05T16:16:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-30T13:34:13Z",
+      "rocket": {
+        "name": "Long March 2C",
+        "full_name": "Long March 2C"
+      },
+      "provider": {
+        "name": "China Aerospace Science and Technology Corporation",
+        "ja": "中国航天科技集団（CASC）"
+      },
+      "mission": {
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
+      },
+      "site": {
+        "location_id": 16,
+        "name": "Xichang Satellite Launch Center, People's Republic of China",
+        "ja": "西昌衛星発射センター",
+        "short": "西昌",
+        "pad": "Launch Complex 3 (LC-3/LA-1)",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 28.247059,
+          "lng": 102.029008
+        }
+      }
+    },
+    {
+      "id": "a2423132-f965-423f-8b03-6891b775dc54",
+      "net": "2026-11-05T21:15:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-05T21:39:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-10-30T13:36:40Z",
       "rocket": {
         "name": "Long March 12",
         "full_name": "Long March 12"
@@ -396,6 +396,45 @@
       }
     },
     {
+      "id": "a2975167-7c6f-4403-99e1-b40df17c8140",
+      "net": "2026-11-20T11:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-20T14:00:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-30T13:59:24Z",
+      "rocket": {
+        "name": "Long March 8A",
+        "full_name": "Long March 8A"
+      },
+      "provider": {
+        "name": "China Aerospace Science and Technology Corporation",
+        "ja": "中国航天科技集団（CASC）"
+      },
+      "mission": {
+        "name": "SatNet LEO Group TBD?",
+        "placeholder": false,
+        "type": "Communications",
+        "type_ja": "通信",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 8,
+        "name": "Wenchang Space Launch Site, People's Republic of China",
+        "ja": "文昌宇宙発射場",
+        "short": "文昌",
+        "pad": "Commercial LC-1",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 19.597275,
+          "lng": 110.930753
+        }
+      }
+    },
+    {
       "id": "8dd5de11-831b-445f-86f0-bffefe0550d9",
       "net": "2026-11-24T05:03:00.000Z",
       "precision": "min",
@@ -431,45 +470,6 @@
         "position": {
           "lat": 45.996034,
           "lng": 63.564003
-        }
-      }
-    },
-    {
-      "id": "dff42a2e-f047-48d7-b260-3888d3a4fe33",
-      "net": "2026-11-26T20:00:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-11-26T21:30:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-10-29T21:51:22Z",
-      "rocket": {
-        "name": "Spectrum",
-        "full_name": "Spectrum"
-      },
-      "provider": {
-        "name": "Isar Aerospace",
-        "ja": null
-      },
-      "mission": {
-        "name": "AT-Astra and Others (Spectrum Flight 3)",
-        "placeholder": false,
-        "type": "Technology",
-        "type_ja": "技術の試験",
-        "orbit": "Sun-Synchronous Orbit",
-        "orbit_ja": "太陽同期軌道"
-      },
-      "site": {
-        "location_id": 161,
-        "name": "Andøya Spaceport",
-        "ja": null,
-        "short": null,
-        "pad": "Orbital Launch Pad",
-        "country": "NOR",
-        "country_ja": "ノルウェー",
-        "position": {
-          "lat": 69.1084,
-          "lng": 15.5895
         }
       }
     }
