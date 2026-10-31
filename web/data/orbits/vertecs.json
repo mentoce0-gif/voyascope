@@ -4,15 +4,15 @@
   "norad_id": 69506,
   "name": "VERTECS",
   "format": "omm",
-  "epoch": "2026-10-31T03:07:21.219Z",
+  "epoch": "2026-10-31T03:07:21.220Z",
   "source": "https://celestrak.org/NORAD/elements/gp.php?CATNR=69506&FORMAT=JSON",
-  "fetched_at": "2026-10-31T12:29:38.005Z",
+  "fetched_at": "2026-10-31T21:34:58.840Z",
   "omm": {
     "OBJECT_NAME": "VERTECS",
     "OBJECT_ID": "2026-132E",
-    "EPOCH": "2026-10-31T03:07:21.219744",
+    "EPOCH": "2026-10-31T03:07:21.220608",
     "MEAN_MOTION": 15.0146464,
-    "ECCENTRICITY": 0.0014002,
+    "ECCENTRICITY": 0.00140018,
     "INCLINATION": 97.6589,
     "RA_OF_ASC_NODE": 6.0821,
     "ARG_OF_PERICENTER": 205.4937,
@@ -22,7 +22,7 @@
     "NORAD_CAT_ID": 69506,
     "ELEMENT_SET_NO": 999,
     "REV_AT_EPOCH": 2116,
-    "BSTAR": 0.00021548,
+    "BSTAR": 0.00021548134,
     "MEAN_MOTION_DOT": 0.00002729,
     "MEAN_MOTION_DDOT": 0
   }
