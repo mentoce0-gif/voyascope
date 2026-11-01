@@ -6,6 +6,9 @@
 
 
 
+## 2026-11-01
+
+- チャッピーへの依頼 C39（あらせ〈ERG〉の機体カード）を `prompts/src/chappy.md` に足した。`docs/sky-families.md` の第一棚の候補。軌道は楕円のはずなので、近地点・遠地点・傾斜角・周期を原文で確かめてもらい、カードの `altitude_km` は書かせない（形はあとで決める）。`curation/` は変えていない
 ## 2026-10-30（2）
 
 - リンクを貼ったときのカードの画像（og:image、1200×630）を作った（オーナー）。トップは地球の写真・ロゴ・「今、宇宙を旅する者たち。」・OBS・SpaceTips・FAR・「voyascope.org・非公式のファンメイド作品」・「地球の画像：NASA Blue Marble・Black Marble」（`web/assets/og/home.jpg`）。SpaceTips の各ページは Q1「何？」の図（名前・一言・出典・非公式つき）に右上のロゴ（`web/assets/og/<id>.jpg`、地球を描いたものは NASA の表記つき）。作るのは `scripts/build-og-images.mjs`（Playwright で描く。CI では作らない。一言・名前・模型を変えたら作り直す）。一覧・アルテミス2号のページはトップの画像
