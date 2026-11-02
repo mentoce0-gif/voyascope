@@ -13,6 +13,9 @@ import { join } from "node:path";
 import { MISSION, RESULTS } from "../web/tour/artemis2/mission.js";
 import { probeDistance, bodyDistanceKm, lightSeconds, lightTimeJa, kmJa } from "../web/js/far/distance.js";
 
+// 重さ：1トン未満は kg のまま（350 kg を「約0 トン」にしない）
+const massJa = (kg) => (kg < 1000 ? `${Math.round(kg).toLocaleString("ja-JP")} kg` : `${Math.round(kg / 1000).toLocaleString("ja-JP")} トン`);
+
 const ROOT = new URL("..", import.meta.url).pathname;
 const SITE = "https://voyascope.org";
 const CHECK = process.argv.includes("--check");
@@ -279,14 +282,14 @@ ${tl.join("\n")}
       periodMin: st.period_min?.value ?? null,
       speed: st.speed_km_s?.value ?? null,
       lengthM: st.length_m?.value ?? null,
-      massT: st.mass_kg ? Math.round(st.mass_kg.value / 1000) : null,
+      mass: st.mass_kg ? massJa(st.mass_kg.value) : null,
       altKm: st.altitude_km?.value ?? null,
       src: host((st.period_min ?? st.speed_km_s ?? st.length_m ?? st.mass_kg ?? { source: c.mission.source }).source),
     };
     if (st.speed_km_s) scale.push(`      <li>速さ：秒速 <b>約${esc(st.speed_km_s.value)} km</b>${cite(st.speed_km_s)}</li>`);
     if (st.period_min) scale.push(`      <li>地球を1周：<b>約${esc(st.period_min.value)}分</b>${cite(st.period_min)}</li>`);
     if (st.length_m) scale.push(`      <li>大きさ：<b>約${esc(st.length_m.value.toLocaleString("ja-JP"))} m</b>${st.length_m.note ? `（${esc(st.length_m.note)}）` : ""}${cite(st.length_m)}</li>`);
-    if (st.mass_kg) scale.push(`      <li>重さ：<b>約${esc(Math.round(st.mass_kg.value / 1000).toLocaleString("ja-JP"))} トン</b>${cite(st.mass_kg)}</li>`);
+    if (st.mass_kg) scale.push(`      <li>重さ：<b>約${esc(massJa(st.mass_kg.value))}</b>${cite(st.mass_kg)}</li>`);
   }
   if (scale.length) parts.push(sec(5, "どれくらい？", `    <ul class="scale">
 ${scale.join("\n")}

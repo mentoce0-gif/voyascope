@@ -418,7 +418,7 @@ function start() {
             q.periodMin && `地球を1周 約${q.periodMin}分`,
             q.speed && `秒速 約${q.speed} km`,
             q.lengthM && `大きさ 約${q.lengthM.toLocaleString("ja-JP")} m`,
-            q.massT && `重さ 約${q.massT.toLocaleString("ja-JP")} トン`,
+            q.mass && `重さ 約${q.mass}`,
           ].filter(Boolean);
           big(g, lines[0] ?? "", 64, 250);
           if (q.periodMin) {

@@ -64,6 +64,14 @@
       "crew": null,
       "status": null,
       "sample": false
+    },
+    {
+      "id": "arase",
+      "card": "data/cards/arase.json",
+      "orbit": "data/orbits/arase.json",
+      "crew": null,
+      "status": null,
+      "sample": false
     }
   ]
 }
