@@ -9,6 +9,7 @@
     { "id": "ibuki-gw", "norad_id": 64694 },
     { "id": "hinode", "norad_id": 29479 },
     { "id": "xrism", "norad_id": 57800 },
+    { "id": "arase", "norad_id": 41896 },
     { "id": "vertecs", "norad_id": 69506, "lab": true }
   ]
 }

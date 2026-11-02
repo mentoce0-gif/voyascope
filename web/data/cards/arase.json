@@ -1,0 +1,81 @@
+{
+  "id": "arase",
+  "norad_id": 41896,
+  "name": {
+    "ja": "あらせ",
+    "en": "ARASE (ERG)"
+  },
+  "class": "science",
+  "operator": {
+    "value": "JAXA 宇宙科学研究所",
+    "source": "https://ergsc.isee.nagoya-u.ac.jp/index.shtml.ja",
+    "as_of": "2026-11-02",
+    "note": "国内外の約30の大学・研究機関が参加。ERGサイエンスセンターはJAXA宇宙科学研究所と名古屋大学の共同運用"
+  },
+  "operator_type": {
+    "value": "civil",
+    "source": "https://www.jaxa.jp/about/jaxa/",
+    "as_of": "2026-11-02"
+  },
+  "launch_date": {
+    "value": "2016-12-20",
+    "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html",
+    "as_of": "2026-11-02",
+    "note": "日本時間 20:00。イプシロンロケット2号機で、内之浦宇宙空間観測所から"
+  },
+  "mission": {
+    "value": "地球をとりまく放射線帯（ヴァン・アレン帯）で、高エネルギーの電子がどう生まれ、宇宙嵐がどう発達するかを調べる",
+    "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html",
+    "as_of": "2026-11-02"
+  },
+  "status": {
+    "value": "operating",
+    "source": "https://www.jaxa.jp/projects/sas/erg/index_j.html",
+    "as_of": "2026-11-02",
+    "note": "JAXA の表記は「後期運用中」。2032年度末までの観測運用の延長が承認されている"
+  },
+  "stats": {
+    "perigee_km": {
+      "value": 440,
+      "unit": "km",
+      "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html",
+      "as_of": "2026-11-02",
+      "note": "おおよその値（公称）。地球にいちばん近づく高さ（近地点）"
+    },
+    "apogee_km": {
+      "value": 32000,
+      "unit": "km",
+      "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html",
+      "as_of": "2026-11-02",
+      "note": "おおよその値（公称）。地球からいちばん離れる高さ（遠地点）"
+    },
+    "period_min": {
+      "value": 570,
+      "unit": "min",
+      "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html",
+      "as_of": "2026-11-02",
+      "note": "おおよその値（公称）"
+    },
+    "mass_kg": {
+      "value": 350,
+      "unit": "kg",
+      "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html",
+      "as_of": "2026-11-02"
+    }
+  },
+  "official_links": [
+    {
+      "label": "JAXA 宇宙科学研究所",
+      "url": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html"
+    },
+    {
+      "label": "JAXA あらせ",
+      "url": "https://www.jaxa.jp/projects/sas/erg/index_j.html"
+    },
+    {
+      "label": "ERG サイエンスセンター",
+      "url": "https://ergsc.isee.nagoya-u.ac.jp/index.shtml.ja"
+    }
+  ],
+  "updated_at": "2026-11-02"
+}

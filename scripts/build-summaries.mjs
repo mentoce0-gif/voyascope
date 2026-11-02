@@ -13,6 +13,15 @@ import { join } from "node:path";
 import { MISSION, RESULTS } from "../web/tour/artemis2/mission.js";
 import { probeDistance, bodyDistanceKm, lightSeconds, lightTimeJa, kmJa } from "../web/js/far/distance.js";
 
+// 楕円の軌道（近地点・遠地点）。altitude_km があるときは使わない
+const ellipse = (st) =>
+  st?.perigee_km && st?.apogee_km && !st.altitude_km
+    ? { peri: st.perigee_km.value, apo: st.apogee_km.value, text: `${st.perigee_km.value.toLocaleString("ja-JP")}〜${st.apogee_km.value.toLocaleString("ja-JP")} km` }
+    : null;
+
+// 重さ：1トン未満は kg のまま（350 kg を「約0 トン」にしない）
+const massJa = (kg) => (kg < 1000 ? `${Math.round(kg).toLocaleString("ja-JP")} kg` : `${Math.round(kg / 1000).toLocaleString("ja-JP")} トン`);
+
 const ROOT = new URL("..", import.meta.url).pathname;
 const SITE = "https://voyascope.org";
 const CHECK = process.argv.includes("--check");
@@ -206,9 +215,18 @@ function cardPage(c, group) {
   if (c.location) where.push(`    <p>${esc(val(c.location))}${cite(c.location)}</p>`);
   else if (group === "craft") {
     const alt = c.stats?.altitude_km;
-    where.push(`    <p>地球のまわりを回っている${alt ? `（高さ 約${esc(alt.value.toLocaleString("ja-JP"))} km）${cite(alt)}` : ""}</p>`);
+    const ell = ellipse(c.stats);
+    where.push(
+      alt ? `    <p>地球のまわりを回っている（高さ 約${esc(alt.value.toLocaleString("ja-JP"))} km）${cite(alt)}</p>`
+      : ell ? `    <p>地球のまわりを、近づいたり遠ざかったりしながら回っている（高さ 約${esc(ell.text)}）${cite(c.stats.apogee_km)}</p>`
+      : "    <p>地球のまわりを回っている</p>",
+    );
   }
-  if (group === "craft") V.q3 = { altKm: c.stats?.altitude_km?.value ?? null, src: c.stats?.altitude_km ? host(c.stats.altitude_km.source) : "" };
+  if (group === "craft") {
+    const ell = ellipse(c.stats);
+    const altFact = c.stats?.altitude_km ?? (ell && c.stats.apogee_km);
+    V.q3 = { altKm: c.stats?.altitude_km?.value ?? null, peri: ell?.peri ?? null, apo: ell?.apo ?? null, altText: ell?.text ?? null, src: altFact ? host(altFact.source) : "" };
+  }
   if (dist && dist.km > 0) {
     V.q3 = {
       km: dist.km,
@@ -279,14 +297,16 @@ ${tl.join("\n")}
       periodMin: st.period_min?.value ?? null,
       speed: st.speed_km_s?.value ?? null,
       lengthM: st.length_m?.value ?? null,
-      massT: st.mass_kg ? Math.round(st.mass_kg.value / 1000) : null,
+      mass: st.mass_kg ? massJa(st.mass_kg.value) : null,
       altKm: st.altitude_km?.value ?? null,
+      peri: ellipse(st)?.peri ?? null,
+      apo: ellipse(st)?.apo ?? null,
       src: host((st.period_min ?? st.speed_km_s ?? st.length_m ?? st.mass_kg ?? { source: c.mission.source }).source),
     };
     if (st.speed_km_s) scale.push(`      <li>速さ：秒速 <b>約${esc(st.speed_km_s.value)} km</b>${cite(st.speed_km_s)}</li>`);
     if (st.period_min) scale.push(`      <li>地球を1周：<b>約${esc(st.period_min.value)}分</b>${cite(st.period_min)}</li>`);
     if (st.length_m) scale.push(`      <li>大きさ：<b>約${esc(st.length_m.value.toLocaleString("ja-JP"))} m</b>${st.length_m.note ? `（${esc(st.length_m.note)}）` : ""}${cite(st.length_m)}</li>`);
-    if (st.mass_kg) scale.push(`      <li>重さ：<b>約${esc(Math.round(st.mass_kg.value / 1000).toLocaleString("ja-JP"))} トン</b>${cite(st.mass_kg)}</li>`);
+    if (st.mass_kg) scale.push(`      <li>重さ：<b>約${esc(massJa(st.mass_kg.value))}</b>${cite(st.mass_kg)}</li>`);
   }
   if (scale.length) parts.push(sec(5, "どれくらい？", `    <ul class="scale">
 ${scale.join("\n")}

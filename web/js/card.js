@@ -88,6 +88,12 @@ function approxNumber(fact) {
   return `${approx}${numberJa(fact.value)}${fact.unit ? ` ${esc(fact.unit)}` : ""}`;
 }
 
+// 楕円の軌道：「約 440〜32,000 km」（近地点〜遠地点）
+export function altRange(s) {
+  const approx = /おおよそ|約/.test(`${s.perigee_km.note ?? ""}${s.apogee_km.note ?? ""}`) ? "約 " : "";
+  return `${approx}${numberJa(s.perigee_km.value)}〜${numberJa(s.apogee_km.value)} km`;
+}
+
 const launchYear = (fact) => /^(\d{4})/.exec(fact?.value ?? "")?.[1];
 const nw = (t) => `<span class="nw">${t}</span>`;
 
@@ -191,6 +197,7 @@ function overviewHtml(card, aboard, family, statusSum, realNow) {
   const orbitLine = [
     launchYear(card.launch_date) && `${launchYear(card.launch_date)}年〜`,
     approxNumber(s.altitude_km) && `高度 ${approxNumber(s.altitude_km)}`,
+    s.perigee_km && s.apogee_km && !s.altitude_km && `高度 ${altRange(s)}`,
     approxNumber(s.period_min) && `1周 ${approxNumber(s.period_min).replace(" min", "分")}`,
   ]
     .filter(Boolean)
