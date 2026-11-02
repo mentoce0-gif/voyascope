@@ -49,6 +49,13 @@
       "as_of": "2026-11-02",
       "note": "おおよその値（公称）。地球からいちばん離れる高さ（遠地点）"
     },
+    "inclination_deg": {
+      "value": 31,
+      "unit": "°",
+      "source": "https://ergsc.isee.nagoya-u.ac.jp/about/satellite.shtml.ja",
+      "as_of": "2026-11-02",
+      "note": "赤道の面からの傾き。JAXA のプロジェクトページは「約31度」、宇宙科学研究所の機体紹介は「約32度」"
+    },
     "period_min": {
       "value": 570,
       "unit": "min",

@@ -198,6 +198,7 @@ function overviewHtml(card, aboard, family, statusSum, realNow) {
     launchYear(card.launch_date) && `${launchYear(card.launch_date)}年〜`,
     approxNumber(s.altitude_km) && `高度 ${approxNumber(s.altitude_km)}`,
     s.perigee_km && s.apogee_km && !s.altitude_km && `高度 ${altRange(s)}`,
+    approxNumber(s.inclination_deg) && `傾き ${approxNumber(s.inclination_deg).replace(" °", "°")}`,
     approxNumber(s.period_min) && `1周 ${approxNumber(s.period_min).replace(" min", "分")}`,
   ]
     .filter(Boolean)

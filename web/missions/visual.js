@@ -131,10 +131,12 @@ function start() {
   }
   // 地球のまわりの機体：地球と高さの輪（本当の比）と、輪を回る点。文字のじゃまにならないよう右へ寄せる
   // alt は高さ（km）か、楕円の軌道なら { peri, apo }（近地点・遠地点の高さ、km）。地球は楕円の焦点に置く
-  const orbitOf = (q) => (q?.peri && q?.apo ? { peri: q.peri, apo: q.apo } : q?.altKm ?? 400);
+  const orbitOf = (q) => (q?.peri && q?.apo ? { peri: q.peri, apo: q.apo, incl: q.incl } : q?.altKm ?? 400);
+  // 傾き：公式の軌道傾斜角（incl、度）があれば、赤道（地球の自転軸に垂直な面）からその角度だけ傾ける。なければ見やすい角度
   function earthSystem(scene, cam, alt = 400, ringColor = C.mint, satColor = C.amber) {
     const R = 1;
     const ell = alt && typeof alt === "object" ? alt : null;
+    const tilt = ell?.incl ? (ell.incl * Math.PI) / 180 : 0.35;
     const rp = R * (1 + (ell ? ell.peri : alt) / 6371), ra = ell ? R * (1 + ell.apo / 6371) : rp;
     const sa = (rp + ra) / 2, ecc = (ra - rp) / (ra + rp), sb = sa * Math.sqrt(1 - ecc * ecc);
     const r = ra;
@@ -147,14 +149,14 @@ function start() {
     const g = new THREE.Group();
     const e = earth(R);
     const orbit = ell ? ellipseLine(posAt, ringColor, 0.7) : ring(r, ringColor, 0.7);
-    orbit.rotation.x = 0.35;
+    orbit.rotation.x = tilt;
     const sat = dot(satColor, 0.035 * Math.max(1, r / 1.5));
     g.add(e, orbit, sat);
     scene.add(g);
     const d = Math.max(6.4, r * 2.9);
     const half = Math.tan((cam.fov / 2) * (Math.PI / 180)) * d * (W / H);
     g.position.x = half * 0.42;
-    g.position.y = -0.3;
+    g.position.y = ell ? -0.3 - 0.25 * sb : -0.3; // 楕円は大きく開くので、文字にかからないよう少し下げる
     cam.position.set(0, 0.12 * d, d);
     cam.lookAt(0, 0, 0);
     return {
@@ -162,7 +164,7 @@ function start() {
       update(t) {
         e.rotation.y = t * 0.8;
         const [x, z] = posAt(t * Math.PI * 2);
-        sat.position.set(x, 0, z).applyAxisAngle(new THREE.Vector3(1, 0, 0), 0.35);
+        sat.position.set(x, 0, z).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
       },
     };
   }
@@ -270,7 +272,7 @@ function start() {
             big(g, V.q3?.altKm ? `高さ 約${V.q3.altKm.toLocaleString("ja-JP")} km` : V.q3?.altText ? `高さ 約${V.q3.altText}` : "地球のまわり", 64, 250);
             g.font = `24px ${FONT}`;
             g.fillStyle = C.dim;
-            g.fillText(V.q3?.apo ? "近づいたり遠ざかったりしながら回っている（輪の形と大きさは本当の比）" : "地球のまわりを回っている（輪の大きさは本当の比）", 64, 300);
+            g.fillText(V.q3?.apo ? V.q3?.incl ? `近づいたり遠ざかったりしながら回る（形・大きさ・赤道からの傾き約${V.q3.incl}°は本物どおり）` : "近づいたり遠ざかったりしながら回っている（輪の形と大きさは本当の比）" : "地球のまわりを回っている（輪の大きさは本当の比）", 64, 300);
             footer(g, V.q3?.src ? `出典：${V.q3.src}` : "");
           },
         };
