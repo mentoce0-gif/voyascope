@@ -5,11 +5,11 @@
     "world"
   ],
   "title": {
-    "ja": "ISS 最後の太陽電池の船外活動",
+    "ja": "ISS 太陽電池8基目の取り付け",
     "en": "Spacewalk to install the eighth and final IROSA"
   },
   "summary": {
-    "value": "新しい太陽電池パネル IROSA（Roll-Out Solar Array）の8基目で最後の1基を取り付ける。8基そろうと、ISS の発電の力は160キロワットから約215キロワットに（最大30%増）",
+    "value": "ISS に足してきた新しい太陽電池パネル IROSA（Roll-Out Solar Array）8基のうち、残る8基目を船外活動で取り付ける。8基そろうと、ISS の発電の力は160キロワットから約215キロワットに（最大30%増）",
     "source": "https://www.nasa.gov/blogs/spacestation/2026/10/29/spacewalkers-install-roll-out-solar-arrays-for-power-generation/",
     "as_of": "2026-11-02",
     "note": "NASA の ISS ブログ（2026-10-29）。3B の電力系統に取り付ける"
