@@ -55,6 +55,17 @@
    },
    "status": "scheduled",
    "href": "missions/voyager-1/"
+  },
+  {
+   "id": "iss-irosa-final-spacewalk",
+   "card": "iss",
+   "name": "国際宇宙ステーション",
+   "title": "ISS 太陽電池8基目の取り付けを完了",
+   "when": {
+    "date": "2026-11-05"
+   },
+   "status": "scheduled",
+   "href": "missions/iss/"
   }
  ]
 }

@@ -28,11 +28,20 @@ for (const g of budget.groups) {
   }
 }
 
+// 動画（.mp4）は押すまで読み込まない（preload=none）ので、別の上限で数える
+const isVideo = (f) => f.endsWith(".mp4");
 const big = allFiles(ROOT)
+  .filter((f) => !isVideo(f))
   .map((f) => [f, transferSize(join(ROOT, f))])
   .filter(([, s]) => s > budget.max_file_kb * 1024);
 for (const [f, s] of big) fail(`${f} が1ファイルの上限を超えました：${kb(s)}／上限 ${budget.max_file_kb}KB`);
-console.log(`  ${big.length ? "NG" : "OK"}  1ファイルの上限 ${budget.max_file_kb}KB（web/ のすべて）`);
+console.log(`  ${big.length ? "NG" : "OK"}  1ファイルの上限 ${budget.max_file_kb}KB（web/ のすべて。動画のほか）`);
+const bigVideo = allFiles(ROOT)
+  .filter(isVideo)
+  .map((f) => [f, transferSize(join(ROOT, f))])
+  .filter(([, s]) => s > budget.max_video_kb * 1024);
+for (const [f, s] of bigVideo) fail(`${f} が動画の上限を超えました：${kb(s)}／上限 ${budget.max_video_kb}KB`);
+console.log(`  ${bigVideo.length ? "NG" : "OK"}  動画1本の上限 ${budget.max_video_kb}KB（押すまで読み込まない）`);
 
 const errors = bootRuleErrors(readFileSync(join(ROOT, "index.html"), "utf8"), { preload: budget.preload ?? [] });
 for (const e of errors) fail(`index.html：${e}`);

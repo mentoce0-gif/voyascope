@@ -2,7 +2,7 @@
 
 > **新しいチャットは、`CLAUDE.md` とこのファイルを読んでから始める。** チャットは目的ごとに1つ（例：「MMX 打ち上げ対応」「Cloudflare への切り替え」「チャッピーの報告の照合」）。
 > 区切りごとに Claude Code がこのファイルを更新する（古くなった行は消す）。日ごとの記録は [`changelog.md`](changelog.md)、全体の計画は [`roadmap.md`](roadmap.md)。
-> 最終更新：2026-11-02（あらせを地球の画面に・楕円の軌道の高さ・数字の表示崩れの点検。PR #98）／2026-10-30（M13 の N0・N1）／2026-10-28（MMX の「いまどこ」の直し：到着日・PC の全体の図・REPLAY・全体の図の道）
+> 最終更新：2026-11-02（ISS の 11/5 船外活動を SpaceTips に）／2026-11-02（あらせを地球の画面に・楕円の軌道の高さ・数字の表示崩れの点検。PR #98）／2026-10-30（M13 の N0・N1）／2026-10-28（MMX の「いまどこ」の直し：到着日・PC の全体の図・REPLAY・全体の図の道）
 
 ## 公開先とリポジトリ
 
@@ -31,6 +31,10 @@
    - **しし座（11/18 極大・出現 11/6〜）・ふたご座（12/14 極大・出現 12/4〜）のカード**：入れた（C36・C37 照合済み。放射点まで）。出現期間から地球の画面・「今夜」・`/sky/` に出る。星座の星も入れた（IAU-CSN。IAU の星名一覧のページは502だった）
 2. **M9 ② Cloudflare への切り替え**：住所をそろえる（`og:url`・`og:image`・canonical・README・CLAUDE.md を voyascope.org に）と、GitHub Pages を案内だけにするのは **10/15 に済み**。残り：**データの更新でコミットしない形**（Actions から直接公開）は次の段→ [`m9-plan.md`](m9-plan.md)
 3. **出来事のあとの手直し**：11/18 ボイジャー1号が地球から1光日、11/21 ベピコロンボが水星を回る軌道へ、12/9〜10「みお」と MPO の分離
+   - **ISS の船外活動（11/5・8基目＝最後の IROSA）**（2026-11-02。dots の報告を NASA の原文で照合）：`curation/events/iss-irosa-final-spacewalk.json`（kind `milestone`・world・日付だけ）を ISS のカードの `events` にひもづけ → 一言ページ（`missions/iss/`）と SpaceTips に出る。出典は NASA の ISS ブログ 10/29「Spacewalkers Install Roll-Out Solar Array for Power Generation」の "a planned Thursday, Nov. 5 spacewalk, when they will install the eighth and final IROSA"。**飛行士の名前は入れない**（オーナー）。見出しは「ISS 太陽電池8基目の取り付けを完了」（2026-11-02 オーナー。スマホ幅の帯では「…取り付けを…」で切れる。「最後」は IROSA 8基の最後＝電力の増強の完了で、飛行士や ISS の最後の船外活動ではない。誤認しやすいので見出しに「最後」を入れない）
+     - **延期のとき**：NASA の公式（ISS ブログ・NASA のお知らせ）で延期を確かめてから、① `status` を `postponed`（出典＝延期を書いた NASA のページ・確認日）。帯に「（延期）」が付く ② 新しい日が公式に出たら `when` を直して `status` を `scheduled` に戻す ③ `updated_at` ④ `npm run validate` → `npm run sync:web` → `node scripts/build-summaries.mjs`。Grok・報道だけでは直さない。中止なら `cancelled`
+     - **動画「IROSA が8基になるまで」**（2026-11-02 オーナー）：ISS の一言ページの Q2 に置いた（`config/mission-videos.json` → `build-summaries.mjs`。`web/assets/video/iss-irosa-2021-2026.mp4`・720×900・1.8MB・押すまで読み込まない）。8回の日付・系統は NASA の ISS ブログ各回、系統と骨組みの対応は NASA グレン研究センターの報告（NTRS 20180005346 の表1）で照合。**作る仕組みはリポジトリに入れない（オーナー：不要）**ので、作り直しはできない。動画の中に「2026年11月5日（予定）」と入っている → **延期したら `config/mission-videos.json` から外す**（日付がちがう動画を出さない）。終わったあとは「予定」のままでよいか、オーナーに聞く。動画は `config/size-budget.json` の `max_video_kb`（2500KB）で数える
+     - **終わったら**：NASA の「終わった」の記事を出典に `status` を `done`。開始時刻は 10/29 の記事にない（8:10 EST の予定は未照合）ので日付のままでよい
    - **「みお」のページ**：計画（案）は [`mio-plan.md`](mio-plan.md)（2026-10-21。オーナーの OK 待ち。段取り ①予告 11/14ごろ〜 → ②着いた・分かれる → ③いまどこ → ④観測。C35 をチャッピーに依頼中〈2026-10-21〉）
 4. **M9 ③ 公式ページの見張り**（10/22 から）
 5. **アルテミス2号のページ**（[タスク019](tasks/019-artemis2-tour.md)、`web/tour/artemis2/`）：10/12 に作り直した（オーナー：Apple の製品ページのように）

@@ -1,5 +1,5 @@
 {
-  "$comment": "読み込み量の上限（KB）。スマホで重くならないように scripts/check-size.mjs が CI で確かめる。文字のファイル（html・css・js・json）は gzip 後、画像はそのままの大きさで数える。パスは web/ から。* は1階層だけ。@craft-index は data/craft-index.json が指すファイル（カード・軌道・乗員・運用状況）。Google Fonts（外のサイト）は数えていない。上限を上げるときは、理由を PR に書く（docs/tasks/012-mobile-weight.md）",
+  "$comment": "読み込み量の上限（KB）。スマホで重くならないように scripts/check-size.mjs が CI で確かめる。文字のファイル（html・css・js・json）は gzip 後、画像はそのままの大きさで数える。パスは web/ から。* は1階層だけ。@craft-index は data/craft-index.json が指すファイル（カード・軌道・乗員・運用状況）。Google Fonts（外のサイト）は数えていない。上限を上げるときは、理由を PR に書く（docs/tasks/012-mobile-weight.md）。動画（.mp4）は押すまで読み込まない（preload=none）ので max_file_kb ではなく max_video_kb で数える（2026-11-02）",
   "groups": [
     {
       "id": "boot",
@@ -65,5 +65,6 @@
     }
   ],
   "max_file_kb": 600,
+  "max_video_kb": 2500,
   "preload": ["vendor/globe.gl.min.js"]
 }

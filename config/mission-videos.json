@@ -1,0 +1,24 @@
+{
+  "$comment": "「一言でわかる」ページ（missions/〇〇/）に置く動画（scripts/build-summaries.mjs が読む）。q は置く問いの番号。動画の中の事実は sources で確かめたものだけ。動画は押すまで読み込まない（preload=none）。重さの上限は config/size-budget.json の max_video_kb",
+  "videos": {
+    "iss": [
+      {
+        "q": 2,
+        "src": "assets/video/iss-irosa-2021-2026.mp4",
+        "poster": "assets/video/iss-irosa-2021-2026.webp",
+        "caption": "新しい太陽電池パネル IROSA が8基になるまで（2021〜2026年。8基目の2026年11月5日は予定）。ISS の形・パネルの向きは簡略化したイメージ",
+        "made": "2026-11-02",
+        "sources": [
+          { "label": "NASA 国際宇宙ステーションのブログ（7基目・8基目の予定、2026年10月29日）", "url": "https://www.nasa.gov/blogs/spacestation/2026/10/29/spacewalkers-install-roll-out-solar-arrays-for-power-generation/" },
+          { "label": "同（1基目、2021年6月16日）", "url": "https://www.nasa.gov/blogs/spacestation/2021/06/16/spacewalk-to-install-first-new-solar-array-concluded/" },
+          { "label": "同（2基目、2021年6月25日）", "url": "https://www.nasa.gov/blogs/spacestation/2021/06/25/spacewalkers-complete-second-roll-out-solar-array-installation/" },
+          { "label": "同（3基目、2022年12月3日）", "url": "https://www.nasa.gov/blogs/spacestation/2022/12/03/spacewalkers-complete-new-solar-array-installation-on-station/" },
+          { "label": "同（4基目、2022年12月22日）", "url": "https://www.nasa.gov/blogs/spacestation/2022/12/22/nasa-spacewalkers-install-stations-fourth-roll-out-solar-array/" },
+          { "label": "同（5基目、2023年6月9日）", "url": "https://www.nasa.gov/blogs/spacestation/2023/06/09/nasa-spacewalkers-complete-solar-array-installation/" },
+          { "label": "同（6基目、2023年6月15日）", "url": "https://www.nasa.gov/blogs/spacestation/2023/06/15/nasa-spacewalkers-finish-installing-roll-out-solar-array/" },
+          { "label": "NASA グレン研究センターの報告（電力の系統と骨組みの対応、NTRS 20180005346）", "url": "https://ntrs.nasa.gov/api/citations/20180005346/downloads/20180005346.pdf" }
+        ]
+      }
+    ]
+  }
+}
