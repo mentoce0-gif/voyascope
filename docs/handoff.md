@@ -2,7 +2,7 @@
 
 > **新しいチャットは、`CLAUDE.md` とこのファイルを読んでから始める。** チャットは目的ごとに1つ（例：「MMX 打ち上げ対応」「Cloudflare への切り替え」「チャッピーの報告の照合」）。
 > 区切りごとに Claude Code がこのファイルを更新する（古くなった行は消す）。日ごとの記録は [`changelog.md`](changelog.md)、全体の計画は [`roadmap.md`](roadmap.md)。
-> 最終更新：2026-10-30（M13 の N0・N1）／2026-10-28（MMX の「いまどこ」の直し：到着日・PC の全体の図・REPLAY・全体の図の道）
+> 最終更新：2026-11-02（あらせを地球の画面に・楕円の軌道の高さ・数字の表示崩れの点検。PR #98）／2026-10-30（M13 の N0・N1）／2026-10-28（MMX の「いまどこ」の直し：到着日・PC の全体の図・REPLAY・全体の図の道）
 
 ## 公開先とリポジトリ
 
@@ -39,6 +39,14 @@
    - 読み込み 949KB／上限 1100KB（オーナーが 950 から上げた）
    - 残り：Phase D（実機・低速通信）。月を回る探査機の軌道の線は出さない（値と ID がそろわない。一覧だけ）。ダヌリは公式で未確認なので出さない
    - 決まり：NASA の素材は教育目的・出典つき（クレームがあれば検討）、ESA の画像・データは使わない、確かでないものは原文から「推測」と書いて描く、文の説明より情報、人物は名前・役割・所属だけ
+
+## 2026-11-02 に決まったこと（オーナー）
+
+- **あらせ（ERG）**：地球の画面に出した（PR #98 マージ済み）。C39 を公式ページで照合（JAXA 宇宙科学研究所の機体紹介・JAXA のプロジェクトページ・ERG サイエンスセンター・ISAS ニュース 497 号）。運用中（JAXA の表記は「後期運用中」。2032年度末までの延長が承認済み）
+  - **画像はいったんなし**。JAXA デジタルアーカイブスは個人の Web サイトへの掲載に申請が必要で、候補の CG のクレジットは「ERG science team」（JAXA だけではない）。XRISM は NASA のイラストで済ませたが、あらせは日本のミッションなので同じ手は使えない。進めるなら、MMX と同じく公式の写真を見て自分で作る（なぞらない）か、JAXA に申請（これまでの方針「問い合わせない」とは逆）
+  - **楕円の軌道の高さ（案A）**：スキーマの `stats` に `perigee_km`・`apogee_km`。`altitude_km` の代わりに組で書く。カードは「高度 約 440〜32,000 km」、「一言でわかる」は本当の比の楕円（地球は焦点）。詳細の「環」はいまの高さで低軌道⇔中軌道が切り替わる（そのまま）
+  - 軌道の値は出典で違う（JAXA 約440/32,000 km・約570分、ERG サイエンスセンター 約565分、CelesTrak 2026-11-02 で 397/31,781 km・558.57分）。カードは JAXA の機体紹介の1ページにそろえた
+- **数字の表示崩れの点検**（オーナーの依頼「単位のせいで 0 になっていないか」）：重さの「約0 トン」（1トン未満）を kg 表示に直した。ほかは「一言でわかる」全ページ・地球の画面の全機体×全タブ・遠くを見る部屋の24か所・アルテミス2号・MMX で見つからなかった（試作の部屋は見ていない）。新しい数字の表示を足したら、1未満・1万以上で崩れないかを確かめる
 
 ## 2026-10-12〜15 に決まったこと（オーナー）
 
@@ -108,7 +116,7 @@
 - `web/data/` は `curation/` から `npm run sync:web` で作る。CI と同じ確かめ：`npm run validate`・`npm test`・`node scripts/sync-web-data.mjs --check`・`node scripts/build-prompts.mjs --check`・`node scripts/check-size.mjs`
 - 新しい調査はチャッピーに頼む（依頼文は `prompts/chappy-research.md` から、そのタスクだけを抜き出して渡す）。報告が来たら `voyascope-research` の `research/chappy/` に保存 → 公式ページで照合して `research/verification/` に記録 → 確かめられたものだけ `curation/` へ
 - 「いまどこ」（`web/mmx/now/`）を Playwright で見るとき：この環境のブラウザでは画面のアニメーションが進まない（ずっと最初の場面のまま）。`window.watchAt(t)`・`trackAt`・`coastAt`・`filmGo(i)` を直接呼んで描かせてから撮る。ブラウザの拡大・縮小は、画面の大きさを 1/倍率 にして `deviceScaleFactor` を倍率にすると近い
-- ブラウザでの確認：Playwright（`createRequire('/opt/node-tools/node_modules/')`、Chromium は `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`、WebGL は SwiftShader）。アプリは「観測を開始」を押してから。この環境のブラウザは外の https を開けない（証明書）ので、公開先は curl で確かめる
+- ブラウザでの確認：Playwright（`createRequire('/opt/node-tools/node_modules/')`、Chromium は `require("playwright")` の既定のままで動く（版で場所が変わる。2026-11-02 は chromium-1243）、WebGL は SwiftShader）。アプリは「観測を開始」を押してから。この環境のブラウザは外の https を開けない（証明書）ので、公開先は curl で確かめる
 - ひまわり9号の軌道要素は、CelesTrak 側で 9/29 から新しくなっていない（静止衛星なので表示はほぼ同じ。足元の「軌道データ取得」は、いちばん古い日を出す）
 - 予告ページの旅のしおりと打ち上げの流れは、公式（プレスキット・MMX サイト・打上げ計画書）を照合したもの。`curation/` にはまだ入れていない
 - X などのアプリ内ブラウザで止まったら：20秒後に起動画面へ出る「届いていないもの」「エラー」のスクリーンショットをもらう（index.html の起動の見張り、2026-10-08）
@@ -116,7 +124,7 @@
 - **チャッピーの報告の URL は、貼り付けで消える**（ドメイン名だけ残る）。引用の文で検索して公式ページを探し、原文を確かめる。量が多いときは調べ物を別のエージェントに任せて、結果の表を `research/verification/` に保存する
 - 日本語の地名（月など）の確認先：JAXA デジタルアーカイブス（https://jda.jaxa.jp/ の検索。「かぐや」の映像の題名）
 - 時刻で変わる画面（打ち上げの日など）の確認：Playwright の `page.clock.install({ time })` で時計を合わせる
-- 「一言でわかる」ページ（`web/missions/`）：`curation/` を直したら `node scripts/build-summaries.mjs`（CI は `--check`）。カードの一言・名前・模型を変えたら、カードの画像も `CHROMIUM=/opt/pw-browsers/chromium-1194/chrome-linux/chrome node scripts/build-og-images.mjs <id>`（新しい機体のページを足したときも）。入口は i ボタン（トップは「このアプリについて」）の中だけ
+- 「一言でわかる」ページ（`web/missions/`）：`curation/` を直したら `node scripts/build-summaries.mjs`（CI は `--check`）。カードの一言・名前・模型を変えたら、カードの画像も `node scripts/build-og-images.mjs <id>`（CHROMIUM の指定なしで動く）（新しい機体のページを足したときも）。入口は i ボタン（トップは「このアプリについて」）の中だけ
 - 同じ日に PR をいくつも出すと、`docs/changelog.md`・`handoff.md` の同じ行で競合する。マージの前に main を取りこんで、両方の行を残す
 - 読み込みの上限は `config/size-budget.json`（グループごと）。上限を上げるのはオーナーの判断
 - `LICENSE`（All rights reserved）・`RULES.md`・`CONTENT_LICENSE.md` は、オーナーの承認なしに変えない。ライセンス・利用条件はルール5（判断材料だけ出す）
