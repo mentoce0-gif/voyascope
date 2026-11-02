@@ -111,6 +111,14 @@ function start() {
     }
     return segs(pos, color, opacity);
   }
+  function ellipseLine(posAt, color = C.mint, opacity = 0.6) {
+    const pos = [];
+    for (let i = 0; i < 256; i++) {
+      const [x1, z1] = posAt((i / 256) * Math.PI * 2), [x2, z2] = posAt(((i + 1) / 256) * Math.PI * 2);
+      pos.push(x1, 0, z1, x2, 0, z2);
+    }
+    return segs(pos, color, opacity);
+  }
   function line(a, b, color = C.dim, opacity = 0.5) {
     return segs([...a.toArray(), ...b.toArray()], color, opacity);
   }
@@ -122,11 +130,23 @@ function start() {
     return o;
   }
   // 地球のまわりの機体：地球と高さの輪（本当の比）と、輪を回る点。文字のじゃまにならないよう右へ寄せる
+  // alt は高さ（km）か、楕円の軌道なら { peri, apo }（近地点・遠地点の高さ、km）。地球は楕円の焦点に置く
+  const orbitOf = (q) => (q?.peri && q?.apo ? { peri: q.peri, apo: q.apo } : q?.altKm ?? 400);
   function earthSystem(scene, cam, alt = 400, ringColor = C.mint, satColor = C.amber) {
-    const R = 1, r = R * (1 + alt / 6371);
+    const R = 1;
+    const ell = alt && typeof alt === "object" ? alt : null;
+    const rp = R * (1 + (ell ? ell.peri : alt) / 6371), ra = ell ? R * (1 + ell.apo / 6371) : rp;
+    const sa = (rp + ra) / 2, ecc = (ra - rp) / (ra + rp), sb = sa * Math.sqrt(1 - ecc * ecc);
+    const r = ra;
+    // 平均近点角 M から位置（ケプラーの式をニュートン法で解く）。円なら等速
+    const posAt = (M) => {
+      let E = M;
+      for (let i = 0; i < 8; i++) E -= (E - ecc * Math.sin(E) - M) / (1 - ecc * Math.cos(E));
+      return [sa * (Math.cos(E) - ecc), sb * Math.sin(E)];
+    };
     const g = new THREE.Group();
     const e = earth(R);
-    const orbit = ring(r, ringColor, 0.7);
+    const orbit = ell ? ellipseLine(posAt, ringColor, 0.7) : ring(r, ringColor, 0.7);
     orbit.rotation.x = 0.35;
     const sat = dot(satColor, 0.035 * Math.max(1, r / 1.5));
     g.add(e, orbit, sat);
@@ -141,8 +161,8 @@ function start() {
       sat,
       update(t) {
         e.rotation.y = t * 0.8;
-        const a = t * Math.PI * 2;
-        sat.position.set(Math.cos(a) * r, 0, Math.sin(a) * r).applyAxisAngle(new THREE.Vector3(1, 0, 0), 0.35);
+        const [x, z] = posAt(t * Math.PI * 2);
+        sat.position.set(x, 0, z).applyAxisAngle(new THREE.Vector3(1, 0, 0), 0.35);
       },
     };
   }
@@ -162,7 +182,7 @@ function start() {
       lights(scene);
       scene.add(stars());
       if (!V.model) {
-        const es = earthSystem(scene, cam, V.q3?.altKm ?? 400);
+        const es = earthSystem(scene, cam, orbitOf(V.q3));
         return {
           scene, cam,
           update: es.update,
@@ -202,9 +222,9 @@ function start() {
         scene.add(m);
         cam.position.set(0, 0, 6);
       } else {
-        es = earthSystem(scene, cam, V.q3?.altKm ?? 400, C.dim, C.mint);
+        es = earthSystem(scene, cam, orbitOf(V.q3), C.dim, C.mint);
         m = es.sat;
-        size = 0.25 * Math.max(1, (1 + (V.q3?.altKm ?? 400) / 6371) / 1.5);
+        size = 0.25 * Math.max(1, (1 + (V.q3?.altKm ?? V.q3?.apo ?? 400) / 6371) / 1.5);
       }
       const rings = Array.from({ length: 3 }, () => {
         const r = ring(1, C.mint, 0.8);
@@ -241,16 +261,16 @@ function start() {
       lights(scene);
       scene.add(stars());
       if (V.group === "craft" || !V.q3?.km) {
-        const es = earthSystem(scene, cam, V.q3?.altKm ?? 400);
+        const es = earthSystem(scene, cam, orbitOf(V.q3));
         return {
           scene, cam,
           update: es.update,
           overlay(g) {
             title(g, 3);
-            big(g, V.q3?.altKm ? `高さ 約${V.q3.altKm.toLocaleString("ja-JP")} km` : "地球のまわり", 64, 250);
+            big(g, V.q3?.altKm ? `高さ 約${V.q3.altKm.toLocaleString("ja-JP")} km` : V.q3?.altText ? `高さ 約${V.q3.altText}` : "地球のまわり", 64, 250);
             g.font = `24px ${FONT}`;
             g.fillStyle = C.dim;
-            g.fillText("地球のまわりを回っている（輪の大きさは本当の比）", 64, 300);
+            g.fillText(V.q3?.apo ? "近づいたり遠ざかったりしながら回っている（輪の形と大きさは本当の比）" : "地球のまわりを回っている（輪の大きさは本当の比）", 64, 300);
             footer(g, V.q3?.src ? `出典：${V.q3.src}` : "");
           },
         };
@@ -403,7 +423,7 @@ function start() {
         };
       }
       // 地球のまわり：1周の時計
-      const es = earthSystem(scene, cam, V.q5?.altKm ?? 400, C.amber, C.mint);
+      const es = earthSystem(scene, cam, orbitOf(V.q5), C.amber, C.mint);
       let k = 0;
       return {
         scene, cam,

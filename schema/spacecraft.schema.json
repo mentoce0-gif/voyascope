@@ -93,6 +93,8 @@
       "additionalProperties": false,
       "properties": {
         "altitude_km": { "$ref": "common.schema.json#/$defs/fact" },
+        "perigee_km": { "$ref": "common.schema.json#/$defs/fact", "description": "楕円の軌道で、地球にいちばん近づく高さ（近地点）。altitude_km の代わりに apogee_km と組で書く" },
+        "apogee_km": { "$ref": "common.schema.json#/$defs/fact", "description": "楕円の軌道で、地球からいちばん離れる高さ（遠地点）" },
         "speed_km_s": { "$ref": "common.schema.json#/$defs/fact" },
         "period_min": { "$ref": "common.schema.json#/$defs/fact" },
         "mass_kg": { "$ref": "common.schema.json#/$defs/fact" },

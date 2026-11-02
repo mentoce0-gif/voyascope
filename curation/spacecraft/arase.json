@@ -35,12 +35,26 @@
     "note": "JAXA の表記は「後期運用中」。2032年度末までの観測運用の延長が承認されている"
   },
   "stats": {
+    "perigee_km": {
+      "value": 440,
+      "unit": "km",
+      "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html",
+      "as_of": "2026-11-02",
+      "note": "おおよその値（公称）。地球にいちばん近づく高さ（近地点）"
+    },
+    "apogee_km": {
+      "value": 32000,
+      "unit": "km",
+      "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html",
+      "as_of": "2026-11-02",
+      "note": "おおよその値（公称）。地球からいちばん離れる高さ（遠地点）"
+    },
     "period_min": {
       "value": 570,
       "unit": "min",
       "source": "https://www.isas.jaxa.jp/missions/spacecraft/current/erg.html",
       "as_of": "2026-11-02",
-      "note": "おおよその値（公称）。地球から約440〜32,000 kmを行き来する楕円の軌道"
+      "note": "おおよその値（公称）"
     },
     "mass_kg": {
       "value": 350,

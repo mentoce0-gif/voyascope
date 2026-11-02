@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { teamsAboard, builderLine } from "../web/js/card.js";
+import { teamsAboard, builderLine, altRange } from "../web/js/card.js";
 
 const team = (id, launch, ret) => ({
   id,
@@ -44,4 +44,11 @@ test("つくり手の行：種類つき。書いていない機体は出さな�
   assert.equal(builderLine(card), '九州工業大学・東京大学<span class="k">（大学・高専）</span>');
   assert.equal(builderLine({ builder: { value: "アークエッジ・スペース", source: src } }), "アークエッジ・スペース");
   assert.equal(builderLine({}), null);
+});
+
+test("楕円の軌道の高さ：近地点〜遠地点（おおよその値には「約」）", () => {
+  const src = "https://example.org";
+  const f = (value, note) => ({ value, unit: "km", source: src, note });
+  assert.equal(altRange({ perigee_km: f(440, "おおよその値"), apogee_km: f(32000, "おおよその値") }), "約 440〜32,000 km");
+  assert.equal(altRange({ perigee_km: f(397), apogee_km: f(31781) }), "397〜31,781 km");
 });
