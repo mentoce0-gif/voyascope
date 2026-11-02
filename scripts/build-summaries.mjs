@@ -42,6 +42,18 @@ const ymd = (iso) => {
 };
 const jstDay = (t) => new Date(Date.parse(t) + JST).toISOString().slice(0, 10);
 const EVENTS = new Map(read("events").map((e) => [e.id, e]));
+// ページに置く動画（config/mission-videos.json）。押すまで読み込まない
+const VIDEOS = JSON.parse(readFileSync(join(ROOT, "config", "mission-videos.json"), "utf8")).videos ?? {};
+const videoHtml = (id, q) =>
+  (VIDEOS[id] ?? [])
+    .filter((v) => v.q === q)
+    .map(
+      (v) => `    <figure class="movie">
+      <video controls playsinline preload="none" poster="../../${esc(v.poster)}" width="720" height="900"><source src="../../${esc(v.src)}" type="video/mp4"></video>
+      <figcaption>${esc(v.caption)}<span class="src">出典：${v.sources.map((s) => `<a href="${esc(s.url)}" rel="noopener">${esc(s.label)}</a>`).join("・")} · ${esc(v.made)} 作成</span></figcaption>
+    </figure>`,
+    )
+    .join("\n");
 const HORIZONS = JSON.parse(readFileSync(join(ROOT, "web", "data", "horizons.json"), "utf8"));
 // 距離を出す日：Horizons の表のはじめの日（日本時間 0時）。表がなければ距離は出さない
 const REF = Object.values(HORIZONS.probes ?? {})[0]?.start ? new Date(Object.values(HORIZONS.probes)[0].start) : null;
@@ -100,6 +112,9 @@ ul { margin: 0; padding-left: 1.2em; }
 .vis button:hover { color: var(--text); border-color: var(--mint); }
 .vis button[disabled] { opacity: .5; cursor: default; }
 .scale li { margin: 6px 0; }
+.movie { margin: 14px 0 0; }
+.movie video { display: block; width: 100%; max-width: 420px; height: auto; aspect-ratio: 4 / 5; margin: 0 auto; border-radius: 12px; background: #050e1f; }
+.movie figcaption { margin: 8px auto 0; max-width: 420px; font-size: 14px; color: var(--dim); }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: var(--dim); font-size: 13px; }
 @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
 `;
@@ -206,7 +221,7 @@ function cardPage(c, group) {
   if (c.status) {
     const st = STATUS[c.status.value] ?? c.status.value;
     V.q2 = { label: st, note: c.status.note ?? "", asOf: c.status.as_of, src: host(c.status.source) };
-    parts.push(sec(2, "いま何が起きた？", `    <p class="happen"><span class="tag">${esc(st)}</span>${c.status.note ? esc(c.status.note) : ""}${cite(c.status)}</p>`));
+    parts.push(sec(2, "いま何が起きた？", `    <p class="happen"><span class="tag">${esc(st)}</span>${c.status.note ? esc(c.status.note) : ""}${cite(c.status)}</p>${videoHtml(c.id, 2) ? `\n${videoHtml(c.id, 2)}` : ""}`));
   }
 
   // Q3 どこ？

@@ -62,6 +62,9 @@ ul { margin: 0; padding-left: 1.2em; }
 .vis button:hover { color: var(--text); border-color: var(--mint); }
 .vis button[disabled] { opacity: .5; cursor: default; }
 .scale li { margin: 6px 0; }
+.movie { margin: 14px 0 0; }
+.movie video { display: block; width: 100%; max-width: 420px; height: auto; aspect-ratio: 4 / 5; margin: 0 auto; border-radius: 12px; background: #050e1f; }
+.movie figcaption { margin: 8px auto 0; max-width: 420px; font-size: 14px; color: var(--dim); }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.12); color: var(--dim); font-size: 13px; }
 @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 2px; } dd { margin-bottom: 10px; } }
 </style>
@@ -86,6 +89,10 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
     <h2 id="q2"><span class="qn">Q2</span>いま何が起きた？</h2>
     <figure class="vis" data-q="2" hidden></figure>
     <p class="happen"><span class="tag">運用中</span>参加機関は2030年までの運用を約束している（NASA の FAQ）<span class="src">出典：<a href="https://www.nasa.gov/international-space-station/space-station-overview/" rel="noopener">nasa.gov</a> · 2026-09-30 確認</span></p>
+    <figure class="movie">
+      <video controls playsinline preload="none" poster="../../assets/video/iss-irosa-2021-2026.webp" width="720" height="900"><source src="../../assets/video/iss-irosa-2021-2026.mp4" type="video/mp4"></video>
+      <figcaption>新しい太陽電池パネル IROSA が8基になるまで（2021〜2026年。8基目の2026年11月5日は予定）。ISS の形・パネルの向きは簡略化したイメージ<span class="src">出典：<a href="https://www.nasa.gov/blogs/spacestation/2026/10/29/spacewalkers-install-roll-out-solar-arrays-for-power-generation/" rel="noopener">NASA 国際宇宙ステーションのブログ（7基目・8基目の予定、2026年10月29日）</a>・<a href="https://www.nasa.gov/blogs/spacestation/2021/06/16/spacewalk-to-install-first-new-solar-array-concluded/" rel="noopener">同（1基目、2021年6月16日）</a>・<a href="https://www.nasa.gov/blogs/spacestation/2021/06/25/spacewalkers-complete-second-roll-out-solar-array-installation/" rel="noopener">同（2基目、2021年6月25日）</a>・<a href="https://www.nasa.gov/blogs/spacestation/2022/12/03/spacewalkers-complete-new-solar-array-installation-on-station/" rel="noopener">同（3基目、2022年12月3日）</a>・<a href="https://www.nasa.gov/blogs/spacestation/2022/12/22/nasa-spacewalkers-install-stations-fourth-roll-out-solar-array/" rel="noopener">同（4基目、2022年12月22日）</a>・<a href="https://www.nasa.gov/blogs/spacestation/2023/06/09/nasa-spacewalkers-complete-solar-array-installation/" rel="noopener">同（5基目、2023年6月9日）</a>・<a href="https://www.nasa.gov/blogs/spacestation/2023/06/15/nasa-spacewalkers-finish-installing-roll-out-solar-array/" rel="noopener">同（6基目、2023年6月15日）</a>・<a href="https://ntrs.nasa.gov/api/citations/20180005346/downloads/20180005346.pdf" rel="noopener">NASA グレン研究センターの報告（電力の系統と骨組みの対応、NTRS 20180005346）</a> · 2026-11-02 作成</span></figcaption>
+    </figure>
   </section>
 
   <section class="q" aria-labelledby="q3">
