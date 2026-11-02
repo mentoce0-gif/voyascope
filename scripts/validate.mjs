@@ -103,10 +103,12 @@ for (const { kind, path, card } of cards) {
     if (v.from && v.to && v.from > v.to) errors.push(`${path}: when の from が to より後になっています`);
     if (card.kind === "launch" && !card.site) errors.push(`${path}: 打ち上げ（launch）には射場（site）が要ります`);
   }
-  if (kind === "probes") {
+  if (kind === "spacecraft" || kind === "probes") {
     for (const ev of card.events ?? []) {
       if (!ids.events.has(ev)) errors.push(`${path}: events "${ev}" が events/ にありません`);
     }
+  }
+  if (kind === "probes") {
     const realDay = (s) => !Number.isNaN(Date.parse(`${s}T00:00:00Z`)) && new Date(`${s}T00:00:00Z`).toISOString().slice(0, 10) === s;
     for (const d of [card.launch_date?.value, card.distance?.at].filter(Boolean)) {
       if (!realDay(d)) errors.push(`${path}: "${d}" は日付として読めません`);

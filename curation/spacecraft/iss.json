@@ -84,6 +84,9 @@
     "caption": "ソユーズ宇宙船から撮影した国際宇宙ステーション（2018年10月4日）",
     "terms": "https://www.nasa.gov/nasa-brand-center/images-and-media/"
   },
+  "events": [
+    "iss-irosa-final-spacewalk"
+  ],
   "official_links": [
     {
       "label": "NASA 国際宇宙ステーション",
@@ -98,5 +101,5 @@
       "url": "https://www.esa.int/Science_Exploration/Human_and_Robotic_Exploration/International_Space_Station"
     }
   ],
-  "updated_at": "2026-09-30"
+  "updated_at": "2026-11-02"
 }
