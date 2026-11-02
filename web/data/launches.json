@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-02T06:02:41.159Z",
+  "fetched_at": "2026-11-02T15:52:53.480Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -13,7 +13,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-10-31T13:53:23Z",
+      "updated": "2026-11-02T15:42:49Z",
       "rocket": {
         "name": "Electron",
         "full_name": "Electron"
@@ -35,12 +35,12 @@
         "name": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
         "ja": "マヒア半島の発射場",
         "short": "マヒア",
-        "pad": "Unknown Pad",
+        "pad": "Rocket Lab Launch Complex 1A",
         "country": "NZL",
         "country_ja": "ニュージーランド",
         "position": {
-          "lat": -39.260881,
-          "lng": 177.865826
+          "lat": -39.262833,
+          "lng": 177.864469
         }
       }
     },
@@ -91,7 +91,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-01T22:44:35Z",
+      "updated": "2026-11-02T15:29:20Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
