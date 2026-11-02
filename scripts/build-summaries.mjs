@@ -218,14 +218,16 @@ function cardPage(c, group) {
     const ell = ellipse(c.stats);
     where.push(
       alt ? `    <p>地球のまわりを回っている（高さ 約${esc(alt.value.toLocaleString("ja-JP"))} km）${cite(alt)}</p>`
-      : ell ? `    <p>地球のまわりを、近づいたり遠ざかったりしながら回っている（高さ 約${esc(ell.text)}）${cite(c.stats.apogee_km)}</p>`
+      : ell ? `    <p>地球のまわりを、近づいたり遠ざかったりしながら回っている（高さ 約${esc(ell.text)}）${cite(c.stats.apogee_km)}</p>${
+          c.stats.inclination_deg ? `\n    <p>軌道は赤道から約${esc(c.stats.inclination_deg.value)}°傾いている${cite(c.stats.inclination_deg)}</p>` : ""
+        }`
       : "    <p>地球のまわりを回っている</p>",
     );
   }
   if (group === "craft") {
     const ell = ellipse(c.stats);
     const altFact = c.stats?.altitude_km ?? (ell && c.stats.apogee_km);
-    V.q3 = { altKm: c.stats?.altitude_km?.value ?? null, peri: ell?.peri ?? null, apo: ell?.apo ?? null, altText: ell?.text ?? null, src: altFact ? host(altFact.source) : "" };
+    V.q3 = { altKm: c.stats?.altitude_km?.value ?? null, peri: ell?.peri ?? null, apo: ell?.apo ?? null, incl: c.stats?.inclination_deg?.value ?? null, altText: ell?.text ?? null, src: altFact ? host(altFact.source) : "" };
   }
   if (dist && dist.km > 0) {
     V.q3 = {
@@ -301,6 +303,7 @@ ${tl.join("\n")}
       altKm: st.altitude_km?.value ?? null,
       peri: ellipse(st)?.peri ?? null,
       apo: ellipse(st)?.apo ?? null,
+      incl: st.inclination_deg?.value ?? null,
       src: host((st.period_min ?? st.speed_km_s ?? st.length_m ?? st.mass_kg ?? { source: c.mission.source }).source),
     };
     if (st.speed_km_s) scale.push(`      <li>速さ：秒速 <b>約${esc(st.speed_km_s.value)} km</b>${cite(st.speed_km_s)}</li>`);
