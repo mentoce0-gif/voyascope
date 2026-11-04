@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-03T23:23:48.350Z",
+  "fetched_at": "2026-11-04T06:22:32.212Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -91,7 +91,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-03T01:56:05Z",
+      "updated": "2026-11-04T00:46:25Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -205,10 +205,10 @@
       "net": "2026-11-13T04:23:00.000Z",
       "precision": "min",
       "window_end": "2026-11-13T08:23:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-11-03T13:16:04Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-03T23:39:43Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -218,7 +218,7 @@
         "ja": "スペースX"
       },
       "mission": {
-        "name": "USSF-xxx (\"R-6\")",
+        "name": "USSF-317",
         "placeholder": false,
         "type": "Government/Top Secret",
         "type_ja": "政府（内容は非公開）",
