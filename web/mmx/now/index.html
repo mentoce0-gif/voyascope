@@ -32,6 +32,7 @@
   .note summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
   .tag { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font-size: 12px; font-weight: 700; color: var(--mint); text-shadow: 0 0 8px var(--navy); }
   .tag.amber { color: var(--amber); }
+  .tag.dim { font-weight: 500; font-size: 11px; color: #9fb3c8; }
   .top { position: absolute; left: 14px; right: 14px; top: 14px; display: flex; align-items: center; gap: 10px; pointer-events: auto; }
   [hidden] { display: none !important; }
   .btn { white-space: nowrap; appearance: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 14px; border: 1px solid rgba(94,242,194,.55); border-radius: 999px; background: rgba(5,14,31,.72); color: var(--text); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; backdrop-filter: blur(4px); }
@@ -218,6 +219,7 @@
   <div class="tag amber" id="tag-h3">H3ロケット10号機（MMX を搭載）</div>
   <div class="tag" id="tag-mars">火星</div>
   <div class="tag" id="tag-earth">地球</div>
+  <div class="tag dim" id="tag-earth0">打ち上げの日の地球</div>
   <div class="tag" id="tag-marsnow">火星（いま）</div>
   <div class="tag" id="tag-moon">月</div>
   <div class="tag amber" id="tag-phobos">フォボス</div>
@@ -399,6 +401,11 @@ const earthMat = new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0 
 const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(RE, 96, 64), earthMat); earth.add(earthMesh);
 const atm = glow(0x6fb6ff, 1.75, earthPos); atm.uniforms.uA.value = 0.45;
 const earthNow = new THREE.Mesh(new THREE.SphereGeometry(1, 64, 48), earthMat); earthNow.visible = false; scene.add(earthNow);
+// 全体の図：打ち上げの日の地球（道と光の出発点。薄く。2026-11-04 オーナー：光が何もないところから出て見える）
+const earthLaunchMat = new THREE.MeshStandardMaterial({ roughness: 0.85, metalness: 0, transparent: true, opacity: 0.35, depthWrite: false });
+const earthLaunch = new THREE.Mesh(earthNow.geometry, earthLaunchMat); earthLaunch.visible = false; scene.add(earthLaunch);
+// 全体の図の地球の大きさ（参考。実際の比ではない。2026-11-04 オーナー：図として分かりやすく、0.22 から大きく）
+const EARTH_OV = 0.6;
 // 緯度・経度 → 地球の表面（SphereGeometry の貼り方に合わせる）
 const ll = (lat, lon, r = RE) => { const la = ((lat) * Math.PI / 180), ph = ((lon + 180) * Math.PI / 180); return V(-r * Math.cos(ph) * Math.cos(la), r * Math.sin(la), r * Math.sin(ph) * Math.cos(la)); };
 // 地球のそばの道の向き（計算。2026-10-20 オーナー：公式の計画を追う）
@@ -502,10 +509,13 @@ const end = path[path.length - 1].clone(), endDir = end.clone().sub(path[path.le
 // 火星のそば：大きな楕円で1周 → 少し小さく → フォボスの軌道の高さへ
 const mUp = V(0, 1, 0), mx = endDir.clone().cross(mUp).normalize(), mz = mUp.clone().cross(mx).normalize();
 const ell = (a, b, th, cx = 0) => marsPos.clone().add(mx.clone().multiplyScalar(Math.cos(th) * a + cx)).add(mz.clone().multiplyScalar(Math.sin(th) * b));
-const capStart = ell(2.0, 1.1, -0.35, 1.3);
-for (let i = 1; i <= 160; i++) path.push(bez(end, end.clone().add(endDir.clone().multiplyScalar(0.8)), capStart.clone().add(V(0, 0, 0)).sub(mz.clone().multiplyScalar(-0.5)), capStart, i / 160));
-for (let i = 1; i <= 300; i++) { const t = i / 300, th = -0.35 + t * Math.PI * 2; path.push(ell(lerp(2.0, 1.45, t), lerp(1.1, 1.0, t), th, lerp(1.3, 0.55, t))); }
-for (let i = 1; i <= 220; i++) { const t = i / 220, th = -0.35 + t * Math.PI * 1.6; path.push(ell(lerp(1.45, phobosR, t), lerp(1.0, phobosR, t), th, lerp(0.55, 0, t))); }
+const capStart = ell(2.0, 1.1, -0.35, -1.3); // 楕円の中心を、来た道の側から見て火星の向こうへ（入口が火星の手前・進む向きのまま。2026-11-04）
+// 楕円に入るところは、楕円の進む向き（th が増える向き）にそろえる（2026-11-04：前は逆向きの制御点で、ここが折り返して尖って見えた）
+const capDir = mx.clone().multiplyScalar(-Math.sin(-0.35) * 2.0).add(mz.clone().multiplyScalar(Math.cos(-0.35) * 1.1)).normalize();
+const capL = end.distanceTo(capStart) * 0.42;
+for (let i = 1; i <= 160; i++) path.push(bez(end, end.clone().add(endDir.clone().multiplyScalar(capL)), capStart.clone().sub(capDir.clone().multiplyScalar(capL)), capStart, i / 160));
+for (let i = 1; i <= 300; i++) { const t = i / 300, th = -0.35 + t * Math.PI * 2; path.push(ell(lerp(2.0, 1.45, t), lerp(1.1, 1.0, t), th, lerp(-1.3, -0.55, t))); }
+for (let i = 1; i <= 220; i++) { const t = i / 220, th = -0.35 + t * Math.PI * 1.6; path.push(ell(lerp(1.45, phobosR, t), lerp(1.0, phobosR, t), th, lerp(-0.55, 0, t))); }
 // フォボスの位置を、この到着点のすこし先に置き直す
 const arriveTh = -0.35 + Math.PI * 1.6 + 0.35;
 phobosPos.copy(ell(phobosR, phobosR, arriveTh)); phobos.position.copy(phobosPos);
@@ -1040,7 +1050,7 @@ function sAtKm(km) {
   return sJoin;
 }
 // 名札が字幕・ボタン・計器や、ほかの名札と重なるときは出さない（2026-10-20 オーナー：文字が被らないように）
-const TAG_ORDER = () => [tags.mmx, tagH3, tagEarth, tags.tane, tagMarsNow, tags.mars, tagMoon, tags.phobos];
+const TAG_ORDER = () => [tags.mmx, tagH3, tagEarth, tagEarth0, tags.tane, tagMarsNow, tags.mars, tagMoon, tags.phobos];
 const BLOCKERS = [".cap", ".nowlinks", ".replay-big", ".links", ".film-hint", ".tm", ".top", ".bubble"];
 function declutter() {
   const boxes = [];
@@ -1069,6 +1079,7 @@ function nowObjs(mode) {
   if (mode !== "overview") mmxHolder.position.copy(mmxPos);
   if (!allLines) { allLines = []; scene.traverse((o) => { if (o.isLineSegments || o.isLine) allLines.push(o); }); } // "plan"（打ち上げ前・打ち上げの日・オープニング）／"overview"／"track"
   earth.visible = mode === "plan"; atm.uniforms.uA.value = mode === "plan" ? 0.45 : 0; routeObj.visible = mode !== "track";
+  earthLaunch.visible = mode === "overview" && FLYING; if (mode !== "overview") tagEarth0.style.opacity = 0;
   earthNow.visible = mode !== "plan"; moonLocal.visible = mode === "track"; marsNow.visible = mode === "overview";
   route.uniforms.uMinS.value = mode === "overview" ? sJoin : 0;
   for (const o of allLines) o.visible = mode !== "track"; // MMX のそばでは、太陽系の大きさの線（公転の線など）を出さない
@@ -1079,7 +1090,8 @@ function nowObjs(mode) {
 function watchAt(t) {
   nowObjs("overview");
   { // 全体の図：いまの地球（小さな印）と、いまの火星。到着のときの火星（仮）は薄く
-    const nn = nearNow(); earthNow.position.copy(P(nn.eH)); earthNow.scale.setScalar(0.22);
+    const nn = nearNow(); earthNow.position.copy(P(nn.eH)); earthNow.scale.setScalar(EARTH_OV);
+    earthLaunch.position.copy(earthPos); earthLaunch.scale.setScalar(EARTH_OV); earthLaunch.quaternion.copy(earthNow.quaternion);
     mmxHolder.position.copy(P(nn.mH)); watchMMX = P(nn.mH); // MMX も、いまの太陽から見た位置（計画の軌道から）
     marsNow.position.copy(P(helioAU("Mars", new Date()))); marsNow.scale.setScalar(RM * 0.75);
     tags.mars.textContent = "到着時の火星（仮）";
@@ -1127,14 +1139,16 @@ function watchAt(t) {
   watchCaption();
   document.querySelector(".cap").style.opacity = 1;
   place(tags.tane, pinWorld, 0); place(tags.mmx, watchMMX, 1, -26); place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 0.55, 30); place(tags.phobos, phobosPos, 0);
-  tagEarth.textContent = "地球（いま）"; place(tagEarth, earthNow.position, 1, 22); place(tagMarsNow, marsNow.position.clone().add(V(0, -RM, 0)), 1, 26); tagMoon.style.opacity = 0;
+  tagEarth.textContent = "地球（いま）"; place(tagEarth, earthNow.position, 1, 22); place(tagEarth0, earthLaunch.position, FLYING ? 0.85 : 0, 22); place(tagMarsNow, marsNow.position.clone().add(V(0, -RM, 0)), 1, 26); tagMoon.style.opacity = 0;
 }
 window.watchAt = watchAt;
 // ---------- MMX を追う（2026-10-20 オーナー：しばらくは監視モードの「いまの位置」を主に）：MMX のそば・日の当たる側から。なぞって回す・寄せ引き ----------
 // 打ち上げから5日ほどは MMX を追う視点を最初に。そのあとは全体の図（火星との距離に関心が移るころ。2026-10-20 オーナー）。どちらもボタンで切り替えられる
 const TRACK_DAYS = 5;
 let track = FLYING && PH.days < TRACK_DAYS;
-const tagEarth = document.getElementById("tag-earth");
+const tagEarth = document.getElementById("tag-earth"), tagEarth0 = document.getElementById("tag-earth0");
+// 打ち上げの日（日本時間）
+if (Number.isFinite(PH.launchAt)) { const f = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric" }).formatToParts(new Date(PH.launchAt)), g = (t) => f.find((x) => x.type === t)?.value; tagEarth0.textContent = `打ち上げの日の地球（${g("month")}/${g("day")}）`; }
 // 上の計器と下の字幕のあいだ（空いているところ）の真ん中に、絵の中心を寄せる。空きの高さを返す
 function freeOffset(kind) {
   if (W >= 700) { const wide = kind === "overview" && watchWide(); camera.setViewOffset(W, H, -(wide ? WIDE_COL / 2 : Math.min(240, W * 0.16)), wide ? H * 0.06 : 0, W, H); return Math.max(260, H * 0.8); } // 横に広い画面：文字は左の列なので、絵は右へ寄せる（全体の図は、列の右の空きの真ん中へ。手前の側が遠近で大きく下へはみ出すので、少し上へ）
@@ -1231,7 +1245,7 @@ function watchCaption() {
   capCache = key;
   document.getElementById("capk").innerHTML = k; document.getElementById("capt").innerHTML = t; document.getElementById("caps").innerHTML = sub;
 }
-window.ready = loadTex("../../assets/earth/day-2048.jpg").then((tex) => { earthMat.map = tex; earthMat.needsUpdate = true; return document.fonts.ready; }).then(() => { renderAt(0); return true; });
+window.ready = loadTex("../../assets/earth/day-2048.jpg").then((tex) => { earthMat.map = tex; earthMat.needsUpdate = true; earthLaunchMat.map = tex; earthLaunchMat.needsUpdate = true; return document.fonts.ready; }).then(() => { renderAt(0); return true; });
 // 打ち上げ前（PRE）：種子島の H3 ロケットと、公式のリンク。「計画の航路を見る」でオープニング（16秒）→ 種子島へ戻る（2026-10-19 オーナー）
 // 打ち上げを確かめたあと：はじめて開いたときはオープニング → 監視モード。2回目からは監視モードから
 const SEEN = "voyascope.mmx-now.seen";
