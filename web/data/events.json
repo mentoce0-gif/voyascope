@@ -450,16 +450,16 @@
       },
       "when": {
         "value": {
-          "date": "2026-11-05"
+          "at": "2026-11-05T13:30:00Z"
         },
-        "source": "https://www.nasa.gov/blogs/spacestation/2026/10/29/spacewalkers-install-roll-out-solar-arrays-for-power-generation/",
-        "as_of": "2026-11-02",
-        "note": "原文「a planned Thursday, Nov. 5 spacewalk」。開始時刻はこの記事にないので日付だけ"
+        "source": "https://www.nasa.gov/blogs/spacestation/2026/11/03/crew-keeps-up-spacewalk-preps-research-and-cargo-operations/",
+        "as_of": "2026-11-04",
+        "note": "原文「scheduled to start at 8:30 a.m. EST on Thursday」（日本時間22:30）。中継は7:00 EST から"
       },
       "status": {
         "value": "scheduled",
-        "source": "https://www.nasa.gov/blogs/spacestation/2026/10/29/spacewalkers-install-roll-out-solar-arrays-for-power-generation/",
-        "as_of": "2026-11-02"
+        "source": "https://www.nasa.gov/blogs/spacestation/2026/11/03/crew-keeps-up-spacewalk-preps-research-and-cargo-operations/",
+        "as_of": "2026-11-04"
       },
       "links": [
         {
@@ -467,11 +467,15 @@
           "url": "https://www.nasa.gov/blogs/spacestation/2026/10/29/spacewalkers-install-roll-out-solar-arrays-for-power-generation/"
         },
         {
+          "label": "NASA+ 生中継「U.S. Spacewalk 101」（英語）",
+          "url": "https://plus.nasa.gov/scheduled-video/u-s-spacewalk-101/"
+        },
+        {
           "label": "NASA 国際宇宙ステーション",
           "url": "https://www.nasa.gov/international-space-station/"
         }
       ],
-      "updated_at": "2026-11-02"
+      "updated_at": "2026-11-04"
     },
     {
       "id": "leonids-2026",
