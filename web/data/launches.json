@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-05T06:46:39.337Z",
+  "fetched_at": "2026-11-05T19:59:09.799Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "711de6bc-f755-475b-a12f-ec5240da3a11",
-      "net": "2026-11-05T16:00:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-11-05T16:16:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-10-30T13:34:13Z",
-      "rocket": {
-        "name": "Long March 2C",
-        "full_name": "Long March 2C"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 16,
-        "name": "Xichang Satellite Launch Center, People's Republic of China",
-        "ja": "西昌衛星発射センター",
-        "short": "西昌",
-        "pad": "Launch Complex 3 (LC-3/LA-1)",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 28.247059,
-          "lng": 102.029008
-        }
-      }
-    },
     {
       "id": "e91d1da2-819b-4523-95bf-39ac7daa871d",
       "net": "2026-11-06T23:35:00.000Z",
@@ -470,6 +431,45 @@
         "position": {
           "lat": 19.59755,
           "lng": 110.936481
+        }
+      }
+    },
+    {
+      "id": "dff42a2e-f047-48d7-b260-3888d3a4fe33",
+      "net": "2026-11-26T20:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-26T21:30:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-10-29T21:51:22Z",
+      "rocket": {
+        "name": "Spectrum",
+        "full_name": "Spectrum"
+      },
+      "provider": {
+        "name": "Isar Aerospace",
+        "ja": null
+      },
+      "mission": {
+        "name": "AT-Astra and Others (Spectrum Flight 3)",
+        "placeholder": false,
+        "type": "Technology",
+        "type_ja": "技術の試験",
+        "orbit": "Sun-Synchronous Orbit",
+        "orbit_ja": "太陽同期軌道"
+      },
+      "site": {
+        "location_id": 161,
+        "name": "Andøya Spaceport",
+        "ja": null,
+        "short": null,
+        "pad": "Orbital Launch Pad",
+        "country": "NOR",
+        "country_ja": "ノルウェー",
+        "position": {
+          "lat": 69.1084,
+          "lng": 15.5895
         }
       }
     }
