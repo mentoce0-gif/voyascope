@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-04T19:45:29.917Z",
+  "fetched_at": "2026-11-05T06:46:39.337Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -169,7 +169,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-03T21:49:18Z",
+      "updated": "2026-11-04T20:05:21Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -201,6 +201,84 @@
       }
     },
     {
+      "id": "9e27a1ed-e81a-4918-b32b-0380cf3a9f8f",
+      "net": "2026-11-10T06:00:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-10T09:00:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-05T02:58:19Z",
+      "rocket": {
+        "name": "Mir",
+        "full_name": "Mir"
+      },
+      "provider": {
+        "name": "Agency for Defense Development",
+        "ja": null
+      },
+      "mission": {
+        "name": "Demo Flight",
+        "placeholder": false,
+        "type": "Test Flight",
+        "type_ja": "試験飛行",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 3,
+        "name": "Sea Launch",
+        "ja": null,
+        "short": null,
+        "pad": "ADD Offshore launch platform",
+        "country": "KOR",
+        "country_ja": "韓国",
+        "position": {
+          "lat": 33.216667,
+          "lng": 126.366667
+        }
+      }
+    },
+    {
+      "id": "d66590ab-b273-47ff-b85a-608b62851b4b",
+      "net": "2026-11-11T11:40:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-11T12:05:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-05T06:42:19Z",
+      "rocket": {
+        "name": "Long March 2D",
+        "full_name": "Long March 2D"
+      },
+      "provider": {
+        "name": "China Aerospace Science and Technology Corporation",
+        "ja": "中国航天科技集団（CASC）"
+      },
+      "mission": {
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
+      },
+      "site": {
+        "location_id": 17,
+        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
+        "ja": "酒泉衛星発射センター",
+        "short": "酒泉",
+        "pad": "Launch Area 94 (SLS-2 / 603)",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 40.960482,
+          "lng": 100.298059
+        }
+      }
+    },
+    {
       "id": "76617033-4dc0-4448-b50c-e5b0d5a18539",
       "net": "2026-11-13T04:23:00.000Z",
       "precision": "min",
@@ -208,7 +286,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-03T23:39:43Z",
+      "updated": "2026-11-04T20:05:26Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -392,84 +470,6 @@
         "position": {
           "lat": 19.59755,
           "lng": 110.936481
-        }
-      }
-    },
-    {
-      "id": "dff42a2e-f047-48d7-b260-3888d3a4fe33",
-      "net": "2026-11-26T20:00:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-11-26T21:30:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-10-29T21:51:22Z",
-      "rocket": {
-        "name": "Spectrum",
-        "full_name": "Spectrum"
-      },
-      "provider": {
-        "name": "Isar Aerospace",
-        "ja": null
-      },
-      "mission": {
-        "name": "AT-Astra and Others (Spectrum Flight 3)",
-        "placeholder": false,
-        "type": "Technology",
-        "type_ja": "技術の試験",
-        "orbit": "Sun-Synchronous Orbit",
-        "orbit_ja": "太陽同期軌道"
-      },
-      "site": {
-        "location_id": 161,
-        "name": "Andøya Spaceport",
-        "ja": null,
-        "short": null,
-        "pad": "Orbital Launch Pad",
-        "country": "NOR",
-        "country_ja": "ノルウェー",
-        "position": {
-          "lat": 69.1084,
-          "lng": 15.5895
-        }
-      }
-    },
-    {
-      "id": "d74afbc7-0de5-491c-be05-4e9c31f736ac",
-      "net": "2026-11-29T15:49:00.000Z",
-      "precision": "min",
-      "window_end": null,
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-02T17:54:56Z",
-      "rocket": {
-        "name": "Falcon 9",
-        "full_name": "Falcon 9 Block 5"
-      },
-      "provider": {
-        "name": "SpaceX",
-        "ja": "スペースX"
-      },
-      "mission": {
-        "name": "Cygnus CRS-2 NG-25",
-        "placeholder": false,
-        "type": "Resupply",
-        "type_ja": "物資の補給",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
-      },
-      "site": {
-        "location_id": 12,
-        "name": "Cape Canaveral SFS, FL, USA",
-        "ja": "ケープカナベラル宇宙軍基地",
-        "short": "ケープカナベラル",
-        "pad": "Space Launch Complex 40",
-        "country": "USA",
-        "country_ja": "アメリカ",
-        "position": {
-          "lat": 28.56194122,
-          "lng": -80.57735736
         }
       }
     }
