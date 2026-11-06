@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-06T06:45:55.215Z",
+  "fetched_at": "2026-11-06T19:24:37.823Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -46,13 +46,13 @@
     },
     {
       "id": "54d471e8-695c-4fa7-a3cf-dbd8b389e8ae",
-      "net": "2026-11-07T00:46:00.000Z",
-      "precision": "min",
+      "net": "2026-11-07T00:48:42.000Z",
+      "precision": "sec",
       "window_end": "2026-11-07T04:46:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-04T00:46:25Z",
+      "updated": "2026-11-06T14:59:36Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -163,13 +163,13 @@
     },
     {
       "id": "9e27a1ed-e81a-4918-b32b-0380cf3a9f8f",
-      "net": "2026-11-10T06:00:00.000Z",
+      "net": "2026-11-11T05:00:00.000Z",
       "precision": "hour",
-      "window_end": "2026-11-10T09:00:00.000Z",
+      "window_end": "2026-11-11T09:00:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-05T02:58:19Z",
+      "updated": "2026-11-06T14:45:06Z",
       "rocket": {
         "name": "Mir",
         "full_name": "Mir"
@@ -286,7 +286,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-03T17:22:50Z",
+      "updated": "2026-11-06T14:36:43Z",
       "rocket": {
         "name": "Vulcan VC6L",
         "full_name": "Vulcan VC6L"
