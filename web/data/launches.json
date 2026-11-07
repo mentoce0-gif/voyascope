@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-07T13:01:39.516Z",
+  "fetched_at": "2026-11-07T21:51:10.251Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -240,6 +240,45 @@
       }
     },
     {
+      "id": "0f867f0c-5422-4d44-93b8-d7faaae7019b",
+      "net": "2026-11-13T22:45:00.000Z",
+      "precision": "min",
+      "window_end": "2026-11-14T00:00:00.000Z",
+      "status": "tbc",
+      "status_label": "TBC",
+      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
+      "updated": "2026-11-07T16:14:28Z",
+      "rocket": {
+        "name": "Starship",
+        "full_name": "Starship V3"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "Starlink Group 31-2 (Starship Flight 15)",
+        "placeholder": false,
+        "type": "Communications",
+        "type_ja": "通信",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 143,
+        "name": "SpaceX Starbase, TX, USA",
+        "ja": "スターベース",
+        "short": "スターベース",
+        "pad": "Orbital Launch Pad 2",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 25.99677,
+          "lng": -97.15799
+        }
+      }
+    },
+    {
       "id": "db3500ac-965b-4ad8-b417-cb8d8d005586",
       "net": "2026-11-14T05:30:00.000Z",
       "precision": "min",
@@ -431,45 +470,6 @@
         "position": {
           "lat": 69.1084,
           "lng": 15.5895
-        }
-      }
-    },
-    {
-      "id": "d74afbc7-0de5-491c-be05-4e9c31f736ac",
-      "net": "2026-11-29T15:49:00.000Z",
-      "precision": "min",
-      "window_end": null,
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-04T20:05:35Z",
-      "rocket": {
-        "name": "Falcon 9",
-        "full_name": "Falcon 9 Block 5"
-      },
-      "provider": {
-        "name": "SpaceX",
-        "ja": "スペースX"
-      },
-      "mission": {
-        "name": "Cygnus CRS-2 NG-25",
-        "placeholder": false,
-        "type": "Resupply",
-        "type_ja": "物資の補給",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
-      },
-      "site": {
-        "location_id": 12,
-        "name": "Cape Canaveral SFS, FL, USA",
-        "ja": "ケープカナベラル宇宙軍基地",
-        "short": "ケープカナベラル",
-        "pad": "Space Launch Complex 40",
-        "country": "USA",
-        "country_ja": "アメリカ",
-        "position": {
-          "lat": 28.56194122,
-          "lng": -80.57735736
         }
       }
     }
