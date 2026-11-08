@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-08T13:29:10.264Z",
+  "fetched_at": "2026-11-08T22:05:24.701Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "a2423132-f965-423f-8b03-6891b775dc54",
-      "net": "2026-11-08T20:25:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-11-08T20:47:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-03T13:09:32Z",
-      "rocket": {
-        "name": "Long March 12",
-        "full_name": "Long March 12"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "SatNet LEO Group TBD?",
-        "placeholder": false,
-        "type": "Communications",
-        "type_ja": "通信",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
-      },
-      "site": {
-        "location_id": 8,
-        "name": "Wenchang Space Launch Site, People's Republic of China",
-        "ja": "文昌宇宙発射場",
-        "short": "文昌",
-        "pad": "Commercial LC-2",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 19.59755,
-          "lng": 110.936481
-        }
-      }
-    },
     {
       "id": "6aa7b90b-e5ed-45d8-a52e-04fbf399d178",
       "net": "2026-11-10T03:03:00.000Z",
@@ -247,7 +208,7 @@
       "status": "tbc",
       "status_label": "TBC",
       "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-11-07T16:14:28Z",
+      "updated": "2026-11-08T15:50:02Z",
       "rocket": {
         "name": "Starship",
         "full_name": "Starship V3"
@@ -470,6 +431,45 @@
         "position": {
           "lat": 69.1084,
           "lng": 15.5895
+        }
+      }
+    },
+    {
+      "id": "d74afbc7-0de5-491c-be05-4e9c31f736ac",
+      "net": "2026-11-29T15:49:00.000Z",
+      "precision": "min",
+      "window_end": null,
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-04T20:05:35Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "Cygnus CRS-2 NG-25",
+        "placeholder": false,
+        "type": "Resupply",
+        "type_ja": "物資の補給",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 12,
+        "name": "Cape Canaveral SFS, FL, USA",
+        "ja": "ケープカナベラル宇宙軍基地",
+        "short": "ケープカナベラル",
+        "pad": "Space Launch Complex 40",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 28.56194122,
+          "lng": -80.57735736
         }
       }
     }
