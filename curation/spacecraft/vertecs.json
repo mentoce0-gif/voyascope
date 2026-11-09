@@ -18,15 +18,10 @@
     "as_of": "2026-10-27"
   },
   "builder": {
-    "value": ["九州工業大学", "関西学院大学", "東京都市大学", "金沢大学", "東京大学"],
-    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12360.html",
-    "as_of": "2026-10-27",
-    "note": "研究チーム（「ら」）。代表は九州工業大学"
-  },
-  "builder_type": {
-    "value": "university",
-    "source": "https://www.kyutech.ac.jp/whats-new/press/entry-12360.html",
-    "as_of": "2026-10-27"
+    "value": "九州工業大学・JAXA宇宙科学研究所・関西学院大学・東京都市大学・金沢大学・東京大学　ほか複数の大学、企業が参画",
+    "source": "https://vertecs-project.com/ja/home-jp/",
+    "as_of": "2026-11-09",
+    "note": "表記は VERTECS プロジェクトの指定（2026-11-07）。参画機関の一覧は出典のページ"
   },
   "form_factor": {
     "value": "6U",
@@ -70,5 +65,5 @@
       "url": "https://www.kyutech.ac.jp/whats-new/press/entry-12360.html"
     }
   ],
-  "updated_at": "2026-10-27"
+  "updated_at": "2026-11-09"
 }
