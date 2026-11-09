@@ -2,18 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-09T06:28:54.664Z",
+  "fetched_at": "2026-11-09T22:21:55.069Z",
   "days_ahead": 45,
   "launches": [
     {
       "id": "6aa7b90b-e5ed-45d8-a52e-04fbf399d178",
-      "net": "2026-11-10T03:03:00.000Z",
+      "net": "2026-11-11T02:49:00.000Z",
       "precision": "min",
-      "window_end": "2026-11-10T07:03:00.000Z",
+      "window_end": "2026-11-11T06:49:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-04T20:05:21Z",
+      "updated": "2026-11-09T21:22:26Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -123,41 +123,41 @@
       }
     },
     {
-      "id": "76617033-4dc0-4448-b50c-e5b0d5a18539",
-      "net": "2026-11-13T04:23:00.000Z",
-      "precision": "min",
-      "window_end": "2026-11-13T08:23:00.000Z",
+      "id": "e2523821-9760-4cb4-ad1f-7ce2e30419bd",
+      "net": "2026-11-12T19:50:00.000Z",
+      "precision": "hour",
+      "window_end": "2026-11-12T20:29:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-04T20:05:26Z",
+      "updated": "2026-11-09T16:25:42Z",
       "rocket": {
-        "name": "Falcon 9",
-        "full_name": "Falcon 9 Block 5"
+        "name": "Kuaizhou 11",
+        "full_name": "Kuaizhou 11"
       },
       "provider": {
-        "name": "SpaceX",
-        "ja": "スペースX"
+        "name": "ExPace",
+        "ja": null
       },
       "mission": {
-        "name": "USSF-317",
-        "placeholder": false,
-        "type": "Government/Top Secret",
-        "type_ja": "政府（内容は非公開）",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
       },
       "site": {
-        "location_id": 11,
-        "name": "Vandenberg SFB, CA, USA",
-        "ja": "ヴァンデンバーグ宇宙軍基地",
-        "short": "ヴァンデンバーグ",
-        "pad": "Space Launch Complex 4E",
-        "country": "USA",
-        "country_ja": "アメリカ",
+        "location_id": 17,
+        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
+        "ja": "酒泉衛星発射センター",
+        "short": "酒泉",
+        "pad": "Launch Area 95A",
+        "country": "CHN",
+        "country_ja": "中国",
         "position": {
-          "lat": 34.632,
-          "lng": -120.611
+          "lat": 40.969117,
+          "lng": 100.343333
         }
       }
     },
@@ -240,6 +240,45 @@
       }
     },
     {
+      "id": "76617033-4dc0-4448-b50c-e5b0d5a18539",
+      "net": "2026-11-14T04:09:00.000Z",
+      "precision": "min",
+      "window_end": "2026-11-14T08:09:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-09T21:55:20Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "USSF-317",
+        "placeholder": false,
+        "type": "Government/Top Secret",
+        "type_ja": "政府（内容は非公開）",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 11,
+        "name": "Vandenberg SFB, CA, USA",
+        "ja": "ヴァンデンバーグ宇宙軍基地",
+        "short": "ヴァンデンバーグ",
+        "pad": "Space Launch Complex 4E",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 34.632,
+          "lng": -120.611
+        }
+      }
+    },
+    {
       "id": "db3500ac-965b-4ad8-b417-cb8d8d005586",
       "net": "2026-11-14T05:30:00.000Z",
       "precision": "min",
@@ -275,6 +314,45 @@
         "position": {
           "lat": -39.260881,
           "lng": 177.865826
+        }
+      }
+    },
+    {
+      "id": "460d9db7-eaf6-4cd9-b095-cff433534c09",
+      "net": "2026-11-17T16:58:00.000Z",
+      "precision": "min",
+      "window_end": "2026-11-17T20:58:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-09T21:55:20Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "USSF-266",
+        "placeholder": false,
+        "type": "Government/Top Secret",
+        "type_ja": "政府（内容は非公開）",
+        "orbit": "Polar Orbit",
+        "orbit_ja": "極軌道"
+      },
+      "site": {
+        "location_id": 11,
+        "name": "Vandenberg SFB, CA, USA",
+        "ja": "ヴァンデンバーグ宇宙軍基地",
+        "short": "ヴァンデンバーグ",
+        "pad": "Space Launch Complex 4E",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 34.632,
+          "lng": -120.611
         }
       }
     },
@@ -392,84 +470,6 @@
         "position": {
           "lat": 19.59755,
           "lng": 110.936481
-        }
-      }
-    },
-    {
-      "id": "dff42a2e-f047-48d7-b260-3888d3a4fe33",
-      "net": "2026-11-26T20:00:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-11-26T21:30:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-10-29T21:51:22Z",
-      "rocket": {
-        "name": "Spectrum",
-        "full_name": "Spectrum"
-      },
-      "provider": {
-        "name": "Isar Aerospace",
-        "ja": null
-      },
-      "mission": {
-        "name": "AT-Astra and Others (Spectrum Flight 3)",
-        "placeholder": false,
-        "type": "Technology",
-        "type_ja": "技術の試験",
-        "orbit": "Sun-Synchronous Orbit",
-        "orbit_ja": "太陽同期軌道"
-      },
-      "site": {
-        "location_id": 161,
-        "name": "Andøya Spaceport",
-        "ja": null,
-        "short": null,
-        "pad": "Orbital Launch Pad",
-        "country": "NOR",
-        "country_ja": "ノルウェー",
-        "position": {
-          "lat": 69.1084,
-          "lng": 15.5895
-        }
-      }
-    },
-    {
-      "id": "d74afbc7-0de5-491c-be05-4e9c31f736ac",
-      "net": "2026-11-29T15:49:00.000Z",
-      "precision": "min",
-      "window_end": null,
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-04T20:05:35Z",
-      "rocket": {
-        "name": "Falcon 9",
-        "full_name": "Falcon 9 Block 5"
-      },
-      "provider": {
-        "name": "SpaceX",
-        "ja": "スペースX"
-      },
-      "mission": {
-        "name": "Cygnus CRS-2 NG-25",
-        "placeholder": false,
-        "type": "Resupply",
-        "type_ja": "物資の補給",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
-      },
-      "site": {
-        "location_id": 12,
-        "name": "Cape Canaveral SFS, FL, USA",
-        "ja": "ケープカナベラル宇宙軍基地",
-        "short": "ケープカナベラル",
-        "pad": "Space Launch Complex 40",
-        "country": "USA",
-        "country_ja": "アメリカ",
-        "position": {
-          "lat": 28.56194122,
-          "lng": -80.57735736
         }
       }
     }
