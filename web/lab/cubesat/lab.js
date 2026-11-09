@@ -2,7 +2,7 @@
 // - 地球の上：キューブサットは名前を出さず、小さな立方体の印だけ（「すべて」）。「小さな衛星」にすると名前が出て、
 //   同じ仕事の大きい仲間（XRISM）と一緒に光り、ほかの機体は薄くなる
 // - 詳細：ものさし（同じ縮尺で大きな衛星と並べる）と、同じ仕事の大きい仲間
-// 事実はカード（curation/）と、九州工業大学の発表の原文だけ。VERTECS は config/orbits.json の "lab": true（アプリには出ない）
+// 事実はカード（curation/）と、九州工業大学の発表の原文だけ。VERTECS は 2026-11-09 から本番の一覧にも入った（プロジェクトの了承。docs/cubesat-study.md の 15.）
 import { satrecFromOrbit, positionAt } from "../../js/orbit.js";
 import { setupEarth } from "../../js/earth.js";
 import { displayAltitude, RINGS } from "../../js/scale.js";
@@ -28,7 +28,8 @@ const load = async (id, card, orbit) => {
 const craft = (
   await Promise.all([
     ...index.craft.map((c) => load(c.id, c.card, c.orbit)),
-    ...SMALL.map((s) => load(s.id, `data/cards/${s.id}.json`, `data/orbits/${s.id}.json`)),
+    // 本番の一覧に入ったもの（2026-11 から VERTECS）は二重に読まない
+    ...SMALL.filter((s) => !index.craft.some((c) => c.id === s.id)).map((s) => load(s.id, `data/cards/${s.id}.json`, `data/orbits/${s.id}.json`)),
   ])
 ).filter((c) => c.orbit);
 const byId = new Map(craft.map((c) => [c.id, c]));
@@ -192,7 +193,7 @@ function openSheet(c) {
     <h2 id="cs-name">${esc(k.name.ja)}</h2>
     <p class="cs-lead">${esc(k.mission.value)}</p>
     <dl class="cs-facts">
-      <dt>つくり手</dt><dd>${k.builder.value.map(esc).join("・")}<span class="k">（大学・高専）</span></dd>
+      <dt>つくり手</dt><dd>${[k.builder.value].flat().map(esc).join("・")}</dd>
       <dt>打ち上げ</dt><dd>${esc(k.launch_date.value)}　${esc(k.launch_date.note)}</dd>
       <dt>いま</dt><dd>運用中（${esc(k.status.note)}）。高さ 約<span id="alt">${Math.round(c.altKm ?? 0)}</span> km<span class="k">（計算値）</span></dd>
     </dl>

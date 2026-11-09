@@ -72,6 +72,14 @@
       "crew": null,
       "status": null,
       "sample": false
+    },
+    {
+      "id": "vertecs",
+      "card": "data/cards/vertecs.json",
+      "orbit": "data/orbits/vertecs.json",
+      "crew": null,
+      "status": null,
+      "sample": false
     }
   ]
 }
