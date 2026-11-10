@@ -350,6 +350,17 @@ function start() {
       });
       const pulse = dot(C.mint, 0.06);
       scene.add(pulse);
+      // 予定がないとき：いまの先の空いた場所に、中が空の琥珀の輪。光は「いま」を過ぎて、そこまで薄く進んで消える
+      const open = slots > n && nowI >= 0;
+      const emptyX = -3.3 + (6.6 * n) / Math.max(1, slots - 1);
+      const hollow = ring(0.09, C.amber, 0.55);
+      hollow.rotation.x = Math.PI / 2;
+      hollow.position.set(emptyX, Y, 0);
+      const ghost = dot(C.amber, 0.05);
+      ghost.material.transparent = true;
+      ghost.material.depthWrite = false;
+      const fade = (a) => [ghost, ...ghost.children].forEach((m) => (m.material.uniforms.uA.value = a * (m === ghost ? 1 : 0.18)));
+      if (open) scene.add(hollow, ghost);
       cam.position.set(0, 0.5, 8.6);
       cam.lookAt(0, -0.2, 0);
       return {
@@ -360,6 +371,14 @@ function start() {
           pulse.visible = t < 0.8 && nowI > 0;
           const b = 1 + 0.35 * Math.sin(t * Math.PI * 4);
           nodes[nowI]?.scale.setScalar(b);
+          if (open) {
+            // 0.62〜0.95：いま → 空いた場所。着いたら輪が少しふくらむ
+            const u = Math.min(1, Math.max(0, (t - 0.62) / 0.33));
+            ghost.visible = u > 0 && u < 1;
+            ghost.position.set(xs[nowI] + (emptyX - xs[nowI]) * ease(u), Y, 0);
+            fade(0.75 * Math.sin(Math.PI * u));
+            hollow.scale.setScalar(1 + 0.4 * Math.max(0, Math.sin(Math.PI * Math.min(1, Math.max(0, (t - 0.85) / 0.15)))));
+          }
         },
         overlay(g) {
           title(g, 4);
@@ -373,6 +392,16 @@ function start() {
             wrap(g, it.label, sx, sy + 48, Math.min(250, (W - 120) / n), 28, `700 22px ${FONT}`, col, 3, "center");
             g.textAlign = "left";
           });
+          if (open) {
+            const [sx, sy] = project(new THREE.Vector3(emptyX, Y, 0), cam);
+            g.textAlign = "center";
+            g.font = `20px ${MONO}`;
+            g.fillStyle = C.amber;
+            g.fillText("これから", sx, sy - 34);
+            g.font = `700 22px ${FONT}`;
+            g.fillText("？", sx, sy + 48);
+            g.textAlign = "left";
+          }
           if (!items.some((i) => i.kind === "next")) {
             g.font = `20px ${FONT}`;
             g.fillStyle = C.dim;
