@@ -103,7 +103,7 @@
 - **ブランチ `claude/perseverance-record-greeting`**：別のチャットの作業（パーサヴィアランスの走行距離の記録・「節目」のお知らせ）。PR はまだない。続けるか、そのチャットで決める
 - **フォボスの表面の画像**：NASA の Viking テクスチャが候補（投影法の確認が要る）
 - **MMX の海外の参加者の見える化**：英語の試作 https://voyascope.org/mmx/partners/ （2026-10-27 公開。noindex・どこからもリンクしない〈オーナー〉）。判断待ち：IDEFIX のロゴ（どの画像か・その利用条件）、noindex を外す時期・入口を置くか（[`mmx-partners-study.md`](mmx-partners-study.md) の 10.）
-- **日本のキューブサット**：**VERTECS は 2026-11-09 から地球の画面に出した**（VERTECS プロジェクトの了承。つくり手は先方指定の文言、画像はリンクだけ・`image` を足さない。[`cubesat-study.md`](cubesat-study.md) の 15.）。印はいまふつうの丸。次：試作の部屋 03（`/lab/cubesat/`）の立方体の印・「小さな衛星」・ものさし・XRISM との組を本番へ移すか（オーナー判断）。アークエッジ（フォーム）は返事待ち（下書きは voyascope-research の `research/outreach/2026-10-27-cubesat-permission.md`）。判断待ち：EYE の照合（sony.com が開けない）・ルール5の残り
+- **日本のキューブサット**：**VERTECS は 2026-11-09 から地球の画面に出した**（VERTECS プロジェクトの了承。つくり手は先方指定の文言、画像はリンクだけ・`image` を足さない。[`cubesat-study.md`](cubesat-study.md) の 15.）。印はいまふつうの丸。試作の部屋 03（`/lab/cubesat/`）の立方体の印・「小さな衛星」・ものさし・XRISM との組は**試作のまま保留**（2026-11-10 オーナー）。アークエッジ（フォーム）は返事待ち（下書きは voyascope-research の `research/outreach/2026-10-27-cubesat-permission.md`）。判断待ち：EYE の照合（sony.com が開けない）・ルール5の残り
 - そのほか：サブタイトルの変更、見出しを明朝体にするか、英語版（案。JPL の教育の部署の反応しだい）
 
 ## 自動で動いているもの
