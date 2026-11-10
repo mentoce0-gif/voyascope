@@ -398,8 +398,6 @@ function start() {
             g.font = `20px ${MONO}`;
             g.fillStyle = C.amber;
             g.fillText("これから", sx, sy - 34);
-            g.font = `700 22px ${FONT}`;
-            g.fillText("？", sx, sy + 48);
             g.textAlign = "left";
           }
           if (!items.some((i) => i.kind === "next")) {
