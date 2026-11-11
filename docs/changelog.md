@@ -15,6 +15,9 @@
 - sitemap：カードから作るページに更新日（`lastmod`。カードとひもづく出来事の `updated_at` の新しいほう）、MMX のいまどこ（`mmx/now/`）を足した（canonical も）。トップの説明文を「人工衛星と、太陽系を旅する探査機の『今』」に（起動画面の見た目は変えていない）、トップに構造化データ（WebSite）
 - 誤りの報告の受け口：GitHub の Issue テンプレート（`.github/ISSUE_TEMPLATE/error-report.yml`。白紙の Issue は受けつけない。「だれでも読める・名前や連絡先を書かない」と書いた）。入口は「このアプリについて」と SpaceTips の足元
 - チャッピーへの依頼 C41（Cloudflare Web Analytics と Search Console が集めるもの。「このアプリについて」に書くため）を `prompts/src/chappy.md` に足した。`curation/` は変えていない
+- PR #106 をマージ、本番で新しい題と sitemap を確認。オーナーが Search Console を入れた（ドメインのプロパティ・sitemap を送信）
+- C41 を受領・照合（voyascope-research の `research/verification/2026-11-11-c41.md`）。Cloudflare・Google の技術の説明は公式の原文で確認。本番を見て分かったこと：計測の JavaScript は Cloudflare が配るときに自動で足している（リポジトリの HTML にはない。試作の部屋は除く）・クッキーなし・CSP なし。総務省の「手引き」の引用2件は未確認で使っていない
+- 「このアプリについて」に「使われ方を数えるしくみ」を足した（オーナー OK の文）：送られるもの・送り先（Cloudflare, Inc.）・何のため・しないこと、Search Console は Google 検索の側の記録、端末の中だけに覚えるもの
 
 
 ## 2026-11-09
