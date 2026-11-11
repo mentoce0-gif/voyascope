@@ -112,6 +112,9 @@ ul { margin: 0; padding-left: 1.2em; }
 .vis button:hover { color: var(--text); border-color: var(--mint); }
 .vis button[disabled] { opacity: .5; cursor: default; }
 .scale li { margin: 6px 0; }
+.share { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.share a, .share button { font: 13px "Zen Kaku Gothic New", system-ui, sans-serif; color: var(--text); background: transparent; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; padding: 6px 14px; text-decoration: none; cursor: pointer; min-height: 36px; display: inline-flex; align-items: center; }
+.share a:hover, .share button:hover { border-color: var(--mint); color: var(--mint); }
 .movie { margin: 14px 0 0; }
 .movie video { display: block; width: 100%; max-width: 420px; height: auto; aspect-ratio: 4 / 5; margin: 0 auto; border-radius: 12px; background: #050e1f; }
 .movie figcaption { margin: 8px auto 0; max-width: 420px; font-size: 14px; color: var(--dim); }
@@ -152,7 +155,7 @@ ${body}
   <footer>
     <p>VOYASCOPE は非公式のファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
     <p>ここに書いた事実は、それぞれの出典（一次情報）で確かめてください。VOYASCOPE は、公式の発表への入口です。</p>
-    <p><a href="${up}missions/">SpaceTips（一言でわかる一覧）</a> · <a href="${up}">VOYASCOPE を開く</a></p>
+    <p><a href="${up}missions/">SpaceTips（一言でわかる一覧）</a> · <a href="${up}">VOYASCOPE を開く</a> · <a href="${REPORT_URL}" rel="noopener">誤りを見つけたら（GitHub）</a></p>
   </footer>
 </main>
 </body>
@@ -160,7 +163,30 @@ ${body}
 `;
 }
 
-const ldPage = (name, description, url, dateModified, sameAs = []) => ({
+// 誤りの報告の受け口（GitHub の Issue テンプレート .github/ISSUE_TEMPLATE/error-report.yml。2026-11-11 オーナー）
+const REPORT_URL = "https://github.com/mentoce0-gif/voyascope/issues/new?template=error-report.yml";
+
+// 別名（検索で打たれる略称・英名・愛称）。カードの名前から機械的に取り出すだけで、新しい名前は足さない：
+// 「火星衛星探査機（MMX）」→ 火星衛星探査機・MMX、「MMX (Martian Moons eXploration)」→ MMX・Martian Moons eXploration
+function aliases(name) {
+  const out = [];
+  for (const s of [name.ja, name.en]) {
+    const m = String(s ?? "").match(/^(.*?)\s*[（(](.+?)[）)]\s*$/);
+    for (const v of m ? [m[1], m[2]] : [s]) if (v && v !== name.ja && !out.includes(v)) out.push(v);
+  }
+  return out;
+}
+
+// 共有（X・リンクのコピー）。文は定型で、人物の名前は入れない。「非公式のファンメイド作品」を必ず入れる（2026-11-11 オーナー）
+const shareRow = (name, path) => {
+  const url = `${SITE}/${path}`;
+  const text = `${name}とは？ いまどこ・何が起きたを、5つの問いで（出典つき）\n※非公式のファンメイド作品です #VOYASCOPE`;
+  return `  <p class="share"><a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&amp;url=${encodeURIComponent(url)}" target="_blank" rel="noopener">X で共有</a><button type="button" data-copy="${esc(url)}">リンクをコピー</button></p>`;
+};
+// 「リンクをコピー」：押したときだけ動く。コピーできないブラウザでは、URL をそのまま見せる
+const COPY_JS = `document.addEventListener("click",function(e){var b=e.target.closest("[data-copy]");if(!b)return;var u=b.dataset.copy;var ok=function(){b.textContent="コピーしました";setTimeout(function(){b.textContent="リンクをコピー"},2000)};var ng=function(){b.textContent=u};try{navigator.clipboard.writeText(u).then(ok,ng)}catch(_){ng()}});`;
+
+const ldPage = (name, description, url, dateModified, sameAs = [], alternateName = []) => ({
   "@context": "https://schema.org",
   "@type": "WebPage",
   name,
@@ -169,7 +195,7 @@ const ldPage = (name, description, url, dateModified, sameAs = []) => ({
   inLanguage: "ja",
   dateModified,
   isPartOf: { "@type": "WebSite", name: "VOYASCOPE", url: `${SITE}/` },
-  about: { "@type": "Thing", name, ...(sameAs.length ? { sameAs } : {}) },
+  about: { "@type": "Thing", name, ...(alternateName.length ? { alternateName } : {}), ...(sameAs.length ? { sameAs } : {}) },
 });
 
 // 出来事の日時（events.json の when）を「2026年11月21日」の形に。並べるための鍵も返す
@@ -334,6 +360,7 @@ ${scale.join("\n")}
   <p class="kicker">SpaceTips｜一言でわかる</p>
   <h1>${esc(c.name.ja)}</h1>
   <p class="en">${esc(c.name.en)}</p>
+${shareRow(c.name.ja, path)}
 ${parts.join("\n")}
   <h2>公式のページ</h2>
   <ul>
@@ -341,18 +368,23 @@ ${c.official_links.map((l) => `    <li><a href="${esc(l.url)}" rel="noopener">${
   </ul>
   <p class="src">VOYASCOPE のカードの最終確認：${esc(c.updated_at)}</p>
   <script type="application/json" id="vis-data">${JSON.stringify(V).replace(/</g, "\\u003c")}</script>
-  <script type="module" src="../visual.js"></script>`;
+  <script type="module" src="../visual.js"></script>
+  <script>${COPY_JS}</script>`;
+  // sitemap の更新日：カードと、ひもづく出来事のカードの updated_at の新しいほう
+  const lastmod = [c.updated_at, ...(c.events ?? []).map((id) => EVENTS.get(id)?.updated_at)].filter(Boolean).sort().pop();
   return {
     path,
+    lastmod,
     one: c.mission.value,
     name: c.name.ja,
     html: page({
       path,
       og: c.id,
-      title: `${c.name.ja}を一言で — VOYASCOPE`,
+      // 題は検索で打たれる言葉に（「〇〇とは」「いまどこ」。M13 の N4。2026-11-11 オーナー）
+      title: `${c.name.ja}とは？ いまどこ・何が起きた — VOYASCOPE`,
       description: `${c.name.ja}（${c.name.en}）：${c.mission.value}`,
       body,
-      jsonld: ldPage(c.name.ja, c.mission.value, `${SITE}/${path}`, c.updated_at, c.official_links.map((l) => l.url)),
+      jsonld: ldPage(c.name.ja, c.mission.value, `${SITE}/${path}`, c.updated_at, c.official_links.map((l) => l.url), aliases(c.name)),
     }),
   };
 }
@@ -365,6 +397,7 @@ function artemisPage() {
   <p class="kicker">一言で言うと</p>
   <h1>アルテミス2号</h1>
   <p class="en">Artemis II</p>
+${shareRow("アルテミス2号", path)}
   <p class="one">${esc(one)}<span class="src">出典：<a href="${esc(MISSION.links[0].href)}" rel="noopener">NASA の目標の文書</a> · <a href="${esc(RESULTS.source)}" rel="noopener">NASA の飛行後の発表</a></span></p>
   <h2>要点</h2>
   <dl>
@@ -378,17 +411,19 @@ ${MISSION.rows.map((r) => `    <dt>${esc(r.k)}</dt><dd><ul>${r.items.map((i) => 
 ${MISSION.links.map((l) => `    <li><a href="${esc(l.href)}" rel="noopener">${esc(l.aria)}</a></li>`).join("\n")}
     <li><a href="${esc(RESULTS.source)}" rel="noopener">NASA の飛行後の発表</a></li>
   </ul>
-  <a class="go" href="../../tour/artemis2/">VOYASCOPE で見る（月の旅と月の地図）</a>`;
+  <a class="go" href="../../tour/artemis2/">VOYASCOPE で見る（月の旅と月の地図）</a>
+  <script>${COPY_JS}</script>`;
   return {
     path,
+    lastmod: "2026-10-12",
     one,
     name: "アルテミス2号",
     html: page({
       path,
-      title: "アルテミス2号を一言で — VOYASCOPE",
+      title: "アルテミス2号とは？ 目的・乗員・結果 — VOYASCOPE",
       description: `アルテミス2号（Artemis II）：${one}`,
       body,
-      jsonld: ldPage("アルテミス2号", one, `${SITE}/${path}`, "2026-10-12", MISSION.links.map((l) => l.href)),
+      jsonld: ldPage("アルテミス2号", one, `${SITE}/${path}`, "2026-10-12", MISSION.links.map((l) => l.href), ["Artemis II"]),
     }),
   };
 }
@@ -418,6 +453,8 @@ ${listItems(craft)}
   </ul>`;
 const index = {
   path: "missions/",
+  // 一覧の更新日は、いちばん新しいページの日
+  lastmod: [artemis, ...probes, ...craft].map((p) => p.lastmod).filter(Boolean).sort().pop(),
   html: page({
     path: "missions/",
     title: "SpaceTips（一言でわかる） — VOYASCOPE",
@@ -437,7 +474,9 @@ const index = {
 const pages = [index, artemis, ...probes, ...craft];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${["", "tour/artemis2/", ...pages.map((p) => p.path)].map((p) => `  <url><loc>${SITE}/${p}</loc></url>`).join("\n")}
+${[{ path: "" }, { path: "tour/artemis2/" }, { path: "mmx/now/" }, ...pages]
+  .map((p) => `  <url><loc>${SITE}/${p.path}</loc>${p.lastmod ? `<lastmod>${p.lastmod}</lastmod>` : ""}</url>`)
+  .join("\n")}
 </urlset>
 `;
 

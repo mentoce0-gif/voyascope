@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>VOYASCOPE — 今、宇宙を旅する者たち。</title>
-  <meta name="description" content="地球のまわりをめぐる人工衛星たちの「今」を、観測端末風の画面で覗く非公式ファンメイド作品です。">
+  <meta name="description" content="地球のまわりの人工衛星と、太陽系を旅する探査機の「今」を、観測端末風の画面で覗く非公式ファンメイド作品です。">
   <meta name="theme-color" content="#07142b">
   <link rel="icon" href="favicon.ico" sizes="32x32">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta property="og:type" content="website">
   <meta property="og:title" content="VOYASCOPE — 今、宇宙を旅する者たち。">
-  <meta property="og:description" content="地球のまわりをめぐる人工衛星たちの「今」を、観測端末風の画面で覗く非公式ファンメイド作品です。">
+  <meta property="og:description" content="地球のまわりの人工衛星と、太陽系を旅する探査機の「今」を、観測端末風の画面で覗く非公式ファンメイド作品です。">
   <!-- 公開先は https://voyascope.org（Cloudflare。2026-10-15 に GitHub Pages から切り替え・M9 ②） -->
   <!-- カードの画像（ロゴ・非公式・地球の画像の出典 NASA 入り。scripts/build-og-images.mjs が作る。2026-10-30 オーナー） -->
   <meta property="og:image" content="https://voyascope.org/assets/og/home.jpg">
@@ -21,6 +21,8 @@
   <meta property="og:url" content="https://voyascope.org/">
   <link rel="canonical" href="https://voyascope.org/">
   <meta name="twitter:card" content="summary_large_image">
+  <!-- 検索・AI の検索に、何のサイトかを伝える（2026-11-11） -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"VOYASCOPE","url":"https://voyascope.org/","inLanguage":"ja","description":"地球のまわりの人工衛星と、太陽系を旅する探査機の「今」を、観測端末風の画面で覗く非公式ファンメイド作品です。"}</script>
   <!-- アルテミス2号のページから「遠くを見る部屋へ」で戻ってきたとき（?from=artemis2）は、起動画面と地球を見せずに、暗いまま部屋を開く（2026-10-12 オーナー） -->
   <script>if (/[?&]from=artemis2(&|$)/.test(location.search)) document.documentElement.classList.add("from-tour");</script>
   <!-- 3D 表示のライブラリ（約500KB）は最初に読み始める。実行は js/main.js がする（ほかの読み込みを止めないため） -->
@@ -281,6 +283,8 @@
       <p class="small">軌道データや画像などの権利は、それぞれの提供元にあります。</p>
       <h3>文字で読む</h3>
       <p class="small"><a href="missions/">一言でわかる一覧</a>：探査機・人工衛星・ミッションを、一言と要点で（出典つき）。</p>
+      <h3>誤りを見つけたら</h3>
+      <p class="small">日付・数字・名前などのまちがいは、<a href="https://github.com/mentoce0-gif/voyascope/issues/new?template=error-report.yml" target="_blank" rel="noopener">GitHub の「誤りの報告」</a>から知らせてください（GitHub のアカウントが要ります。書いたことはだれでも読めるので、自分やほかの人の名前・連絡先は書かないでください）。公式の発表で確かめてから直します。</p>
       <h3>ライセンスとお願い</h3>
       <p class="small">このアプリのプログラムは作者が権利を持ちます（<a href="https://github.com/mentoce0-gif/voyascope/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>。許可なくコピーサイトなどに使うことはできません）。VOYASCOPE が書いた文章は <a href="https://github.com/mentoce0-gif/voyascope/blob/main/CONTENT_LICENSE.md" target="_blank" rel="noopener">CC BY 4.0</a> です（ロゴを除く）。書いてある事実は、それぞれの出典で確かめてください。<b>軍事目的や、誰かを傷つけたり虐げたりすることには使わないでください。</b>これはライセンスの条件ではなく、作者からのお願いです。</p>
     </div>

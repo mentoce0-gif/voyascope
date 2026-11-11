@@ -34,6 +34,18 @@ export function dateTimeCompactJa(d) {
 }
 
 // 「9月29日 15:17」のような短い表示（閲覧者の時刻で）
+// 軌道データの取得日のまとめ：fetched_at は「新しいデータが来たとき」だけ進むので、機体によって日がちがう。
+// 主に出すのはいちばん新しい日。3日より古い機体は、数といちばん古い日を別に返す（2026-11-11 オーナー：
+// いちばん古い日だけを出すと、全部が古いデータに見える）
+export function orbitFreshness(craft, staleMs = 3 * 86400000) {
+  const list = craft.filter((c) => c.orbit?.fetched_at).map((c) => ({ name: c.card?.name?.ja ?? c.id, at: c.orbit.fetched_at }));
+  if (!list.length) return null;
+  list.sort((a, b) => (a.at < b.at ? -1 : a.at > b.at ? 1 : 0));
+  const newest = list[list.length - 1].at;
+  const stale = list.filter((c) => Date.parse(newest) - Date.parse(c.at) > staleMs);
+  return { newest, stale, oldest: stale.length ? stale[0] : null };
+}
+
 export function dateTimeShortJa(d) {
   return `${d.getMonth() + 1}月${d.getDate()}日 ${d.getHours()}:${pad(d.getMinutes())}`;
 }

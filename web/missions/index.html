@@ -62,6 +62,9 @@ ul { margin: 0; padding-left: 1.2em; }
 .vis button:hover { color: var(--text); border-color: var(--mint); }
 .vis button[disabled] { opacity: .5; cursor: default; }
 .scale li { margin: 6px 0; }
+.share { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.share a, .share button { font: 13px "Zen Kaku Gothic New", system-ui, sans-serif; color: var(--text); background: transparent; border: 1px solid rgba(255,255,255,.28); border-radius: 999px; padding: 6px 14px; text-decoration: none; cursor: pointer; min-height: 36px; display: inline-flex; align-items: center; }
+.share a:hover, .share button:hover { border-color: var(--mint); color: var(--mint); }
 .movie { margin: 14px 0 0; }
 .movie video { display: block; width: 100%; max-width: 420px; height: auto; aspect-ratio: 4 / 5; margin: 0 auto; border-radius: 12px; background: #050e1f; }
 .movie figcaption { margin: 8px auto 0; max-width: 420px; font-size: 14px; color: var(--dim); }
@@ -110,7 +113,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
   <footer>
     <p>VOYASCOPE は非公式のファンメイド作品です。宇宙機関・運用者とは関係ありません。</p>
     <p>ここに書いた事実は、それぞれの出典（一次情報）で確かめてください。VOYASCOPE は、公式の発表への入口です。</p>
-    <p><a href="../missions/">SpaceTips（一言でわかる一覧）</a> · <a href="../">VOYASCOPE を開く</a></p>
+    <p><a href="../missions/">SpaceTips（一言でわかる一覧）</a> · <a href="../">VOYASCOPE を開く</a> · <a href="https://github.com/mentoce0-gif/voyascope/issues/new?template=error-report.yml" rel="noopener">誤りを見つけたら（GitHub）</a></p>
   </footer>
 </main>
 </body>
