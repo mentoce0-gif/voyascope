@@ -8,7 +8,7 @@ import { displayAltitude, RINGS } from "./scale.js";
 import { FAMILIES, familyOf } from "./families.js";
 import { starfieldDataUrl } from "./stars.js";
 import { placeAt } from "./places.js";
-import { esc, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
+import { esc, orbitFreshness, dateTimeShortJa, dateTimeJa, dateTimeCompactJa, durationJa, latJa, lngJa } from "./format.js";
 import { findVisiblePasses, observerOf, dir8 } from "./passes.js";
 import { renderTonight, renderPrefSelect, loadPrefecture, savePrefecture, whenWord, clockWord } from "./tonight.js";
 import { upcomingEvents, eventsListHtml, eventPanelHtml, nextChipHtml, bigCountdown, whenShort, hmJst, eventSpan } from "./events.js";
@@ -220,9 +220,11 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     return pin;
   });
 
-  // 軌道データの取得日（いちばん古いもの）
-  const oldest = craft.reduce((a, c) => (!a || c.orbit.fetched_at < a.orbit.fetched_at ? c : a), null);
-  $("#tle-info").textContent = `軌道データ取得：${dateTimeShortJa(new Date(oldest.orbit.fetched_at))}`;
+  // 軌道データの取得日：いちばん新しい日を主に。新しいデータが3日より長く来ていない機体は、名前と日を添える
+  const fresh = orbitFreshness(craft);
+  $("#tle-info").textContent =
+    `軌道データ取得：${dateTimeShortJa(new Date(fresh.newest))}` +
+    (fresh.oldest ? `（${fresh.oldest.name}${fresh.stale.length > 1 ? `など${fresh.stale.length}機` : ""}は ${dateTimeShortJa(new Date(fresh.oldest.at))}）` : "");
   $("#about-tle").textContent = craft
     .map(
       (c) =>
@@ -1534,13 +1536,14 @@ async function boot() {
   try {
     // データと 3D 表示のライブラリを並べて読む（どちらかを待ってからもう一方、にしない）
     [data] = await Promise.all([loadAll(), loadGlobeLib()]);
-    // 読み込めた機体数と、軌道データのいちばん古い取得時刻（UTC）
-    const fetched = data.craft.map((c) => c.orbit.fetched_at).sort()[0];
+    // 読み込めた機体数と、軌道データのいちばん新しい取得時刻（UTC）。新しいデータが3日より長く来ていない機体があれば、その数といちばん古い日も
+    const fresh = orbitFreshness(data.craft);
     status.textContent = [
       "ORBITAL DATA LOADED",
       `${data.craft.length} OBJECTS ONLINE`,
-      fetched ? `UPDATED ${fetched.slice(0, 16).replace("T", " ")} UTC` : "",
-    ].join("\n");
+      fresh ? `UPDATED ${fresh.newest.slice(0, 16).replace("T", " ")} UTC` : "",
+      fresh?.oldest ? `${fresh.stale.length} OBJECT${fresh.stale.length > 1 ? "S" : ""} SINCE ${fresh.oldest.at.slice(0, 10)}` : "",
+    ].filter(Boolean).join("\n");
   } catch (e) {
     status.classList.add("error");
     status.textContent =

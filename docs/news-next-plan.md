@@ -110,6 +110,12 @@
 - **SCOPE**（スマホの右下）：押したまま指をすべらせて、離したところへ（OBS 地球を見る・TIPS SpaceTips・FAR 遠くを見る・MMX いまどこ）。押して離すだけなら開いたまま、もう一度押して選ぶ。キーボード（Enter・矢印・Esc）でも。`web/js/launcher.js`。PC は上の部屋の帯に「SpaceTips」
 - 画面：[`screenshots/m13-launcher/`](screenshots/m13-launcher/)
 
+### N4 の前倒しと、届け方の見直し（2026-11-11 オーナー）
+
+- 題を「〇〇とは？ いまどこ・何が起きた — VOYASCOPE」に、構造化データに別名（カードの名前から取り出したものだけ）、名前の下に共有の列（X・リンクのコピー）、sitemap に更新日と `mmx/now/`
+- 計り方（6. の 3）：**Search Console を入れる・Cloudflare Web Analytics は使い続ける**（オーナー）。「このアプリについて」の書き方は C41 のあと
+- 次：出来事1件に URL を1つ（`curation/events/` から作る。オーナー OK）と N2 を 11/25 の週から。日程は [`handoff.md`](handoff.md) の「いまの優先」
+
 ### やらないこと
 
 - ニュースの記事を書かない・論評しない（事実と出典だけ。速報サイトにはならない）

@@ -58,3 +58,24 @@ test("カードの画像（og:image）は、ページの機体の画像があれ
   assert.match(html("mmx"), /assets\/og\/mmx\.jpg/);
   assert.match(readFileSync(new URL("../web/index.html", import.meta.url), "utf8"), /og:image" content="https:\/\/voyascope\.org\/assets\/og\/home\.jpg"/);
 });
+
+test("題は検索の言葉（〇〇とは？）、別名はカードの名前から、共有の文は非公式の一文つき", () => {
+  for (const id of ids) assert.match(html(id), /<title>[^<]+とは？ いまどこ・何が起きた — VOYASCOPE<\/title>/, `${id} 題`);
+  assert.match(html("mmx"), /"alternateName":\["火星衛星探査機","MMX","Martian Moons eXploration"\]/);
+  assert.match(html("bepicolombo"), /"alternateName":\["ベピコロンボ","みお","BepiColombo"\]/);
+  for (const id of [...ids, "artemis2"]) {
+    const m = html(id).match(/<p class="share"><a href="https:\/\/twitter\.com\/intent\/tweet\?text=([^&"]+)&amp;url=([^"]+)"/);
+    assert.ok(m, `${id} 共有`);
+    assert.ok(decodeURIComponent(m[1]).includes("非公式のファンメイド作品"), `${id} 非公式の一文`);
+    assert.equal(decodeURIComponent(m[2]), `https://voyascope.org/missions/${id}/`);
+    assert.match(html(id), new RegExp(`data-copy="https://voyascope.org/missions/${id}/"`));
+    assert.match(html(id), /issues\/new\?template=error-report\.yml/);
+  }
+  assert.ok(existsSync(new URL("../.github/ISSUE_TEMPLATE/error-report.yml", import.meta.url)));
+});
+
+test("sitemap：カードから作るページに更新日（lastmod）、MMX のいまどこも載せる", () => {
+  const sm = readFileSync(new URL("../web/sitemap.xml", import.meta.url), "utf8");
+  for (const id of ids) assert.match(sm, new RegExp(`<loc>https://voyascope.org/missions/${id}/</loc><lastmod>\\d{4}-\\d{2}-\\d{2}</lastmod>`), id);
+  assert.match(sm, /<loc>https:\/\/voyascope\.org\/mmx\/now\/<\/loc>/);
+});

@@ -1,0 +1,32 @@
+name: 誤りの報告
+description: VOYASCOPE に書いてあること（日付・数字・名前・リンクなど）のまちがいを知らせる
+title: "誤りの報告："
+labels: ["誤りの報告"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        見つけてくれてありがとうございます。VOYASCOPE は非公式のファンメイド作品で、書いてある事実は公式の発表（出典）で確かめて載せています。
+        **ここに書いたことは、だれでも読めます。** 名前・学校・住所・メールアドレスなど、あなたやほかの人のことは書かないでください。
+  - type: input
+    id: where
+    attributes:
+      label: どのページ・どの機体ですか
+      description: URL か、機体・出来事の名前
+      placeholder: "例：https://voyascope.org/missions/voyager-1/ の「どこ？」"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: どこが、どうちがいますか
+      description: いま書いてあることと、正しいと思うこと
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 正しいと分かる公式のページ（あれば）
+      description: 宇宙機関・運用者の発表の URL。報道や SNS だけのときは、そう書いてください（公式で確かめられるまで直せないことがあります）
+    validations:
+      required: false
