@@ -2,126 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-13T19:41:59.916Z",
+  "fetched_at": "2026-11-14T06:23:20.410Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "0f867f0c-5422-4d44-93b8-d7faaae7019b",
-      "net": "2026-11-13T22:45:00.000Z",
-      "precision": "min",
-      "window_end": "2026-11-14T00:00:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-13T19:25:26Z",
-      "rocket": {
-        "name": "Starship",
-        "full_name": "Starship V3"
-      },
-      "provider": {
-        "name": "SpaceX",
-        "ja": "スペースX"
-      },
-      "mission": {
-        "name": "Starlink Group 31-2 (Starship Flight 15)",
-        "placeholder": false,
-        "type": "Communications",
-        "type_ja": "通信",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
-      },
-      "site": {
-        "location_id": 143,
-        "name": "SpaceX Starbase, TX, USA",
-        "ja": "スターベース",
-        "short": "スターベース",
-        "pad": "Orbital Launch Pad 2",
-        "country": "USA",
-        "country_ja": "アメリカ",
-        "position": {
-          "lat": 25.99677,
-          "lng": -97.15799
-        }
-      }
-    },
-    {
-      "id": "bff2fc91-eddd-4dfc-af26-ac0674cfab4d",
-      "net": "2026-11-14T01:16:00.000Z",
-      "precision": "min",
-      "window_end": "2026-11-14T01:50:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-13T15:37:56Z",
-      "rocket": {
-        "name": "Soyuz 2.1b/Fregat-M",
-        "full_name": "Soyuz 2.1b Fregat-M"
-      },
-      "provider": {
-        "name": "Russian Federal Space Agency (ROSCOSMOS)",
-        "ja": "ロスコスモス"
-      },
-      "mission": {
-        "name": "MKA Kinosputnik, KOEN and others",
-        "placeholder": false,
-        "type": "Technology",
-        "type_ja": "技術の試験",
-        "orbit": "Sun-Synchronous Orbit",
-        "orbit_ja": "太陽同期軌道"
-      },
-      "site": {
-        "location_id": 18,
-        "name": "Vostochny Cosmodrome, Siberia, Russian Federation",
-        "ja": "ボストチヌイ宇宙基地",
-        "short": "ボストチヌイ",
-        "pad": "Cosmodrome Site 1S",
-        "country": "RUS",
-        "country_ja": "ロシア",
-        "position": {
-          "lat": 51.884395,
-          "lng": 128.333932
-        }
-      }
-    },
-    {
-      "id": "db3500ac-965b-4ad8-b417-cb8d8d005586",
-      "net": "2026-11-14T05:30:00.000Z",
-      "precision": "min",
-      "window_end": null,
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-13T00:15:49Z",
-      "rocket": {
-        "name": "Electron",
-        "full_name": "Electron"
-      },
-      "provider": {
-        "name": "Rocket Lab",
-        "ja": "ロケットラボ"
-      },
-      "mission": {
-        "name": "The Mountain God Rises (iQPS Launch 10)",
-        "placeholder": false,
-        "type": "Earth Science",
-        "type_ja": "地球観測",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
-      },
-      "site": {
-        "location_id": 10,
-        "name": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
-        "ja": "マヒア半島の発射場",
-        "short": "マヒア",
-        "pad": "Rocket Lab Launch Complex 1A",
-        "country": "NZL",
-        "country_ja": "ニュージーランド",
-        "position": {
-          "lat": -39.262833,
-          "lng": 177.864469
-        }
-      }
-    },
     {
       "id": "ef9850ad-1096-425b-9d27-f7bbd186e61a",
       "net": "2026-11-14T17:32:30.000Z",
@@ -470,6 +353,45 @@
         "position": {
           "lat": 69.1084,
           "lng": 15.5895
+        }
+      }
+    },
+    {
+      "id": "d74afbc7-0de5-491c-be05-4e9c31f736ac",
+      "net": "2026-11-29T15:47:00.000Z",
+      "precision": "min",
+      "window_end": null,
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-13T12:35:58Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "Cygnus CRS-2 NG-25",
+        "placeholder": false,
+        "type": "Resupply",
+        "type_ja": "物資の補給",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 12,
+        "name": "Cape Canaveral SFS, FL, USA",
+        "ja": "ケープカナベラル宇宙軍基地",
+        "short": "ケープカナベラル",
+        "pad": "Space Launch Complex 40",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 28.56194122,
+          "lng": -80.57735736
         }
       }
     }
