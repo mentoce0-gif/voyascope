@@ -2,18 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-14T06:23:20.410Z",
+  "fetched_at": "2026-11-14T18:01:34.093Z",
   "days_ahead": 45,
   "launches": [
     {
       "id": "ef9850ad-1096-425b-9d27-f7bbd186e61a",
-      "net": "2026-11-14T17:32:30.000Z",
+      "net": "2026-11-15T17:11:30.000Z",
       "precision": "sec",
-      "window_end": "2026-11-14T18:01:00.000Z",
+      "window_end": "2026-11-15T17:31:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-13T14:54:33Z",
+      "updated": "2026-11-14T14:18:08Z",
       "rocket": {
         "name": "Vulcan VC6L",
         "full_name": "Vulcan VC6L"
@@ -169,7 +169,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-12T19:21:00Z",
+      "updated": "2026-11-14T14:29:39Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
