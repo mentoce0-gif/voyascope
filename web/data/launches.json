@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-17T07:55:13.042Z",
+  "fetched_at": "2026-11-17T20:55:22.882Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -46,13 +46,13 @@
     },
     {
       "id": "76617033-4dc0-4448-b50c-e5b0d5a18539",
-      "net": "2026-11-19T03:00:00.000Z",
+      "net": "2026-11-20T02:46:00.000Z",
       "precision": "min",
-      "window_end": "2026-11-19T07:00:00.000Z",
+      "window_end": "2026-11-20T06:46:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-17T00:50:52Z",
+      "updated": "2026-11-17T16:09:07Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -158,6 +158,45 @@
         "position": {
           "lat": 34.632,
           "lng": -120.611
+        }
+      }
+    },
+    {
+      "id": "7bdc412b-c965-4517-a131-f57a01189803",
+      "net": "2026-11-23T11:09:00.000Z",
+      "precision": "min",
+      "window_end": "2026-11-23T11:38:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-17T19:49:30Z",
+      "rocket": {
+        "name": "Ariane 64",
+        "full_name": "Ariane 64 Block 2"
+      },
+      "provider": {
+        "name": "Arianespace",
+        "ja": "アリアンスペース"
+      },
+      "mission": {
+        "name": "Amazon Leo (LE-04)",
+        "placeholder": false,
+        "type": "Communications",
+        "type_ja": "通信",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 13,
+        "name": "Guiana Space Centre, French Guiana",
+        "ja": "ギアナ宇宙センター",
+        "short": "ギアナ",
+        "pad": "Ariane Launch Area 4",
+        "country": "GUF",
+        "country_ja": "フランス領ギアナ",
+        "position": {
+          "lat": 5.256319,
+          "lng": -52.786838
         }
       }
     },
