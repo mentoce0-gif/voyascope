@@ -18,6 +18,10 @@ export function whenDay(w) {
   return Number.isNaN(t) ? null : jstMidnight(t);
 }
 
+// 済んだ出来事の文。名前が文の形（「…1光日に」「…入る」）なら「〇〇（N日前）」、名詞（「MMX の打ち上げ」）なら「〇〇から N日」
+const SENTENCE_END = /[にへるただ]$/;
+export const pastText = (title, days) => (SENTENCE_END.test(title) ? `${title}（${days}日前）` : `${title}から${days}日`);
+
 // 帯に出す行。済んだ出来事は「〇〇から N日」、これからは「あと N日：〇〇」。近いものから
 export function tipLines(items, now = Date.now()) {
   const today = jstMidnight(now);
@@ -27,7 +31,7 @@ export function tipLines(items, now = Date.now()) {
     if (day === null) continue;
     const n = Math.round((day - today) / DAY);
     if (it.status === "done" && n <= 0 && -n <= PAST_DAYS) {
-      out.push({ ...it, n, text: n === 0 ? `きょう：${it.title}` : `${it.title}から${-n}日` });
+      out.push({ ...it, n, text: n === 0 ? `きょう：${it.title}` : pastText(it.title, -n) });
     } else if (it.status !== "done" && it.status !== "cancelled" && n >= 0 && n <= NEXT_DAYS) {
       out.push({ ...it, n, text: n === 0 ? `きょう：${it.title}` : `あと${n}日：${it.title}${it.status === "postponed" ? "（延期）" : ""}` });
     }

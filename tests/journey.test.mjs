@@ -137,3 +137,28 @@ test("計器：速さ（光より速いとワープ・作り話）・光年・�
   assert.equal(angleText(0.0055), "0.0055 度");
   assert.ok(P0 === 2 && PMAX > Math.log10(LIGHT_DAY_KM));
 });
+
+test("1光日：ボイジャー1号が届いたことを公式で確かめたら（status が done）、「届いた」と書き、模型を輪の向こう側に", async () => {
+  const { reachedEvent } = await import("../web/js/far/room.js");
+  const { reachedStamp } = await import("../web/js/far/journey.js");
+  const { ladderHtml, fullCardHtml } = await import("../web/js/far/probe-card.js");
+  const done = events.map((ev) => (ev.id === "voyager-1-one-light-day" ? { ...ev, status: { value: "done", source: "https://science.nasa.gov/", as_of: "2026-11-18" } } : ev));
+  const after = new Date("2026-11-20T00:00:00Z");
+  const v1Reached = reachedEvent(done);
+  assert.equal(v1Reached?.id, "voyager-1-one-light-day");
+  assert.equal(reachedEvent(events), null); // 予定のままなら「届いた」と書かない
+  assert.equal(reachedStamp(v1Reached), "2026.11.18"); // 日本時間の日付
+  const ctx = { ...ctxAt(after), v1Reached, events: done };
+  const items = roomItems(probes, after);
+  const gate = journeyStops(items, ctx).at(-1);
+  assert.equal(gate.text, "ボイジャー1号は 11月18日（水）19:16、ここに届いた（NASA）。人がつくったもので、はじめて");
+  assert.equal(gate.caption, "2026.11.18 ボイジャー1号が通過");
+  assert.equal(gate.companion.beyond, true); // 距離がなくても、NASA が届いたと発表したら向こう側
+  assert.equal(gate.card, GATE_COMPANION);
+  assert.match(strip(ladderHtml(items, ctx)), /ボイジャー1号が 11月18日（水）19:16 にここへ届いた（NASA）/);
+  // ボイジャー1号のカード：予定ではなく「節目」に出す
+  const v1 = items.find((it) => it.id === GATE_COMPANION);
+  const card = strip(fullCardHtml(v1, ctx));
+  assert.match(card, /節目 2026年11月18日（水）19時16分07秒（日本時間） ボイジャー1号が地球から1光日に/);
+  assert.doesNotMatch(card, /予定 /);
+});

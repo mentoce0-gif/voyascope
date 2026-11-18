@@ -109,8 +109,9 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
     <figure class="vis" data-q="4" hidden></figure>
     <ol class="tl">
       <li class="past"><span class="d">1977年9月5日</span>打ち上げ<span class="src">出典：<a href="https://science.nasa.gov/mission/voyager/voyager-1/" rel="noopener">science.nasa.gov</a> · 2026-10-03 確認</span></li>
+      <li class="past"><span class="d">2026年11月18日</span>ボイジャー1号が地球から1光日に<span class="st">済み</span><span class="src">出典：<a href="https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/" rel="noopener">science.nasa.gov</a> · 2026-10-01 確認</span></li>
       <li class="now"><span class="d">いま</span>運用中</li>
-      <li class="next"><span class="d">2026年11月18日</span>ボイジャー1号が地球から1光日に<span class="src">出典：<a href="https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/" rel="noopener">science.nasa.gov</a> · 2026-10-01 確認</span></li>
+      <li class="next none"><span class="d">これから</span>公式に日付の出ている予定は、まだ載せていません</li>
     </ol>
   </section>
 
@@ -129,7 +130,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid rgba(255,255
     <li><a href="https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/" rel="noopener">NASA「Where Are Voyager 1 and Voyager 2 Now?」</a></li>
   </ul>
   <p class="src">VOYASCOPE のカードの最終確認：2026-10-04</p>
-  <script type="application/json" id="vis-data">{"id":"voyager-1","group":"probe","model":"voyager","name":"ボイジャー1号","q1":{"text":"木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った。いまもデータを送っている","src":"science.nasa.gov"},"q2":{"label":"運用中","note":"電力を節約するため、観測装置を少しずつ止めながら運用している（2026年4月17日に1台止めた）","asOf":"2026-10-03","src":"science.nasa.gov"},"q3":{"km":25896000000,"text":"約259億 km","when":"2026年11月16日の値","src":"JPL Horizons","moonKm":403621,"sunKm":147977447},"q4":[{"d":"1977年9月5日","label":"打ち上げ","kind":"past"},{"d":"いま","label":"運用中","kind":"now"},{"d":"2026年11月18日","label":"ボイジャー1号が地球から1光日に","kind":"next"}],"q5":{"light":"約23時間59分","lightSec":86379.75809251345,"src":"光の速さ（定義の値）から計算","ratio":"太陽までの約175倍"}}</script>
+  <script type="application/json" id="vis-data">{"id":"voyager-1","group":"probe","model":"voyager","name":"ボイジャー1号","q1":{"text":"木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った。いまもデータを送っている","src":"science.nasa.gov"},"q2":{"label":"運用中","note":"電力を節約するため、観測装置を少しずつ止めながら運用している（2026年4月17日に1台止めた）","asOf":"2026-10-03","src":"science.nasa.gov"},"q3":{"km":25896000000,"text":"約259億 km","when":"2026年11月16日の値","src":"JPL Horizons","moonKm":403621,"sunKm":147977447},"q4":[{"d":"1977年9月5日","label":"打ち上げ","kind":"past"},{"d":"2026年11月18日","label":"ボイジャー1号が地球から1光日に","kind":"past"},{"d":"いま","label":"運用中","kind":"now"}],"q5":{"light":"約23時間59分","lightSec":86379.75809251345,"src":"光の速さ（定義の値）から計算","ratio":"太陽までの約175倍"}}</script>
   <script type="module" src="../visual.js"></script>
   <script>document.addEventListener("click",function(e){var b=e.target.closest("[data-copy]");if(!b)return;var u=b.dataset.copy;var ok=function(){b.textContent="コピーしました";setTimeout(function(){b.textContent="リンクをコピー"},2000)};var ng=function(){b.textContent=u};try{navigator.clipboard.writeText(u).then(ok,ng)}catch(_){ng()}});</script>
   <footer>
