@@ -84,7 +84,8 @@ const LONG_NAME = 11; // これより長い名前は、スマホでは1行に縮
 
 // ---------- 停留所（本体のデータから） ----------
 // items：room.js の roomItems。距離があって、見せ方の決まっているものを近い順に。文・予定・距離の書き方はカードと計算から
-export function journeyStops(items, { now = new Date(), upcoming = [], v1Event = null } = {}) {
+// v1Event：これからの予告（NASA）。v1Reached：届いたことを NASA の公式で確かめた出来事（status が done）
+export function journeyStops(items, { now = new Date(), upcoming = [], v1Event = null, v1Reached = null } = {}) {
   const v1 = items.find((it) => it.id === GATE_COMPANION) ?? null;
   return items
     .filter((it) => it.id !== GATE_COMPANION && it.dist && it.dist.km > 0 && LOOK[it.id])
@@ -109,17 +110,24 @@ export function journeyStops(items, { now = new Date(), upcoming = [], v1Event =
         sayEvent: "",
         card: it.card ? it.id : null, // 「探査機をもっと知る」で開くカード
         companion: null,
+        caption: "", // 右下の小さな一言（空なら決まりの一言）
       };
       if (it.id === "moon") st.text = `光なら ${dp.lt}で着く。ここまでは、ほとんど一瞬`;
       else if (it.id === "sun") st.text = `いま見ている太陽の光は、${dp.lt}前に太陽を出た光`;
       else if (it.kind === "light-day") {
         if (v1Event) st.text = `ボイジャー1号は ${whenText(v1Event, now)}、ここに届く予定（NASA）。人がつくったもので、はじめて`;
-        else if (v1?.card) st.text = `ボイジャー1号は、${v1.card.location.value}`;
+        else if (v1Reached) {
+          // 届いたあと（NASA の公式で確かめた）：日時は NASA の発表どおり。模型は輪の向こう側に置く
+          st.text = `ボイジャー1号は ${whenText(v1Reached, now)}、ここに届いた（NASA）。人がつくったもので、はじめて`;
+          st.caption = `${reachedStamp(v1Reached)} ボイジャー1号が通過`;
+        } else if (v1?.card) st.text = `ボイジャー1号は、${v1.card.location.value}`;
         else st.text = "光が24時間で進む距離";
         if (v1?.card) st.card = GATE_COMPANION;
-        if (v1 && (v1Event || v1.dist?.km > 0)) {
+        if (v1 && (v1Event || v1Reached || v1.dist?.km > 0)) {
           const dp1 = v1.dist?.km > 0 ? distanceParts(v1) : null;
-          st.companion = { name: v1.name, dist: dp1?.short ?? null, how: dp1?.how ?? null, beyond: !!(dp1 && v1.dist.km >= LIGHT_DAY_KM) };
+          // 越えたかどうか：NASA が「届いた」と発表したら越えた側に。発表の前は Horizons の計算値で決める
+          const beyond = !!v1Reached || !!(dp1 && v1.dist.km >= LIGHT_DAY_KM);
+          st.companion = { name: v1.name, dist: dp1?.short ?? null, how: dp1?.how ?? null, beyond };
           // 説明の小さな行は、1光日の説明の代わりに、ボイジャー1号のいまの距離（名前と「光で 24 時間」で、1光日のことは分かる）
           if (dp1) st.how = `${v1.name}は いま${dp1.short}・${dp1.how}`;
         }
@@ -133,6 +141,14 @@ export function journeyStops(items, { now = new Date(), upcoming = [], v1Event =
       }
       return st;
     });
+}
+
+// 「2026.11.18」（届いた日。日本時間）
+export function reachedStamp(ev) {
+  const t = Date.parse(ev?.when?.value?.at ?? `${ev?.when?.value?.date ?? ""}T00:00:00Z`);
+  if (Number.isNaN(t)) return "";
+  const j = new Date(t + 9 * 3600000);
+  return `${j.getUTCFullYear()}.${String(j.getUTCMonth() + 1).padStart(2, "0")}.${String(j.getUTCDate()).padStart(2, "0")}`;
 }
 
 // 名前（大きな見出し）。ウェッブは PC で2行に分ける（試作と同じ）。「・」のあとで折り返せるようにする
@@ -1635,7 +1651,7 @@ float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a 
       tour.hidden = pl.id !== "moon"; // 月：アルテミス2号の旅に乗るページ（web/tour/artemis2/。2026-10-09 オーナー）
       $("scene-name").textContent = pl.en;
       $("story-en").textContent = pl.en;
-      $("scene-caption").textContent = pl.kind === "probe" ? "いま、あなたのすぐそばに。" : "光の旅の、ひとつの目印。";
+      $("scene-caption").textContent = pl.caption || (pl.kind === "probe" ? "いま、あなたのすぐそばに。" : "光の旅の、ひとつの目印。");
       // 説明の上の端（文の長さで変わる）。スマホでは「なぞって眺める」の案内を、これより上に置く（重ならないように）
       root.style.setProperty("--story-top", `${story.offsetTop}px`);
     }

@@ -63,7 +63,7 @@ export function eventTitleWithout(title, name) {
 }
 
 // ---------- 飛んでいるときのカード（通り過ぎた場所） ----------
-export function compactCardHtml(item, { now, upcoming, v1Event }) {
+export function compactCardHtml(item, { now, upcoming, v1Event, v1Reached = null }) {
   if (!item || item.kind === "earth") return "";
   const dp = distanceParts(item);
   const head = `<div class="fc-name">${esc(item.name)}${item.kind === "landmark" ? `<span class="fc-tag">くらべる目安</span>` : ""}</div>`;
@@ -80,7 +80,10 @@ export function compactCardHtml(item, { now, upcoming, v1Event }) {
     const ev = v1Event
       ? `<p class="fc-line">ボイジャー1号は ${eventWhenJa(v1Event, now)}、ここに届く予定（NASA）。人がつくったもので、はじめて</p>
          <button type="button" class="fc-more" data-card="voyager-1">ボイジャー1号のカード</button>`
-      : "";
+      : v1Reached
+        ? `<p class="fc-line">ボイジャー1号は ${eventWhenJa(v1Reached, now)}、ここに届いた（NASA）。人がつくったもので、はじめて</p>
+         <button type="button" class="fc-more" data-card="voyager-1">ボイジャー1号のカード</button>`
+        : "";
     return `${head}${dist}${lt}${ev}`;
   }
   const ev = nextEvent(item, upcoming);
@@ -93,7 +96,7 @@ export function compactCardHtml(item, { now, upcoming, v1Event }) {
 const eventWhenJa = (ev, now) => esc(whenText(ev, now));
 
 // ---------- くわしいカード（ダイアログの中身） ----------
-export function fullCardHtml(item, { now, upcoming }) {
+export function fullCardHtml(item, { now, upcoming, events = [] }) {
   const c = item.card;
   const dp = distanceParts(item);
   const d = c.distance;
@@ -112,6 +115,8 @@ export function fullCardHtml(item, { now, upcoming }) {
           }${src(d.source)}`;
   const status = c.status;
   const evs = upcoming.filter((ev) => c.events?.includes(ev.id));
+  // 終わった節目（公式で確かめて status を done にしたもの）。打ち上げはカードの「打ち上げ」の行にあるので出さない
+  const done = events.filter((ev) => c.events?.includes(ev.id) && ev.kind !== "launch" && ev.status?.value === "done");
   const row = (label, body) => `<div class="pc-row"><dt>${label}</dt><dd>${body}</dd></div>`;
   const note = (f) => (f?.note ? `<br><span class="k small">${esc(f.note)}</span>` : "");
   return `
@@ -124,6 +129,7 @@ export function fullCardHtml(item, { now, upcoming }) {
         ${row("いま", `${esc(c.location.value)}${src(c.location.source)}`)}
         ${row("状態", `<strong>${esc(STATUS_JA[status.value] ?? status.value)}</strong><span class="k">（${asOfJa(status.as_of)}に確認）</span>${note(status)}${src(status.source)}`)}
         ${row("距離", distBody)}
+        ${done.length ? row("節目", done.map((ev) => `<div class="pc-ev"><span class="ev-when">${esc(whenText(ev, now, { full: true }))}</span>　${esc(ev.title.ja)}${src(ev.status.source)}</div>`).join("")) : ""}
         ${evs.length ? row("予定", evs.map((ev) => `<div class="pc-ev">${eventLine(ev, now, { full: true })}${src(ev.when.source)}</div>`).join("")) : ""}
         ${row("任務", `${esc(c.mission.value)}${src(c.mission.source)}`)}
         ${row("運用", `${esc(factValue(c.operator))}${note(c.operator)}${src(c.operator.source)}`)}
@@ -139,7 +145,7 @@ export function fullCardHtml(item, { now, upcoming }) {
 export const LADDER_DECADES = [5, 6, 7, 8, 9, 10];
 
 // numbers：旅の停留所の番号（はしごの左の「01」）。旅に出てこないものは空
-export function ladderHtml(items, { now, upcoming, v1Event, numbers = {} }) {
+export function ladderHtml(items, { now, upcoming, v1Event, v1Reached = null, numbers = {} }) {
   const placed = items.filter((it) => it.dist && it.dist.method !== "on_earth");
   const onEarth = items.filter((it) => it.dist?.method === "on_earth");
   const pending = items.filter((it) => it.kind === "probe" && !it.dist);
@@ -148,7 +154,14 @@ export function ladderHtml(items, { now, upcoming, v1Event, numbers = {} }) {
     const dp = distanceParts(it);
     const ev = it.kind === "probe" ? nextEvent(it, upcoming) : null;
     const cls = it.kind === "probe" ? "probe" : it.kind;
-    const v1 = it.kind === "light-day" && v1Event ? `<span class="lad-ev">ボイジャー1号が ${eventWhenJa(v1Event, now)} にここへ（NASA の予告）</span>` : "";
+    const v1 =
+      it.kind !== "light-day"
+        ? ""
+        : v1Event
+          ? `<span class="lad-ev">ボイジャー1号が ${eventWhenJa(v1Event, now)} にここへ（NASA の予告）</span>`
+          : v1Reached
+            ? `<span class="lad-ev">ボイジャー1号が ${eventWhenJa(v1Reached, now)} にここへ届いた（NASA）</span>`
+            : "";
     // 計算した値はぜんぶの桁、目安・日付つき・Horizons の値は丸めて「約」
     const dist = it.dist.approx ? dp.short : kmFullJa(it.dist.km);
     return `<li><button type="button" class="lad-place ${cls}" data-go="${esc(it.id)}">

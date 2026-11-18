@@ -21,11 +21,21 @@
     "as_of": "2026-10-01",
     "note": "NASA の発表は 2026年11月18日 2時16分07秒（米国太平洋標準時）"
   },
+  "status": {
+    "value": "done",
+    "source": "https://science.nasa.gov/resource/voyager-one-light-day-downloads/",
+    "as_of": "2026-11-18",
+    "note": "NASA に「it became the first spacecraft to reach one light-day away from Earth」"
+  },
   "links": [
     {
       "label": "NASA「Where Are Voyager 1 and Voyager 2 Now?」",
       "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
+    },
+    {
+      "label": "NASA「Voyager One Light-Day Downloads」",
+      "url": "https://science.nasa.gov/resource/voyager-one-light-day-downloads/"
     }
   ],
-  "updated_at": "2026-10-01"
+  "updated_at": "2026-11-18"
 }

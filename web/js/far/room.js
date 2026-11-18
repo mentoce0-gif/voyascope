@@ -5,7 +5,7 @@
 // Horizons の計算値は、週に1回取った表（data/horizons.json）を読む。読めなければ、その探査機は「準備中」のまま。
 // 3D は three.js r128（vendor/three-r128.min.js）。読めない・WebGL を使えないときは、v0 の飛ぶ画面（fly.js。2D）にする
 import { dateTimeShortJa } from "../format.js";
-import { upcomingEvents } from "../events.js";
+import { upcomingEvents, statusOf } from "../events.js";
 import { landmarks, probeDistance } from "./distance.js";
 import { createFly } from "./fly.js";
 import { compactCardHtml, fullCardHtml, ladderHtml, horizonsCredit } from "./probe-card.js";
@@ -59,6 +59,10 @@ async function loadThree() {
     else window.__THREE__ = mark;
   }
 }
+
+// ボイジャー1号が1光日に届く出来事。届いたことを公式で確かめたら（status が done）、輪の向こう側に置いて「届いた」と書く
+export const V1_EVENT = "voyager-1-one-light-day";
+export const reachedEvent = (events) => (events ?? []).find((ev) => ev.id === V1_EVENT && statusOf(ev) === "done") ?? null;
 
 // 部屋に並べるもの：くらべる目安（月・太陽・1光日）と探査機。距離のないもの（準備中）は dist: null
 export function roomItems(probes, now, horizons = null) {
@@ -164,11 +168,12 @@ export async function createFarRoom({ events = [], onClose = () => {} } = {}) {
   let stops = [];
   let upcoming = [];
   let v1Event = null;
+  let v1Reached = null;
   let view = null; // 飛ぶ画面：3D の旅（journey）か、v0 の飛ぶ画面（fly）
   let timer = 0;
   let pendingStart = 0;
 
-  const ctx = () => ({ now, upcoming, v1Event });
+  const ctx = () => ({ now, upcoming, v1Event, v1Reached, events });
 
   // 書き直すときに、押そうとしていたボタン（キーボードのフォーカス）を失わないようにする
   function rewrite(el, html) {
@@ -259,7 +264,8 @@ export async function createFarRoom({ events = [], onClose = () => {} } = {}) {
     now = new Date();
     items = roomItems(probes, now, horizons);
     upcoming = upcomingEvents(events, now);
-    v1Event = upcoming.find((ev) => ev.id === "voyager-1-one-light-day") ?? null;
+    v1Event = upcoming.find((ev) => ev.id === V1_EVENT) ?? null;
+    v1Reached = reachedEvent(events);
     stops = journeyStops(items, ctx());
     view?.update();
     renderLadder();

@@ -39,3 +39,11 @@ test("帯：月だけの予定・中止・期間の外は出さない。当日�
   assert.equal(tipLines(items, Date.parse("2027-06-01T00:00:00+09:00")).length, 0);
   assert.equal(FALLBACK.href, "missions/");
 });
+
+test("帯：済んだ出来事の名前が文の形なら「〇〇（N日前）」（「…1光日にから3日」にしない）", async () => {
+  const { pastText } = await import("../web/js/tips.js");
+  assert.equal(pastText("ボイジャー1号が地球から1光日に", 3), "ボイジャー1号が地球から1光日に（3日前）");
+  assert.equal(pastText("ベピコロンボが水星を回る軌道に入る", 1), "ベピコロンボが水星を回る軌道に入る（1日前）");
+  assert.equal(pastText("MMX の打ち上げ", 30), "MMX の打ち上げから30日");
+  assert.equal(pastText("ISS 太陽電池8基目の取り付けを完了", 2), "ISS 太陽電池8基目の取り付けを完了から2日");
+});
