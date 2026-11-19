@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>流星を眺める｜宇宙から見るver.（試作）</title>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/deck.gl@9.0.38/dist.min.js"></script>
+<style>
+  :root {
+    --navy: #070d1f; --navy2: #0e1a36; --amber: #ffb340; --mint: #6ee7c8;
+    --ink: #e6ecf7; --dim: #8b98b5; --line: rgba(140,160,200,.25);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--navy); color: var(--ink);
+    font-family: "Zen Kaku Gothic New", system-ui, sans-serif; overflow: hidden; }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  #map { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, #13224a 0%, var(--navy) 65%); }
+
+  /* 見出し */
+  .head { position: absolute; top: 0; left: 0; right: 0; padding: 14px 16px 28px;
+    background: linear-gradient(180deg, rgba(7,13,31,.92) 0%, rgba(7,13,31,.6) 60%, rgba(7,13,31,0) 100%);
+    pointer-events: none; z-index: 2; }
+  .head .kicker { font-size: 11px; letter-spacing: .18em; color: var(--mint); }
+  .head h1 { margin: 2px 0 2px; font-size: clamp(18px, 4.6vw, 26px); line-height: 1.3; }
+  .head h1 b { color: var(--amber); }
+  .head p { margin: 0; font-size: 13px; color: var(--dim); }
+  .head .sample { color: #ff8a8a; font-weight: 700; }
+
+  /* 操作 */
+  .panel { position: absolute; z-index: 3; background: rgba(10,18,40,.82); border: 1px solid var(--line);
+    border-radius: 12px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .views { left: 16px; bottom: 64px; padding: 8px; display: flex; gap: 6px; flex-wrap: wrap; max-width: calc(100% - 32px); }
+  button { font: inherit; font-size: 13px; color: var(--ink); background: var(--navy2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 11px; cursor: pointer; min-height: 38px; }
+  button:hover { border-color: var(--mint); }
+  button.play { background: var(--amber); color: #1a1200; border-color: var(--amber); font-weight: 700; }
+  button.play.on { background: transparent; color: var(--amber); }
+
+  .legend { right: 16px; top: 88px; padding: 10px 12px; font-size: 12px; min-width: 170px; }
+  .legend h2 { margin: 0 0 6px; font-size: 12px; color: var(--dim); font-weight: 400; }
+  .legend ul { list-style: none; margin: 0; padding: 0; }
+  .legend li { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .legend i { width: 22px; height: 3px; border-radius: 2px; flex: none; }
+  .legend .n { margin-left: auto; color: var(--dim); }
+  .legend .total { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; color: var(--dim); }
+  .legend .hint { margin-top: 6px; color: var(--dim); font-size: 11px; line-height: 1.5; }
+
+  .clock { left: 50%; transform: translateX(-50%); top: 96px; padding: 6px 12px; font-size: 13px; display: none; text-align: center; }
+  .clock.on { display: block; }
+  .clock .t { font-size: 20px; color: var(--amber); }
+  .clock .bar { height: 3px; background: var(--line); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .clock .bar span { display: block; height: 100%; width: 0; background: var(--amber); }
+
+  /* 出典（常に見える） */
+  .credit { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+    font-size: 11px; line-height: 1.5; color: var(--dim); background: rgba(7,13,31,.9); border-top: 1px solid var(--line); }
+  .credit a { color: var(--mint); }
+
+  #tipbox { position: absolute; z-index: 6; pointer-events: none; background: rgba(10,18,40,.95); color: var(--ink);
+    border: 1px solid rgba(140,160,200,.35); border-radius: 10px; padding: 8px 10px; max-width: 260px; }
+  .tip { font-family: "Zen Kaku Gothic New", sans-serif; font-size: 12px; line-height: 1.6; }
+  .tip .name { font-size: 14px; font-weight: 700; }
+  .tip .mono { font-size: 12px; }
+
+  .msg { position: absolute; inset: 0; display: none; place-items: center; z-index: 9; padding: 24px; text-align: center; color: var(--dim); }
+  .msg.on { display: grid; }
+
+  @media (max-width: 640px) {
+    .legend { top: 112px; right: 16px; min-width: 0; padding: 6px 9px; font-size: 11px; }
+    .legend h2, .legend .hint, .legend .total { display: none; }
+    .legend li { margin: 2px 0; }
+    .views { bottom: 64px; right: auto; }
+    .views { max-width: calc(100% - 32px); }
+    button { padding: 7px 9px; font-size: 12px; }
+    .clock { top: auto; bottom: 168px; }
+  }
+  .maplibregl-ctrl-attrib { display: none !important; } /* 出典は下の帯にまとめて常に出す */
+</style>
+</head>
+<body>
+<div id="map" aria-label="日本列島を斜めから見下ろした地図。上空に流星の通り道が線で描かれている"></div>
+
+<header class="head">
+  <div class="kicker mono">VOYASCOPE LAB · METEORS FROM SPACE</div>
+  <h1>2026年11月18日の夜、日本のまわりの上空を<br><b id="count">—</b>個の流星が飛んでいた</h1>
+  <p id="sub">高さ約80〜120 km。カメラの網（GMN）が記録した通り道です。</p>
+</header>
+
+<div class="panel clock mono" id="clock"><div class="t" id="clockT">--:--</div><div id="clockU" style="color:var(--dim);font-size:11px"></div><div class="bar"><span id="bar"></span></div></div>
+
+<aside class="panel legend" id="legend" aria-label="凡例"></aside>
+
+<nav class="panel views" aria-label="視点">
+  <button class="play" id="play">▶ その夜を再生</button>
+  <button data-view="all">日本全体</button>
+  <button data-view="tokyo">東京上空</button>
+  <button data-view="osaka">大阪上空</button>
+  <button data-view="kyushu">九州上空</button>
+</nav>
+
+<footer class="credit">
+  データ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">Global Meteor Network</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）から抽出 ／
+  地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>（淡色地図）を加工して作成 ／
+  非公式のファンメイド試作。線の位置・高さは観測から計算された推定値です
+</footer>
+
+<div class="msg" id="msg"></div>
+<div id="tipbox" hidden></div>
+
+<script>
+(() => {
+  const DATA_URL = 'meteors_20261118_japan.json';
+
+  // 流星群：LEO だけ目立たせる。日本語名は確かなものだけ。ほかは IAU のコードのまま出す
+  const SHOWERS = {
+    LEO: { ja: 'しし座流星群', color: [255, 190, 70] },
+    NTA: { ja: 'おうし座北流星群', color: [120, 200, 230] },
+    STA: { ja: 'おうし座南流星群', color: [120, 200, 230] },
+    AMO: { ja: 'いっかくじゅう座α流星群', color: [120, 200, 230] },
+  };
+  const OTHER = { ja: 'その他の流星群', color: [150, 140, 220] };
+  const SPORADIC = { ja: '散在流星（どの群にも属さない）', color: [140, 160, 190] };
+  const groupOf = m => m.iau_code === 'LEO' ? 'LEO' : (m.iau_code ? 'OTHER' : 'SPO');
+  const styleOf = m => m.iau_code ? (SHOWERS[m.iau_code] || OTHER) : SPORADIC;
+  const nameOf = m => m.iau_code ? (SHOWERS[m.iau_code] ? SHOWERS[m.iau_code].ja : `その他の流星群（IAU コード ${m.iau_code}）`) : '散在流星';
+
+  const VIEWS = {
+    all:    { center: [136.0, 36.3], zoom: 4.9, pitch: 60, bearing: -15 },
+    tokyo:  { center: [139.75, 35.4], zoom: 7.0, pitch: 62, bearing: -20 },
+    osaka:  { center: [135.5, 34.5], zoom: 7.0, pitch: 62, bearing: -20 },
+    kyushu: { center: [130.7, 32.6], zoom: 6.8, pitch: 62, bearing: -15 },
+  };
+  const narrow = matchMedia('(max-width: 640px)').matches;
+  if (narrow) { VIEWS.all = { ...VIEWS.all, zoom: 4.15, center: [133.6, 35.0], bearing: -25 }; }
+
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: {
+      version: 8,
+      sources: {
+        gsi: {
+          type: 'raster', tileSize: 256, minzoom: 2, maxzoom: 18,
+          tiles: ['https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png'],
+          attribution: '地理院タイル',
+        },
+      },
+      layers: [
+        { id: 'bg', type: 'background', paint: { 'background-color': '#070d1f' } },
+        // 淡色地図を夜の色に：明るさを反転し、色味を抑える（加工）
+        { id: 'gsi', type: 'raster', source: 'gsi', paint: {
+          'raster-brightness-min': 0.92, 'raster-brightness-max': 0.0,
+          'raster-saturation': -0.6, 'raster-hue-rotate': 180, 'raster-contrast': 0.15, 'raster-opacity': 0.95 } },
+      ],
+    },
+    ...VIEWS.all,
+    maxPitch: 75,
+    attributionControl: false,
+  });
+
+  let meteors = [], hover = null;
+  let play = null; // { start: performance.now(), dur }
+  const PLAY_SEC = 45, FLASH_N = 14; // 45秒で全部。1本は「14本ぶん」の間だけ明るい
+
+  const overlay = new deck.MapboxOverlay({ interleaved: false, layers: [], pickingRadius: narrow ? 14 : 6,
+    onClick: info => { if (!info.object) showTip(null); } });
+  const tipEl = document.getElementById('tipbox');
+  // 線に触れた（ホバー）・押した（タップ）ときの説明。スマホはタップで出す
+  function showTip(info) {
+    const t = info && info.object ? getTooltip(info) : null;
+    if (!t) { tipEl.hidden = true; return; }
+    tipEl.innerHTML = t.html; tipEl.hidden = false;
+    const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+    tipEl.style.left = Math.max(8, Math.min(innerWidth - w - 8, info.x + 12)) + 'px';
+    tipEl.style.top = Math.max(8, Math.min(innerHeight - h - 60, info.y + 12)) + 'px';
+  }
+  map.addControl(overlay);
+
+  function getTooltip({ object }) {
+    if (!object || object.utc === undefined) return null;
+    const m = object, d = new Date(m.utc);
+    const jst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(d);
+    const utc = d.toISOString().slice(11, 19);
+    const c = styleOf(m).color;
+    return {
+      html: `<div class="tip" role="status"><div class="name" style="color:rgb(${c})">${nameOf(m)}</div>
+        <div>日本時間 <span class="mono">${jst}</span></div>
+        <div>UTC <span class="mono">${m.utc.slice(0,10)} ${utc}</span></div>
+        <div>高さ <span class="mono">${m.ht_beg_km.toFixed(0)} km → ${m.ht_end_km.toFixed(0)} km</span>（光り始め→消えた）</div>
+        <div>速さ <span class="mono">${m.v_init_kms.toFixed(1)} km/s</span></div>
+        <div>明るさ <span class="mono">${m.peak_absmag.toFixed(1)} 等</span><small>（100 km 先から見たとき）</small></div></div>`,
+    };
+  }
+
+  const pBeg = m => [m.lon_beg, m.lat_beg, m.ht_beg_km * 1000];
+  const pEnd = m => [m.lon_end, m.lat_end, m.ht_end_km * 1000];
+  const lerp = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
+  const rgba = (c, a) => [c[0], c[1], c[2], Math.round(a)];
+
+  function render(now) {
+    let pt = null, pi = null; // 再生中の「いまの時刻」（ms）と「何本目か」（小数）
+    if (play && meteors.length) {
+      const f = Math.max(0, Math.min(1, (now - play.start) / 1000 / PLAY_SEC)); // rAF の時刻はクリックより少し前のことがある
+      // 時刻順に1本ずつ同じ間隔で流す（日本の夕方は流星が少なく、時間に比例させると前半がほぼ空になるため）。時計は実際の時刻
+      pi = f * meteors.length;
+      const a = meteors[Math.min(meteors.length - 1, Math.floor(pi))], b = meteors[Math.min(meteors.length - 1, Math.floor(pi) + 1)];
+      pt = a._t + (b._t - a._t) * (pi - Math.floor(pi));
+      document.getElementById('bar').style.width = (f * 100) + '%';
+      const d = new Date(pt);
+      document.getElementById('clockT').textContent = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit' }).format(d) + ' 日本時間';
+      document.getElementById('clockU').textContent = 'UTC ' + d.toISOString().slice(11, 16) + ' ／ ' + Math.min(meteors.length, Math.floor(pi) + 1) + ' 個目';
+      if (f >= 1) stopPlay();
+    }
+    // 再生中：まだの流星は出さない、流れた直後は明るく、そのあとは薄く残す
+    const alphaOf = m => {
+      if (pi === null) return 1;
+      if (m._i > pi) return 0;
+      return (pi - m._i) < FLASH_N ? 1 : 0.4;
+    };
+    const k = m => groupOf(m) === 'LEO' ? 1 : 0.6;
+
+    const layers = [
+      // 地面に落とした影（真上から見た通り道）
+      new deck.LineLayer({
+        id: 'shadow', data: meteors,
+        getSourcePosition: m => [m.lon_beg, m.lat_beg, 0], getTargetPosition: m => [m.lon_end, m.lat_end, 0],
+        getColor: m => rgba(styleOf(m).color, 60 * alphaOf(m)), getWidth: 1, widthUnits: 'pixels',
+        updateTriggers: { getColor: pi },
+      }),
+      // 消えた点から地面への細い縦線（浮いていることが分かるように）
+      new deck.LineLayer({
+        id: 'drop', data: meteors,
+        getSourcePosition: m => [m.lon_end, m.lat_end, 0], getTargetPosition: pEnd,
+        getColor: m => rgba(styleOf(m).color, 28 * alphaOf(m)), getWidth: 1, widthUnits: 'pixels',
+        updateTriggers: { getColor: pi },
+      }),
+      // 流星：光り始め（明るい）→ 消えた点（暗い）
+      new deck.ArcLayer({
+        id: 'meteors', data: meteors, pickable: true, greatCircle: false, getHeight: 0,
+        getSourcePosition: pBeg, getTargetPosition: pEnd,
+        getSourceColor: m => rgba(lighten(styleOf(m).color), 255 * k(m) * alphaOf(m)),
+        getTargetColor: m => rgba(styleOf(m).color, 40 * k(m) * alphaOf(m)),
+        getWidth: m => (groupOf(m) === 'LEO' ? 2.6 : 1.6) * (hover === m ? 2 : 1) * (pi !== null && alphaOf(m) === 1 ? 1.8 : 1),
+        widthUnits: 'pixels', widthMinPixels: 1,
+        onHover: info => { hover = info.object || null; if (!narrow) showTip(info); },
+        onClick: info => { hover = info.object || null; showTip(info); render(performance.now()); return true; },
+        updateTriggers: { getSourceColor: pi, getTargetColor: pi, getWidth: [pi, hover] },
+      }),
+      // 光り始めの点（小さな光）
+      new deck.ScatterplotLayer({
+        id: 'heads', data: meteors.filter(m => groupOf(m) === 'LEO' || pi !== null),
+        getPosition: pBeg, getRadius: 2.2, radiusUnits: 'pixels',
+        getFillColor: m => rgba(lighten(styleOf(m).color), 200 * alphaOf(m) * k(m)),
+        updateTriggers: { getFillColor: pi },
+      }),
+    ];
+    if (pi !== null) {
+      // 流れている最中の光の玉（光り始め→消えた点へ進む）
+      const live = meteors.filter(m => m._i <= pi && pi - m._i < FLASH_N);
+      layers.push(new deck.ScatterplotLayer({
+        id: 'live', data: live,
+        getPosition: m => lerp(pBeg(m), pEnd(m), Math.min(1, (pi - m._i) / (FLASH_N * 0.5))),
+        getRadius: 6, radiusUnits: 'pixels',
+        getFillColor: m => rgba(lighten(styleOf(m).color), 255 * (1 - (pi - m._i) / FLASH_N)),
+        updateTriggers: { getPosition: pi, getFillColor: pi },
+      }));
+    }
+    overlay.setProps({ layers });
+  }
+  const lighten = c => c.map(v => Math.round(v + (255 - v) * 0.55));
+
+  // ゆっくり回る（操作したら止まる）
+  let spinning = true;
+  const stopSpin = () => { spinning = false; };
+  ['mousedown', 'touchstart', 'wheel', 'dragstart'].forEach(ev => map.getCanvasContainer().addEventListener(ev, stopSpin, { passive: true }));
+  let last = performance.now();
+  function loop(now) {
+    const dt = (now - last) / 1000; last = now;
+    if (spinning && !map.isMoving()) map.setBearing(map.getBearing() + dt * 2.2);
+    if (play) render(now);
+    requestAnimationFrame(loop);
+  }
+
+  document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => {
+    stopSpin();
+    map.flyTo({ ...VIEWS[b.dataset.view], duration: 2800, essential: true });
+  }));
+
+  const playBtn = document.getElementById('play');
+  function stopPlay() {
+    play = null; playBtn.classList.remove('on'); playBtn.textContent = '▶ その夜を再生';
+    document.getElementById('clock').classList.remove('on');
+    render(performance.now());
+  }
+  playBtn.addEventListener('click', () => {
+    if (play) return stopPlay();
+    if (!meteors.length) return;
+    play = { start: performance.now() };
+    playBtn.classList.add('on'); playBtn.textContent = '■ 止める';
+    document.getElementById('clock').classList.add('on');
+  });
+  map.on('mousemove', () => { if (!play) render(performance.now()); });
+
+  function legend() {
+    const n = g => meteors.filter(m => groupOf(m) === g).length;
+    const others = [...new Set(meteors.filter(m => groupOf(m) === 'OTHER').map(m => m.iau_code))];
+    const named = others.filter(c => SHOWERS[c]).map(c => SHOWERS[c].ja);
+    const row = (c, label, num, w) => `<li><i style="background:linear-gradient(90deg,rgb(${lighten(c)}),rgba(${c},.2));height:${w}px"></i><span>${label}</span><span class="n mono">${num}</span></li>`;
+    document.getElementById('legend').innerHTML = `<h2>流星群ごとの色</h2><ul>
+      ${row(SHOWERS.LEO.color, 'しし座流星群', n('LEO'), 4)}
+      ${row(OTHER.color, 'その他の群', n('OTHER'), 2)}
+      ${row(SPORADIC.color, '散在流星', n('SPO'), 2)}
+      </ul><div class="total">線の明るい側＝光り始め</div>
+      <div class="hint">その他の群：${named.join('・')}${named.length ? 'ほか' : ''}（${others.length}群）<br>線に触れると時刻・高さ・速さ</div>`;
+  }
+
+  async function load() {
+    let doc;
+    try {
+      const r = await fetch(DATA_URL, { cache: 'no-cache' });
+      if (!r.ok) throw new Error(r.status);
+      doc = await r.json();
+    } catch (e) {
+      const el = document.getElementById('msg');
+      el.innerHTML = 'データ（meteors_20261118_japan.json）を読み込めませんでした。<br>ファイルを直接開いた場合は、<span class="mono">python3 -m http.server</span> などで開いてください。';
+      el.classList.add('on');
+      return;
+    }
+    meteors = doc.meteors.map(m => ({ ...m, _t: Date.parse(m.utc) }));
+    meteors.sort((a, b) => a._t - b._t);
+    meteors.forEach((m, i) => { m._i = i; });
+    document.getElementById('count').textContent = meteors.length;
+    if (doc.meta.sample) document.getElementById('sub').innerHTML = '<span class="sample">※ サンプルデータ（実際の観測ではありません）</span>';
+    legend();
+    render(performance.now());
+    requestAnimationFrame(loop);
+  }
+  map.on('load', load);
+})();
+</script>
+</body>
+</html>
