@@ -484,9 +484,9 @@
       },
       "status": {
         "value": "operating",
-        "source": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/",
-        "as_of": "2026-10-03",
-        "note": "電力を節約するため、観測装置を少しずつ止めながら運用している（2026年4月17日に1台止めた）"
+        "source": "https://www.nasa.gov/news-release/nasas-voyager-1-makes-history-reaching-one-light-day-from-earth/",
+        "as_of": "2026-11-19",
+        "note": "11月14日から科学と機体のデータが届いていない。電波（搬送波）は届いていて、NASA が原因を調べている"
       },
       "location": {
         "value": "太陽圏の外の「恒星間空間」を飛んでいる。人がつくったもので、いちばん遠くにある",
@@ -494,9 +494,9 @@
         "as_of": "2026-10-03"
       },
       "mission": {
-        "value": "木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った。いまもデータを送っている",
+        "value": "木星と土星を調べるために打ち上げられ、2012年8月に恒星間空間に入った",
         "source": "https://science.nasa.gov/mission/voyager/voyager-1/",
-        "as_of": "2026-10-03"
+        "as_of": "2026-11-19"
       },
       "distance": {
         "method": "horizons",
@@ -520,9 +520,13 @@
         {
           "label": "NASA「Where Are Voyager 1 and Voyager 2 Now?」",
           "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
+        },
+        {
+          "label": "NASA のリリース（2026年11月19日）",
+          "url": "https://www.nasa.gov/news-release/nasas-voyager-1-makes-history-reaching-one-light-day-from-earth/"
         }
       ],
-      "updated_at": "2026-10-04"
+      "updated_at": "2026-11-19"
     },
     {
       "id": "voyager-2",
