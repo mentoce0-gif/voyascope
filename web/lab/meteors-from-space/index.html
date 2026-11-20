@@ -140,6 +140,7 @@
   <button data-view="tokyo">東京上空</button>
   <button data-view="osaka">大阪上空</button>
   <button data-view="kyushu">九州上空</button>
+  <button data-view="side">横から見る</button>
 </nav>
 
 <footer class="credit">
@@ -371,16 +372,64 @@ function buildMeteors(meteors) {
     const col = styleOf(m).color, k = groupOf(m) === 'LEO' ? 1 : 0.6;
     push(L, m.lat_beg, m.lon_beg, m.ht_beg_km, lighten(col), 0.95 * k, i, 0);
     push(L, m.lat_end, m.lon_end, m.ht_end_km, col, 0.08 * k, i, 1);
-    push(D, m.lat_end, m.lon_end, m.ht_end_km, col, 0.16, i, 1);
-    push(D, m.lat_end, m.lon_end, 0.5, col, 0.03, i, 1);
+    push(D, m.lat_end, m.lon_end, m.ht_end_km, col, 0.42, i, 1);
+    push(D, m.lat_end, m.lon_end, 0.5, col, 0.12, i, 1);
     push(S, m.lat_beg, m.lon_beg, 0.5, col, 0.13, i, 1);
     push(S, m.lat_end, m.lon_end, 0.5, col, 0.05, i, 1);
   });
   scene.add(lineMesh(S, 2), lineMesh(D, 3), lineMesh(L, 4));
+  scene.add(footMesh(meteors));
   streaks = streakMesh(meteors);
   scene.add(streaks);
   scene.add(haloMesh(meteors));
   buildRain(meteors);
+}
+
+// 消えた点の真下の地面の足あと（流星が浮いていることを分かりやすく）
+function footMesh(meteors) {
+  const N = meteors.length, p = new Float32Array(N * 3), c = new Float32Array(N * 4), r = new Float32Array(N), t = new Float32Array(N), s = new Float32Array(N), v = new THREE.Vector3();
+  meteors.forEach((m, i) => {
+    xyz(m.lat_end, m.lon_end, 0.5, v); p.set([v.x, v.y, v.z], i * 3);
+    const col = styleOf(m).color; c.set([col[0] / 255, col[1] / 255, col[2] / 255, 0.45], i * 4);
+    r[i] = i; t[i] = 1; s[i] = 2.2;
+  });
+  const g = new THREE.BufferGeometry();
+  [['position', p, 3], ['aColor', c, 4], ['aRank', r, 1], ['aT', t, 1], ['aSize', s, 1]].forEach(([n, a, k]) => g.setAttribute(n, new THREE.BufferAttribute(a, k)));
+  const pts = new THREE.Points(g, new THREE.ShaderMaterial({
+    uniforms: playU,
+    vertexShader: PLAY_VS_HEAD + `attribute vec4 aColor; attribute float aSize; uniform float dpr; varying vec4 vC;
+      void main(){ vC = aColor; vC.a *= playAlpha(); gl_PointSize = aSize * dpr * uZoom; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `varying vec4 vC; void main(){ float d = length(gl_PointCoord-0.5); float a = vC.a * (1.0 - smoothstep(0.3,0.5,d)); gl_FragColor = vec4(vC.rgb * a, a); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  }));
+  pts.renderOrder = 3;
+  return pts;
+}
+
+// 高さの箱：地面の枠・高さ100 kmの網・ISS の高さ（400 km）の枠・四すみの柱（縮尺どおり）
+const BOX = { lat0: 30, lat1: 43, lon0: 124, lon1: 144 };
+function staticLines(P, order) {
+  const m = lineMesh(P, order);
+  m.material = m.material.clone();
+  m.material.uniforms = { uPi: { value: -1 }, uFlash: { value: 1 }, dpr: { value: DPR }, uZoom: { value: 1 } };
+  return m;
+}
+function buildBox() {
+  const P = { p: [], c: [], r: [], t: [] }, v = new THREE.Vector3();
+  const seg = (pts, col, a) => { for (let i = 0; i < pts.length - 1; i++) for (const q of [pts[i], pts[i + 1]]) { xyz(q[0], q[1], q[2], v); P.p.push(v.x, v.y, v.z); P.c.push(col[0], col[1], col[2], a); P.r.push(-1); P.t.push(0); } };
+  const latLine = (lat, h) => { const a = []; for (let lo = BOX.lon0; lo <= BOX.lon1 + 1e-6; lo += 0.5) a.push([lat, lo, h]); return a; };
+  const lonLine = (lon, h) => { const a = []; for (let la = BOX.lat0; la <= BOX.lat1 + 1e-6; la += 0.5) a.push([la, lon, h]); return a; };
+  const AMB = [1, 0.78, 0.4], ISS = [0.72, 0.8, 1], GND = [0.55, 0.62, 0.78];
+  // 高さ100 kmの網（流星が光る面）
+  for (let la = BOX.lat0; la <= BOX.lat1; la += 1) seg(latLine(la, 100), AMB, la === BOX.lat0 || la === BOX.lat1 ? 0.32 : 0.09);
+  for (let lo = BOX.lon0; lo <= BOX.lon1; lo += 1) seg(lonLine(lo, 100), AMB, lo === BOX.lon0 || lo === BOX.lon1 ? 0.32 : 0.09);
+  // 地面と ISS の高さの枠
+  for (const [h, col, a] of [[0.5, GND, 0.3], [ISS_KM, ISS, 0.35]]) {
+    seg(latLine(BOX.lat0, h), col, a); seg(latLine(BOX.lat1, h), col, a); seg(lonLine(BOX.lon0, h), col, a); seg(lonLine(BOX.lon1, h), col, a);
+  }
+  // 四すみの柱（0 → 400 km）
+  for (const la of [BOX.lat0, BOX.lat1]) for (const lo of [BOX.lon0, BOX.lon1]) seg([[la, lo, 0.5], [la, lo, ISS_KM]], GND, 0.3);
+  scene.add(staticLines(P, 1));
 }
 
 // 光のにじみ（明るい流星ほど大きく）。光り始めから3割ほどのところに1つ
@@ -462,10 +511,12 @@ const VIEWS = {
   tokyo:  { lat: 35.0, lon: 139.8, az: 175, el: 32, dist: 1100 },
   osaka:  { lat: 34.6, lon: 135.5, az: 175, el: 32, dist: 1100 },
   kyushu: { lat: 33.0, lon: 130.7, az: 170, el: 32, dist: 1100 },
+  side:   { lat: 37.5, lon: 133.5, az: 158, el: 3.5, dist: 2300 }, // 横から：地球のふちに沿って見る（高さがいちばん分かる）
 };
-const POLE_OFFSET = { all: [-4.0, 0.0], tokyo: [0.0, 3.0], osaka: [-1.6, 0.0], kyushu: [-1.5, 1.2] }; // ものさしは海の上に立てる
+const POLE_OFFSET = { all: [-4.0, 0.0], tokyo: [0.0, 3.0], osaka: [-1.6, 0.0], kyushu: [-1.5, 1.2], side: [-6.5, 1.0] }; // ものさしは海の上に立てる
 const narrow = matchMedia('(max-width: 640px)').matches;
 if (narrow) VIEWS.all = { ...VIEWS.all, dist: 4600, el: 30, lon: 133.5 };
+if (narrow) VIEWS.side = { ...VIEWS.side, dist: 3600, lon: 135.0, el: 4.5 };
 let cam = { ...VIEWS.all };
 let fly = null, spinning = true;
 
@@ -499,7 +550,7 @@ canvas.addEventListener('pointermove', e => {
   if (!p) { if (e.pointerType === 'mouse') hoverAt(e.clientX, e.clientY, false); return; }
   const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; dragMoved += Math.abs(dx) + Math.abs(dy);
   if (pointers.size === 2 && pinch0) { const [a, b] = [...pointers.values()]; cam.dist = clampDist(pinch0.dist * pinch0.d / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y))); return; }
-  cam.az -= dx * 0.25; cam.el = Math.max(6, Math.min(88, cam.el + dy * 0.2));
+  cam.az -= dx * 0.25; cam.el = Math.max(2, Math.min(88, cam.el + dy * 0.2));
 });
 const endPtr = e => {
   if (pointers.has(e.pointerId) && pointers.size === 1 && dragMoved < 8) hoverAt(e.clientX, e.clientY, true);
@@ -671,12 +722,13 @@ function legend() {
     ${row(SHOWERS.LEO.color, 'しし座流星群', n('LEO'), 4)}
     ${row(OTHER.color, 'その他の群', n('OTHER'), 2)}
     ${row(SPORADIC.color, '散在流星', n('SPO'), 2)}</ul>
-    <div class="hint">明るい側＝光り始め・明るい流星ほど大きく<br>うすく伸びる線＝しし座の流星が来た向き<br>その他の群：${named.join('・')}${named.length ? 'ほか' : ''}（${others.length}群）<br>線に触れると時刻・高さ・速さ<br>ドラッグで回す・ホイールで寄る</div>`;
+    <div class="hint">明るい側＝光り始め・明るい流星ほど大きく<br>うすく伸びる線＝しし座の流星が来た向き<br>箱＝地面・高さ100 km の網・ISS の高さ<br>その他の群：${named.join('・')}${named.length ? 'ほか' : ''}（${others.length}群）<br>線に触れると時刻・高さ・速さ<br>ドラッグで回す・ホイールで寄る</div>`;
 }
 
 resize();
 setSun(DEFAULT_SUN_MS);
 buildPole(VIEWS.all.lat + POLE_OFFSET.all[0], VIEWS.all.lon + POLE_OFFSET.all[1]);
+buildBox();
 initGauge();
 requestAnimationFrame(loop);
 try {
