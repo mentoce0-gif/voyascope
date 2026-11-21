@@ -215,6 +215,48 @@
   @media (max-height: 760px) and (max-width: 899px) {
     .tm-meta { display: none; }
   }
+
+  /* ===== 投影の窓に目を集める（2026-11-22 オーナー：参考画像） ===== */
+  body { background: radial-gradient(ellipse 70% 55% at 50% 45%, #0a1a38 0%, #050c1c 55%, #02060f 100%); }
+  .rim-glow { fill: none; stroke: rgba(143, 216, 255, 0.55); stroke-width: 10; filter: blur(9px); }
+  .rim-ring { stroke: rgba(190, 228, 255, 0.85) !important; stroke-width: 2 !important; }
+  .rim-tick { stroke: rgba(190, 228, 255, 0.45); stroke-width: 1.6; }
+  .rim-card { stroke: rgba(217, 244, 234, 0.85); stroke-width: 2.4; }
+  .rim-dir { font-weight: 700; }
+  .rim-log { opacity: 0.7; }
+  .chips button .pin { width: 10px; height: 13px; margin-right: 5px; vertical-align: -1px; fill: currentColor; display: none; }
+  .chips button.cur .pin { display: inline-block; }
+  .cnt-row { display: inline-flex; align-items: center; gap: 6px; }
+  .dome .count svg.cnt-ic { position: static; inset: auto; width: 26px; height: 26px; flex: none; stroke: var(--amber); stroke-width: 2.2; stroke-linecap: round; fill: var(--amber); }
+  .count-break span.leo { display: inline-block; border: 1px solid var(--amber-dim); border-radius: 999px; padding: 1px 10px 1px 8px; margin: 2px 0 3px -2px; background: rgba(255, 181, 71, 0.08); color: var(--text); }
+  /* 計器とタイムラインを1枚のカードに */
+  .panel-wrap { background: var(--panel-bg); border: 1px solid rgba(143, 216, 255, 0.22); border-radius: 16px; padding: 10px 12px 6px;
+    box-shadow: 0 0 24px rgba(30, 80, 160, 0.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .panel-wrap .tm { background: none !important; border: 0 !important; padding: 0 0 10px !important; border-radius: 0; backdrop-filter: none; border-bottom: 1px solid var(--rule) !important; }
+  .panel-wrap .tl-wrap { margin-top: 6px; }
+  .st { display: flex !important; gap: 0; }
+  .st div { display: block !important; padding: 0 10px; border-left: 1px solid var(--rule); }
+  .st div:first-child { border-left: 0; }
+  .st dt { font-size: 0.62rem; letter-spacing: 0.14em; }
+  .st dd { font-size: 0.95rem; font-weight: 700; margin-top: 2px !important; }
+  /* 数値は名前の下の段に3つの柱で（横にはみ出さない） */
+  .panel-wrap .tm { flex-wrap: wrap; row-gap: 8px; }
+  .nm { flex: 1 1 0 !important; }
+  .st { flex: 1 0 100% !important; justify-content: space-between; padding-top: 8px; border-top: 1px solid var(--rule); }
+  .st div { flex: 1 1 0; padding: 0 10px; }
+  .credit { border-top: 0 !important; text-align: center; }
+  @media (max-width: 899px), (max-aspect-ratio: 1/1) {
+    .top { justify-content: center; }
+    .where { flex: 1 1 auto; text-align: center; }
+    .top .spacer { display: none; }
+    .chips { flex: 0 0 auto !important; width: min(100%, 300px); border-radius: 999px !important; }
+    .chips button { border-radius: 999px !important; }
+    .panel-wrap { padding: 8px 8px 4px; }
+    .st dt { font-size: 0.58rem; }
+    .st dd { font-size: 0.95rem; }
+    .st dd small { font-size: 0.75em; }
+    .nm-name { font-size: 0.95rem !important; }
+  }
 </style>
 </head>
 <body>
@@ -224,7 +266,7 @@
     <div class="where"><span class="date-long">2026年11月18日の夜 ・ </span><span class="date-short mono">2026.11.18 夜 ・ </span><b id="cityName">福岡</b>の上空</div>
     <span class="spacer"></span>
     <div class="chips" role="group" aria-label="見上げる場所">
-      <button data-city="tokyo">東京</button><button data-city="osaka">大阪</button><button data-city="fukuoka" class="cur">福岡</button>
+      <button data-city="tokyo"><svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg>東京</button><button data-city="osaka"><svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg>大阪</button><button data-city="fukuoka" class="cur"><svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg>福岡</button>
     </div>
   </header>
 
@@ -236,17 +278,20 @@
           <path id="arcBL" d="M 30 500 A 470 470 0 0 0 500 970" />
           <path id="arcTR" d="M 500 22 A 478 478 0 0 1 978 500" />
         </defs>
+        <circle class="rim-glow" cx="500" cy="500" r="441" />
         <circle class="rim-ring" cx="500" cy="500" r="440" />
+        <path class="rim-tick" d="M461.7 61.7L460.9 52.7 M423.6 66.7L422.0 57.8 M386.1 75.0L383.8 66.3 M349.5 86.5L346.4 78.1 M314.0 101.2L310.2 93.1 M280.0 118.9L271.0 103.4 M247.6 139.6L242.5 132.2 M217.2 162.9L211.4 156.0 M188.9 188.9L182.5 182.5 M162.9 217.2L156.0 211.4 M139.6 247.6L132.2 242.5 M118.9 280.0L103.4 271.0 M101.2 314.0L93.1 310.2 M86.5 349.5L78.1 346.4 M75.0 386.1L66.3 383.8 M66.7 423.6L57.8 422.0 M61.7 461.7L52.7 460.9 M61.7 538.3L52.7 539.1 M66.7 576.4L57.8 578.0 M75.0 613.9L66.3 616.2 M86.5 650.5L78.1 653.6 M101.2 686.0L93.1 689.8 M118.9 720.0L103.4 729.0 M139.6 752.4L132.2 757.5 M162.9 782.8L156.0 788.6 M188.9 811.1L182.5 817.5 M217.2 837.1L211.4 844.0 M247.6 860.4L242.5 867.8 M280.0 881.1L271.0 896.6 M314.0 898.8L310.2 906.9 M349.5 913.5L346.4 921.9 M386.1 925.0L383.8 933.7 M423.6 933.3L422.0 942.2 M461.7 938.3L460.9 947.3 M538.3 938.3L539.1 947.3 M576.4 933.3L578.0 942.2 M613.9 925.0L616.2 933.7 M650.5 913.5L653.6 921.9 M686.0 898.8L689.8 906.9 M720.0 881.1L729.0 896.6 M752.4 860.4L757.5 867.8 M782.8 837.1L788.6 844.0 M811.1 811.1L817.5 817.5 M837.1 782.8L844.0 788.6 M860.4 752.4L867.8 757.5 M881.1 720.0L896.6 729.0 M898.8 686.0L906.9 689.8 M913.5 650.5L921.9 653.6 M925.0 613.9L933.7 616.2 M933.3 576.4L942.2 578.0 M938.3 538.3L947.3 539.1 M938.3 461.7L947.3 460.9 M933.3 423.6L942.2 422.0 M925.0 386.1L933.7 383.8 M913.5 349.5L921.9 346.4 M898.8 314.0L906.9 310.2 M881.1 280.0L896.6 271.0 M860.4 247.6L867.8 242.5 M837.1 217.2L844.0 211.4 M811.1 188.9L817.5 182.5 M782.8 162.9L788.6 156.0 M752.4 139.6L757.5 132.2 M720.0 118.9L729.0 103.4 M686.0 101.2L689.8 93.1 M650.5 86.5L653.6 78.1 M613.9 75.0L616.2 66.3 M576.4 66.7L578.0 57.8 M538.3 61.7L539.1 52.7" />
+        <path class="rim-card" d="M500.0 70.0L500.0 38.0 M70.0 500.0L38.0 500.0 M500.0 930.0L500.0 962.0 M930.0 500.0L962.0 500.0" />
         <circle class="rim-alt" cx="500" cy="500" r="293.3" />
         <circle class="rim-alt" cx="500" cy="500" r="146.7" />
-        <text class="rim-dir n" x="500" y="40">北</text>
-        <text class="rim-dir" x="38" y="500">東</text>
-        <text class="rim-dir" x="500" y="962">南</text>
-        <text class="rim-dir" x="962" y="500">西</text>
+        <text class="rim-dir n" x="500" y="26">北</text>
+        <text class="rim-dir" x="30" y="500">東</text>
+        <text class="rim-dir" x="500" y="974">南</text>
+        <text class="rim-dir" x="970" y="500">西</text>
         <text class="rim-time"><textPath href="#arcBL" startOffset="16%" id="rimTime">--:--</textPath></text>
         <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
       </svg>
-      <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><b id="count">0</b><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
+      <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="cnt-row"><svg class="cnt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 L15 9" /><path d="M8 22 L20 10" opacity=".55"/><circle cx="15.5" cy="8.5" r="1.8"/><circle cx="20.5" cy="9.5" r="1.4" opacity=".55"/></svg><b id="count">0</b></span><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
     </div>
   </div>
 
@@ -257,10 +302,10 @@
       <div class="nm"><div class="nm-name" id="iName">—</div><div class="nm-dir" id="iDir">時刻が進むと、流れた流星がここに出ます</div></div>
       <dl class="st"><div><dt>MAG</dt><dd id="iMag">—</dd></div><div><dt>VELO</dt><dd id="iVel">—</dd></div><div><dt>ALTI</dt><dd id="iAlt">—</dd></div></dl>
     </section>
+    <div class="tl-wrap"><canvas id="tl" aria-label="日没から夜明けまでのタイムライン。縦線が流星、細い曲線がしし座の放射点の高さ。ドラッグで時刻を動かせる"></canvas></div>
   </div>
 
-  <section class="time" aria-label="夜のタイムライン">
-    <div class="tl-wrap"><canvas id="tl" aria-label="日没から夜明けまでのタイムライン。縦線が流星、細い曲線がしし座の放射点の高さ。ドラッグで時刻を動かせる"></canvas></div>
+  <section class="time" aria-label="出典">
     <div class="credit">
       データ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">Global Meteor Network</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）から抽出・加工 ／ 星の位置：<a href="https://www.iau.org/public/themes/naming_stars/" target="_blank" rel="noopener">IAU 恒星名カタログ</a> ／ 火花・尾・光る時間ののばしは演出 ／ 非公式のファンメイド試作
       <button type="button" id="srcBtn">出典と注記</button>
@@ -764,7 +809,7 @@ function updateCount() {
   for (const m of meteors) { if (m._t > simT) break; if (m._t >= T0) { n++; if (m.iau_code === 'LEO') leo++; else if (!m.iau_code) sp++; else groups.add(m.iau_code); } }
   document.getElementById('count').textContent = n;
   const other = n - leo - sp;
-  document.getElementById('countBreak').innerHTML = n ? `<span><i class="o"></i>しし座<b>${leo}</b></span><span><i class="c"></i>ほかの群<b>${other}</b>${groups.size ? `<small>（${groups.size}群）</small>` : ''}</span><span><i class="c"></i>散在<b>${sp}</b></span>` : '';
+  document.getElementById('countBreak').innerHTML = n ? `<span class="leo"><i class="o"></i>しし座<b>${leo}</b></span><span><i class="c"></i>ほかの群<b>${other}</b>${groups.size ? `<small>（${groups.size}群）</small>` : ''}</span><span><i class="c"></i>散在<b>${sp}</b></span>` : '';
 }
 // 流星群の名前：英名と番号は IAU 流星データセンターの一覧（https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php 2026-11-21 確認）。
 // 日本語名：国立天文台「流星群の和名一覧（略符順）」（https://www.nao.ac.jp/new-info/meteor/table-code.html 2026-11-05 更新・2026-11-21 確認。C43）。
