@@ -22,8 +22,8 @@
           "date": "2026-11-21"
         },
         "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
-        "as_of": "2026-10-01",
-        "note": "ESA の発表は日付だけ（時刻なし）"
+        "as_of": "2026-11-18",
+        "note": "ESA の発表は日付だけ（時刻なし）。JAXA の「みお」サイトも 2026年11月21日（UTC）"
       },
       "links": [
         {
@@ -35,7 +35,7 @@
           "url": "https://www.jaxa.jp/projects/sas/bepi/index_j.html"
         }
       ],
-      "updated_at": "2026-10-01"
+      "updated_at": "2026-11-18"
     },
     {
       "id": "bepicolombo-mio-separation",
@@ -930,9 +930,9 @@
       },
       "status": {
         "value": "done",
-        "source": "https://science.nasa.gov/resource/voyager-one-light-day-downloads/",
-        "as_of": "2026-11-18",
-        "note": "NASA に「it became the first spacecraft to reach one light-day away from Earth」"
+        "source": "https://www.nasa.gov/news-release/nasas-voyager-1-makes-history-reaching-one-light-day-from-earth/",
+        "as_of": "2026-11-19",
+        "note": "NASA リリースに「On Nov. 18, 2026, Voyager 1 reached one light-day from Earth.」"
       },
       "links": [
         {
@@ -940,11 +940,11 @@
           "url": "https://science.nasa.gov/mission/voyager/where-are-voyager-1-and-voyager-2-now/"
         },
         {
-          "label": "NASA「Voyager One Light-Day Downloads」",
-          "url": "https://science.nasa.gov/resource/voyager-one-light-day-downloads/"
+          "label": "NASA のリリース「Voyager 1 Makes History Reaching One Light-Day From Earth」",
+          "url": "https://www.nasa.gov/news-release/nasas-voyager-1-makes-history-reaching-one-light-day-from-earth/"
         }
       ],
-      "updated_at": "2026-11-18"
+      "updated_at": "2026-11-19"
     }
   ]
 }

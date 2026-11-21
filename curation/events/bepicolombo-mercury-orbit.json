@@ -19,8 +19,8 @@
       "date": "2026-11-21"
     },
     "source": "https://www.esa.int/Science_Exploration/Space_Science/BepiColombo/Latest_updates_BepiColombo_s_arrival_at_Mercury",
-    "as_of": "2026-10-01",
-    "note": "ESA の発表は日付だけ（時刻なし）"
+    "as_of": "2026-11-18",
+    "note": "ESA の発表は日付だけ（時刻なし）。JAXA の「みお」サイトも 2026年11月21日（UTC）"
   },
   "links": [
     {
@@ -32,5 +32,5 @@
       "url": "https://www.jaxa.jp/projects/sas/bepi/index_j.html"
     }
   ],
-  "updated_at": "2026-10-01"
+  "updated_at": "2026-11-18"
 }

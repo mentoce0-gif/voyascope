@@ -6,6 +6,12 @@
 
 
 
+## 2026-11-19
+
+- ボイジャー1号の 1光日：NASA のリリース（RELEASE26-098、2026-11-19「NASA's Voyager 1 Makes History Reaching One Light-Day From Earth」）が出たので、出来事の `status` の出典をそちらに差し替えた（オーナー OK 済み 2026-11-18）。リンクも Downloads のページからリリースへ
+- **ボイジャー1号のカードの状態**：同じリリースと NASA の Voyager ブログ（11/18）に「11/14 から科学と機体のデータが届いていない。搬送波は届いている」。状態は「運用中」のまま（NASA は「operating one light-day from Earth」を搬送波で確かめた）、注に事実を書いた。「任務」の「いまもデータを送っている」は事実と合わなくなったので外した
+- ベピコロンボ 11/21：ESA・JAXA で日付を再確認（11/18。前日分）
+
 ## 2026-11-18
 
 - **ボイジャー1号が地球から1光日に**（オーナー：NASA が発表）：NASA の公式ページ「Voyager One Light-Day Downloads」（2026-11-17 更新）の "it became the first spacecraft to reach one light-day away from Earth" で照合し、出来事 `voyager-1-one-light-day` を `done` に（出典＝そのページ・確認 2026-11-18。リンクにも足した）。日時は NASA の予告（2:16:07 PST＝日本時間 19:16）のまま。「Where Are Voyager…」と「Voyager 1」のページは 11/18 更新でもまだ未来形（"will reach"）だった
