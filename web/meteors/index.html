@@ -95,6 +95,9 @@
   .tm-head { display: flex; align-items: center; gap: 10px; }
   .tm-kicker { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.22em; color: var(--mint); }
   .tag { margin-left: auto; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: var(--amber); border: 1px solid var(--amber-dim); padding: 2px 6px; border-radius: 3px; }
+  .tag.fire { margin-left: auto; color: #ffd9a0; border-color: rgba(255, 217, 160, 0.7); background: rgba(255, 181, 71, 0.12); }
+  .tag.fire + .tag { margin-left: 0; }
+  .tm-see b { font-weight: 700; color: inherit; }
   .tag.sky { color: var(--sky); border-color: rgba(143, 216, 255, 0.55); }
   .tm-name { margin-top: 4px; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.03em; }
   .tm-name small { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 400; color: var(--text-dim); margin-left: 8px; letter-spacing: 0.06em; }
@@ -207,7 +210,7 @@
 
   <div class="panel-wrap">
     <section class="tm" id="tm" aria-live="polite">
-      <div class="tm-head"><span class="tm-kicker">LAST METEOR</span><span class="tag" id="iTag" hidden>LEO</span></div>
+      <div class="tm-head"><span class="tm-kicker">LAST METEOR</span><span class="tag fire" id="iFire" hidden title="100 km の距離で −4等より明るい（IAU の定義）">FIREBALL 火球</span><span class="tag" id="iTag" hidden>LEO</span></div>
       <div id="iBody" hidden>
         <div class="tm-name" id="iName">—</div>
         <div class="tm-sub" id="iSub"></div>
@@ -260,7 +263,10 @@
     <li>見上げる場所：東京・大阪・福岡の、それぞれ市の中心あたりの代表の点（標高0 m）</li>
     <li>「ここから見た明るさ」：GMN の最大の明るさ（100 km の距離に直した等級）を、見上げる場所から一番明るかった点までの距離で直したもの（等級＋5×log₁₀（距離÷100 km））。大気による減光は入れていないので、地平線に近い流星は実際にはもっと暗く見えます</li>
     <li>線の太さ・輝き・残光の長さは「ここから見た明るさ」で決めています</li>
-    <li>ここから見て6等より暗い流星は「肉眼ではほぼ見えない」として、細い点線でうっすら描いています（飛んでいたことは GMN に記録されているため）。6等は目安の仮の値で、出典を確かめているところです。地平線の下の流星は空には描かず、計器とタイムラインにだけ出します</li>
+    <li>肉眼で見えるかの目安：ここから見て6等より暗い流星は「肉眼ではほぼ見えない」として、細い点線でうっすら描いています（飛んでいたことは GMN に記録されているため）。6等は「理想的な暗い夜空で、肉眼で見える限界」（<a href="https://prc.nao.ac.jp/freqras/glossary.html" target="_blank" rel="noopener">国立天文台「星の明るさ」</a>）。4等は都心の空の目安（ボートル・スカイ・スケールのクラス9「Inner-city sky」〜4.0。<a href="https://www.env.go.jp/content/900400131.pdf" target="_blank" rel="noopener">環境省掲載「星空環境の評価指標の比較」表1</a>）。見え方は空の条件・人・大気で変わります。地平線の下の流星は空には描かず、計器とタイムラインにだけ出します</li>
+    <li>「〇〇くらい」：ここから見た明るさを、近い明るさの天体でたとえたものです。金星 −4.8等（2026年9月の最大光度。<a href="https://www.nao.ac.jp/astro/sky/2026/09-topics02.html" target="_blank" rel="noopener">国立天文台</a>）、木星 −2.1等（2026年11月16日。<a href="https://www.nao.ac.jp/astro/sky/2026/11-topics03.html" target="_blank" rel="noopener">国立天文台</a>）、シリウス −1.5・ベガ 0.0・スピカ 1.0・北極星 2.0（<a href="https://eco.mtk.nao.ac.jp/koyomi/faq/stars.html" target="_blank" rel="noopener">国立天文台暦計算室「おもな恒星」</a>）、満月 −12.74（<a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html" target="_blank" rel="noopener">NASA</a>）。1等ちがうと明るさは約2.5倍、5等で100倍です（国立天文台）。GMN の明るさは目で見る明るさと少しちがう色の範囲（Gaia の G バンド）で測っているので、「くらい」は近い目安です</li>
+    <li>火球：100 km の距離で −4等より明るい流星に「FIREBALL 火球」と出します（<a href="https://www.iau.org/common/Uploaded%20files/Definitions%20of%20terms%20in%20meteor%20astronomy_F1.pdf" target="_blank" rel="noopener">IAU の用語の定義</a>。国立天文台は「マイナス4等程度より明るい流星のことを火球と呼ぶことが多い」。<a href="https://www.nao.ac.jp/faq/a0501.html" target="_blank" rel="noopener">国立天文台</a>）。見る場所によらない、流星そのものの明るさで決めています</li>
+    <li>GMN の明るさの測り方の限界：とても明るい流星はカメラで −1等くらいから写りが飽和することがあり、暗い流星は記録から漏れます（GMN の論文 Vida ほか 2021。2020年のペルセウス座流星群では、記録全体の実効的な限界は平均 +3.95等。Vida ほか 2022）</li>
     <li>「◯個の流星を観測」：見上げる場所によらず、日本のまわり（上の範囲）で GMN のカメラが記録した流星の数です。実際に流れた流星のすべてではありません（カメラのない場所・曇り・暗すぎる流星は入りません）</li>
     <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
     <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
@@ -295,7 +301,16 @@ const DEG = Math.PI / 180;
 const NPTS = 31;              // 直線を30に分ける
 const MIN_SHOW = 0.5;         // 光る時間の下限（秒）
 const SPARK_MAG = -2;         // これより明るい流星だけ火花と尾
-const EYE_LIMIT = 6;          // 肉眼で見える限界の目安（仮。出典はチャッピーへの依頼 C42 の答えで確かめる）
+const EYE_LIMIT = 6;          // 肉眼で見える限界：理想的な暗い夜空で6等級（国立天文台「星の明るさ」。C42・2026-11-22 確認）
+const CITY_LIMIT = 4;         // 都心の空の限界の目安：ボートル・スカイ・スケールのクラス9「Inner-city sky」〜4.0（環境省掲載資料 表1。C42）
+const FIREBALL_ABS = -4;      // 火球：100 km の距離で −4等より明るい（IAU F1 委員会の用語の定義。国立天文台は「マイナス4等程度より明るい」）
+// くらべる相手（見かけの等級）。出典：国立天文台暦計算室「おもな恒星」・国立天文台ほしぞら情報・NASA Moon Fact Sheet（C42）
+const MAG_REFS = [
+  [-8.7, '満月（−12.7等）と金星のあいだ'], [-3.45, '金星（−4.8等）くらい'], [-1.8, '木星（−2.1等）くらい'],
+  [-0.75, 'シリウス（−1.5等）くらい'], [0.5, 'ベガ（0等星）くらい'], [1.5, 'スピカ（1等星）くらい'],
+  [2.5, '北極星（2等星）くらい'], [4, '3〜4等の星くらい'], [6, '暗い星（5〜6等）くらい'], [99, '肉眼では見えない暗さ'],
+];
+const magLike = m => MAG_REFS.find(([lim]) => m <= lim)[1];
 const DATA_FROM = Date.parse('2026-11-18T08:00:00Z'), DATA_TO = Date.parse('2026-11-18T21:00:00Z');
 const COL = { LEO: [255, 181, 71], OTHER: [143, 216, 255] };
 
@@ -737,9 +752,11 @@ function showLast(m) {
   document.getElementById('iSub').innerHTML = `${sub}<br><span class="from">${fromTxt}</span>`;
   const see = document.getElementById('iSee');
   see.className = 'tm-see' + (m.eye ? '' : ' no');
-  see.textContent = !m.visible ? `${city.ja}からは地平線の下で見えない（GMN のカメラが記録した流星）`
-    : m.eye ? `${city.ja}から肉眼で見える明るさ（目安）`
-    : `${city.ja}からは肉眼ではほぼ見えない（${EYE_LIMIT}等より暗い・目安）。飛んでいたことは記録されている`;
+  see.innerHTML = !m.visible ? `${city.ja}からは地平線の下で見えない（GMN のカメラが記録した流星）`
+    : `<b>${magLike(m.magHere)}</b>の明るさ ・ ` + (m.magHere <= CITY_LIMIT ? `${city.ja}の街なかでも肉眼で見える（目安）`
+      : m.eye ? `暗い空なら肉眼で見える。${city.ja}の街なかでは見えにくい（目安）`
+      : `肉眼ではほぼ見えない。飛んでいたことは記録されている`);
+  const fb = document.getElementById('iFire'); fb.hidden = !(m.peak_absmag < FIREBALL_ABS);
   const mg = m.magHere;
   document.getElementById('iMag').innerHTML = m.visible ? `${mg < 0 ? '−' : '+'}${Math.abs(mg).toFixed(1)}<small>等</small>` : '—';
   document.getElementById('iVel').innerHTML = `${m.v_init_kms.toFixed(1)}<small>km/s</small>`;

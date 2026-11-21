@@ -204,6 +204,7 @@
     <li>流星の大きさ・明るさの描き分け：GMN の「Peak AbsMag」（100 km 先から見たときの明るさ。等級）から。数の小さい（明るい）流星ほど大きく描いています（見た目の演出）</li>
     <li>しし座の流星から伸びるうすい線：光り始めと消えた点を結んだ向きを、来た側へ 700 km まっすぐ伸ばしたもの。大気に入る前のちりは見えません（向きを見せるための線）。地球は回っているので、夜のあいだに向きは少しずつ変わります</li>
     <li>光り方：光り始めはうすく、GMN の「一番明るかった高さ」（Peak Ht）でいちばん明るく（光の玉）、消える点へ弱めています。途中の明るさの変わり方は目安です</li>
+    <li>火球：100 km の距離で −4等より明るい流星（<a href="https://www.iau.org/common/Uploaded%20files/Definitions%20of%20terms%20in%20meteor%20astronomy_F1.pdf" target="_blank" rel="noopener">IAU の用語の定義</a>）に、線に触れたときの説明で「火球」と出します</li>
     <li>流星の高さ：GMN の値（WGS84 の楕円体からの高さ）。「約80〜120 km」は、この夜の流星の消えた高さの下から1割（約78 km）〜光り始めの高さの上から1割（約118 km）（2026-11-21 に取り直した426件で計算）</li>
     <li>ISS の高さ 約400 km：<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">NASA</a>（平均約250マイル＝約402 km）</li>
   </ul>
@@ -644,7 +645,7 @@ function hoverAt(x, y, tap) {
     <div>UTC <span class="mono">${best.utc.slice(0, 10)} ${best.utc.slice(11, 19)}</span></div>
     <div>高さ <span class="mono">${best.ht_beg_km.toFixed(0)} km → ${best.ht_end_km.toFixed(0)} km</span>（光り始め→消えた）</div>
     <div>速さ <span class="mono">${best.v_init_kms.toFixed(1)} km/s</span></div>
-    <div>明るさ <span class="mono">${best.peak_absmag.toFixed(1)} 等</span><small>（100 km 先から見たとき）</small></div>`;
+    <div>明るさ <span class="mono">${best.peak_absmag.toFixed(1)} 等</span><small>（100 km 先から見たとき）</small>${best.peak_absmag < -4 ? ' <b style="color:#ffd9a0">火球</b>' : ''}</div>`;
   tipEl.hidden = false;
   const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
   tipEl.style.left = Math.max(8, Math.min(innerWidth - w - 8, x + 12)) + 'px';
