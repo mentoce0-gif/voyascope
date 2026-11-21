@@ -177,10 +177,10 @@
 <div class="app">
   <header class="top">
     <div class="brand"><a href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span></div>
-    <div class="where"><span class="date">2026年11月18日の夜 ・ </span><b id="cityName">大阪</b>の上空</div>
+    <div class="where"><span class="date">2026年11月18日の夜 ・ </span><b id="cityName">福岡</b>の上空</div>
     <span class="spacer"></span>
     <div class="chips" role="group" aria-label="見上げる場所">
-      <button data-city="tokyo">東京</button><button data-city="osaka" class="cur">大阪</button><button data-city="fukuoka">福岡</button>
+      <button data-city="tokyo">東京</button><button data-city="osaka">大阪</button><button data-city="fukuoka" class="cur">福岡</button>
     </div>
     <a class="other" href="space/">宇宙から見る ver. →</a>
   </header>
@@ -362,7 +362,7 @@ const fmtJST = (ms, sec) => new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/T
 const fmtUTC = ms => new Date(ms).toISOString().slice(11, 16);
 
 // ---------- 状態 ----------
-let meteors = [], stars = [], city = CITIES.osaka, F = enuFrame(city.lat, city.lon);
+let meteors = [], stars = [], city = CITIES.fukuoka, F = enuFrame(city.lat, city.lon);
 let T0 = 0, T1 = 1, simT = Date.parse('2026-11-18T15:00:00Z'); // はじめは日本時間 0:00
 let speed = 120, playing = true, active = [], sparks = [], trains = [], radiantGlow = 0, lastShown = null;
 
@@ -862,7 +862,7 @@ new ResizeObserver(layout).observe(domeEl);
   const q = new URLSearchParams(location.hash.slice(1));
   if (q.get('t') && !isNaN(Date.parse(q.get('t')))) simT = Date.parse(q.get('t'));
   if (q.get('speed') && document.querySelector(`[data-speed="${q.get('speed')}"]`)) document.querySelector(`[data-speed="${q.get('speed')}"]`).click();
-  setCity(CITIES[q.get('city')] ? q.get('city') : 'osaka');
+  setCity(CITIES[q.get('city')] ? q.get('city') : 'fukuoka'); // はじめは福岡（GMN の流星が近く、いちばんよく見える。2026-11-22 オーナー）
   requestAnimationFrame(tick);
 })();
 })();
