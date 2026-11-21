@@ -466,8 +466,8 @@ function drawSky(now) {
       if (h.alt <= 0) continue;
       const [x, y] = proj(h.az, h.alt);
       const m = st[2], low = Math.min(1, h.alt / 12);
-      const a = Math.max(0.12, Math.min(1, (6.2 - m) / 5.5)) * starFade * (0.45 + 0.55 * low);
-      const rad = Math.max(0.8, 2.3 - 0.36 * m) * SC();
+      const a = Math.max(0.1, Math.min(0.85, (6.2 - m) / 6)) * starFade * (0.45 + 0.55 * low);
+      const rad = Math.max(0.5, 1.6 - 0.26 * m) * Math.min(SC(), 1); // 星は流星より目立たないように小さめに（2026-11-22 オーナー）
       ctx.fillStyle = `rgba(225,235,255,${a})`;
       ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
     }
