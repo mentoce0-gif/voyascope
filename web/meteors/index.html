@@ -264,6 +264,8 @@
     <li>「◯個の流星を観測」：見上げる場所によらず、日本のまわり（上の範囲）で GMN のカメラが記録した流星の数です。実際に流れた流星のすべてではありません（カメラのない場所・曇り・暗すぎる流星は入りません）</li>
     <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
     <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
+    <li><b>演出</b>：円のふちの建物・木のシルエット、窓と地平線の近くの街明かりは、魚眼の見え方を分かりやすくするための作りものです（その街の本当の景色ではありません）。建物の縦の辺は、魚眼では空の中心へ向かう線になります</li>
+    <li>点線の曲線：天の赤道（水色）と黄道（ミント）。空の大きな円で、魚眼ではふちに近いほど大きく曲がって見えます。しし座の放射点は黄道の近くにあります</li>
     <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は<a href="https://www.nao.ac.jp/new-info/meteor/table-code.html" target="_blank" rel="noopener">国立天文台「流星群の和名一覧」</a>（2026年11月5日更新）。一覧にない5つ（おうし座τ・おうし座λ・うみへび座π・11月ペルセウス座ζ・やまねこ座28）は、<a href="https://www.nao.ac.jp/new-info/meteor/index.html" target="_blank" rel="noopener">国立天文台の和名の決め方</a>にならって英名を直した訳です（公式の和名ではありません。「日本語名は訳」と出ます）</li>
     <li>「来た方向」：その流星の通り道（消えた点→光り始め）を空のかなたへまっすぐ伸ばした向きを、見上げる場所の方角と高さで表したもの。散在流星にも出します</li>
   </ul>
@@ -403,6 +405,11 @@ function drawSky(now) {
   g.addColorStop(1, `rgb(${3 + tw * 40},${6 + tw * 34},${14 + tw * 40})`);
   ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
 
+  // 地平線の近くの街明かり（演出。特定の場所の景色ではない）
+  const lp = ctx.createRadialGradient(cx, cy, R * 0.84, cx, cy, R);
+  lp.addColorStop(0, 'rgba(255,170,90,0)'); lp.addColorStop(1, `rgba(255,170,90,${0.08 * (1 - tw)})`);
+  ctx.fillStyle = lp; ctx.fillRect(0, 0, S, S);
+
   // 星（時刻の恒星時で回る）
   const starFade = Math.max(0, Math.min(1, (-sunA - 6) / 8));
   if (starFade > 0) {
@@ -417,6 +424,10 @@ function drawSky(now) {
       ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
     }
   }
+
+  // 空の大きな線：天の赤道と黄道（大きな円は魚眼ではふちに向かって大きく曲がる）
+  drawSkyLine(t => ({ ra: t, dec: 0 }), 'rgba(143,216,255,0.26)', '天の赤道');
+  drawSkyLine(t => { const l = t * DEG, e = 23.44 * DEG; return { ra: (Math.atan2(Math.cos(e) * Math.sin(l), Math.cos(l)) / DEG + 360) % 360, dec: Math.asin(Math.sin(e) * Math.sin(l)) / DEG }; }, 'rgba(94,242,194,0.2)', '黄道');
 
   // しし座の放射点：しし座流星群がいくつか流れると、うっすら光る（演出）
   const rh = eqToHor(RADIANT.ra, RADIANT.dec, simT, city.lat, city.lon);
@@ -448,10 +459,76 @@ function drawSky(now) {
   }
   ctx.globalCompositeOperation = 'source-over';
 
+  // 地平線のシルエット（演出。特定の場所の景色ではない）：建物の縦の辺は、魚眼では空の中心へ向かう線になる
+  drawSkyline();
+
   // ふちの暗がり（周辺減光）
-  const v = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R);
-  v.addColorStop(0, 'rgba(2,6,15,0)'); v.addColorStop(1, 'rgba(2,6,15,0.78)');
+  const v = ctx.createRadialGradient(cx, cy, R * 0.6, cx, cy, R);
+  v.addColorStop(0, 'rgba(2,6,15,0)'); v.addColorStop(1, 'rgba(2,6,15,0.5)');
   ctx.fillStyle = v; ctx.fillRect(0, 0, S, S);
+  ctx.restore();
+}
+
+// 空の大きな線（赤経・赤緯の点の列）を、地平線より上だけ点線で
+function drawSkyLine(fn, color, label) {
+  ctx.save(); ctx.setLineDash([3, 5]); ctx.strokeStyle = color; ctx.lineWidth = 1;
+  let best = null, pen = false;
+  ctx.beginPath();
+  for (let t = 0; t <= 360; t += 1.5) {
+    const q = fn(t), h = eqToHor(q.ra, q.dec, simT, city.lat, city.lon);
+    if (h.alt <= 0) { pen = false; continue; }
+    const [x, y] = proj(h.az, h.alt);
+    pen ? ctx.lineTo(x, y) : ctx.moveTo(x, y); pen = true;
+    if (!best || h.alt > best.alt) best = { x, y, alt: h.alt }; // いちばん高いところに名前
+  }
+  ctx.stroke(); ctx.restore();
+  if (best) {
+    ctx.font = `${Math.max(9, S * 0.019)}px "Zen Kaku Gothic New", sans-serif`;
+    ctx.fillStyle = color.replace(/[\d.]+\)$/, '0.6)'); ctx.textAlign = 'center';
+    ctx.fillText(label, best.x, best.y + (label === '黄道' ? -6 : 14));
+  }
+}
+
+// 地平線のシルエット：建物と木の形を、方角ごとの高さ（度）で作る。場所ごとに少し変える（どれも作りもの）
+let skyline = null;
+function buildSkyline(seed) {
+  let x = seed >>> 0;
+  const rnd = () => ((x = (x * 1664525 + 1013904223) >>> 0) / 4294967296);
+  const parts = []; let az = 0;
+  while (az < 360) {
+    const city = Math.sin((az + seed % 90) * DEG * 2) > -0.2; // 街のかたまりと、木の多いところ
+    if (city && rnd() < 0.8) {
+      const tall = rnd() < 0.12, w = (tall ? 2.5 : 1.2) + rnd() * 4.5, h = tall ? 12 + rnd() * 10 : 2 + rnd() * rnd() * 11;
+      const lights = []; for (let i = 0; i < Math.floor(w * h * 0.25); i++) if (rnd() < 0.5) lights.push([az + 0.3 + rnd() * (w - 0.6), 0.4 + rnd() * (h - 0.8)]);
+      parts.push({ type: 'b', az0: az, az1: Math.min(360, az + w), h, lights }); az += w + rnd() * 0.6;
+    } else {
+      const w = 2 + rnd() * 6; parts.push({ type: 't', az0: az, az1: Math.min(360, az + w), h: 1.5 + rnd() * 3, seed: rnd() * 1000 }); az += w;
+    }
+  }
+  return parts;
+}
+function drawSkyline() {
+  if (!skyline) return;
+  ctx.save();
+  ctx.fillStyle = '#02050b'; ctx.strokeStyle = 'rgba(143,216,255,0.3)'; ctx.lineWidth = 0.9;
+  for (const p of skyline) {
+    ctx.beginPath();
+    const [x0, y0] = proj(p.az0, -2); ctx.moveTo(x0, y0);
+    if (p.type === 'b') {
+      // 縦の辺（方角が同じ＝中心へ向かう線）→ 上の辺（高さが同じ＝円の弧）
+      for (let a = p.az0; a <= p.az1 + 1e-6; a += 0.4) { const [x, y] = proj(Math.min(a, p.az1), p.h); ctx.lineTo(x, y); }
+    } else {
+      for (let a = p.az0; a <= p.az1 + 1e-6; a += 0.3) {
+        const hh = p.h * (0.55 + 0.45 * Math.abs(Math.sin((a + p.seed) * 1.9)) + 0.25 * Math.sin((a + p.seed) * 5.3));
+        const [x, y] = proj(Math.min(a, p.az1), Math.max(0.2, hh)); ctx.lineTo(x, y);
+      }
+    }
+    const [x1, y1] = proj(p.az1, -2); ctx.lineTo(x1, y1); ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  // 窓の明かり（演出）
+  ctx.fillStyle = 'rgba(255,196,120,0.55)';
+  const dot = Math.max(0.7, S / 900);
+  for (const p of skyline) if (p.lights) for (const [a, h] of p.lights) { const [x, y] = proj(a, h); ctx.fillRect(x - dot / 2, y - dot / 2, dot, dot); }
   ctx.restore();
 }
 
@@ -733,6 +810,7 @@ document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click
 }));
 function setCity(key) {
   city = CITIES[key];
+  skyline = buildSkyline({ tokyo: 11, osaka: 47, fukuoka: 83 }[key] * 7919);
   document.getElementById('cityName').textContent = city.ja;
   document.querySelectorAll('[data-city]').forEach(x => x.classList.toggle('cur', x.dataset.city === key));
   const base = Date.parse('2026-11-18T00:00:00Z');
