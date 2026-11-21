@@ -233,7 +233,10 @@ const OTHER = { color: [150, 140, 220] };
 const SPORADIC = { color: [150, 170, 200] };
 const groupOf = m => m.iau_code === 'LEO' ? 'LEO' : (m.iau_code ? 'OTHER' : 'SPO');
 const styleOf = m => m.iau_code ? (SHOWERS[m.iau_code] || OTHER) : SPORADIC;
-const nameOf = m => m.iau_code ? (SHOWERS[m.iau_code] ? SHOWERS[m.iau_code].ja : `その他の流星群（IAU コード ${m.iau_code}）`) : '散在流星';
+// 公式の日本語名がない流星群は、IAU 流星データセンターの英名を星座名・ギリシャ文字に直した訳（見上げるver. と同じ）
+const JA_TR = { TAT: 'おうし座τ流星群', LTA: 'おうし座λ流星群', ORS: 'オリオン座χ南流星群', NOO: '11月オリオン座流星群', PIH: 'うみへび座π流星群',
+  OER: 'エリダヌス座ο流星群', DAD: '12月りゅう座α流星群', NZP: '11月ペルセウス座ζ流星群', TOL: 'やまねこ座28番星流星群' };
+const nameOf = m => m.iau_code ? (SHOWERS[m.iau_code] ? SHOWERS[m.iau_code].ja : JA_TR[m.iau_code] ? `${JA_TR[m.iau_code]}<small>（日本語名は訳）</small>` : `流星群（IAU コード ${m.iau_code}）`) : '散在流星';
 const lighten = c => c.map(v => Math.round(v + (255 - v) * 0.55));
 
 // ---- 座標 ----
@@ -748,9 +751,9 @@ function legend() {
   const row = (c, label, num, w) => `<li><i style="background:linear-gradient(90deg,rgb(${lighten(c)}),rgba(${c},.15));height:${w}px"></i><span>${label}</span><span class="n mono">${num}</span></li>`;
   document.getElementById('legend').innerHTML = `<h2>流星群ごとの色</h2><ul>
     ${row(SHOWERS.LEO.color, 'しし座流星群', n('LEO'), 4)}
-    ${row(OTHER.color, 'その他の群', n('OTHER'), 2)}
+    ${row(OTHER.color, 'ほかの流星群', n('OTHER'), 2)}
     ${row(SPORADIC.color, '散在流星', n('SPO'), 2)}</ul>
-    <div class="hint">明るい側＝光り始め・明るい流星ほど大きく<br>うすく伸びる線＝しし座の流星が来た向き<br>箱＝地面・高さ100 km の網・ISS の高さ<br>その他の群：${named.join('・')}${named.length ? 'ほか' : ''}（${others.length}群）<br>線に触れると時刻・高さ・速さ<br>ドラッグで回す・ホイールで寄る</div>`;
+    <div class="hint">明るい側＝光り始め・明るい流星ほど大きく<br>うすく伸びる線＝しし座の流星が来た向き<br>箱＝地面・高さ100 km の網・ISS の高さ<br>ほかの流星群：${named.join('・')}${named.length ? 'ほか' : ''}（${others.length}群）<br>線に触れると時刻・高さ・速さ<br>ドラッグで回す・ホイールで寄る</div>`;
 }
 
 resize();

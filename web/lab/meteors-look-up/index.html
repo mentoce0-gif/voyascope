@@ -72,6 +72,12 @@
   .count { grid-area: count; text-align: center; line-height: 1.1; }
   .count b { font-family: var(--font-mono); font-size: clamp(2.2rem, 9vw, 3.4rem); font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
   .count span { font-size: 1rem; margin-left: 6px; letter-spacing: 0.1em; }
+  .count-break { margin-top: 6px; font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.06em; }
+  .count .count-break b { font-family: var(--font-mono); font-size: 1.05em; font-weight: 700; color: var(--text); margin: 0 2px 0 3px; letter-spacing: 0; }
+  .count-break span { font-size: 0.9em; }
+  .count-break i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin: 0 5px 1px 12px; vertical-align: middle; }
+  .count-break i:first-child { margin-left: 0; }
+  .count-break i.o { background: var(--amber); box-shadow: 0 0 6px var(--amber-dim); } .count-break i.c { background: var(--sky); }
   .count small { display: block; margin-top: 4px; font-size: 0.68rem; color: var(--text-dim); letter-spacing: 0.08em; }
 
   /* 計器（MMX の「いまどこ」と同じことば：字間の広い英大文字・等幅の大きな数字・細い区切り線・琥珀色の枠だけのタグ） */
@@ -83,6 +89,8 @@
   .tag.sky { color: var(--sky); border-color: rgba(143, 216, 255, 0.55); }
   .tm-name { margin-top: 4px; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.03em; }
   .tm-name small { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 400; color: var(--text-dim); margin-left: 8px; letter-spacing: 0.06em; }
+  .tm-sub { font-family: var(--font-mono); font-size: 0.66rem; color: var(--text-dim); letter-spacing: 0.04em; line-height: 1.5; }
+  .tm-sub .from { font-family: var(--font-body); color: var(--sky); letter-spacing: 0.06em; }
   .tm-row { display: flex; gap: 14px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--rule); }
   .tm-q { flex: 1 1 0; min-width: 0; }
   .tm-k { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.16em; color: var(--text-dim); line-height: 1.3; white-space: nowrap; }
@@ -182,13 +190,14 @@
     </div>
   </div>
 
-  <div class="count"><b id="count">0</b><span>個の流星</span><small id="countNote">日没から いまの時刻まで ・ 地平線より上に流れた数（暗いもの・低いものも含む）</small></div>
+  <div class="count"><b id="count">0</b><span>個の流星</span><div class="count-break" id="countBreak"></div><small id="countNote">日没から いまの時刻まで ・ 地平線より上に流れた数（暗いもの・低いものも含む）</small></div>
 
   <div class="panel-wrap">
     <section class="tm" id="tm" aria-live="polite">
       <div class="tm-head"><span class="tm-kicker">LAST METEOR</span><span class="tag" id="iTag" hidden>LEO</span></div>
       <div id="iBody" hidden>
         <div class="tm-name" id="iName">—</div>
+        <div class="tm-sub" id="iSub"></div>
         <div class="tm-row">
           <div class="tm-q"><div class="tm-k">MAG<small>ここから見た明るさ</small></div><div class="tm-v" id="iMag">—</div></div>
           <div class="tm-q"><div class="tm-k">VELOCITY<small>速さ</small></div><div class="tm-v" id="iVel">—</div></div>
@@ -239,6 +248,8 @@
     <li>線の太さ・輝き・残光の長さは「ここから見た明るさ」で決めています</li>
     <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
     <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
+    <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は、しし座・おうし座北／南・いっかくじゅう座α 以外は、英名を星座名とギリシャ文字に直した訳です（公式の日本語名ではありません。「日本語名は訳」と出ます）</li>
+    <li>「来た方向」：その流星の通り道（消えた点→光り始め）を空のかなたへまっすぐ伸ばした向きを、見上げる場所の方角と高さで表したもの。散在流星にも出します</li>
   </ul>
   <h3>星と放射点</h3>
   <ul>
@@ -569,10 +580,36 @@ function idxAt(t) { let i = 0; while (i < meteors.length && meteors[i]._t <= t) 
 let lastIdx = 0;
 function lastVisibleBefore(t) { for (let i = idxAt(t) - 1; i >= 0; i--) if (meteors[i].visible) return meteors[i]; return null; }
 function updateCount() {
-  let n = 0; for (const m of meteors) { if (m._t > simT) break; if (m.visible && m._t >= T0) n++; }
+  let n = 0, leo = 0, sp = 0; const groups = new Set();
+  for (const m of meteors) { if (m._t > simT) break; if (m.visible && m._t >= T0) { n++; if (m.iau_code === 'LEO') leo++; else if (!m.iau_code) sp++; else groups.add(m.iau_code); } }
   document.getElementById('count').textContent = n;
+  const other = n - leo - sp;
+  document.getElementById('countBreak').innerHTML = n ? `<i class="o"></i>しし座流星群 <b>${leo}</b><i class="c"></i>ほかの流星群 <b>${other}</b>${groups.size ? `<span>（${groups.size}群）</span>` : ''}<i class="c"></i>散在流星 <b>${sp}</b>` : '';
 }
-const NAMES = { LEO: 'しし座流星群', NTA: 'おうし座北流星群', STA: 'おうし座南流星群', AMO: 'いっかくじゅう座α流星群' };
+// 流星群の名前：英名と番号は IAU 流星データセンターの一覧（https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php 2026-11-21 確認）。
+// 日本語名：しし座・おうし座北／南・いっかくじゅう座α は国立天文台などの書き方。ほかは英名を星座名・ギリシャ文字に直した訳（公式の日本語名ではない）
+const SHOWER_NAMES = {
+  LEO: ['しし座流星群', 'Leonids', 13],
+  NTA: ['おうし座北流星群', 'Northern Taurids', 17],
+  STA: ['おうし座南流星群', 'Southern Taurids', 2],
+  AMO: ['いっかくじゅう座α流星群', 'alpha-Monocerotids', 246],
+  TAT: ['おうし座τ流星群', 'tau-Taurids', 634, true],
+  LTA: ['おうし座λ流星群', 'lambda-Taurids', 625, true],
+  ORS: ['オリオン座χ南流星群', 'Southern chi-Orionids', 257, true],
+  NOO: ['11月オリオン座流星群', 'November Orionids', 250, true],
+  PIH: ['うみへび座π流星群', 'pi-Hydrids', 101, true],
+  OER: ['エリダヌス座ο流星群', 'omicron-Eridanids', 338, true],
+  DAD: ['12月りゅう座α流星群', 'December alpha-Draconids', 334, true],
+  NZP: ['11月ペルセウス座ζ流星群', 'November zeta-Perseids', 486, true],
+  TOL: ['やまねこ座28番星流星群', '28-Lyncids', 593, true],
+};
+// 来た方向：通り道（消えた点→光り始め）を空のかなたへ伸ばした向き。その場所の空での方角と高さ
+function cameFrom(m) {
+  const A = ecef(m.lat_beg, m.lon_beg, m.ht_beg_km), B = ecef(m.lat_end, m.lon_end, m.ht_end_km);
+  const d = [A[0] - B[0], A[1] - B[1], A[2] - B[2]];
+  const E = dot(d, F.e), N = dot(d, F.n), U = dot(d, F.u), r = Math.hypot(E, N, U);
+  return { az: (Math.atan2(E, N) / DEG + 360) % 360, alt: Math.asin(U / r) / DEG };
+}
 function showLast(m) {
   lastShown = m;
   const has = !!m;
@@ -581,8 +618,15 @@ function showLast(m) {
   if (!has) return;
   const code = m.iau_code;
   tag.textContent = code || 'SPORADIC'; tag.classList.toggle('sky', code !== 'LEO');
-  const name = code ? (NAMES[code] || `その他の流星群（${code}）`) : '散在流星';
+  const sn = code && SHOWER_NAMES[code];
+  const name = code ? (sn ? sn[0] : `流星群 ${code}`) : '散在流星';
+  const from = cameFrom(m);
+  const fromTxt = from.alt > 0 ? `${dir8(from.az)}の空 高さ${Math.round(from.alt)}°の方向から` : `${dir8(from.az)}の地平線の下の方向から`;
+  const sub = code
+    ? `${sn ? `${sn[1]} · IAU ${String(sn[2]).padStart(3, '0')}` : `IAU ${code}`}${sn && sn[3] ? ' · 日本語名は訳' : ''}`
+    : 'どの流星群にも属さない流星';
   document.getElementById('iName').innerHTML = `${name}<small>${fmtJST(m._t, true)} JST</small>`;
+  document.getElementById('iSub').innerHTML = `${sub}<br><span class="from">${fromTxt}</span>`;
   const mg = m.magHere;
   document.getElementById('iMag').innerHTML = `${mg < 0 ? '−' : '+'}${Math.abs(mg).toFixed(1)}<small>等</small>`;
   document.getElementById('iVel').innerHTML = `${m.v_init_kms.toFixed(1)}<small>km/s</small>`;
