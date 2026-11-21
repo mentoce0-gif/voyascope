@@ -38,13 +38,12 @@
   a { color: var(--mint); text-underline-offset: 3px; }
 
   /* 全体：スマホは縦に積む。広い画面は空（左）と計器（右） */
-  .app { position: fixed; inset: 0; display: grid; grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto auto auto;
-    grid-template-areas: "top" "dome" "count" "panel" "time"; padding: calc(env(safe-area-inset-top) + 10px) 14px 0; gap: 6px; }
+  .app { position: fixed; inset: 0; display: grid; grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "top" "dome" "panel" "time"; padding: calc(env(safe-area-inset-top) + 10px) 14px 0; gap: 6px; }
   @media (min-width: 900px) and (min-aspect-ratio: 1/1) {
-    .app { grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto minmax(0, 1fr) auto auto;
-      grid-template-areas: "top top" "dome panel" "dome count" "time time"; padding: 14px 24px 0; column-gap: 28px; }
+    .app { grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto minmax(0, 1fr) auto;
+      grid-template-areas: "top top" "dome panel" "time time"; padding: 14px 24px 0; column-gap: 28px; }
     .panel-wrap { align-self: center; }
-    .count { align-self: start; text-align: left !important; }
   }
 
   .top { grid-area: top; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -78,16 +77,22 @@
   .rim-log .live { fill: var(--amber); }
 
   /* 数 */
-  .count { grid-area: count; text-align: center; line-height: 1.1; }
-  .count b { font-family: var(--font-mono); font-size: clamp(2.2rem, 9vw, 3.4rem); font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
-  .count span { font-size: 1rem; margin-left: 6px; letter-spacing: 0.1em; }
-  .count-break { margin-top: 6px; font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.06em; }
-  .count .count-break b { font-family: var(--font-mono); font-size: 1.05em; font-weight: 700; color: var(--text); margin: 0 2px 0 3px; letter-spacing: 0; }
-  .count-break span { font-size: 0.9em; }
-  .count-break i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin: 0 5px 1px 12px; vertical-align: middle; }
-  .count-break i:first-child { margin-left: 0; }
+  /* 観測の窓の左上：流星を観測した数（2026-11-22 オーナー） */
+  .count { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; text-align: left; line-height: 1.15;
+    text-shadow: 0 0 8px #02060f, 0 0 2px #02060f; }
+  .count b { font-family: var(--font-mono); font-size: clamp(1.8rem, 7vw, 2.6rem); font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+  .count .unit { display: block; font-size: 0.74rem; letter-spacing: 0.1em; color: var(--text); }
+  .count-break { margin-top: 4px; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.04em; }
+  .count-break span { display: block; }
+  .count .count-break b { font-family: var(--font-mono); font-size: 1.05em; font-weight: 700; color: var(--text); margin-left: 4px; letter-spacing: 0; }
+  .count-break small { font-size: 0.9em; margin-left: 2px; }
+  .count-break i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin: 0 5px 1px 0; vertical-align: middle; }
   .count-break i.o { background: var(--amber); box-shadow: 0 0 6px var(--amber-dim); } .count-break i.c { background: var(--sky); }
-  .count small { display: block; margin-top: 4px; font-size: 0.68rem; color: var(--text-dim); letter-spacing: 0.08em; }
+  /* 観測の窓の右下：宇宙から見るへ */
+  .to-space { position: absolute; right: 0; bottom: 0; z-index: 2; font-size: 0.78rem; color: var(--mint); text-decoration: none;
+    background: rgba(7, 20, 43, 0.82); border: 1px solid var(--mint-dim); border-radius: 3px; padding: 0.45em 0.8em; min-height: 32px; display: inline-flex; align-items: center; }
+  .to-space:hover { background: var(--mint-faint); }
+  .to-space:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
   /* 計器（MMX の「いまどこ」と同じことば：字間の広い英大文字・等幅の大きな数字・細い区切り線・琥珀色の枠だけのタグ） */
   .panel-wrap { grid-area: panel; }
@@ -162,14 +167,12 @@
     .tm-k small { display: none; }
     .tm-v { font-size: 1.05rem; margin-top: 2px; }
     .tm-meta { font-size: 8.5px; gap: 2px 10px; }
-    .count b { font-size: clamp(2rem, 10vw, 2.8rem); }
-    .count small { font-size: 0.62rem; margin-top: 2px; }
     .ctrl .note { display: none; }
     .ctrl button { padding: 0.25em 0.6em; }
     .tl-wrap { height: 64px; }
   }
   @media (max-height: 760px) and (max-width: 899px) {
-    .count small, .tm-meta { display: none; }
+    .tm-meta { display: none; }
   }
 </style>
 </head>
@@ -182,7 +185,6 @@
     <div class="chips" role="group" aria-label="見上げる場所">
       <button data-city="tokyo">東京</button><button data-city="osaka">大阪</button><button data-city="fukuoka" class="cur">福岡</button>
     </div>
-    <a class="other" href="space/">宇宙から見る ver. →</a>
   </header>
 
   <div class="dome" id="dome">
@@ -203,10 +205,10 @@
         <text class="rim-time"><textPath href="#arcBL" startOffset="16%" id="rimTime">--:--</textPath></text>
         <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
       </svg>
+      <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><b id="count">0</b><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
+      <a class="to-space" href="space/">宇宙から見る →</a>
     </div>
   </div>
-
-  <div class="count"><b id="count">0</b><span>個の流星を観測</span><div class="count-break" id="countBreak"></div><small id="countNote">日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）</small></div>
 
   <div class="panel-wrap">
     <section class="tm" id="tm" aria-live="polite">
@@ -398,8 +400,18 @@ function layout() {
   boxEl.style.width = S + 'px'; boxEl.style.height = S + 'px';
   sky.width = S * DPR; sky.height = S * DPR;
   cx = S / 2; cy = S / 2; R = S * 0.44;
+  // ふちの文字：viewBox（1000）を画面の大きさに直すと小さくなるので、画面の上での最小の大きさを守る
+  const k = 1000 / S, px = (min, base) => Math.max(base, min * k) + 'px';
+  document.querySelectorAll('#rim .rim-dir').forEach(t => { t.style.fontSize = px(14, 30); });
+  document.querySelector('#rim .rim-time').style.fontSize = px(13, 30);
+  document.querySelector('#rim .rim-time').style.letterSpacing = k > 2 ? '0.02em' : '';
+  const log = document.querySelector('#rim .rim-log');
+  log.style.fontSize = px(8.5, 15); log.style.letterSpacing = k > 2 ? '0.1em' : '';
+  log.querySelector('textPath').setAttribute('startOffset', k > 2 ? '7%' : '14%');
   layoutTl();
 }
+// 星・流星の大きさの倍率。スマホ（空の円が小さい）でも小さくなりすぎないように下限を置く
+const SC = () => Math.max(1.15, S / 700 + 0.4), WC = () => Math.max(1.05, S / 700 + 0.35);
 // 等距離射影：中心が天頂・ふちが地平線。北が上、東が左
 function proj(az, alt) {
   const r = R * (90 - alt) / 90, a = az * DEG;
@@ -434,7 +446,7 @@ function drawSky(now) {
       const [x, y] = proj(h.az, h.alt);
       const m = st[2], low = Math.min(1, h.alt / 12);
       const a = Math.max(0.12, Math.min(1, (6.2 - m) / 5.5)) * starFade * (0.45 + 0.55 * low);
-      const rad = Math.max(0.55, 2.3 - 0.36 * m) * (S / 700 + 0.4);
+      const rad = Math.max(0.8, 2.3 - 0.36 * m) * SC();
       ctx.fillStyle = `rgba(225,235,255,${a})`;
       ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
     }
@@ -454,7 +466,7 @@ function drawSky(now) {
     rg.addColorStop(1, 'rgba(255,181,71,0)');
     ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
     if (radiantGlow > 0.35) {
-      ctx.font = `${Math.max(10, S * 0.022)}px "Zen Kaku Gothic New", sans-serif`;
+      ctx.font = `${Math.max(12, S * 0.022)}px "Zen Kaku Gothic New", sans-serif`;
       ctx.fillStyle = `rgba(255,181,71,${Math.min(0.85, radiantGlow)})`; ctx.textAlign = 'center';
       ctx.fillText('しし座の放射点', x, y + rr * 0.55);
     }
@@ -498,7 +510,7 @@ function drawSkyLine(fn, color, label) {
   }
   ctx.stroke(); ctx.restore();
   if (best) {
-    ctx.font = `${Math.max(9, S * 0.019)}px "Zen Kaku Gothic New", sans-serif`;
+    ctx.font = `${Math.max(11, S * 0.019)}px "Zen Kaku Gothic New", sans-serif`;
     ctx.fillStyle = color.replace(/[\d.]+\)$/, '0.6)'); ctx.textAlign = 'center';
     ctx.fillText(label, best.x, best.y + (label === '黄道' ? -6 : 14));
   }
@@ -586,7 +598,7 @@ function drawMeteor(a, now) {
   const tailLen = (0.25 + 0.45 * m.b) * (NPTS - 1);
   const k = age <= D ? 1 : 1 - (age - D) / fade;
   const col = colOf(m), hot = lighten(col, 0.55);
-  const w = (0.7 + 3.4 * m.b) * (S / 700 + 0.35);
+  const w = (0.7 + 3.4 * m.b) * WC();
   const aMax = (0.25 + 0.75 * m.b) * k;
   const pts = pathPts(m, Math.max(0, head - tailLen), head);
   // 輝き（太く薄く）＋芯（細く明るく）
@@ -609,9 +621,9 @@ function drawMeteor(a, now) {
       const pp = m.pts[NPTS - 4], [px, py] = pp.alt > 0 ? proj(pp.az, pp.alt) : [x, y];
       const dx = x - px, dy = y - py, L = Math.hypot(dx, dy) || 1;
       for (let i = 0; i < n; i++) {
-        const sp = (8 + Math.random() * 26) * (S / 700 + 0.3), th = Math.atan2(dy, dx) + (Math.random() - 0.5) * 1.6;
+        const sp = (8 + Math.random() * 26) * WC(), th = Math.atan2(dy, dx) + (Math.random() - 0.5) * 1.6;
         sparks.push({ x, y, vx: Math.cos(th) * sp + dx / L * 10, vy: Math.sin(th) * sp + dy / L * 10, t0: now, life: 0.5 + Math.random() * 0.8,
-          r: (0.6 + Math.random() * 1.2) * (S / 700 + 0.4), c: Math.random() < 0.5 ? [255, 236, 200] : lighten(col, 0.2) });
+          r: (0.6 + Math.random() * 1.2) * SC(), c: Math.random() < 0.5 ? [255, 236, 200] : lighten(col, 0.2) });
       }
       trains.push({ m, t0: now, life: 1.2 + 1.3 * m.b });
     }
@@ -621,7 +633,7 @@ function drawTrain(tr, now) { // 消えたあとに残る短い尾（演出）
   const age = (now - tr.t0) / 1000; if (age > tr.life) { tr.done = true; return; }
   const k = 1 - age / tr.life, m = tr.m, col = colOf(m);
   const pts = pathPts(m, (NPTS - 1) * 0.55, NPTS - 1);
-  strokeFaded(pts, col, (1.6 + 2 * m.b) * (S / 700 + 0.35) * (1 + age * 0.8), 0.32 * k, 0.0);
+  strokeFaded(pts, col, (1.6 + 2 * m.b) * WC() * (1 + age * 0.8), 0.32 * k, 0.0);
 }
 
 // ---------- 夜のタイムライン ----------
@@ -706,7 +718,7 @@ function updateCount() {
   for (const m of meteors) { if (m._t > simT) break; if (m._t >= T0) { n++; if (m.iau_code === 'LEO') leo++; else if (!m.iau_code) sp++; else groups.add(m.iau_code); } }
   document.getElementById('count').textContent = n;
   const other = n - leo - sp;
-  document.getElementById('countBreak').innerHTML = n ? `<i class="o"></i>しし座 <b>${leo}</b><i class="c"></i>ほかの流星群 <b>${other}</b>${groups.size ? `<span>（${groups.size}群）</span>` : ''}<i class="c"></i>散在 <b>${sp}</b>` : '';
+  document.getElementById('countBreak').innerHTML = n ? `<span><i class="o"></i>しし座<b>${leo}</b></span><span><i class="c"></i>ほかの群<b>${other}</b>${groups.size ? `<small>（${groups.size}群）</small>` : ''}</span><span><i class="c"></i>散在<b>${sp}</b></span>` : '';
 }
 // 流星群の名前：英名と番号は IAU 流星データセンターの一覧（https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php 2026-11-21 確認）。
 // 日本語名：国立天文台「流星群の和名一覧（略符順）」（https://www.nao.ac.jp/new-info/meteor/table-code.html 2026-11-05 更新・2026-11-21 確認。C43）。
