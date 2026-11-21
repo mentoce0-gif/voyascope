@@ -194,7 +194,13 @@
     .brand-sub { display: none; }
     .where .date-long { display: none; }
     .top { gap: 8px; }
-    .chips button { padding: 0.3em 0.7em; min-height: 30px; }
+    /* 場所の切り替え：ひとつながりのセグメントを横いっぱいに（iOS・Android で見慣れた形。押しやすい高さ 36px） */
+    .chips { order: 10; flex: 1 0 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; padding: 3px;
+      border: 1px solid var(--panel-border); border-radius: 10px; background: rgba(7, 20, 43, 0.6); }
+    .chips button { border: 0; border-radius: 7px; min-height: 34px; background: transparent; color: var(--text-dim); font-size: 0.82rem; }
+    .chips button.cur { background: var(--mint); color: var(--navy-800); font-weight: 700; }
+    .top { row-gap: 10px; }
+    .where { font-size: 0.82rem; }
     .tm { padding: 8px 12px 7px; }
     .tm-track { display: none; }
     .tm-name { font-size: 0.92rem; margin-top: 2px; }
@@ -439,14 +445,14 @@ function layout() {
 }
 // スマホ：投影の窓（空の円）を画面の真ん中に。上の帯・計器にかからない範囲で（2026-11-22 オーナー）
 function centerDome() {
+  // 上の帯と計器のあいだの余白のなかで、上の空き：下の空き ＝ 4：5（目で見た真ん中は少し上。Apple・Google の画面でもよく使う置き方）
   boxEl.style.transform = '';
   if (!narrowLayout()) return;
   requestAnimationFrame(() => {
-    const b = boxEl.getBoundingClientRect(), topLim = document.querySelector('.top').getBoundingClientRect().bottom + 8;
-    const botLim = document.querySelector('.panel-wrap').getBoundingClientRect().top - 8;
-    let d = innerHeight / 2 - (b.top + b.height / 2);
-    d = Math.max(topLim - b.top, Math.min(botLim - b.bottom, d));
-    boxEl.style.transform = `translateY(${Math.round(d)}px)`;
+    const b = boxEl.getBoundingClientRect(), top = document.querySelector('.top').getBoundingClientRect().bottom;
+    const bot = document.querySelector('.panel-wrap').getBoundingClientRect().top;
+    const free = Math.max(0, (bot - top) - b.height), want = top + free * 4 / 9;
+    boxEl.style.transform = `translateY(${Math.round(want - b.top)}px)`;
   });
 }
 const narrowLayout = () => matchMedia('(max-width: 899px), (max-aspect-ratio: 1/1)').matches;
