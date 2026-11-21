@@ -3,9 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>流星を眺める（試験版）— VOYASCOPE</title>
+<!-- 流星を眺める｜見上げるver.：試作の部屋 04 から、2026-11-21 に鍵なしの /meteors/ へ（オーナー）。試験版のあいだは検索に出さない -->
 <meta name="robots" content="noindex">
-<title>流星を眺める｜見上げるver.（試作）</title>
-<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<meta name="description" content="2026年11月18日の夜（しし座流星群）に日本のまわりで観測された流星を、東京・大阪・福岡から見上げた空に。Global Meteor Network のデータから。VOYASCOPE の試験版（非公式ファンメイド作品）。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://voyascope.org/meteors/">
+<meta property="og:image" content="https://voyascope.org/assets/earth/hero-1600.webp">
+<meta property="og:title" content="流星を眺める（試験版）— VOYASCOPE">
+<meta property="og:description" content="しし座流星群の夜、日本のまわりで観測された流星を、見上げた空に（非公式ファンメイド作品）。">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#050e1f">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -164,13 +173,13 @@
 <body>
 <div class="app">
   <header class="top">
-    <div class="brand"><img src="../../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"><span class="brand-sub">LAB 04 ・ 流星を眺める｜見上げる</span></div>
+    <div class="brand"><a href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span></div>
     <div class="where"><span class="date">2026年11月18日の夜 ・ </span><b id="cityName">大阪</b>の上空</div>
     <span class="spacer"></span>
     <div class="chips" role="group" aria-label="見上げる場所">
       <button data-city="tokyo">東京</button><button data-city="osaka" class="cur">大阪</button><button data-city="fukuoka">福岡</button>
     </div>
-    <a class="other" href="../meteors-from-space/">宇宙から見る ver. →</a>
+    <a class="other" href="space/">宇宙から見る ver. →</a>
   </header>
 
   <div class="dome" id="dome">
@@ -272,8 +281,8 @@
 <script>
 (() => {
 'use strict';
-const DATA_URL = '../meteors-from-space/meteors_20261118_japan.json';
-const STARS_URL = 'stars-iau-csn.json';
+const DATA_URL = 'data/meteors_20261118_japan.json';
+const STARS_URL = 'data/stars-iau-csn.json';
 const RADIANT = { ra: 154.4, dec: 21.4 }; // curation/events/leonids-2026.json（IAU MDC）
 const CITIES = {
   tokyo:   { ja: '東京', lat: 35.68, lon: 139.77 },

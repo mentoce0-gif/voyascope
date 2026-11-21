@@ -28,8 +28,8 @@ T_START = dt.datetime(2026, 11, 18, 8, 0, 0)
 T_END = dt.datetime(2026, 11, 18, 21, 0, 0)
 LAT = (24.0, 46.0)
 LON = (122.0, 146.0)
-OUT_DEFAULT = os.path.join(os.path.dirname(__file__), "..", "..", "web", "lab",
-                           "meteors-from-space", "meteors_20261118_japan.json")
+OUT_DEFAULT = os.path.join(os.path.dirname(__file__), "..", "..", "web", "meteors",
+                           "data", "meteors_20261118_japan.json")
 
 # 列の定義 PDF の名前（ヘッダー1行目と2行目をつなげたもの）→ 出力のキー
 WANTED = {

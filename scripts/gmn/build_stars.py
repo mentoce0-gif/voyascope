@@ -13,7 +13,7 @@ import json, os, re, sys
 
 MAG_MAX = 5.5
 src = sys.argv[1]
-out = os.path.join(os.path.dirname(__file__), "..", "..", "web", "lab", "meteors-look-up", "stars-iau-csn.json")
+out = os.path.join(os.path.dirname(__file__), "..", "..", "web", "meteors", "data", "stars-iau-csn.json")
 stars = []
 for line in open(src, encoding="utf-8"):
     if line.startswith(("#", "$")) or not line.strip():

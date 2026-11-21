@@ -1363,6 +1363,8 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
     fab: scopeFab,
     items: [
       { label: "OBS", sub: "地球を見る", action: () => {} },
+      // 流星を眺める（試験版）：SCOPE の真下に（2026-11-21 オーナー）
+      { label: "METEOR", sub: "流星", angle: 270, r: 0.72, action: () => location.assign("meteors/") },
       { label: "TIPS", sub: "SpaceTips", accent: true, action: () => location.assign("missions/") },
       { label: "FAR", sub: "遠くを見る", action: () => openFar("pushed", scopeFab) },
       { label: "MMX", sub: "いまどこ", hidden: () => !mmxEv, action: () => location.assign("mmx/now/") },
