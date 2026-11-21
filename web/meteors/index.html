@@ -92,6 +92,15 @@
   .to-space { position: absolute; right: 0; bottom: 0; z-index: 2; font-size: 0.78rem; color: var(--mint); text-decoration: none;
     background: rgba(7, 20, 43, 0.82); border: 1px solid var(--mint-dim); border-radius: 3px; padding: 0.45em 0.8em; min-height: 32px; display: inline-flex; align-items: center; }
   .to-space:hover { background: var(--mint-faint); }
+  /* 三角を2つ重ねたマーク：宙（そら）へ上がるイメージ。上の三角が明るく、ゆっくり上へ流れる */
+  .to-space { gap: 8px; }
+  .dome .to-space svg.up2 { position: static; inset: auto; width: 14px; height: 18px; flex: none; overflow: visible; } /* 空の円の SVG の配置（.dome svg）が効かないように */
+  .up2 .t1 { fill: var(--mint); }
+  .up2 .t2 { fill: var(--mint); opacity: 0.45; }
+  .up2 path { animation: up2 2.4s ease-in-out infinite; }
+  .up2 .t2 { animation-delay: 0.15s; }
+  @keyframes up2 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+  @media (prefers-reduced-motion: reduce) { .up2 path { animation: none; } }
   .to-space:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
   /* 計器（MMX の「いまどこ」と同じことば：字間の広い英大文字・等幅の大きな数字・細い区切り線・琥珀色の枠だけのタグ） */
@@ -206,7 +215,7 @@
         <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
       </svg>
       <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><b id="count">0</b><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
-      <a class="to-space" href="space/">宇宙から見る →</a>
+      <a class="to-space" href="space/" aria-label="宇宙から見る（宇宙から見る ver. へ）"><svg class="up2" viewBox="0 0 16 20" width="14" height="18" aria-hidden="true"><path class="t1" d="M8 1 L15 9 H1 Z"/><path class="t2" d="M8 10 L15 18 H1 Z"/></svg>宇宙から見る</a>
     </div>
   </div>
 
