@@ -53,7 +53,8 @@
   .where { font-size: 0.8rem; color: var(--text-dim); letter-spacing: 0.06em; }
   .where b { color: var(--text); font-weight: 700; }
   .spacer { flex: 1; }
-  .count .night { display: block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; color: var(--sky); margin-bottom: 2px; }
+  .where .date-short { display: none; }
+  @media (max-width: 899px), (max-aspect-ratio: 1/1) { .where .date-short { display: inline; color: var(--text-dim); } }
   .chips { display: flex; gap: 6px; }
   button { appearance: none; font-family: var(--font-body); font-size: 0.78rem; line-height: 1.3; color: var(--mint);
     background: rgba(7, 20, 43, 0.72); border: 1px solid var(--mint-dim); border-radius: 3px; padding: 0.4em 0.8em;
@@ -180,9 +181,8 @@
   @media (max-width: 899px), (max-aspect-ratio: 1/1) {
     /* スマホ：空の円のすぐ下に計器。余った高さはタイムラインの上にまとめる */
     /* 空の円は上、計器・タイムライン・出典は下端にまとめる（あいだを空ける。2026-11-22 オーナーのスケッチ） */
-    .app { grid-template-rows: auto auto minmax(0, 1fr) auto auto !important; grid-template-areas: "top" "dome" "." "panel" "time" !important;
+    .app { grid-template-rows: auto minmax(0, 1fr) auto minmax(0, 1fr) auto auto !important; grid-template-areas: "top" "." "dome" "." "panel" "time" !important;
       padding-bottom: env(safe-area-inset-bottom) !important; }
-    .dome { margin-top: 10px; }
     .tm { gap: 9px; padding: 8px 10px; }
     .play { width: 46px; height: 46px; }
     .emb { width: 44px; height: 44px; }
@@ -215,7 +215,7 @@
 <div class="app">
   <header class="top">
     <div class="brand"><a href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span></div>
-    <div class="where"><span class="date-long">2026年11月18日の夜 ・ </span><b id="cityName">福岡</b>の上空</div>
+    <div class="where"><span class="date-long">2026年11月18日の夜 ・ </span><span class="date-short mono">2026.11.18 夜 ・ </span><b id="cityName">福岡</b>の上空</div>
     <span class="spacer"></span>
     <div class="chips" role="group" aria-label="見上げる場所">
       <button data-city="tokyo">東京</button><button data-city="osaka">大阪</button><button data-city="fukuoka" class="cur">福岡</button>
@@ -240,7 +240,7 @@
         <text class="rim-time"><textPath href="#arcBL" startOffset="16%" id="rimTime">--:--</textPath></text>
         <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
       </svg>
-      <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="night">2026.11.18 の夜</span><b id="count">0</b><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
+      <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><b id="count">0</b><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
     </div>
   </div>
 
