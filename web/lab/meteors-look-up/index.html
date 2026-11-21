@@ -255,7 +255,7 @@
     <li>「◯個の流星を観測」：見上げる場所によらず、日本のまわり（上の範囲）で GMN のカメラが記録した流星の数です。実際に流れた流星のすべてではありません（カメラのない場所・曇り・暗すぎる流星は入りません）</li>
     <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
     <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
-    <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は、しし座・おうし座北／南・いっかくじゅう座α 以外は、英名を星座名とギリシャ文字に直した訳です（公式の日本語名ではありません。「日本語名は訳」と出ます）</li>
+    <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は<a href="https://www.nao.ac.jp/new-info/meteor/table-code.html" target="_blank" rel="noopener">国立天文台「流星群の和名一覧」</a>（2026年11月5日更新）。一覧にない5つ（おうし座τ・おうし座λ・うみへび座π・11月ペルセウス座ζ・やまねこ座28）は、<a href="https://www.nao.ac.jp/new-info/meteor/index.html" target="_blank" rel="noopener">国立天文台の和名の決め方</a>にならって英名を直した訳です（公式の和名ではありません。「日本語名は訳」と出ます）</li>
     <li>「来た方向」：その流星の通り道（消えた点→光り始め）を空のかなたへまっすぐ伸ばした向きを、見上げる場所の方角と高さで表したもの。散在流星にも出します</li>
   </ul>
   <h3>星と放射点</h3>
@@ -608,7 +608,8 @@ function updateCount() {
   document.getElementById('countBreak').innerHTML = n ? `<i class="o"></i>しし座 <b>${leo}</b><i class="c"></i>ほかの流星群 <b>${other}</b>${groups.size ? `<span>（${groups.size}群）</span>` : ''}<i class="c"></i>散在 <b>${sp}</b>` : '';
 }
 // 流星群の名前：英名と番号は IAU 流星データセンターの一覧（https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php 2026-11-21 確認）。
-// 日本語名：しし座・おうし座北／南・いっかくじゅう座α は国立天文台などの書き方。ほかは英名を星座名・ギリシャ文字に直した訳（公式の日本語名ではない）
+// 日本語名：国立天文台「流星群の和名一覧（略符順）」（https://www.nao.ac.jp/new-info/meteor/table-code.html 2026-11-05 更新・2026-11-21 確認。C43）。
+// 一覧にないもの（true の印）は、国立天文台「流星群の和名設定のルール」にならって英名を直した訳（公式の和名ではない）
 const SHOWER_NAMES = {
   LEO: ['しし座流星群', 'Leonids', 13],
   NTA: ['おうし座北流星群', 'Northern Taurids', 17],
@@ -616,13 +617,13 @@ const SHOWER_NAMES = {
   AMO: ['いっかくじゅう座α流星群', 'alpha-Monocerotids', 246],
   TAT: ['おうし座τ流星群', 'tau-Taurids', 634, true],
   LTA: ['おうし座λ流星群', 'lambda-Taurids', 625, true],
-  ORS: ['オリオン座χ南流星群', 'Southern chi-Orionids', 257, true],
-  NOO: ['11月オリオン座流星群', 'November Orionids', 250, true],
+  ORS: ['オリオン座χ南流星群', 'Southern chi-Orionids', 257],
+  NOO: ['11月オリオン座流星群', 'November Orionids', 250],
   PIH: ['うみへび座π流星群', 'pi-Hydrids', 101, true],
-  OER: ['エリダヌス座ο流星群', 'omicron-Eridanids', 338, true],
-  DAD: ['12月りゅう座α流星群', 'December alpha-Draconids', 334, true],
+  OER: ['エリダヌス座ο流星群', 'omicron-Eridanids', 338],
+  DAD: ['12月りゅう座α流星群', 'December alpha-Draconids', 334],
   NZP: ['11月ペルセウス座ζ流星群', 'November zeta-Perseids', 486, true],
-  TOL: ['やまねこ座28番星流星群', '28-Lyncids', 593, true],
+  TOL: ['やまねこ座28流星群', '28-Lyncids', 593, true], // 和名一覧の 29-Piscids＝うお座29流星群 にならう
 };
 // 来た方向：通り道（消えた点→光り始め）を空のかなたへ伸ばした向き。その場所の空での方角と高さ
 function cameFrom(m) {

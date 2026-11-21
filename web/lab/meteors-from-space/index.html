@@ -233,10 +233,10 @@ const OTHER = { color: [150, 140, 220] };
 const SPORADIC = { color: [150, 170, 200] };
 const groupOf = m => m.iau_code === 'LEO' ? 'LEO' : (m.iau_code ? 'OTHER' : 'SPO');
 const styleOf = m => m.iau_code ? (SHOWERS[m.iau_code] || OTHER) : SPORADIC;
-// 公式の日本語名がない流星群は、IAU 流星データセンターの英名を星座名・ギリシャ文字に直した訳（見上げるver. と同じ）
-const JA_TR = { TAT: 'おうし座τ流星群', LTA: 'おうし座λ流星群', ORS: 'オリオン座χ南流星群', NOO: '11月オリオン座流星群', PIH: 'うみへび座π流星群',
-  OER: 'エリダヌス座ο流星群', DAD: '12月りゅう座α流星群', NZP: '11月ペルセウス座ζ流星群', TOL: 'やまねこ座28番星流星群' };
-const nameOf = m => m.iau_code ? (SHOWERS[m.iau_code] ? SHOWERS[m.iau_code].ja : JA_TR[m.iau_code] ? `${JA_TR[m.iau_code]}<small>（日本語名は訳）</small>` : `流星群（IAU コード ${m.iau_code}）`) : '散在流星';
+// 日本語名：国立天文台「流星群の和名一覧」（2026-11-05 更新・2026-11-21 確認）。JA_TR は一覧にないもの＝和名の決め方にならった訳（見上げるver. と同じ）
+const JA_NAOJ = { ORS: 'オリオン座χ南流星群', NOO: '11月オリオン座流星群', OER: 'エリダヌス座ο流星群', DAD: '12月りゅう座α流星群' };
+const JA_TR = { TAT: 'おうし座τ流星群', LTA: 'おうし座λ流星群', PIH: 'うみへび座π流星群', NZP: '11月ペルセウス座ζ流星群', TOL: 'やまねこ座28流星群' };
+const nameOf = m => m.iau_code ? (SHOWERS[m.iau_code] ? SHOWERS[m.iau_code].ja : JA_NAOJ[m.iau_code] ? JA_NAOJ[m.iau_code] : JA_TR[m.iau_code] ? `${JA_TR[m.iau_code]}<small>（日本語名は訳）</small>` : `流星群（IAU コード ${m.iau_code}）`) : '散在流星';
 const lighten = c => c.map(v => Math.round(v + (255 - v) * 0.55));
 
 // ---- 座標 ----
