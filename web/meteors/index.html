@@ -181,7 +181,7 @@
   @media (max-width: 899px), (max-aspect-ratio: 1/1) {
     /* スマホ：空の円のすぐ下に計器。余った高さはタイムラインの上にまとめる */
     /* 空の円は上、計器・タイムライン・出典は下端にまとめる（あいだを空ける。2026-11-22 オーナーのスケッチ） */
-    .app { grid-template-rows: auto minmax(0, 1fr) auto minmax(0, 1fr) auto auto !important; grid-template-areas: "top" "." "dome" "." "panel" "time" !important;
+    .app { grid-template-rows: auto minmax(0, 1fr) auto auto !important; grid-template-areas: "top" "dome" "panel" "time" !important;
       padding-bottom: env(safe-area-inset-bottom) !important; }
     .tm { gap: 9px; padding: 8px 10px; }
     .play { width: 46px; height: 46px; }
@@ -421,11 +421,12 @@ function layout() {
     // スマホ：画面の高さから、上の帯・計器・タイムラインのぶんを引いた残りと、幅の小さいほう
     const used = ['.top', '.panel-wrap', '.time'].reduce((a, q) => a + document.querySelector(q).getBoundingClientRect().height, 0);
     S = Math.max(160, Math.floor(Math.min(r.width, innerHeight - used - 40)));
-    domeEl.style.height = S + 'px';
+    domeEl.style.height = ''; 
   } else { domeEl.style.height = ''; S = Math.max(160, Math.floor(Math.min(r.width, r.height))); }
   boxEl.style.width = S + 'px'; boxEl.style.height = S + 'px';
   sky.width = S * DPR; sky.height = S * DPR;
   cx = S / 2; cy = S / 2; R = S * 0.44;
+  centerDome();
   // ふちの文字：viewBox（1000）を画面の大きさに直すと小さくなるので、画面の上での最小の大きさを守る
   const k = 1000 / S, px = (min, base) => Math.max(base, min * k) + 'px';
   document.querySelectorAll('#rim .rim-dir').forEach(t => { t.style.fontSize = px(14, 30); });
@@ -435,6 +436,18 @@ function layout() {
   log.style.fontSize = px(8.5, 15); log.style.letterSpacing = k > 2 ? '0.1em' : '';
   log.querySelector('textPath').setAttribute('startOffset', k > 2 ? '7%' : '14%');
   layoutTl();
+}
+// スマホ：投影の窓（空の円）を画面の真ん中に。上の帯・計器にかからない範囲で（2026-11-22 オーナー）
+function centerDome() {
+  boxEl.style.transform = '';
+  if (!narrowLayout()) return;
+  requestAnimationFrame(() => {
+    const b = boxEl.getBoundingClientRect(), topLim = document.querySelector('.top').getBoundingClientRect().bottom + 8;
+    const botLim = document.querySelector('.panel-wrap').getBoundingClientRect().top - 8;
+    let d = innerHeight / 2 - (b.top + b.height / 2);
+    d = Math.max(topLim - b.top, Math.min(botLim - b.bottom, d));
+    boxEl.style.transform = `translateY(${Math.round(d)}px)`;
+  });
 }
 const narrowLayout = () => matchMedia('(max-width: 899px), (max-aspect-ratio: 1/1)').matches;
 // 星・流星の大きさの倍率。スマホ（空の円が小さい）でも小さくなりすぎないように下限を置く
