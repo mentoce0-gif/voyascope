@@ -53,6 +53,7 @@
   .where { font-size: 0.8rem; color: var(--text-dim); letter-spacing: 0.06em; }
   .where b { color: var(--text); font-weight: 700; }
   .spacer { flex: 1; }
+  .count .night { display: block; font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.12em; color: var(--sky); margin-bottom: 2px; }
   .chips { display: flex; gap: 6px; }
   button { appearance: none; font-family: var(--font-body); font-size: 0.78rem; line-height: 1.3; color: var(--mint);
     background: rgba(7, 20, 43, 0.72); border: 1px solid var(--mint-dim); border-radius: 3px; padding: 0.4em 0.8em;
@@ -187,7 +188,8 @@
     .st { font-size: 0.66rem; }
     .st div { grid-template-columns: 2.9em auto; gap: 4px; }
     .app { gap: 4px; padding-left: 12px; padding-right: 12px; }
-    .brand-sub, .where .date { display: none; }
+    .brand-sub { display: none; }
+    .where .date-long { display: none; }
     .top { gap: 8px; }
     .chips button { padding: 0.3em 0.7em; min-height: 30px; }
     .tm { padding: 8px 12px 7px; }
@@ -210,7 +212,7 @@
 <div class="app">
   <header class="top">
     <div class="brand"><a href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span></div>
-    <div class="where"><span class="date">2026年11月18日の夜 ・ </span><b id="cityName">福岡</b>の上空</div>
+    <div class="where"><span class="date-long">2026年11月18日の夜 ・ </span><b id="cityName">福岡</b>の上空</div>
     <span class="spacer"></span>
     <div class="chips" role="group" aria-label="見上げる場所">
       <button data-city="tokyo">東京</button><button data-city="osaka">大阪</button><button data-city="fukuoka" class="cur">福岡</button>
@@ -235,7 +237,7 @@
         <text class="rim-time"><textPath href="#arcBL" startOffset="16%" id="rimTime">--:--</textPath></text>
         <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
       </svg>
-      <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><b id="count">0</b><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
+      <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="night">2026.11.18 の夜</span><b id="count">0</b><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
     </div>
   </div>
 
@@ -376,6 +378,7 @@ function findCross(c, from, to, rising) { // 太陽の上の縁が地平線（-0
 const DIR8 = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
 const dir8 = az => DIR8[Math.round(az / 45) % 8];
 const fmtJST = (ms, sec) => new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', ...(sec ? { second: '2-digit' } : {}), hourCycle: 'h23' }).format(new Date(ms));
+const fmtDateJST = ms => new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date(ms)); // 例：11/19
 const fmtUTC = ms => new Date(ms).toISOString().slice(11, 16);
 
 // ---------- 状態 ----------
@@ -833,7 +836,7 @@ function tick(now) {
   sparks = sparks.filter(p => (now - p.t0) / 1000 < p.life);
   drawSky(now);
   drawTimeline();
-  rimTime.innerHTML = `${fmtJST(simT)} JST <tspan class="u">UTC ${fmtUTC(simT)}</tspan>`;
+  rimTime.innerHTML = `${fmtDateJST(simT)} ${fmtJST(simT)} JST <tspan class="u">UTC ${fmtUTC(simT)}</tspan>`; // いつの流星か分かるように日付も（2026-11-22 オーナー）
   requestAnimationFrame(tick);
 }
 
