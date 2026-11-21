@@ -41,7 +41,7 @@
   .app { position: fixed; inset: 0; display: grid; grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto auto;
     grid-template-areas: "top" "dome" "panel" "time"; padding: calc(env(safe-area-inset-top) + 10px) 14px 0; gap: 6px; }
   @media (min-width: 900px) and (min-aspect-ratio: 1/1) {
-    .app { grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto minmax(0, 1fr) auto;
+    .app { grid-template-columns: minmax(0, 1fr) 460px; grid-template-rows: auto minmax(0, 1fr) auto;
       grid-template-areas: "top top" "dome panel" "time time"; padding: 14px 24px 0; column-gap: 28px; }
     .panel-wrap { align-self: center; }
   }
@@ -96,6 +96,12 @@
     background: rgba(7, 20, 43, 0.85); border: 1px solid var(--mint-dim); box-shadow: 0 0 14px rgba(94, 242, 194, 0.18);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   @media (min-width: 900px) and (min-aspect-ratio: 1/1) { .to-space { width: 88px; height: 88px; font-size: 0.72rem; } }
+  /* スマホ：空のふち（建物）に重なっても読めるように、地をしっかり塗り、枠と字を強く（2026-11-22 オーナー） */
+  @media (max-width: 899px), (max-aspect-ratio: 1/1) {
+    .to-space { width: 84px; height: 84px; right: -2px; bottom: 2px; font-size: 0.8rem; font-weight: 700; color: var(--text);
+      background: rgba(7, 20, 43, 0.97); border: 1.5px solid var(--mint); box-shadow: 0 0 0 4px rgba(2, 6, 15, 0.9), 0 0 6px rgba(94, 242, 194, 0.3); }
+    .dome .to-space svg.up2 { width: 18px; height: 22px; }
+  }
   .to-space:hover { background: var(--mint-faint); }
   /* 三角を2つ重ねたマーク：宙（そら）へ上がるイメージ。上の三角が明るく、ゆっくり上へ流れる */
   .dome .to-space svg.up2 { position: static; inset: auto; width: 14px; height: 18px; flex: none; overflow: visible; } /* 空の円の SVG の配置（.dome svg）が効かないように */
@@ -109,7 +115,32 @@
 
   /* 計器（MMX の「いまどこ」と同じことば：字間の広い英大文字・等幅の大きな数字・細い区切り線・琥珀色の枠だけのタグ） */
   .panel-wrap { grid-area: panel; }
-  .tm { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px 14px 10px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  /* 1行の計器：再生・記号・名前・数値（2026-11-22 オーナーのスケッチ） */
+  .tm { display: flex; align-items: center; gap: 12px; }
+  .play { flex: none; width: 52px; height: 52px; border-radius: 50%; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    border: 1.5px solid var(--amber); color: var(--amber); background: rgba(7, 20, 43, 0.9); }
+  .play.on { background: var(--amber); color: var(--navy-800); }
+  .play .pi { font-size: 15px; line-height: 1; }
+  .play .ps { font-size: 9.5px; letter-spacing: 0.02em; line-height: 1.1; }
+  .emb { flex: none; width: 56px; height: 56px; overflow: visible; }
+  .emb-ring { fill: rgba(2, 6, 15, 0.6); stroke: rgba(143, 216, 255, 0.35); stroke-width: 1; }
+  .emb-n { stroke: var(--amber); stroke-width: 1.4; }
+  .emb-path { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: emb-draw 0.8s ease-in forwards; }
+  .emb-head { opacity: 0; animation: emb-head 0.6s ease-out forwards; }
+  @keyframes emb-draw { to { stroke-dashoffset: 0; } }
+  @keyframes emb-head { 0% { opacity: 1; r: 3.4; } 100% { opacity: 0.9; r: 2.2; } }
+  @media (prefers-reduced-motion: reduce) { .emb-path { animation: none; stroke-dashoffset: 0; } .emb-head { animation: none; opacity: 0.9; } }
+  .nm { flex: 1 1 auto; min-width: 0; }
+  .nm-name { font-size: 1.12rem; font-weight: 700; letter-spacing: 0.04em; line-height: 1.3; }
+  .nm-name sup { font-size: 0.6em; color: var(--text-dim); margin-left: 1px; }
+  .nm-name .fire { margin-left: 8px; font-size: 0.6rem; font-weight: 700; color: #ffd9a0; border: 1px solid rgba(255, 217, 160, 0.7); border-radius: 3px; padding: 0 5px; vertical-align: 3px; }
+  .nm-dir { margin-top: 2px; font-size: 0.72rem; color: var(--sky); letter-spacing: 0.04em; }
+  .st { flex: none; margin: 0; display: grid; gap: 1px; font-family: var(--font-mono); font-size: 0.72rem; }
+  .st div { display: grid; grid-template-columns: 3.2em auto; gap: 6px; }
+  .st dt { color: var(--text-dim); letter-spacing: 0.08em; }
+  .st dd { margin: 0; color: var(--text); white-space: nowrap; }
+  .st dd small { font-size: 0.85em; color: var(--text-dim); margin-left: 3px; }
+  .tm { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 10px 12px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .tm-head { display: flex; align-items: center; gap: 10px; }
   .tm-kicker { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.22em; color: var(--mint); }
   .tag { margin-left: auto; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: var(--amber); border: 1px solid var(--amber-dim); padding: 2px 6px; border-radius: 3px; }
@@ -169,6 +200,15 @@
   .msg.on { display: grid; }
 
   @media (max-width: 899px), (max-aspect-ratio: 1/1) {
+    /* スマホ：空の円のすぐ下に計器。余った高さはタイムラインの上にまとめる */
+    .app { grid-template-rows: auto minmax(0, 1fr) auto auto auto minmax(0, 1fr) !important; grid-template-areas: "top" "." "dome" "panel" "time" "." !important; }
+    .tm { gap: 9px; padding: 8px 10px; }
+    .play { width: 46px; height: 46px; }
+    .emb { width: 44px; height: 44px; }
+    .nm-name { font-size: 0.98rem; letter-spacing: 0.02em; }
+    .nm-dir { font-size: 0.66rem; }
+    .st { font-size: 0.66rem; }
+    .st div { grid-template-columns: 2.9em auto; gap: 4px; }
     .app { gap: 4px; padding-left: 12px; padding-right: 12px; }
     .brand-sub, .where .date { display: none; }
     .top { gap: 8px; }
@@ -225,29 +265,14 @@
 
   <div class="panel-wrap">
     <section class="tm" id="tm" aria-live="polite">
-      <div class="tm-head"><span class="tm-kicker">LAST METEOR</span><span class="tag fire" id="iFire" hidden title="100 km の距離で −4等より明るい（IAU の定義）">FIREBALL 火球</span><span class="tag" id="iTag" hidden>LEO</span></div>
-      <div id="iBody" hidden>
-        <div class="tm-name" id="iName">—</div>
-        <div class="tm-sub" id="iSub"></div>
-        <div class="tm-see" id="iSee"></div>
-        <div class="tm-row">
-          <div class="tm-q"><div class="tm-k">MAG<small>ここから見た明るさ</small></div><div class="tm-v" id="iMag">—</div></div>
-          <div class="tm-q"><div class="tm-k">VELOCITY<small>速さ</small></div><div class="tm-v" id="iVel">—</div></div>
-          <div class="tm-q"><div class="tm-k">ALTITUDE<small>光った高さ</small></div><div class="tm-v" id="iAlt">—</div></div>
-        </div>
-        <svg class="tm-track" id="iTrack" viewBox="0 0 320 60" preserveAspectRatio="none"></svg>
-        <div class="tm-meta" id="iMeta"></div>
-      </div>
-      <div class="tm-empty" id="iEmpty">時刻を進めると、この空に流れた流星がここに出ます。</div>
+      <button id="playBtn" class="play on" type="button" aria-label="速さを変える（押すたびに）"><span class="pi" id="playIcon">▶</span><span class="ps mono" id="playSpeed">×120</span></button>
+      <svg class="emb" id="iEmb" viewBox="0 0 60 60" aria-hidden="true"></svg>
+      <div class="nm"><div class="nm-name" id="iName">—</div><div class="nm-dir" id="iDir">時刻が進むと、流れた流星がここに出ます</div></div>
+      <dl class="st"><div><dt>MAG</dt><dd id="iMag">—</dd></div><div><dt>VELO</dt><dd id="iVel">—</dd></div><div><dt>ALTI</dt><dd id="iAlt">—</dd></div></dl>
     </section>
   </div>
 
   <section class="time" aria-label="夜のタイムライン">
-    <div class="ctrl">
-      <button id="playBtn" class="on" aria-label="一時停止">❚❚</button>
-      <span class="lab">SPEED</span>
-      <button data-speed="1">実時間</button><button data-speed="60">60倍</button><button data-speed="120" class="cur">120倍<span class="note mono" style="font-size:.85em;opacity:.8">（1時間＝30秒）</span></button><button data-speed="600">600倍</button>
-    </div>
     <div class="tl-wrap"><canvas id="tl" aria-label="日没から夜明けまでのタイムライン。縦線が流星、細い曲線がしし座の放射点の高さ。ドラッグで時刻を動かせる"></canvas></div>
     <div class="credit">
       データ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">Global Meteor Network</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）から抽出・加工 ／ 星の位置：<a href="https://www.iau.org/public/themes/naming_stars/" target="_blank" rel="noopener">IAU 恒星名カタログ</a> ／ 火花・尾・光る時間ののばしは演出 ／ 非公式のファンメイド試作
@@ -285,9 +310,10 @@
     <li>「◯個の流星を観測」：見上げる場所によらず、日本のまわり（上の範囲）で GMN のカメラが記録した流星の数です。実際に流れた流星のすべてではありません（カメラのない場所・曇り・暗すぎる流星は入りません）</li>
     <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
     <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
+    <li>下の計器：左の丸を押すたびに速さが変わります（実時間 → 60倍 → 120倍 → 600倍 → 停止）。丸い記号は、向きが空の上で流れた向き、線の長さと描く速さが流星の速さ（速いほど長く一瞬で。目安）。「北西（NW）・仰角61°」は、一番明るかったところが見えた方角と高さです。MAG はここから見た明るさ（指を置くと「〇〇くらい」）</li>
     <li><b>演出</b>：円のふちの建物・木のシルエット、窓と地平線の近くの街明かりは、魚眼の見え方を分かりやすくするための作りものです（その街の本当の景色ではありません）。建物の縦の辺は、魚眼では空の中心へ向かう線になります</li>
     <li>点線の曲線：天の赤道（水色）と黄道（ミント）。空の大きな円で、魚眼ではふちに近いほど大きく曲がって見えます。しし座の放射点は黄道の近くにあります</li>
-    <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は<a href="https://www.nao.ac.jp/new-info/meteor/table-code.html" target="_blank" rel="noopener">国立天文台「流星群の和名一覧」</a>（2026年11月5日更新）。一覧にない5つ（おうし座τ・おうし座λ・うみへび座π・11月ペルセウス座ζ・やまねこ座28）は、<a href="https://www.nao.ac.jp/new-info/meteor/index.html" target="_blank" rel="noopener">国立天文台の和名の決め方</a>にならって英名を直した訳です（公式の和名ではありません。「日本語名は訳」と出ます）</li>
+    <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は<a href="https://www.nao.ac.jp/new-info/meteor/table-code.html" target="_blank" rel="noopener">国立天文台「流星群の和名一覧」</a>（2026年11月5日更新）。一覧にない5つ（おうし座τ・おうし座λ・うみへび座π・11月ペルセウス座ζ・やまねこ座28）は、<a href="https://www.nao.ac.jp/new-info/meteor/index.html" target="_blank" rel="noopener">国立天文台の和名の決め方</a>にならって英名を直した訳です（公式の和名ではありません。名前に「＊」が付きます）</li>
     <li>「来た方向」：その流星の通り道（消えた点→光り始め）を空のかなたへまっすぐ伸ばした向きを、見上げる場所の方角と高さで表したもの。散在流星にも出します</li>
   </ul>
   <h3>星と放射点</h3>
@@ -406,10 +432,15 @@ function prepare() {
 
 // ---------- 魚眼 ----------
 const domeEl = document.getElementById('dome'), boxEl = document.getElementById('domeBox'), sky = document.getElementById('sky'), ctx = sky.getContext('2d');
-let S = 300, DPR = Math.min(devicePixelRatio || 1, 2), cx = 0, cy = 0, R = 0;
+let S = 300, DPR = Math.min(devicePixelRatio || 1, 3), /* スマホの多くは 3倍。2倍で止めるとにじむ（2026-11-22 オーナー「ファジー」） */ cx = 0, cy = 0, R = 0;
 function layout() {
   const r = domeEl.getBoundingClientRect();
-  S = Math.max(160, Math.floor(Math.min(r.width, r.height)));
+  if (narrowLayout()) {
+    // スマホ：画面の高さから、上の帯・計器・タイムラインのぶんを引いた残りと、幅の小さいほう
+    const used = ['.top', '.panel-wrap', '.time'].reduce((a, q) => a + document.querySelector(q).getBoundingClientRect().height, 0);
+    S = Math.max(160, Math.floor(Math.min(r.width, innerHeight - used - 40)));
+    domeEl.style.height = S + 'px';
+  } else { domeEl.style.height = ''; S = Math.max(160, Math.floor(Math.min(r.width, r.height))); }
   boxEl.style.width = S + 'px'; boxEl.style.height = S + 'px';
   sky.width = S * DPR; sky.height = S * DPR;
   cx = S / 2; cy = S / 2; R = S * 0.44;
@@ -423,6 +454,7 @@ function layout() {
   log.querySelector('textPath').setAttribute('startOffset', k > 2 ? '7%' : '14%');
   layoutTl();
 }
+const narrowLayout = () => matchMedia('(max-width: 899px), (max-aspect-ratio: 1/1)').matches;
 // 星・流星の大きさの倍率。スマホ（空の円が小さい）でも小さくなりすぎないように下限を置く
 const SC = () => Math.max(1.15, S / 700 + 0.4), WC = () => Math.max(1.05, S / 700 + 0.35);
 // 等距離射影：中心が天頂・ふちが地平線。北が上、東が左
@@ -615,12 +647,12 @@ function drawMeteor(a, now) {
   const aMax = (0.25 + 0.75 * m.b) * k;
   const pts = pathPts(m, Math.max(0, head - tailLen), head);
   // 輝き（太く薄く）＋芯（細く明るく）
-  strokeFaded(pts, col, w * 3.2, aMax * 0.22, 0);
+  strokeFaded(pts, col, w * 2, aMax * 0.1, 0); // にじみは控えめに（跡が見えるように。2026-11-22 オーナー）
   strokeFaded(pts, hot, w, aMax, 0);
   // 頭の光
   const hp = m.pts[Math.min(NPTS - 1, Math.round(head))];
   if (hp.alt > 0 && age <= D) {
-    const [x, y] = proj(hp.az, hp.alt), rr = w * (2.2 + 2 * m.b);
+    const [x, y] = proj(hp.az, hp.alt), rr = w * (1.3 + 1.1 * m.b);
     const hg = ctx.createRadialGradient(x, y, 0, x, y, rr);
     hg.addColorStop(0, `rgba(255,250,235,${aMax})`); hg.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
     ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
@@ -646,7 +678,7 @@ function drawTrain(tr, now) { // 消えたあとに残る短い尾（演出）
   const age = (now - tr.t0) / 1000; if (age > tr.life) { tr.done = true; return; }
   const k = 1 - age / tr.life, m = tr.m, col = colOf(m);
   const pts = pathPts(m, (NPTS - 1) * 0.55, NPTS - 1);
-  strokeFaded(pts, col, (1.6 + 2 * m.b) * WC() * (1 + age * 0.8), 0.32 * k, 0.0);
+  strokeFaded(pts, col, (1.6 + 2 * m.b) * WC() * (1 + age * 0.5), 0.22 * k, 0.0);
 }
 
 // ---------- 夜のタイムライン ----------
@@ -758,54 +790,45 @@ function cameFrom(m) {
   const E = dot(d, F.e), N = dot(d, F.n), U = dot(d, F.u), r = Math.hypot(E, N, U);
   return { az: (Math.atan2(E, N) / DEG + 360) % 360, alt: Math.asin(U / r) / DEG };
 }
+const DIR_EN = { 北: 'N', 北東: 'NE', 東: 'E', 南東: 'SE', 南: 'S', 南西: 'SW', 西: 'W', 北西: 'NW' };
+const ARROWS = ['→', '↗', '↑', '↖', '←', '↙', '↓', '↘'];
+// 計器は1行だけ（2026-11-22 オーナー）：再生（押すたびに速さ）・方向と速さの記号・流星の名前と空のどこ・MAG／VELO／ALTI
 function showLast(m) {
   lastShown = m;
-  const has = !!m;
-  document.getElementById('iBody').hidden = !has; document.getElementById('iEmpty').hidden = has;
-  const tag = document.getElementById('iTag'); tag.hidden = !has;
-  if (!has) return;
-  const code = m.iau_code;
-  tag.textContent = code || 'SPORADIC'; tag.classList.toggle('sky', code !== 'LEO');
-  const sn = code && SHOWER_NAMES[code];
+  const emb = document.getElementById('iEmb');
+  if (!m) { document.getElementById('iName').textContent = '—'; document.getElementById('iDir').textContent = '時刻が進むと、流れた流星がここに出ます'; emb.innerHTML = embBase(); ['iMag', 'iVel', 'iAlt'].forEach(id => { document.getElementById(id).textContent = '—'; }); return; }
+  const code = m.iau_code, sn = code && SHOWER_NAMES[code];
   const name = code ? (sn ? sn[0] : `流星群 ${code}`) : '散在流星';
-  const from = cameFrom(m);
-  const fromTxt = from.alt > 0 ? `${dir8(from.az)}の空 高さ${Math.round(from.alt)}°の方向から` : `${dir8(from.az)}の地平線の下の方向から`;
-  const sub = code
-    ? `${sn ? `${sn[1]} · IAU ${String(sn[2]).padStart(3, '0')}` : `IAU ${code}`}${sn && sn[3] ? ' · 日本語名は訳' : ''}`
-    : 'どの流星群にも属さない流星';
-  document.getElementById('iName').innerHTML = `${name}<small>${fmtJST(m._t, true)} JST</small>`;
-  document.getElementById('iSub').innerHTML = `${sub}<br><span class="from">${fromTxt}</span>`;
-  const see = document.getElementById('iSee');
-  see.className = 'tm-see' + (m.eye ? '' : ' no');
-  see.innerHTML = !m.visible ? `${city.ja}からは地平線の下で見えない（GMN のカメラが記録した流星）`
-    : `<b>${magLike(m.magHere)}</b>の明るさ ・ ` + (m.magHere <= CITY_LIMIT ? `${city.ja}の街なかでも肉眼で見える（目安）`
-      : m.eye ? `暗い空なら肉眼で見える。${city.ja}の街なかでは見えにくい（目安）`
-      : `肉眼ではほぼ見えない。飛んでいたことは記録されている`);
-  const fb = document.getElementById('iFire'); fb.hidden = !(m.peak_absmag < FIREBALL_ABS);
+  document.getElementById('iName').innerHTML = `${name}${sn && sn[3] ? '<sup title="公式の和名がないので、英名を直した訳">＊</sup>' : ''}${m.peak_absmag < FIREBALL_ABS ? '<span class="fire" title="100 km の距離で −4等より明るい（IAU の定義）">火球</span>' : ''}`;
+  // 空のどこ（一番明るかったところ）と、空の上での動く向き
+  const pk = m.pts[m.peakIdx], b = m.pts[0], e = m.pts[NPTS - 1];
+  const P = (q) => { const r = 27 * (90 - Math.max(0, q.alt)) / 90, a = q.az * DEG; return [30 - r * Math.sin(a), 30 - r * Math.cos(a)]; };
+  let dirTxt;
+  if (!m.visible) dirTxt = `地平線の下（${city.ja}からは見えない）`;
+  else {
+    const [bx, by] = P(b), [ex, ey] = P(e), ang = Math.atan2(-(ey - by), ex - bx) / DEG;
+    const arrow = ARROWS[((Math.round(ang / 45) % 8) + 8) % 8], d = dir8(pk.az);
+    dirTxt = `${arrow} ${d}（${DIR_EN[d]}）・仰角${Math.round(Math.max(0, pk.alt))}°` + (m.eye ? '' : ' ・ 肉眼ではほぼ見えない');
+  }
+  document.getElementById('iDir').textContent = dirTxt;
+  // 記号：向きは空の上で流れた向き、長さと描く速さは流星の速さ（速いほど長く、一瞬で）。位置は記号なので中心に
+  const col = m.iau_code === 'LEO' ? 'var(--amber)' : 'var(--sky)';
+  if (m.visible) {
+    const [bx, by] = P(b), [ex, ey] = P(e), dl = Math.hypot(ex - bx, ey - by) || 1, ux = (ex - bx) / dl, uy = (ey - by) / dl;
+    const L = 14 + 30 * Math.max(0, Math.min(1, (m.v_init_kms - 11) / 62)), x0 = 30 - ux * L / 2, y0 = 30 - uy * L / 2, x1 = 30 + ux * L / 2, y1 = 30 + uy * L / 2;
+    const dur = Math.max(0.25, Math.min(1.4, 1.7 - m.v_init_kms / 55)).toFixed(2), gid = 'g' + m._t;
+    emb.innerHTML = embBase() + `<defs><linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"><stop offset="0" stop-color="${m.iau_code === 'LEO' ? '#ffb547' : '#8fd8ff'}" stop-opacity="0"/><stop offset="1" stop-color="${m.iau_code === 'LEO' ? '#ffb547' : '#8fd8ff'}"/></linearGradient></defs>` +
+      `<path class="emb-path" d="M ${x0.toFixed(1)} ${y0.toFixed(1)} L ${x1.toFixed(1)} ${y1.toFixed(1)}" pathLength="100" style="stroke:url(#${gid});animation-duration:${dur}s"/>` +
+      `<circle class="emb-head" cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="2.4" style="fill:${col};animation-delay:${dur}s"/>`;
+  } else emb.innerHTML = embBase();
   const mg = m.magHere;
-  document.getElementById('iMag').innerHTML = m.visible ? `${mg < 0 ? '−' : '+'}${Math.abs(mg).toFixed(1)}<small>等</small>` : '—';
+  const magEl = document.getElementById('iMag');
+  magEl.innerHTML = m.visible ? `${mg < 0 ? '−' : '+'}${Math.abs(mg).toFixed(1)}<small>等</small>` : '—';
+  magEl.title = m.visible ? `${magLike(mg)}の明るさ（ここから見た等級）` : '';
   document.getElementById('iVel').innerHTML = `${m.v_init_kms.toFixed(1)}<small>km/s</small>`;
   document.getElementById('iAlt').innerHTML = `${Math.round(m.ht_beg_km)}→${Math.round(m.ht_end_km)}<small>km</small>`;
-  const b = m.pts[0], e = m.pts[NPTS - 1];
-  const where = (p) => p.alt > 0 ? `${dir8(p.az)} ${Math.round(p.alt)}°` : '地平線の下';
-  document.getElementById('iMeta').innerHTML =
-    `<span>SKY<b>${where(b)} → ${where(e)}</b></span><span>DURATION<b>${(m.duration_s ?? 0).toFixed(2)} s</b></span>` +
-    `<span>DIST<b>${Math.round(m.distPeak).toLocaleString()} km</b></span><span>STATIONS<b>${m.num_stations ?? '—'}</b></span>`;
-  // 光った道すじ（横：光り始めからの長さ、縦：高さ）。オレンジの印＝一番明るかった高さ
-  const A = ecef(m.lat_beg, m.lon_beg, m.ht_beg_km), B = ecef(m.lat_end, m.lon_end, m.ht_end_km);
-  const L = Math.hypot(B[0] - A[0], B[1] - A[1], B[2] - A[2]);
-  const H0 = 60, H1 = 130, X0 = 34, X1 = 312, yOf = h => 52 - 46 * (h - H0) / (H1 - H0);
-  const x1 = X0 + (X1 - X0) * Math.min(1, L / 120);
-  const pk = m.peak_ht_km ?? (m.ht_beg_km + m.ht_end_km) / 2, xp = X0 + (x1 - X0) * m.peakF;
-  document.getElementById('iTrack').innerHTML =
-    `<line class="grid" x1="${X0}" x2="${X1}" y1="${yOf(80)}" y2="${yOf(80)}"/><line class="grid" x1="${X0}" x2="${X1}" y1="${yOf(120)}" y2="${yOf(120)}"/>` +
-    `<line class="base" x1="${X0}" x2="${X1}" y1="56" y2="56"/>` +
-    `<text x="0" y="${yOf(120) + 3}">120km</text><text x="0" y="${yOf(80) + 3}">80km</text>` +
-    `<path class="path" d="M ${X0} ${yOf(m.ht_beg_km)} L ${x1} ${yOf(m.ht_end_km)}"/>` +
-    `<circle class="dot" cx="${xp}" cy="${yOf(pk)}" r="4.2"/><circle class="dot-in" cx="${xp}" cy="${yOf(pk)}" r="1.7"/>` +
-    `<text class="hl" x="${Math.min(X1 - 70, xp + 8)}" y="${yOf(pk) - 6}">PEAK ${Math.round(pk)} km</text>` +
-    `<text x="${X1}" y="${yOf(m.ht_end_km) + (yOf(m.ht_end_km) > 44 ? -6 : 12)}" text-anchor="end">LENGTH ${Math.round(L)} km</text>`;
 }
+const embBase = () => '<circle class="emb-ring" cx="30" cy="30" r="27"/><line class="emb-n" x1="30" y1="1" x2="30" y2="6"/>';
 
 // ---------- 時間を進める ----------
 const rimTime = document.getElementById('rimTime');
@@ -840,16 +863,18 @@ function tick(now) {
 
 // ---------- 操作 ----------
 const playBtn = document.getElementById('playBtn');
-function setPlaying(v) {
-  if (v && simT >= T1) { simT = T0; active = []; lastIdx = idxAt(simT); updateCount(); }
-  playing = v; playBtn.classList.toggle('on', v); playBtn.textContent = v ? '❚❚' : '▶';
-  playBtn.setAttribute('aria-label', v ? '一時停止' : '再生');
-  document.getElementById('rimLive').textContent = v ? '観測中' : '一時停止';
+const SPEEDS = [1, 60, 120, 600, 0]; // 0＝停止
+function setSpeed(v) {
+  if (v > 0 && simT >= T1) { simT = T0; active = []; lastIdx = idxAt(simT); updateCount(); }
+  playing = v > 0; if (v > 0) speed = v;
+  playBtn.classList.toggle('on', playing);
+  document.getElementById('playIcon').textContent = playing ? '▶' : '❚❚';
+  document.getElementById('playSpeed').textContent = playing ? (v === 1 ? '実時間' : `×${v}`) : '停止';
+  playBtn.setAttribute('aria-label', `${playing ? (v === 1 ? '実時間' : v + '倍') : '停止中'}。押すと速さが変わる`);
+  document.getElementById('rimLive').textContent = playing ? '観測中' : '一時停止';
 }
-playBtn.addEventListener('click', () => setPlaying(!playing));
-document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => {
-  speed = +b.dataset.speed; document.querySelectorAll('[data-speed]').forEach(x => x.classList.toggle('cur', x === b));
-}));
+const setPlaying = v => setSpeed(v ? speed : 0);
+playBtn.addEventListener('click', () => setSpeed(SPEEDS[(SPEEDS.indexOf(playing ? speed : 0) + 1) % SPEEDS.length]));
 function setCity(key) {
   city = CITIES[key];
   skyline = buildSkyline({ tokyo: 11, osaka: 47, fukuoka: 83 }[key] * 7919);
@@ -886,8 +911,8 @@ new ResizeObserver(layout).observe(domeEl);
   layout();
   const q = new URLSearchParams(location.hash.slice(1));
   if (q.get('t') && !isNaN(Date.parse(q.get('t')))) simT = Date.parse(q.get('t'));
-  if (q.get('speed') && document.querySelector(`[data-speed="${q.get('speed')}"]`)) document.querySelector(`[data-speed="${q.get('speed')}"]`).click();
   setCity(CITIES[q.get('city')] ? q.get('city') : 'fukuoka'); // はじめは福岡（GMN の流星が近く、いちばんよく見える。2026-11-22 オーナー）
+  setSpeed(SPEEDS.includes(+q.get('speed')) && +q.get('speed') > 0 ? +q.get('speed') : 120); // 日の入り・日の出が決まってから（先に呼ぶと時刻が戻る）
   requestAnimationFrame(tick);
 })();
 })();
