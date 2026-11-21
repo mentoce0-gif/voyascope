@@ -96,6 +96,12 @@
     background: rgba(7, 20, 43, 0.85); border: 1px solid var(--mint-dim); box-shadow: 0 0 14px rgba(94, 242, 194, 0.18);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   @media (min-width: 900px) and (min-aspect-ratio: 1/1) { .to-space { width: 88px; height: 88px; font-size: 0.72rem; } }
+  /* スマホ：空のふち（建物）に重なっても読めるように、地をしっかり塗り、枠と字を強く（2026-11-22 オーナー） */
+  @media (max-width: 899px), (max-aspect-ratio: 1/1) {
+    .to-space { width: 84px; height: 84px; right: -2px; bottom: -6px; font-size: 0.8rem; font-weight: 700; color: var(--text);
+      background: rgba(7, 20, 43, 0.97); border: 1.5px solid var(--mint); box-shadow: 0 0 0 4px rgba(2, 6, 15, 0.9), 0 0 18px rgba(94, 242, 194, 0.35); }
+    .dome .to-space svg.up2 { width: 18px; height: 22px; }
+  }
   .to-space:hover { background: var(--mint-faint); }
   /* 三角を2つ重ねたマーク：宙（そら）へ上がるイメージ。上の三角が明るく、ゆっくり上へ流れる */
   .dome .to-space svg.up2 { position: static; inset: auto; width: 14px; height: 18px; flex: none; overflow: visible; } /* 空の円の SVG の配置（.dome svg）が効かないように */
