@@ -18,6 +18,14 @@ test("ランチャー：指の向きから近い項目。近すぎる・離れ�
   assert.equal(pickIndex(-100, 30, a), 0); // 少し左下でも OBS
 });
 
+test("ランチャー：角度を決めた項目（SCOPE の真下 270°）も指の向きで選べる", () => {
+  const a = [180, 150, 120, 90, 270];
+  assert.equal(pickIndex(0, 100, a), 4); // 真下
+  assert.equal(pickIndex(-20, 100, a), 4); // 少し左下
+  assert.equal(pickIndex(20, 100, a), 4); // 少し右下
+  assert.equal(pickIndex(-100, 0, a), 0); // 左はいままでどおり
+});
+
 const items = [
   { id: "a", name: "MMX", title: "MMX の打ち上げ", when: { at: "2026-10-19T19:41:03Z" }, status: "done", href: "missions/mmx/" },
   { id: "b", name: "ボイジャー1号", title: "ボイジャー1号が地球から1光日に", when: { at: "2026-11-18T10:16:07Z" }, status: "scheduled", href: "missions/voyager-1/" },

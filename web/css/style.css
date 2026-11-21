@@ -1681,6 +1681,9 @@ dialog.greeting > .card-inner > .greet-actions .btn-primary { background: none; 
     backdrop-filter: blur(4px);
   }
   .room-nav .room-link:hover { background: rgba(255, 181, 71, 0.14); }
+  /* 流星を眺める（/meteors/・試験版）：SpaceTips の琥珀色と見分けるため、流星の画面の水色の枠 */
+  .room-nav .room-link.meteor-link { border-color: rgba(143, 216, 255, 0.7); color: #8fd8ff; }
+  .room-nav .room-link.meteor-link:hover { background: rgba(143, 216, 255, 0.12); }
   .scope-fab { display: none; }
 }
 .scope-fab {

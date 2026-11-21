@@ -52,6 +52,18 @@
       "files": ["mmx/now/*", "vendor/three-r128.min.js", "js/far/models.js", "js/events.js", "js/launch-plan.js", "vendor/astronomy.min.js", "assets/earth/day-2048.jpg", "data/events.json", "data/cards/iss.json"]
     },
     {
+      "id": "meteors",
+      "label": "流星を眺める（meteors/・試験版）を開いたときに読むもの（ページ・流星のデータ・星の位置・ロゴ）。2026-11-21",
+      "max_kb": 120,
+      "files": ["meteors/index.html", "meteors/data/*", "assets/brand/logo-600.webp"]
+    },
+    {
+      "id": "meteors-space",
+      "label": "流星を眺める｜宇宙から見る（meteors/space/・試験版）を開いたときに読むもの（ページ・日本のまわりの細かい夜の画像・流星のデータ・three.js r128・地球の画像・ロゴ）。2026-11-21",
+      "max_kb": 1000,
+      "files": ["meteors/space/*", "meteors/data/meteors_20261118_japan.json", "vendor/three-r128.min.js", "assets/earth/day-2048.jpg", "assets/earth/night-2048.jpg", "assets/brand/logo-600.webp"]
+    },
+    {
       "id": "missions",
       "label": "「一言でわかる」ページ（missions/〇〇/）を開いたときに読むもの（ページ・5つの問いの図・three.js r128・探査機の模型・地球の画像）。いちばん大きいページで数える。2026-10-30",
       "max_kb": 500,

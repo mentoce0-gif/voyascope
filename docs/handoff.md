@@ -11,6 +11,7 @@
 | 本番 | https://voyascope.org | **2026-10-15 に正式に切り替え（M9 ②）**。Cloudflare（Workers の静的アセット）。`.github/workflows/deploy.yml`・`wrangler.jsonc`・`web/_headers`。鍵は GitHub の Secrets（`CLOUDFLARE_API_TOKEN`・`CLOUDFLARE_ACCOUNT_ID`） |
 | もとの公開先 | https://mentoce0-gif.github.io/voyascope/ | GitHub Pages。いまは「voyascope.org に移りました」の案内だけ（`pages-moved/`・`pages.yml`。同じ道の voyascope.org へ3秒で移る） |
 | 試作の部屋 | https://voyascope.org/lab/ | パスワードつき（2026-10-20）。`src/lab-worker.js` が `/lab/` だけ Basic 認証。パスワードは Cloudflare の Worker のシークレット `LAB_PASSWORD`（未設定なら開かない）。リポジトリは公開なので中身は GitHub で見える。01＝観測ログ（OBS-LOG）、02＝SKY OBSERVER → 2026-10-21 に鍵なしの https://voyascope.org/sky/ へ（試験版・noindex。`web/sky/`） |
+| 流星を眺める | https://voyascope.org/meteors/ （宇宙から見る：`/meteors/space/`） | 試験版・noindex（2026-11-21、PR #110 がマージされたら公開）。GMN の 11/18 の夜。PC の部屋の帯と、スマホの SCOPE の真下から入る。データは `web/meteors/data/`（`scripts/gmn/`） |
 | MMX の予告ページ | https://voyascope.org/mmx/ | `web/mmx/`。noindex、アプリからはまだリンクしない。紹介のメールに添えた |
 | X（旧 Twitter） | https://x.com/voyascope （@voyascope） | オーナーのアカウント（作者として発信）。プロフィールは「VOYASCOPE をつくっている人。本業のかたわら…※非公式ファンメイド作品」（2026-10-08 案C）。開発記録の投稿文は Claude Code が下書き（X の重み付きで280以内、非公式ファンメイドの一文を入れる） |
 | 公開のリポジトリ | `mentoce0-gif/voyascope` | 2026-10-04 に作り直した（PR は #1 から振り直し） |
@@ -96,10 +97,14 @@
 | 日本宇宙少年団（YAC） | 問い合わせのフォーム（同上） | 2026-10-05 | 同上 |
 | Discord のコミュニティ「Cosmo Base」 | 雑談のチャンネルに投稿（リアクションあり・返事なし） | 2026-10-08 報告 | `research/outreach/2026-10-08-cosmo-base.md`（非公開） |
 | JPL の教育の部署（Engagement/Education Office） | JPL SSD の方が、やりとりを回してくれた。先方の計画に合えば直接連絡が来るかもしれない。こちらからは先に連絡しない | 2026-10-06 | `research/verification/2026-10-03-c14.md`（非公開） |
+| チャッピー | C42 流星の明るさ（等級）を目で見た感覚で伝える材料（試作の部屋 04 のため。6等の仮の値もこれで確かめる） | 2026-11-20 | `prompts/src/chappy.md` の C42 |
 
 返事が来たら、オーナーが要点を貼る → Claude Code が記録して、次の動きを一緒に考える（記録に、相手とオーナーの氏名・メールアドレスは書かない）。
 
 ## オーナーの判断待ち
+
+- **「流星を眺める｜見上げるver.」**（`web/meteors/`。2026-11-21 オーナーの軌道修正で試作の部屋 04 のメインに → 同日、鍵なしの試験版へ。PR #110）：東京・大阪・福岡から見上げた円形の魚眼に、GMN の流星を時刻どおりに。決まったこと（2026-11-21 オーナー）：数は GMN が日本のまわりで記録した数・肉眼でほぼ見えない流星も描いてそう書く（6等は仮、C42 で確かめる）・火花は −2等のまま・星は IAU-CSN（CC BY）でよい。流星群の日本語名は C43 で照合済み（国立天文台の和名一覧。一覧にない5つは訳のまま）。依頼の最後の項目が途中で切れていた（続きをオーナーに確認）
+- **「流星を眺める｜宇宙から見るver.」**（`web/meteors/space/`、PR #110）：GMN の 11/18 の夜の490件を、NASA の夜の地球の球体の上に本当の高さで。決まったこと（2026-11-19〜20 オーナー）：見出しは「日本のまわりの宙」・地図は球体・色は付けない・引用は GMN と画像の両方ルールどおり・横から見る→日本全体のオープニング・見た目は本体にそろえる。**次**：世界の街（オーナー：B が面白そう。北アメリカ・ヨーロッパは日本より記録が多い。その地域の夜のデータの取り出しと現地時間の表示が要る）。C42 が来たら、明るさを「金星くらい」「1等星くらい」のように目で見た感覚で出す（形はオーナーと決める）。カーマン線を画面に書くかは未定（書くなら出典の依頼）
 
 - **M13「ニュースの次に開く」の進め方**：目安の数字・計り方（Search Console／Cloudflare Web Analytics はルール5）・増やす主題の範囲 → [`news-next-plan.md`](news-next-plan.md) の 6.
 - **Search Console**：**入った（2026-11-11 オーナー。ドメインのプロパティ・sitemap 送信済み）**。「ページにリダイレクトがあります」の1件は `http://voyascope.org/`（https へ移すだけ。直さない）。数字は 12/16 週に見て、届け方の順番を決め直す

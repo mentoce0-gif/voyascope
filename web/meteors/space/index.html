@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>流星を眺める｜宇宙から見る（試験版）— VOYASCOPE</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="2026年11月18日の夜（しし座流星群）に日本のまわりで観測された流星を、宇宙から見た夜の地球の上に本当の高さで。VOYASCOPE の試験版（非公式ファンメイド作品）。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://voyascope.org/meteors/space/">
+<meta property="og:image" content="https://voyascope.org/assets/earth/hero-1600.webp">
+<meta property="og:title" content="流星を眺める｜宇宙から見る（試験版）— VOYASCOPE">
+<meta name="theme-color" content="#050e1f">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* 色・文字は VOYASCOPE 本体（web/css/style.css）にそろえる */
+  :root {
+    --navy-900: #050e1f; --navy-800: #07142b; --navy-700: #0c2140;
+    --mint: #5ef2c2; --mint-dim: rgba(94, 242, 194, 0.55); --mint-faint: rgba(94, 242, 194, 0.16);
+    --amber: #ffb547; --amber-dim: rgba(255, 181, 71, 0.6);
+    --text: #d9f4ea; --text-dim: #8fb3a8; --ref: #a8bce0;
+    --panel-bg: rgba(7, 20, 43, 0.84); --panel-border: rgba(94, 242, 194, 0.18);
+    --font-body: "Zen Kaku Gothic New", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --dim: var(--text-dim); --line: var(--panel-border);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--navy-900); color: var(--text);
+    font-family: var(--font-body); line-height: 1.6; overflow: hidden; -webkit-text-size-adjust: 100%; }
+  .mono { font-family: var(--font-mono); }
+  [hidden] { display: none !important; }
+  canvas#gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  canvas#gl:active { cursor: grabbing; }
+
+  /* 上：ロゴと見出し（本体の top-bar と同じ帯） */
+  .head { position: absolute; top: 0; left: 0; right: 0; z-index: 2; pointer-events: none;
+    padding: calc(env(safe-area-inset-top) + 12px) 20px 28px;
+    background: linear-gradient(180deg, rgba(5, 14, 31, 0.88) 0%, rgba(5, 14, 31, 0.55) 65%, rgba(5, 14, 31, 0) 100%); }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img { height: 22px; width: auto; display: block; }
+  .brand-sub { font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.2em; }
+  .head h1 { margin: 10px 0 2px; font-size: clamp(1.05rem, 2.4vw, 1.35rem); font-weight: 700; line-height: 1.4; letter-spacing: 0.03em; }
+  .head h1 b { color: var(--amber); font-family: var(--font-mono); font-weight: 700; }
+  .head rt { font-size: 0.5em; color: var(--text-dim); }
+  .head p { margin: 0; font-size: 0.78rem; color: var(--text-dim); max-width: 36em; }
+  .head p b { color: var(--text); font-family: var(--font-mono); font-weight: 400; }
+
+  /* パネル（本体の side-panel と同じ） */
+  .panel { position: absolute; z-index: 3; background: var(--panel-bg); border: 1px solid var(--panel-border);
+    border-radius: 10px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .panel h2 { margin: 0 0 6px; font-size: 0.72rem; color: var(--text-dim); font-weight: 400; letter-spacing: 0.1em; }
+
+  /* ボタン（本体の .btn・.btn-primary） */
+  .views { left: 16px; bottom: 58px; padding: 8px; display: flex; gap: 6px; flex-wrap: wrap; max-width: calc(100% - 32px); }
+  button { appearance: none; font-family: var(--font-body); font-size: 0.85rem; line-height: 1.4; color: var(--mint);
+    background: rgba(7, 20, 43, 0.72); border: 1px solid var(--mint-dim); border-radius: 3px; padding: 0.45em 0.9em;
+    min-height: 36px; cursor: pointer; transition: background 0.15s, color 0.15s, box-shadow 0.15s; }
+  button:hover { background: var(--mint-faint); }
+  button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  button.cur { background: var(--mint); color: var(--navy-800); box-shadow: 0 0 12px var(--mint-dim); }
+  button.play { border-color: var(--amber); color: var(--amber); letter-spacing: 0.12em; }
+  button.play:hover { background: rgba(255, 181, 71, 0.12); box-shadow: 0 0 18px var(--amber-dim); }
+  button.play.on { background: var(--amber); color: var(--navy-800); }
+
+  .legend { right: 16px; top: 108px; padding: 10px 12px; font-size: 0.78rem; min-width: 180px; }
+  .legend ul { list-style: none; margin: 0; padding: 0; }
+  .legend li { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+  .legend i { width: 22px; height: 3px; border-radius: 2px; flex: none; }
+  .legend .n { margin-left: auto; color: var(--text-dim); font-family: var(--font-mono); font-size: 0.75rem; }
+  .legend .hint { border-top: 1px solid var(--panel-border); margin-top: 8px; padding-top: 6px; color: var(--text-dim); font-size: 0.68rem; line-height: 1.6; }
+
+  /* 高さ（縮尺どおり）：地上・流星・ISS・いまの目の高さ */
+  .gauge { right: 16px; bottom: 58px; width: 186px; height: 236px; padding: 10px 10px 10px 12px; font-size: 0.7rem; }
+  .gauge .track { position: absolute; left: 22px; top: 34px; bottom: 26px; width: 2px; background: var(--panel-border); }
+  .gauge .mark { position: absolute; left: 14px; right: 8px; display: flex; align-items: center; gap: 6px; transform: translateY(50%); white-space: nowrap; }
+  .gauge .mark i { width: 18px; height: 2px; flex: none; }
+  .gauge .band { position: absolute; left: 17px; width: 12px; border-radius: 3px; background: linear-gradient(0deg, rgba(255,181,71,.25), rgba(255,220,150,.95)); }
+  .gauge .eye { color: var(--mint); }
+  .gauge .eye i { background: var(--mint); box-shadow: 0 0 6px var(--mint); }
+  .gauge .iss { color: var(--ref); }
+  .gauge .iss i { background: var(--ref); }
+  .gauge .ground { color: var(--text-dim); }
+  .gauge .ground i { background: var(--text-dim); }
+  .gauge .met { color: var(--amber); }
+  .gauge .met i { background: transparent; }
+  .gauge .off { position: absolute; left: 14px; top: 26px; color: var(--mint); }
+
+  /* 再生の時計（本体の clock-block のように計器の文字で） */
+  .clock { left: 50%; transform: translateX(-50%); top: 108px; padding: 6px 14px; display: none; text-align: center; }
+  .clock.on { display: block; }
+  .clock .t { font-size: 1.15rem; color: var(--amber); letter-spacing: 0.05em; }
+  .clock .t small { font-family: var(--font-body); font-size: 0.7rem; color: var(--text-dim); margin-left: 6px; letter-spacing: 0.1em; }
+  .clock .u { color: var(--text-dim); font-size: 0.68rem; }
+  .clock .bar { height: 2px; background: var(--panel-border); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .clock .bar span { display: block; height: 100%; width: 0; background: var(--amber); box-shadow: 0 0 6px var(--amber-dim); }
+
+  /* 3D の上の名前 */
+  .label { position: absolute; z-index: 1; pointer-events: none; font-size: 0.75rem; color: var(--text);
+    text-shadow: 0 0 4px #000, 0 0 8px #000; white-space: nowrap; transform: translate(-50%, -130%); letter-spacing: 0.05em; }
+  .label.pole { color: var(--ref); transform: translate(8px, -50%); font-size: 0.68rem; }
+  .label.pole.met { color: var(--amber); }
+  .label.rain { color: var(--amber); font-size: 0.8rem; letter-spacing: 0.12em; transform: translate(-50%, -50%); }
+
+  /* 下の帯：出典（本体の panel-foot の文字） */
+  .credit { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; padding: 8px 20px calc(8px + env(safe-area-inset-bottom));
+    font-size: 0.68rem; line-height: 1.6; color: var(--text-dim); background: rgba(5, 14, 31, 0.92); border-top: 1px solid var(--panel-border); }
+  .credit a, .sources a { color: var(--mint); text-underline-offset: 3px; }
+  .credit button { font-size: 0.68rem; min-height: 0; padding: 1px 8px; margin-left: 4px; }
+
+  .sources { position: absolute; z-index: 8; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(560px, calc(100% - 32px));
+    max-height: calc(100% - 120px); overflow: auto; padding: 16px 18px; font-size: 0.82rem; line-height: 1.75; }
+  .sources h2 { font-size: 1.05rem; color: var(--text); font-weight: 700; letter-spacing: 0.03em; margin-bottom: 8px; }
+  .sources h3 { margin: 14px 0 4px; font-size: 0.8rem; color: var(--mint); font-weight: 700; letter-spacing: 0.08em; }
+  .sources p, .sources li { margin: 0 0 6px; }
+  .sources ul { padding-left: 1.2em; margin: 0; }
+  .sources .close { position: absolute; right: 10px; top: 10px; }
+
+  #tipbox { position: absolute; z-index: 6; pointer-events: none; background: var(--panel-bg); color: var(--text);
+    border: 1px solid var(--panel-border); border-radius: 10px; padding: 8px 12px; max-width: 270px; font-size: 0.75rem; line-height: 1.65;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  #tipbox .name { font-size: 0.92rem; font-weight: 700; letter-spacing: 0.03em; margin-bottom: 2px; }
+
+  .msg { position: absolute; inset: 0; display: none; place-items: center; z-index: 9; padding: 24px; text-align: center; color: var(--text-dim); }
+  .msg.on { display: grid; }
+
+  @media (max-width: 640px) {
+    .head { padding-left: 16px; padding-right: 16px; }
+    .brand img { height: 18px; }
+    .brand-sub { font-size: 0.62rem; letter-spacing: 0.12em; }
+    .head h1 { margin-top: 8px; }
+    .head p { font-size: 0.72rem; }
+    .legend { top: 150px; right: 12px; min-width: 0; padding: 6px 9px; font-size: 0.7rem; }
+    .legend h2, .legend .hint { display: none; }
+    .legend li { margin: 1px 0; }
+    .gauge { left: 12px; right: auto; top: 150px; bottom: auto; width: 152px; height: 168px; font-size: 0.62rem; }
+    .gauge h2 { font-size: 0.62rem; }
+    .views { left: 12px; bottom: 62px; max-width: calc(100% - 24px); }
+    button { font-size: 0.78rem; padding: 0.4em 0.75em; }
+    .clock { top: auto; bottom: 168px; left: 12px; transform: none; }
+  }
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="宇宙から見た夜の地球。日本のまわりの上空に流星の通り道が光の筋で描かれている"></canvas>
+<div id="labels"></div>
+
+<header class="head">
+  <div class="brand"><a href="../../" aria-label="VOYASCOPE のトップへ" style="pointer-events:auto"><img src="../../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜宇宙から見る ・ 試験版</span><a href="../" style="pointer-events:auto;font-size:.72rem;color:var(--mint);margin-left:6px">見上げる ver. →</a></div>
+  <h1>2026年11月18日の夜、日本のまわりの<ruby>宙<rt>そら</rt></ruby>を<br><b id="count">—</b>個の流星が飛んでいた</h1>
+  <p id="sub">流星が光ったのは、地上から高さ<b>約80〜120 km</b>（多くの流星）。ISS が回る高さ（約400 km）の4分の1ほどのところ。</p>
+</header>
+
+<div class="panel clock mono" id="clock"><div class="t" id="clockT">--:--</div><div class="u" id="clockU"></div><div class="bar"><span id="bar"></span></div></div>
+
+<aside class="panel legend" id="legend" aria-label="凡例"></aside>
+
+<aside class="panel gauge" id="gauge" aria-label="高さのものさし（縮尺どおり）">
+  <h2>高さ（縮尺どおり）</h2>
+  <div class="track"></div>
+  <div class="band" id="gBand"></div>
+  <div class="mark met" id="gMet"><i></i><span>流星が光る 約80〜120 km</span></div>
+  <div class="mark iss" id="gIss"><i></i><span>ISS 約400 km</span></div>
+  <div class="mark ground" id="gGround"><i></i><span>地上 0 km</span></div>
+  <div class="mark eye mono" id="gEye"><i></i><span id="gEyeT">いまの目</span></div>
+  <div class="off mono" id="gOff" hidden></div>
+</aside>
+
+<nav class="panel views" aria-label="視点">
+  <button class="play" id="play">▶ その夜を再生</button>
+  <button data-view="all" class="cur">日本全体</button>
+  <button data-view="tokyo">東京上空</button>
+  <button data-view="osaka">大阪上空</button>
+  <button data-view="kyushu">九州上空</button>
+  <button data-view="side">横から見る</button>
+</nav>
+
+<footer class="credit">
+  データ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">Global Meteor Network</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）から抽出・加工 ／
+  地球の画像：NASA Blue Marble・Black Marble をもとに作成 ／ 非公式のファンメイド試作
+  <button type="button" id="srcBtn">出典と引用</button>
+</footer>
+
+<section class="panel sources" id="sources" hidden aria-label="出典と引用">
+  <button type="button" class="close" id="srcClose">閉じる</button>
+  <h2>出典と引用</h2>
+  <h3>流星のデータ</h3>
+  <p>Global Meteor Network（GMN）の軌道データ（日ごとの軌道サマリー）から、2026-11-18 08:00〜21:00 UTC に、光り始めか消えた点が北緯24〜46°・東経122〜146°に入る流星を抜き出し、線に描き直しました（加工）。</p>
+  <ul>
+    <li>データのページ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">https://globalmeteornetwork.org/data/</a></li>
+    <li>ライセンス：<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">クリエイティブ・コモンズ 表示 4.0 国際（CC BY 4.0）</a></li>
+    <li>列の定義：<a href="https://globalmeteornetwork.org/data/media/GMN_orbit_data_columns.pdf" target="_blank" rel="noopener">GMN_orbit_data_columns.pdf</a></li>
+    <li id="srcFiles">使ったファイル：—</li>
+  </ul>
+  <p>GMN がデータを使うときに引用を求めている論文：</p>
+  <ul lang="en">
+    <li>Vida, D., Gural, P.S., Brown, P.G., Campbell-Brown, M. and Wiegert, P., 2020. Estimating trajectories of meteors: an observational Monte Carlo approach – I. Theory. <i>Monthly Notices of the Royal Astronomical Society</i>, 491(2), pp.2688–2705. <a href="https://academic.oup.com/mnras/article/491/2/2688/5626361" target="_blank" rel="noopener">MNRAS</a> ／ <a href="https://arxiv.org/abs/1911.02979" target="_blank" rel="noopener">arXiv</a></li>
+    <li>Vida, D., Šegon, D., Gural, P.S., Brown, P.G., McIntyre, M.J., Dijkema, T.J., Pavletić, L., Kukić, P., Mazur, M.J., Eschman, P. and Roggemans, P., 2021. The Global Meteor Network – Methodology and first results. <i>Monthly Notices of the Royal Astronomical Society</i>, 506(4), pp.5046–5074. <a href="https://academic.oup.com/mnras/article-abstract/506/4/5046/6347233" target="_blank" rel="noopener">MNRAS</a> ／ <a href="https://arxiv.org/abs/2107.12335" target="_blank" rel="noopener">arXiv</a></li>
+  </ul>
+  <h3>高さ</h3>
+  <ul>
+    <li>流星の大きさ・明るさの描き分け：GMN の「Peak AbsMag」（100 km 先から見たときの明るさ。等級）から。数の小さい（明るい）流星ほど大きく描いています（見た目の演出）</li>
+    <li>しし座の流星から伸びるうすい線：光り始めと消えた点を結んだ向きを、来た側へ 700 km まっすぐ伸ばしたもの。大気に入る前のちりは見えません（向きを見せるための線）。地球は回っているので、夜のあいだに向きは少しずつ変わります</li>
+    <li>流星の高さ：GMN の値（WGS84 の楕円体からの高さ）。「約80〜120 km」は、この夜の流星の消えた高さの下から1割（約78 km）〜光り始めの高さの上から1割（約118 km）（2026-11-21 に取り直した426件で計算）</li>
+    <li>ISS の高さ 約400 km：<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">NASA</a>（平均約250マイル＝約402 km）</li>
+  </ul>
+  <h3>地球と星空</h3>
+  <ul>
+    <li>地球の画像：NASA Blue Marble（昼）・Black Marble（夜の明かり）をもとに作成。日本のまわり（北緯18〜50°・東経116〜154°）は、<a href="https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/" target="_blank" rel="noopener">NASA Earth Observatory の Black Marble 2016（500 m 版の D1）</a>から切り出して縮めたもの。昼と夜の境目は、その時刻の太陽の位置から計算（おおよそ）</li>
+    <li>背景の星空は模擬です（実際の星の位置ではありません）</li>
+  </ul>
+  <h3>この画面について</h3>
+  <p>非公式のファンメイド試作です。線の位置・高さは、複数のカメラの観測から計算された推定値です。地球の画像は粗いので、街の明かりと流星の位置の細かい重なりは正確ではありません。</p>
+</section>
+
+<div class="msg" id="msg"></div>
+<div id="tipbox" hidden></div>
+
+<script type="module">
+let THREE;
+try { THREE = await import('../../vendor/three-r128.min.js'); }
+catch (e) { fail('3D の部品を読み込めませんでした。'); throw e; }
+
+const DATA_URL = '../data/meteors_20261118_japan.json';
+const R = 6371;           // 地球の半径（km。描画用）。1 単位 = 1 km
+const ISS_KM = 400;       // curation/spacecraft/iss.json（NASA、おおよその値）
+const DEG = Math.PI / 180;
+
+// ---- 流星群（LEO だけ目立たせる。日本語名は確かなものだけ） ----
+const SHOWERS = {
+  LEO: { ja: 'しし座流星群', color: [255, 190, 70] },
+  NTA: { ja: 'おうし座北流星群', color: [120, 200, 230] },
+  STA: { ja: 'おうし座南流星群', color: [120, 200, 230] },
+  AMO: { ja: 'いっかくじゅう座α流星群', color: [120, 200, 230] },
+};
+const OTHER = { color: [150, 140, 220] };
+const SPORADIC = { color: [150, 170, 200] };
+const groupOf = m => m.iau_code === 'LEO' ? 'LEO' : (m.iau_code ? 'OTHER' : 'SPO');
+const styleOf = m => m.iau_code ? (SHOWERS[m.iau_code] || OTHER) : SPORADIC;
+// 日本語名：国立天文台「流星群の和名一覧」（2026-11-05 更新・2026-11-21 確認）。JA_TR は一覧にないもの＝和名の決め方にならった訳（見上げるver. と同じ）
+const JA_NAOJ = { ORS: 'オリオン座χ南流星群', NOO: '11月オリオン座流星群', OER: 'エリダヌス座ο流星群', DAD: '12月りゅう座α流星群' };
+const JA_TR = { TAT: 'おうし座τ流星群', LTA: 'おうし座λ流星群', PIH: 'うみへび座π流星群', NZP: '11月ペルセウス座ζ流星群', TOL: 'やまねこ座28流星群' };
+const nameOf = m => m.iau_code ? (SHOWERS[m.iau_code] ? SHOWERS[m.iau_code].ja : JA_NAOJ[m.iau_code] ? JA_NAOJ[m.iau_code] : JA_TR[m.iau_code] ? `${JA_TR[m.iau_code]}<small>（日本語名は訳）</small>` : `流星群（IAU コード ${m.iau_code}）`) : '散在流星';
+const lighten = c => c.map(v => Math.round(v + (255 - v) * 0.55));
+
+// ---- 座標 ----
+function xyz(lat, lon, h = 0, out = new THREE.Vector3()) {
+  const r = R + h, p = lat * DEG, l = lon * DEG;
+  return out.set(r * Math.cos(p) * Math.cos(l), r * Math.sin(p), -r * Math.cos(p) * Math.sin(l));
+}
+function frame(lat, lon) { // その地点の 東・北・上
+  const p = lat * DEG, l = lon * DEG;
+  return {
+    e: new THREE.Vector3(-Math.sin(l), 0, -Math.cos(l)),
+    n: new THREE.Vector3(-Math.sin(p) * Math.cos(l), Math.cos(p), Math.sin(p) * Math.sin(l)),
+    u: new THREE.Vector3(Math.cos(p) * Math.cos(l), Math.sin(p), -Math.cos(p) * Math.sin(l)),
+  };
+}
+// 太陽が真上にある地点（おおよその式。昼夜の境目を描くためだけ）
+function subsolar(ms) {
+  const n = ms / 86400000 - 10957.5; // J2000 からの日数
+  const L = (280.46 + 0.9856474 * n) * DEG, g = (357.528 + 0.9856003 * n) * DEG;
+  const lam = L + (1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * DEG, eps = (23.439 - 4e-7 * n) * DEG;
+  const ra = Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)), dec = Math.asin(Math.sin(eps) * Math.sin(lam));
+  const gmst = (280.46061837 + 360.98564736629 * n) * DEG;
+  let lon = (ra - gmst) / DEG; lon = ((lon + 540) % 360) - 180;
+  return { lat: dec / DEG, lon };
+}
+
+// ---- three.js ----
+const canvas = document.getElementById('gl');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); }
+catch (e) { fail('この端末では 3D を表示できませんでした（WebGL）。'); throw e; }
+const DPR = Math.min(devicePixelRatio || 1, 2);
+renderer.setPixelRatio(DPR);
+renderer.setClearColor(0x02040b, 1);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(42, 1, 5, 3e6);
+
+// 地球：昼は Blue Marble、夜は Black Marble（街の明かり）
+const JP = { lon0: 116, lon1: 154, lat0: 18, lat1: 50 }; // night-japan-3072.jpg の範囲（NASA Black Marble 2016 の 500m 版 D1 から切り出し）
+const earthU = { dayMap: { value: null }, nightMap: { value: null }, jpMap: { value: null }, hasJp: { value: 0 }, sunDir: { value: new THREE.Vector3(1, 0, 0) } };
+const earth = new THREE.Mesh(new THREE.SphereGeometry(R, 160, 120), new THREE.ShaderMaterial({
+  uniforms: earthU,
+  vertexShader: `varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader: `
+    uniform sampler2D dayMap; uniform sampler2D nightMap; uniform sampler2D jpMap; uniform float hasJp; uniform vec3 sunDir; varying vec3 vP;
+    void main(){
+      vec3 n = normalize(vP);
+      float lon = degrees(atan(-n.z, n.x)), lat = degrees(asin(clamp(n.y,-1.0,1.0)));
+      vec2 uv = vec2(lon / 360.0 + 0.5, lat / 180.0 + 0.5);
+      vec3 day = texture2D(dayMap, uv).rgb, night = texture2D(nightMap, uv).rgb;
+      if (hasJp > 0.5) {
+        vec2 ju = vec2((lon - ${JP.lon0}.0) / ${JP.lon1 - JP.lon0}.0, (lat - ${JP.lat0}.0) / ${JP.lat1 - JP.lat0}.0);
+        if (ju.x > 0.0 && ju.x < 1.0 && ju.y > 0.0 && ju.y < 1.0) {
+          float edge = min(min(ju.x, 1.0 - ju.x) * ${JP.lon1 - JP.lon0}.0, min(ju.y, 1.0 - ju.y) * ${JP.lat1 - JP.lat0}.0);
+          night = mix(night, texture2D(jpMap, ju).rgb, smoothstep(0.0, 1.5, edge));
+        }
+      }
+      float d = smoothstep(-0.08, 0.14, dot(n, sunDir));
+      vec3 c = mix(night * 0.72 + vec3(0.006, 0.012, 0.03), day * 0.95, d); // 街の明かりは控えめに（流星を目立たせる）
+      gl_FragColor = vec4(c, 1.0);
+    }`,
+}));
+scene.add(earth);
+
+// 大気の縁の光（見た目のための演出）
+const atmo = new THREE.Mesh(new THREE.SphereGeometry(R * 1.022, 96, 72), new THREE.ShaderMaterial({
+  uniforms: { camPos: { value: camera.position } },
+  vertexShader: `varying vec3 vN; varying vec3 vW; void main(){ vN = normalize(position); vW = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader: `uniform vec3 camPos; varying vec3 vN; varying vec3 vW;
+    void main(){ vec3 v = normalize(camPos - vW); float f = pow(1.0 - abs(dot(v, vN)), 5.0);
+      gl_FragColor = vec4(vec3(0.35, 0.6, 1.0) * f * 0.9, f); }`,
+  side: THREE.BackSide, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+}));
+scene.add(atmo);
+
+// 模擬の星空
+{
+  const N = 2500, pos = new Float32Array(N * 3), sz = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const z = Math.random() * 2 - 1, a = Math.random() * Math.PI * 2, r = Math.sqrt(1 - z * z);
+    pos.set([r * Math.cos(a) * 2e6, z * 2e6, r * Math.sin(a) * 2e6], i * 3);
+    sz[i] = Math.random() < 0.06 ? 2.2 : 0.8 + Math.random();
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('aSize', new THREE.BufferAttribute(sz, 1));
+  scene.add(new THREE.Points(g, new THREE.ShaderMaterial({
+    uniforms: { dpr: { value: DPR } },
+    vertexShader: `attribute float aSize; uniform float dpr; varying float vA; void main(){ vA = aSize/2.2; gl_PointSize = aSize*dpr; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `varying float vA; void main(){ float d = length(gl_PointCoord-0.5); gl_FragColor = vec4(vec3(0.75,0.82,1.0), (1.0-smoothstep(0.2,0.5,d))*(0.35+0.5*vA)); }`,
+    transparent: true, depthWrite: false,
+  })));
+}
+
+// 再生の状態を受けとる共通の uniform（uPi < 0 なら全部表示）
+const playU = { uPi: { value: -1 }, uFlash: { value: 14 }, dpr: { value: DPR }, uZoom: { value: 1 } };
+// 等級 → 見た目の強さ（明るい流星ほど大きく強く。−5等の火球と+3等の暗い流星で差が出るように）
+const magSize = mag => Math.max(0.6, Math.min(2.6, 1 + (1.5 - mag) * 0.25));
+const magAlpha = mag => Math.max(0.3, Math.min(1.3, 0.55 + (2.5 - mag) * 0.13));
+const PLAY_VS_HEAD = `
+  uniform float uPi; uniform float uFlash; uniform float uZoom; attribute float aRank; attribute float aT;
+  float playAlpha(){ if (uPi < 0.0) return 1.0; if (aRank > uPi) return 0.0;
+    float age = uPi - aRank; if (age < uFlash) return aT <= age / (uFlash*0.35) ? 1.0 : 0.0; return 0.6; }
+  float flashing(){ return (uPi >= 0.0 && aRank <= uPi && uPi - aRank < uFlash) ? 1.0 : 0.0; }`;
+
+// 線（流星・消えた点から地面への縦線・地面の影）：頂点ごとの色と透明度
+function lineMesh(verts, order) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts.p), 3));
+  g.setAttribute('aColor', new THREE.BufferAttribute(new Float32Array(verts.c), 4));
+  g.setAttribute('aRank', new THREE.BufferAttribute(new Float32Array(verts.r), 1));
+  g.setAttribute('aT', new THREE.BufferAttribute(new Float32Array(verts.t), 1));
+  const m = new THREE.LineSegments(g, new THREE.ShaderMaterial({
+    uniforms: playU,
+    vertexShader: PLAY_VS_HEAD + `attribute vec4 aColor; varying vec4 vC;
+      void main(){ vC = aColor; vC.a *= playAlpha(); vC.a *= 1.0 + flashing(); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `varying vec4 vC; void main(){ gl_FragColor = vec4(vC.rgb * vC.a, vC.a); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  }));
+  m.renderOrder = order;
+  return m;
+}
+
+// 流星の光の筋（点を並べて、光り始めは大きく明るく、消える側は小さく暗く）
+const STEPS = 24;
+function streakMesh(meteors) {
+  const N = meteors.length * STEPS;
+  const p = new Float32Array(N * 3), c = new Float32Array(N * 4), r = new Float32Array(N), t = new Float32Array(N), s = new Float32Array(N);
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), q = new THREE.Vector3();
+  meteors.forEach((m, i) => {
+    xyz(m.lat_beg, m.lon_beg, m.ht_beg_km, a); xyz(m.lat_end, m.lon_end, m.ht_end_km, b);
+    const leo = groupOf(m) === 'LEO', col = styleOf(m).color.map(v => Math.round(v + (255 - v) * 0.25)), ms = magSize(m.peak_absmag), ma = magAlpha(m.peak_absmag);
+    for (let k = 0; k < STEPS; k++) {
+      const j = i * STEPS + k, f = k / (STEPS - 1);
+      q.copy(a).lerp(b, f); p.set([q.x, q.y, q.z], j * 3);
+      const al = (leo ? 0.8 : 0.5) * ma * (1 - f) ** 1.4;
+      c.set([col[0] / 255, col[1] / 255, col[2] / 255, al], j * 4);
+      r[j] = i; t[j] = f; s[j] = (leo ? 3.0 : 2.3) * ms * (1 - 0.7 * f);
+    }
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  g.setAttribute('aColor', new THREE.BufferAttribute(c, 4));
+  g.setAttribute('aRank', new THREE.BufferAttribute(r, 1));
+  g.setAttribute('aT', new THREE.BufferAttribute(t, 1));
+  g.setAttribute('aSize', new THREE.BufferAttribute(s, 1));
+  const pts = new THREE.Points(g, new THREE.ShaderMaterial({
+    uniforms: Object.assign({ uHover: { value: -1 } }, playU),
+    vertexShader: PLAY_VS_HEAD + `attribute vec4 aColor; attribute float aSize; uniform float dpr; uniform float uHover; varying vec4 vC;
+      void main(){ vC = aColor; vC.a *= playAlpha(); float big = 1.0 + flashing()*1.6 + (abs(aRank-uHover) < 0.5 ? 0.8 : 0.0);
+        gl_PointSize = aSize * big * dpr * uZoom; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `varying vec4 vC; void main(){ float d = length(gl_PointCoord-0.5); float a = vC.a * exp(-d*d*14.0); gl_FragColor = vec4(vC.rgb * a, a); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  }));
+  pts.renderOrder = 5;
+  return pts;
+}
+
+function buildMeteors(meteors) {
+  const L = { p: [], c: [], r: [], t: [] }, D = { p: [], c: [], r: [], t: [] }, S = { p: [], c: [], r: [], t: [] };
+  const v = new THREE.Vector3();
+  const push = (o, lat, lon, h, col, a, i, tt) => { xyz(lat, lon, h, v); o.p.push(v.x, v.y, v.z); o.c.push(col[0] / 255, col[1] / 255, col[2] / 255, a); o.r.push(i); o.t.push(tt); };
+  meteors.forEach((m, i) => {
+    const col = styleOf(m).color, k = groupOf(m) === 'LEO' ? 1 : 0.6;
+    push(L, m.lat_beg, m.lon_beg, m.ht_beg_km, lighten(col), 0.95 * k, i, 0);
+    push(L, m.lat_end, m.lon_end, m.ht_end_km, col, 0.08 * k, i, 1);
+    push(D, m.lat_end, m.lon_end, m.ht_end_km, col, 0.42, i, 1);
+    push(D, m.lat_end, m.lon_end, 0.5, col, 0.12, i, 1);
+    push(S, m.lat_beg, m.lon_beg, 0.5, col, 0.13, i, 1);
+    push(S, m.lat_end, m.lon_end, 0.5, col, 0.05, i, 1);
+  });
+  scene.add(lineMesh(S, 2), lineMesh(D, 3), lineMesh(L, 4));
+  scene.add(footMesh(meteors));
+  streaks = streakMesh(meteors);
+  scene.add(streaks);
+  scene.add(haloMesh(meteors));
+  buildRain(meteors);
+}
+
+// 消えた点の真下の地面の足あと（流星が浮いていることを分かりやすく）
+function footMesh(meteors) {
+  const N = meteors.length, p = new Float32Array(N * 3), c = new Float32Array(N * 4), r = new Float32Array(N), t = new Float32Array(N), s = new Float32Array(N), v = new THREE.Vector3();
+  meteors.forEach((m, i) => {
+    xyz(m.lat_end, m.lon_end, 0.5, v); p.set([v.x, v.y, v.z], i * 3);
+    const col = styleOf(m).color; c.set([col[0] / 255, col[1] / 255, col[2] / 255, 0.45], i * 4);
+    r[i] = i; t[i] = 1; s[i] = 2.2;
+  });
+  const g = new THREE.BufferGeometry();
+  [['position', p, 3], ['aColor', c, 4], ['aRank', r, 1], ['aT', t, 1], ['aSize', s, 1]].forEach(([n, a, k]) => g.setAttribute(n, new THREE.BufferAttribute(a, k)));
+  const pts = new THREE.Points(g, new THREE.ShaderMaterial({
+    uniforms: playU,
+    vertexShader: PLAY_VS_HEAD + `attribute vec4 aColor; attribute float aSize; uniform float dpr; varying vec4 vC;
+      void main(){ vC = aColor; vC.a *= playAlpha(); gl_PointSize = aSize * dpr * uZoom; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `varying vec4 vC; void main(){ float d = length(gl_PointCoord-0.5); float a = vC.a * (1.0 - smoothstep(0.3,0.5,d)); gl_FragColor = vec4(vC.rgb * a, a); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  }));
+  pts.renderOrder = 3;
+  return pts;
+}
+
+// 高さの箱：地面の枠・高さ100 kmの網・ISS の高さ（400 km）の枠・四すみの柱（縮尺どおり）
+const BOX = { lat0: 30, lat1: 43, lon0: 124, lon1: 144 };
+function staticLines(P, order) {
+  const m = lineMesh(P, order);
+  m.material = m.material.clone();
+  m.material.uniforms = { uPi: { value: -1 }, uFlash: { value: 1 }, dpr: { value: DPR }, uZoom: { value: 1 } };
+  return m;
+}
+function buildBox() {
+  const P = { p: [], c: [], r: [], t: [] }, v = new THREE.Vector3();
+  const seg = (pts, col, a) => { for (let i = 0; i < pts.length - 1; i++) for (const q of [pts[i], pts[i + 1]]) { xyz(q[0], q[1], q[2], v); P.p.push(v.x, v.y, v.z); P.c.push(col[0], col[1], col[2], a); P.r.push(-1); P.t.push(0); } };
+  const latLine = (lat, h) => { const a = []; for (let lo = BOX.lon0; lo <= BOX.lon1 + 1e-6; lo += 0.5) a.push([lat, lo, h]); return a; };
+  const lonLine = (lon, h) => { const a = []; for (let la = BOX.lat0; la <= BOX.lat1 + 1e-6; la += 0.5) a.push([la, lon, h]); return a; };
+  const AMB = [1, 0.78, 0.4], ISS = [0.72, 0.8, 1], GND = [0.55, 0.62, 0.78];
+  // 高さ100 kmの網（流星が光る面）
+  for (let la = BOX.lat0; la <= BOX.lat1; la += 1) seg(latLine(la, 100), AMB, la === BOX.lat0 || la === BOX.lat1 ? 0.32 : 0.09);
+  for (let lo = BOX.lon0; lo <= BOX.lon1; lo += 1) seg(lonLine(lo, 100), AMB, lo === BOX.lon0 || lo === BOX.lon1 ? 0.32 : 0.09);
+  // 地面と ISS の高さの枠
+  for (const [h, col, a] of [[0.5, GND, 0.3], [ISS_KM, ISS, 0.35]]) {
+    seg(latLine(BOX.lat0, h), col, a); seg(latLine(BOX.lat1, h), col, a); seg(lonLine(BOX.lon0, h), col, a); seg(lonLine(BOX.lon1, h), col, a);
+  }
+  // 四すみの柱（0 → 400 km）
+  for (const la of [BOX.lat0, BOX.lat1]) for (const lo of [BOX.lon0, BOX.lon1]) seg([[la, lo, 0.5], [la, lo, ISS_KM]], GND, 0.3);
+  scene.add(staticLines(P, 1));
+}
+
+// 光のにじみ（明るい流星ほど大きく）。光り始めから3割ほどのところに1つ
+function haloMesh(meteors) {
+  const N = meteors.length, p = new Float32Array(N * 3), c = new Float32Array(N * 4), r = new Float32Array(N), t = new Float32Array(N), s = new Float32Array(N);
+  const a = new THREE.Vector3(), b = new THREE.Vector3();
+  meteors.forEach((m, i) => {
+    xyz(m.lat_beg, m.lon_beg, m.ht_beg_km, a); xyz(m.lat_end, m.lon_end, m.ht_end_km, b); a.lerp(b, 0.3);
+    p.set([a.x, a.y, a.z], i * 3);
+    const col = styleOf(m).color, leo = groupOf(m) === 'LEO', ms = magSize(m.peak_absmag);
+    c.set([col[0] / 255, col[1] / 255, col[2] / 255, (leo ? 0.11 : 0.05) * magAlpha(m.peak_absmag)], i * 4);
+    r[i] = i; t[i] = 0.3; s[i] = 5 + 10 * ms * ms / 2.6;
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(p, 3));
+  g.setAttribute('aColor', new THREE.BufferAttribute(c, 4));
+  g.setAttribute('aRank', new THREE.BufferAttribute(r, 1));
+  g.setAttribute('aT', new THREE.BufferAttribute(t, 1));
+  g.setAttribute('aSize', new THREE.BufferAttribute(s, 1));
+  const pts = new THREE.Points(g, new THREE.ShaderMaterial({
+    uniforms: playU,
+    vertexShader: PLAY_VS_HEAD + `attribute vec4 aColor; attribute float aSize; uniform float dpr; varying vec4 vC;
+      void main(){ float fl = flashing(); vC = aColor; vC.a *= (uPi < 0.0 ? 1.0 : (fl > 0.5 ? 3.5 * (1.0 - (uPi - aRank) / uFlash) : 0.5 * playAlpha()));
+        gl_PointSize = aSize * (1.0 + fl * 1.2) * dpr * uZoom; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `varying vec4 vC; void main(){ float d = length(gl_PointCoord-0.5); float a = vC.a * exp(-d*d*10.0) * (1.0 - smoothstep(0.35,0.5,d)); gl_FragColor = vec4(vC.rgb * a, a); }`,
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  }));
+  pts.renderOrder = 5;
+  return pts;
+}
+
+// B：しし座流星群の「来た向き」。通り道を、来た向きへまっすぐ伸ばしたうすい線（大気に入る前のちりは見えない。向きを見せるための線）
+const RAIN_KM = 700;
+let rainLabelAt = null;
+function buildRain(meteors) {
+  const P = { p: [], c: [], r: [], t: [] }, a = new THREE.Vector3(), b = new THREE.Vector3(), d = new THREE.Vector3(), far = new THREE.Vector3();
+  const sumD = new THREE.Vector3(), sumA = new THREE.Vector3(); let n = 0;
+  const col = lighten(SHOWERS.LEO.color).map(v => v / 255);
+  meteors.forEach((m, i) => {
+    if (groupOf(m) !== 'LEO') return;
+    xyz(m.lat_beg, m.lon_beg, m.ht_beg_km, a); xyz(m.lat_end, m.lon_end, m.ht_end_km, b);
+    d.copy(a).sub(b).normalize(); far.copy(a).addScaledVector(d, RAIN_KM);
+    P.p.push(a.x, a.y, a.z, far.x, far.y, far.z);
+    P.c.push(col[0], col[1], col[2], 0.3, col[0], col[1], col[2], 0);
+    P.r.push(i, i); P.t.push(0, 0);
+    sumD.add(d); sumA.add(a); n++;
+  });
+  if (!n) return;
+  const mesh = lineMesh(P, 3);
+  scene.add(mesh);
+  rainLabelAt = sumA.divideScalar(n).addScaledVector(sumD.normalize(), RAIN_KM * 0.95);
+}
+let streaks = null;
+
+// 高さのものさし（地図の上に立てる柱。縮尺どおり）：0・100・200・300・ISS 400 km
+let pole = null, poleAt = null;
+function buildPole(lat, lon) {
+  if (pole) scene.remove(pole);
+  const P = { p: [], c: [], r: [], t: [] }, v = new THREE.Vector3(), f = frame(lat, lon);
+  const add = (a, b, col, al) => { [a, b].forEach(x => { P.p.push(x.x, x.y, x.z); P.c.push(col[0], col[1], col[2], al); P.r.push(-1); P.t.push(0); }); };
+  const base = xyz(lat, lon, 0), top = xyz(lat, lon, ISS_KM);
+  add(base, top, [0.75, 0.8, 0.95], 0.55);
+  for (const h of [100, 200, 300, 400]) {
+    const c = xyz(lat, lon, h), w = h === 400 ? 26 : 12;
+    add(c.clone().addScaledVector(f.e, -w), c.clone().addScaledVector(f.e, w), h === 400 ? [0.8, 0.86, 1] : [0.6, 0.66, 0.8], h === 400 ? 0.8 : 0.45);
+  }
+  // 流星が光る帯（80〜120 km）
+  const b1 = xyz(lat, lon, 80), b2 = xyz(lat, lon, 120);
+  for (let k = -3; k <= 3; k++) add(b1.clone().addScaledVector(f.e, k * 2), b2.clone().addScaledVector(f.e, k * 2), [1, 0.75, 0.3], 0.5);
+  const mesh = lineMesh(P, 6);
+  mesh.material = mesh.material.clone(); mesh.material.uniforms = { uPi: { value: -1 }, uFlash: { value: 1 }, dpr: { value: DPR } };
+  pole = mesh; poleAt = { lat, lon };
+  scene.add(pole);
+}
+
+// ---- カメラ（地表のある点のまわりを回る） ----
+const VIEWS = {
+  all:    { lat: 36.0, lon: 134.5, az: 168, el: 26, dist: 3300 },
+  tokyo:  { lat: 35.0, lon: 139.8, az: 175, el: 32, dist: 1100 },
+  osaka:  { lat: 34.6, lon: 135.5, az: 175, el: 32, dist: 1100 },
+  kyushu: { lat: 33.0, lon: 130.7, az: 170, el: 32, dist: 1100 },
+  side:   { lat: 37.5, lon: 133.5, az: 158, el: 3.5, dist: 2300 }, // 横から：地球のふちに沿って見る（高さがいちばん分かる）
+};
+const POLE_OFFSET = { all: [-4.0, 0.0], tokyo: [0.0, 3.0], osaka: [-1.6, 0.0], kyushu: [-1.5, 1.2], side: [-6.5, 1.0] }; // ものさしは海の上に立てる
+const narrow = matchMedia('(max-width: 640px)').matches;
+if (narrow) VIEWS.all = { ...VIEWS.all, dist: 4600, el: 30, lon: 133.5 };
+if (narrow) VIEWS.side = { ...VIEWS.side, dist: 3600, lon: 135.0, el: 4.5 };
+let cam = { ...VIEWS.side }; // はじめは横から（高さが分かる）→ 日本全体へ降りる
+let fly = null, spinning = true;
+
+function placeCamera() {
+  const f = frame(cam.lat, cam.lon), T = xyz(cam.lat, cam.lon, 60);
+  const az = cam.az * DEG, el = cam.el * DEG;
+  const dir = new THREE.Vector3().addScaledVector(f.n, Math.cos(el) * Math.cos(az)).addScaledVector(f.e, Math.cos(el) * Math.sin(az)).addScaledVector(f.u, Math.sin(el));
+  // az は「目標から見てカメラがいる向き」。180 で南から北を見る
+  camera.position.copy(T).addScaledVector(dir, cam.dist);
+  camera.up.copy(f.u);
+  camera.lookAt(T);
+  camera.updateMatrixWorld();
+}
+function flyTo(name, opt = {}) {
+  spinning = false;
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('cur', b.dataset.view === name));
+  const to = VIEWS[name], from = { ...cam };
+  let daz = ((to.az - from.az + 540) % 360) - 180;
+  fly = { from, to: { ...to, az: from.az + daz }, t0: performance.now() + (opt.delay || 0), dur: opt.dur || 2600, thenSpin: !!opt.thenSpin };
+  const o = POLE_OFFSET[name]; buildPole(to.lat + o[0], to.lon + o[1]);
+}
+const ease = x => x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2;
+
+// 指・マウスの操作：ドラッグで回す・傾ける、ホイール・2本指でよる
+const pointers = new Map();
+let dragMoved = 0, pinch0 = null;
+canvas.addEventListener('pointerdown', e => { canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, { x: e.clientX, y: e.clientY }); dragMoved = 0; spinning = false; fly = null;
+  if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch0 = { d: Math.hypot(a.x - b.x, a.y - b.y), dist: cam.dist }; } });
+canvas.addEventListener('pointermove', e => {
+  const p = pointers.get(e.pointerId);
+  if (!p) { if (e.pointerType === 'mouse') hoverAt(e.clientX, e.clientY, false); return; }
+  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY; dragMoved += Math.abs(dx) + Math.abs(dy);
+  if (pointers.size === 2 && pinch0) { const [a, b] = [...pointers.values()]; cam.dist = clampDist(pinch0.dist * pinch0.d / Math.max(20, Math.hypot(a.x - b.x, a.y - b.y))); return; }
+  cam.az -= dx * 0.25; cam.el = Math.max(2, Math.min(88, cam.el + dy * 0.2));
+});
+const endPtr = e => {
+  if (pointers.has(e.pointerId) && pointers.size === 1 && dragMoved < 8) hoverAt(e.clientX, e.clientY, true);
+  pointers.delete(e.pointerId); if (pointers.size < 2) pinch0 = null;
+};
+canvas.addEventListener('pointerup', endPtr); canvas.addEventListener('pointercancel', endPtr);
+canvas.addEventListener('wheel', e => { e.preventDefault(); spinning = false; fly = null; cam.dist = clampDist(cam.dist * Math.exp(e.deltaY * 0.0012)); }, { passive: false });
+const clampDist = d => Math.max(250, Math.min(14000, d));
+
+// ---- 触れた線を探す（画面上での距離） ----
+let meteors = [], scr = [];
+const tipEl = document.getElementById('tipbox');
+const v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
+function occluded(p) { // カメラから点までの間に地球がある
+  const c = camera.position, d = v2.copy(p).sub(c);
+  const a = d.dot(d), b = 2 * c.dot(d), cc = c.dot(c) - R * R, disc = b * b - 4 * a * cc;
+  if (disc < 0) return false;
+  const t1 = (-b - Math.sqrt(disc)) / (2 * a);
+  return t1 > 0 && t1 < 1;
+}
+function project(m) {
+  const W = innerWidth, H = innerHeight, out = [];
+  for (const [la, lo, h] of [[m.lat_beg, m.lon_beg, m.ht_beg_km], [m.lat_end, m.lon_end, m.ht_end_km]]) {
+    xyz(la, lo, h, v1);
+    if (occluded(v1)) return null;
+    v1.project(camera);
+    if (v1.z > 1) return null;
+    out.push([(v1.x + 1) / 2 * W, (1 - v1.y) / 2 * H]);
+  }
+  return out;
+}
+function hoverAt(x, y, tap) {
+  const rad = tap || narrow ? 18 : 8;
+  let best = null, bd = rad;
+  meteors.forEach(m => {
+    if (playing && m._i > curPi) return;
+    const s = project(m); if (!s) return;
+    const [[ax, ay], [bx, by]] = s, dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy || 1;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L2));
+    const d = Math.hypot(x - ax - t * dx, y - ay - t * dy);
+    if (d < bd) { bd = d; best = m; }
+  });
+  if (streaks) streaks.material.uniforms.uHover.value = best ? best._i : -1;
+  if (!best) { tipEl.hidden = true; return; }
+  const d = new Date(best.utc), c = styleOf(best).color;
+  const jst = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(d);
+  tipEl.innerHTML = `<div class="name" style="color:rgb(${c})">${nameOf(best)}</div>
+    <div>日本時間 <span class="mono">${jst}</span></div>
+    <div>UTC <span class="mono">${best.utc.slice(0, 10)} ${best.utc.slice(11, 19)}</span></div>
+    <div>高さ <span class="mono">${best.ht_beg_km.toFixed(0)} km → ${best.ht_end_km.toFixed(0)} km</span>（光り始め→消えた）</div>
+    <div>速さ <span class="mono">${best.v_init_kms.toFixed(1)} km/s</span></div>
+    <div>明るさ <span class="mono">${best.peak_absmag.toFixed(1)} 等</span><small>（100 km 先から見たとき）</small></div>`;
+  tipEl.hidden = false;
+  const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  tipEl.style.left = Math.max(8, Math.min(innerWidth - w - 8, x + 12)) + 'px';
+  tipEl.style.top = Math.max(8, Math.min(innerHeight - h - 60, y + 12)) + 'px';
+}
+
+// ---- 画面の上の名前（地名・ものさし） ----
+const labelsEl = document.getElementById('labels');
+const LABELS = [
+  { text: '東京', lat: 35.68, lon: 139.77 }, { text: '大阪', lat: 34.69, lon: 135.50 },
+  { text: '福岡', lat: 33.59, lon: 130.40 }, { text: '札幌', lat: 43.06, lon: 141.35 },
+].map(l => Object.assign(l, { el: labelsEl.appendChild(Object.assign(document.createElement('div'), { className: 'label', textContent: l.text })) }));
+const poleLabels = [
+  { h: ISS_KM, text: 'ISS が回る高さ 約400 km', cls: 'pole' },
+  { h: 100, text: '流星が光る 約80〜120 km', cls: 'pole met' },
+].map(l => Object.assign(l, { el: labelsEl.appendChild(Object.assign(document.createElement('div'), { className: 'label ' + l.cls, textContent: l.text })) }));
+function placeLabel(el, p, minY = 0) {
+  if (occluded(p)) { el.style.display = 'none'; return; }
+  v1.copy(p).project(camera);
+  if (v1.z > 1 || Math.abs(v1.x) > 1.1 || Math.abs(v1.y) > 1.1) { el.style.display = 'none'; return; }
+  el.style.display = ''; el.style.left = Math.max(90, Math.min(innerWidth - 90, (v1.x + 1) / 2 * innerWidth)) + 'px'; el.style.top = Math.max(minY, (1 - v1.y) / 2 * innerHeight) + 'px';
+}
+const rainLabel = labelsEl.appendChild(Object.assign(document.createElement('div'), { className: 'label rain', textContent: 'しし座の方向から飛んできた' }));
+function updateLabels() {
+  const far = cam.dist > 2500;
+  if (rainLabelAt && (!playing || curPi > meteors.length * 0.3)) placeLabel(rainLabel, rainLabelAt, narrow ? document.getElementById('gauge').getBoundingClientRect().bottom + 16 : 0); else rainLabel.style.display = 'none';
+  LABELS.forEach(l => { if (far && l.text === '札幌' && narrow) { l.el.style.display = 'none'; return; } placeLabel(l.el, xyz(l.lat, l.lon, 0)); });
+  poleLabels.forEach(l => poleAt ? placeLabel(l.el, xyz(poleAt.lat, poleAt.lon, l.h)) : (l.el.style.display = 'none'));
+}
+
+// ---- ものさしの欄（縮尺どおり。いまの目の高さも） ----
+const G_MAX = 450;
+function gaugeY(km) { const g = document.getElementById('gauge'); const top = 34, bot = 26, H = g.clientHeight - top - bot; return bot + H * km / G_MAX; }
+function initGauge() {
+  const band = document.getElementById('gBand');
+  band.style.bottom = gaugeY(80) + 'px'; band.style.height = (gaugeY(120) - gaugeY(80)) + 'px';
+  document.getElementById('gMet').style.bottom = gaugeY(100) + 'px';
+  document.getElementById('gIss').style.bottom = gaugeY(ISS_KM) + 'px';
+  document.getElementById('gGround').style.bottom = gaugeY(0) + 'px';
+}
+function updateGauge() {
+  const alt = camera.position.length() - R, eye = document.getElementById('gEye'), off = document.getElementById('gOff');
+  if (alt <= G_MAX) { eye.hidden = false; off.hidden = true; eye.style.bottom = gaugeY(alt) + 'px'; document.getElementById('gEyeT').textContent = `いまの目 ${Math.round(alt)} km`; }
+  else { eye.hidden = true; off.hidden = false; off.textContent = `↑ いまの目 ${Math.round(alt).toLocaleString()} km`; }
+}
+
+// ---- 再生 ----
+const PLAY_SEC = 45, FLASH_N = 14;
+let playing = null, curPi = -1;
+const playBtn = document.getElementById('play');
+function stopPlay() {
+  playing = null; curPi = -1; playU.uPi.value = -1;
+  playBtn.classList.remove('on'); playBtn.textContent = '▶ その夜を再生';
+  document.getElementById('clock').classList.remove('on');
+  setSun(DEFAULT_SUN_MS);
+}
+playBtn.addEventListener('click', () => {
+  if (playing) return stopPlay();
+  if (!meteors.length) return;
+  tipEl.hidden = true;
+  playing = { start: performance.now() };
+  playBtn.classList.add('on'); playBtn.textContent = '■ 止める';
+  document.getElementById('clock').classList.add('on');
+});
+function stepPlay(now) {
+  const f = Math.max(0, Math.min(1, (now - playing.start) / 1000 / PLAY_SEC));
+  // 時刻順に1本ずつ同じ間隔で流す（日本の夕方は少なく、時間に比例させると前半がほぼ空になるため）。時計は実際の時刻
+  const pi = f * meteors.length, i0 = Math.min(meteors.length - 1, Math.floor(pi)), i1 = Math.min(meteors.length - 1, i0 + 1);
+  const pt = meteors[i0]._t + (meteors[i1]._t - meteors[i0]._t) * (pi - i0);
+  curPi = pi; playU.uPi.value = pi; playU.uFlash.value = FLASH_N;
+  setSun(pt);
+  const d = new Date(pt);
+  document.getElementById('bar').style.width = (f * 100) + '%';
+  document.getElementById('clockT').innerHTML = new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit' }).format(d) + '<small>日本時間</small>';
+  document.getElementById('clockU').textContent = 'UTC ' + d.toISOString().slice(11, 16) + ' ／ ' + Math.min(meteors.length, i0 + 1) + ' 個目';
+  if (f >= 1) stopPlay();
+}
+const DEFAULT_SUN_MS = Date.parse('2026-11-18T18:00:00Z');
+function setSun(ms) { const s = subsolar(ms); earthU.sunDir.value.copy(xyz(s.lat, s.lon, 0).normalize()); }
+
+// ---- 毎フレーム ----
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (fly) {
+    const k = ease(Math.max(0, Math.min(1, (now - fly.t0) / fly.dur)));
+    for (const key of ['lat', 'lon', 'az', 'el']) cam[key] = fly.from[key] + (fly.to[key] - fly.from[key]) * k;
+    // 遠くへ引いてから寄る（宇宙から降りていく感じ）
+    const lift = Math.sin(Math.PI * k) * Math.max(0, 2200 - Math.min(fly.from.dist, fly.to.dist));
+    cam.dist = fly.from.dist + (fly.to.dist - fly.from.dist) * k + lift;
+    if (k >= 1) { if (fly.thenSpin) spinning = true; fly = null; }
+  } else if (spinning) cam.az += dt * 2.5;
+  placeCamera();
+  playU.uZoom.value = Math.max(0.8, Math.min(2.2, Math.sqrt(2400 / cam.dist)));
+  if (playing) stepPlay(now);
+  renderer.render(scene, camera);
+  updateLabels(); updateGauge();
+  requestAnimationFrame(loop);
+}
+
+// ---- 読み込み ----
+function loadTex(url) {
+  return new Promise((ok, ng) => { const img = new Image(); img.onload = () => { const t = new THREE.CanvasTexture(img); t.generateMipmaps = false; t.minFilter = THREE.LinearFilter; ok(t); }; img.onerror = ng; img.src = url; });
+}
+function fail(text) { const el = document.getElementById('msg'); el.innerHTML = text; el.classList.add('on'); }
+function legend() {
+  const n = g => meteors.filter(m => groupOf(m) === g).length;
+  const others = [...new Set(meteors.filter(m => groupOf(m) === 'OTHER').map(m => m.iau_code))];
+  const named = others.filter(c => SHOWERS[c]).map(c => SHOWERS[c].ja);
+  const row = (c, label, num, w) => `<li><i style="background:linear-gradient(90deg,rgb(${lighten(c)}),rgba(${c},.15));height:${w}px"></i><span>${label}</span><span class="n mono">${num}</span></li>`;
+  document.getElementById('legend').innerHTML = `<h2>流星群ごとの色</h2><ul>
+    ${row(SHOWERS.LEO.color, 'しし座流星群', n('LEO'), 4)}
+    ${row(OTHER.color, 'ほかの流星群', n('OTHER'), 2)}
+    ${row(SPORADIC.color, '散在流星', n('SPO'), 2)}</ul>
+    <div class="hint">明るい側＝光り始め・明るい流星ほど大きく<br>うすく伸びる線＝しし座の流星が来た向き<br>箱＝地面・高さ100 km の網・ISS の高さ<br>ほかの流星群：${named.join('・')}${named.length ? 'ほか' : ''}（${others.length}群）<br>線に触れると時刻・高さ・速さ<br>ドラッグで回す・ホイールで寄る</div>`;
+}
+
+resize();
+setSun(DEFAULT_SUN_MS);
+buildPole(VIEWS.side.lat + POLE_OFFSET.side[0], VIEWS.side.lon + POLE_OFFSET.side[1]);
+buildBox();
+initGauge();
+requestAnimationFrame(loop);
+try {
+  const [day, night] = await Promise.all([loadTex('../../assets/earth/day-2048.jpg'), loadTex('../../assets/earth/night-2048.jpg')]);
+  earthU.dayMap.value = day; earthU.nightMap.value = night;
+  loadTex('night-japan-3072.jpg').then(t => { earthU.jpMap.value = t; earthU.hasJp.value = 1; }).catch(() => {});
+} catch (e) { /* 画像がなくても流星は出す */ }
+try {
+  const r = await fetch(DATA_URL, { cache: 'no-cache' });
+  if (!r.ok) throw new Error(r.status);
+  const doc = await r.json();
+  meteors = doc.meteors.map(m => ({ ...m, _t: Date.parse(m.utc) })).sort((a, b) => a._t - b._t);
+  meteors.forEach((m, i) => { m._i = i; });
+  document.getElementById('count').textContent = meteors.length;
+  document.getElementById('srcFiles').innerHTML = '使ったファイル：' + doc.meta.files.map(u => `<a href="${u}" target="_blank" rel="noopener">${u.split('/').pop()}</a>`).join('、');
+  buildMeteors(meteors);
+  legend();
+} catch (e) {
+  fail('データ（meteors_20261118_japan.json）を読み込めませんでした。<br>ファイルを直接開いた場合は、<span class="mono">python3 -m http.server -d web</span> などで開いてください。');
+}
+
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => flyTo(b.dataset.view)));
+// オープニング：横から見た流星の帯（高さが分かる）を少し見せてから、日本全体の上へ降りる。触ればそこで止まる
+flyTo('all', { delay: 1800, dur: 5200, thenSpin: true });
+const src = document.getElementById('sources');
+document.getElementById('srcBtn').addEventListener('click', () => { src.hidden = false; });
+document.getElementById('srcClose').addEventListener('click', () => { src.hidden = true; });
+</script>
+</body>
+</html>
