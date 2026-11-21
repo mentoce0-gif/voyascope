@@ -179,7 +179,10 @@
 
   @media (max-width: 899px), (max-aspect-ratio: 1/1) {
     /* スマホ：空の円のすぐ下に計器。余った高さはタイムラインの上にまとめる */
-    .app { grid-template-rows: auto minmax(0, 1fr) auto auto auto minmax(0, 1fr) !important; grid-template-areas: "top" "." "dome" "panel" "time" "." !important; }
+    /* 空の円は上、計器・タイムライン・出典は下端にまとめる（あいだを空ける。2026-11-22 オーナーのスケッチ） */
+    .app { grid-template-rows: auto auto minmax(0, 1fr) auto auto !important; grid-template-areas: "top" "dome" "." "panel" "time" !important;
+      padding-bottom: env(safe-area-inset-bottom) !important; }
+    .dome { margin-top: 10px; }
     .tm { gap: 9px; padding: 8px 10px; }
     .play { width: 46px; height: 46px; }
     .emb { width: 44px; height: 44px; }
