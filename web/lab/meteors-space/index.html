@@ -7,7 +7,6 @@
 <meta name="robots" content="noindex">
 <meta name="description" content="2026年11月18日の夜（しし座流星群）に日本のまわりで観測された流星を、宇宙から見た夜の地球の上に本当の高さで。VOYASCOPE の試験版（非公式ファンメイド作品）。">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://voyascope.org/meteors/space/">
 <meta property="og:image" content="https://voyascope.org/assets/earth/hero-1600.webp">
 <meta property="og:title" content="流星を眺める｜宇宙から見る（試験版）— VOYASCOPE">
 <meta name="theme-color" content="#050e1f">
@@ -148,7 +147,7 @@
 <div id="labels"></div>
 
 <header class="head">
-  <div class="brand"><a href="../../" aria-label="VOYASCOPE のトップへ" style="pointer-events:auto"><img src="../../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜宇宙から見る ・ 試験版</span><a href="../" style="pointer-events:auto;font-size:.72rem;color:var(--mint);margin-left:6px">見上げる ver. →</a></div>
+  <div class="brand"><a href="../../" aria-label="VOYASCOPE のトップへ" style="pointer-events:auto"><img src="../../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">試作の部屋 ・ 流星を眺める｜宇宙から見る</span><a href="../../meteors/" style="pointer-events:auto;font-size:.72rem;color:var(--mint);margin-left:6px">見上げる ver. →</a></div>
   <h1>2026年11月18日の夜、日本のまわりの<ruby>宙<rt>そら</rt></ruby>を<br><b id="count">—</b>個の流星が飛んでいた</h1>
   <p id="sub">流星が光ったのは、地上から高さ<b>約80〜120 km</b>（多くの流星）。ISS が回る高さ（約400 km）の4分の1ほどのところ。</p>
 </header>
@@ -225,7 +224,7 @@ let THREE;
 try { THREE = await import('../../vendor/three-r128.min.js'); }
 catch (e) { fail('3D の部品を読み込めませんでした。'); throw e; }
 
-const DATA_URL = '../data/meteors_20261118_japan.json';
+const DATA_URL = '../../meteors/data/meteors_20261118_japan.json'; // 見上げると同じデータ（2026-11-22 に公開を止めて試作の部屋へ）
 const R = 6371;           // 地球の半径（km。描画用）。1 単位 = 1 km
 const ISS_KM = 400;       // curation/spacecraft/iss.json（NASA、おおよその値）
 const DEG = Math.PI / 180;

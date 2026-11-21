@@ -89,29 +89,6 @@
   .count-break i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin: 0 5px 1px 0; vertical-align: middle; }
   .count-break i.o { background: var(--amber); box-shadow: 0 0 6px var(--amber-dim); } .count-break i.c { background: var(--sky); }
   /* 観測の窓の右下：宇宙から見るへ */
-  /* 丸いボタン（MMX のいまどこの丸いリンクと同じことば）。マークの下に名前 */
-  .to-space { position: absolute; right: 0; bottom: 0; z-index: 2; width: 78px; height: 78px; border-radius: 50%;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-    font-size: 0.66rem; line-height: 1.25; letter-spacing: 0.04em; text-align: center; color: var(--mint); text-decoration: none;
-    background: rgba(7, 20, 43, 0.85); border: 1px solid var(--mint-dim); box-shadow: 0 0 14px rgba(94, 242, 194, 0.18);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-  @media (min-width: 900px) and (min-aspect-ratio: 1/1) { .to-space { width: 88px; height: 88px; font-size: 0.72rem; } }
-  /* スマホ：空のふち（建物）に重なっても読めるように、地をしっかり塗り、枠と字を強く（2026-11-22 オーナー） */
-  @media (max-width: 899px), (max-aspect-ratio: 1/1) {
-    .to-space { width: 84px; height: 84px; right: -2px; bottom: 2px; font-size: 0.8rem; font-weight: 700; color: var(--text);
-      background: rgba(7, 20, 43, 0.97); border: 1.5px solid var(--mint); box-shadow: 0 0 0 4px rgba(2, 6, 15, 0.9), 0 0 6px rgba(94, 242, 194, 0.3); }
-    .dome .to-space svg.up2 { width: 18px; height: 22px; }
-  }
-  .to-space:hover { background: var(--mint-faint); }
-  /* 三角を2つ重ねたマーク：宙（そら）へ上がるイメージ。上の三角が明るく、ゆっくり上へ流れる */
-  .dome .to-space svg.up2 { position: static; inset: auto; width: 14px; height: 18px; flex: none; overflow: visible; } /* 空の円の SVG の配置（.dome svg）が効かないように */
-  .up2 .t1 { fill: var(--mint); }
-  .up2 .t2 { fill: var(--mint); opacity: 0.45; }
-  .up2 path { animation: up2 2.4s ease-in-out infinite; }
-  .up2 .t2 { animation-delay: 0.15s; }
-  @keyframes up2 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
-  @media (prefers-reduced-motion: reduce) { .up2 path { animation: none; } }
-  .to-space:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
   /* 計器（MMX の「いまどこ」と同じことば：字間の広い英大文字・等幅の大きな数字・細い区切り線・琥珀色の枠だけのタグ） */
   .panel-wrap { grid-area: panel; }
@@ -259,7 +236,6 @@
         <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
       </svg>
       <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><b id="count">0</b><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
-      <a class="to-space" href="space/" aria-label="宇宙から見る（宇宙から見る ver. へ）"><svg class="up2" viewBox="0 0 16 20" width="14" height="18" aria-hidden="true"><path class="t1" d="M8 1 L15 9 H1 Z"/><path class="t2" d="M8 10 L15 18 H1 Z"/></svg><span>宇宙から<br>見る</span></a>
     </div>
   </div>
 
@@ -490,8 +466,8 @@ function drawSky(now) {
       if (h.alt <= 0) continue;
       const [x, y] = proj(h.az, h.alt);
       const m = st[2], low = Math.min(1, h.alt / 12);
-      const a = Math.max(0.12, Math.min(1, (6.2 - m) / 5.5)) * starFade * (0.45 + 0.55 * low);
-      const rad = Math.max(0.8, 2.3 - 0.36 * m) * SC();
+      const a = Math.max(0.1, Math.min(0.85, (6.2 - m) / 6)) * starFade * (0.45 + 0.55 * low);
+      const rad = Math.max(0.5, 1.6 - 0.26 * m) * Math.min(SC(), 1); // 星は流星より目立たないように小さめに（2026-11-22 オーナー）
       ctx.fillStyle = `rgba(225,235,255,${a})`;
       ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
     }
