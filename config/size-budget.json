@@ -59,9 +59,9 @@
     },
     {
       "id": "meteors-space",
-      "label": "流星を眺める｜宇宙から見る（meteors/space/・試験版）を開いたときに読むもの（ページ・日本のまわりの細かい夜の画像・流星のデータ・three.js r128・地球の画像・ロゴ）。2026-11-21",
+      "label": "流星を眺める｜宇宙から見る（試作の部屋 lab/meteors-space/。2026-11-22 に公開を止めた）を開いたときに読むもの（ページ・日本のまわりの細かい夜の画像・流星のデータ・three.js r128・地球の画像・ロゴ）。2026-11-21",
       "max_kb": 1000,
-      "files": ["meteors/space/*", "meteors/data/meteors_20261118_japan.json", "vendor/three-r128.min.js", "assets/earth/day-2048.jpg", "assets/earth/night-2048.jpg", "assets/brand/logo-600.webp"]
+      "files": ["lab/meteors-space/*", "meteors/data/meteors_20261118_japan.json", "vendor/three-r128.min.js", "assets/earth/day-2048.jpg", "assets/earth/night-2048.jpg", "assets/brand/logo-600.webp"]
     },
     {
       "id": "missions",
