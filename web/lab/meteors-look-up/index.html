@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>流星を眺める｜見上げるver.（試作）</title>
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* 色・文字は VOYASCOPE 本体（web/css/style.css）と MMX の「いまどこ」の計器（web/mmx/now/）にそろえる */
+  :root {
+    --navy-900: #050e1f; --navy-800: #07142b;
+    --mint: #5ef2c2; --mint-dim: rgba(94, 242, 194, 0.55); --mint-faint: rgba(94, 242, 194, 0.16);
+    --amber: #ffb547; --amber-dim: rgba(255, 181, 71, 0.6);
+    --sky: #8fd8ff;              /* しし座以外の流星・時刻の表示（水色） */
+    --text: #d9f4ea; --text-dim: #8fb3a8;
+    --panel-bg: rgba(7, 20, 43, 0.84); --panel-border: rgba(94, 242, 194, 0.18); --rule: rgba(143, 179, 168, 0.2);
+    --font-body: "Zen Kaku Gothic New", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #02060f; color: var(--text); font-family: var(--font-body); line-height: 1.6;
+    overflow: hidden; -webkit-text-size-adjust: 100%; }
+  .mono { font-family: var(--font-mono); }
+  [hidden] { display: none !important; }
+  a { color: var(--mint); text-underline-offset: 3px; }
+
+  /* 全体：スマホは縦に積む。広い画面は空（左）と計器（右） */
+  .app { position: fixed; inset: 0; display: grid; grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+    grid-template-areas: "top" "dome" "count" "panel" "time"; padding: calc(env(safe-area-inset-top) + 10px) 14px 0; gap: 6px; }
+  @media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+    .app { grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto minmax(0, 1fr) auto auto;
+      grid-template-areas: "top top" "dome panel" "dome count" "time time"; padding: 14px 24px 0; column-gap: 28px; }
+    .panel-wrap { align-self: center; }
+    .count { align-self: start; text-align: left !important; }
+  }
+
+  .top { grid-area: top; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand img { height: 18px; width: auto; display: block; }
+  .brand-sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.2em; color: var(--text-dim); }
+  .where { font-size: 0.8rem; color: var(--text-dim); letter-spacing: 0.06em; }
+  .where b { color: var(--text); font-weight: 700; }
+  .spacer { flex: 1; }
+  .chips { display: flex; gap: 6px; }
+  button { appearance: none; font-family: var(--font-body); font-size: 0.78rem; line-height: 1.3; color: var(--mint);
+    background: rgba(7, 20, 43, 0.72); border: 1px solid var(--mint-dim); border-radius: 3px; padding: 0.4em 0.8em;
+    min-height: 32px; cursor: pointer; transition: background .15s, color .15s; touch-action: manipulation; }
+  button:hover { background: var(--mint-faint); }
+  button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  button.cur { background: var(--mint); color: var(--navy-800); }
+  .other { font-size: 0.72rem; color: var(--text-dim); text-decoration: none; border-bottom: 1px solid var(--rule); }
+
+  /* 魚眼の空 */
+  .dome { grid-area: dome; position: relative; min-height: 0; display: grid; place-items: center; }
+  .dome-box { position: relative; }
+  .dome canvas, .dome svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .dome svg { pointer-events: none; overflow: visible; }
+  .rim-ring { fill: none; stroke: rgba(143, 216, 255, 0.28); stroke-width: 1.2; }
+  .rim-alt { fill: none; stroke: rgba(143, 216, 255, 0.07); stroke-width: 1; stroke-dasharray: 2 8; }
+  .rim-dir { font-family: var(--font-body); font-size: 30px; fill: var(--text); opacity: 0.85; text-anchor: middle; dominant-baseline: central; }
+  .rim-dir.n { fill: var(--amber); }
+  .rim-time { font-family: var(--font-mono); font-size: 30px; fill: var(--sky); letter-spacing: 0.08em; }
+  .rim-time .u { font-size: 18px; fill: rgba(143, 216, 255, 0.6); }
+  .rim-log { font-family: var(--font-mono); font-size: 15px; fill: rgba(217, 244, 234, 0.55); letter-spacing: 0.28em; }
+  .rim-log .live { fill: var(--amber); }
+
+  /* 数 */
+  .count { grid-area: count; text-align: center; line-height: 1.1; }
+  .count b { font-family: var(--font-mono); font-size: clamp(2.2rem, 9vw, 3.4rem); font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+  .count span { font-size: 1rem; margin-left: 6px; letter-spacing: 0.1em; }
+  .count small { display: block; margin-top: 4px; font-size: 0.68rem; color: var(--text-dim); letter-spacing: 0.08em; }
+
+  /* 計器（MMX の「いまどこ」と同じことば：字間の広い英大文字・等幅の大きな数字・細い区切り線・琥珀色の枠だけのタグ） */
+  .panel-wrap { grid-area: panel; }
+  .tm { background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 12px 14px 10px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .tm-head { display: flex; align-items: center; gap: 10px; }
+  .tm-kicker { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.22em; color: var(--mint); }
+  .tag { margin-left: auto; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: var(--amber); border: 1px solid var(--amber-dim); padding: 2px 6px; border-radius: 3px; }
+  .tag.sky { color: var(--sky); border-color: rgba(143, 216, 255, 0.55); }
+  .tm-name { margin-top: 4px; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.03em; }
+  .tm-name small { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 400; color: var(--text-dim); margin-left: 8px; letter-spacing: 0.06em; }
+  .tm-row { display: flex; gap: 14px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--rule); }
+  .tm-q { flex: 1 1 0; min-width: 0; }
+  .tm-k { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.16em; color: var(--text-dim); line-height: 1.3; white-space: nowrap; }
+  .tm-k small { display: block; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.08em; }
+  .tm-v { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; line-height: 1.1; padding-left: 8px; margin-top: 4px; border-left: 1.5px solid var(--mint); white-space: nowrap; }
+  .tm-v small { font-size: 0.62rem; font-weight: 400; color: var(--text-dim); margin-left: 3px; }
+  .tm-track { display: block; width: 100%; height: 58px; margin-top: 8px; overflow: visible; }
+  .tm-track .base { stroke: var(--rule); stroke-width: 1; }
+  .tm-track .grid { stroke: rgba(143, 179, 168, 0.1); stroke-width: 1; stroke-dasharray: 2 4; }
+  .tm-track .path { fill: none; stroke: var(--sky); stroke-width: 1.4; }
+  .tm-track .dot { fill: var(--navy-800); stroke: var(--amber); stroke-width: 1.6; }
+  .tm-track .dot-in { fill: var(--amber); }
+  .tm-track text { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.08em; fill: var(--text-dim); }
+  .tm-track text.hl { fill: var(--amber); }
+  .tm-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--rule);
+    font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; color: var(--text-dim); }
+  .tm-meta b { color: var(--text); font-weight: 700; margin-left: 4px; letter-spacing: 0.04em; }
+  .tm-empty { font-size: 0.78rem; color: var(--text-dim); padding: 10px 0 4px; }
+
+  /* 夜のタイムライン */
+  .time { grid-area: time; padding-bottom: 4px; }
+  .ctrl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .ctrl .lab { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.2em; color: var(--text-dim); margin-right: 2px; }
+  .ctrl button { min-height: 30px; padding: 0.3em 0.7em; }
+  #playBtn { border-color: var(--amber); color: var(--amber); min-width: 44px; }
+  #playBtn.on { background: var(--amber); color: var(--navy-800); }
+  .tl-wrap { position: relative; height: 74px; }
+  #tl { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
+
+  .credit { font-size: 0.64rem; line-height: 1.6; color: var(--text-dim); padding: 6px 0 calc(6px + env(safe-area-inset-bottom)); border-top: 1px solid var(--panel-border); margin-top: 4px; }
+  .credit button { font-size: 0.64rem; min-height: 0; padding: 1px 8px; margin-left: 4px; }
+
+  .sources { position: fixed; z-index: 8; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(580px, calc(100% - 28px));
+    max-height: calc(100% - 80px); overflow: auto; padding: 16px 18px; font-size: 0.8rem; line-height: 1.75;
+    background: rgba(7, 20, 43, 0.97); border: 1px solid var(--panel-border); border-radius: 10px; }
+  .sources h2 { margin: 0 0 8px; font-size: 1.02rem; }
+  .sources h3 { margin: 14px 0 4px; font-size: 0.78rem; color: var(--mint); letter-spacing: 0.08em; }
+  .sources ul { padding-left: 1.2em; margin: 0; } .sources li, .sources p { margin: 0 0 6px; }
+  .sources .close { position: absolute; right: 10px; top: 10px; }
+
+  .msg { position: fixed; inset: 0; display: none; place-items: center; z-index: 9; padding: 24px; text-align: center; color: var(--text-dim); background: rgba(2, 6, 15, .85); }
+  .msg.on { display: grid; }
+
+  @media (max-width: 899px), (max-aspect-ratio: 1/1) {
+    .app { gap: 4px; padding-left: 12px; padding-right: 12px; }
+    .brand-sub, .where .date { display: none; }
+    .top { gap: 8px; }
+    .chips button { padding: 0.3em 0.7em; min-height: 30px; }
+    .tm { padding: 8px 12px 7px; }
+    .tm-track { display: none; }
+    .tm-name { font-size: 0.92rem; margin-top: 2px; }
+    .tm-row { margin-top: 6px; padding-top: 6px; gap: 10px; }
+    .tm-k small { display: none; }
+    .tm-v { font-size: 1.05rem; margin-top: 2px; }
+    .tm-meta { font-size: 8.5px; gap: 2px 10px; }
+    .count b { font-size: clamp(2rem, 10vw, 2.8rem); }
+    .count small { font-size: 0.62rem; margin-top: 2px; }
+    .ctrl .note { display: none; }
+    .ctrl button { padding: 0.25em 0.6em; }
+    .tl-wrap { height: 64px; }
+  }
+  @media (max-height: 760px) and (max-width: 899px) {
+    .count small, .tm-meta { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><img src="../../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"><span class="brand-sub">LAB 04 ・ 流星を眺める｜見上げる</span></div>
+    <div class="where"><span class="date">2026年11月18日の夜 ・ </span><b id="cityName">大阪</b>の上空</div>
+    <span class="spacer"></span>
+    <div class="chips" role="group" aria-label="見上げる場所">
+      <button data-city="tokyo">東京</button><button data-city="osaka" class="cur">大阪</button><button data-city="fukuoka">福岡</button>
+    </div>
+    <a class="other" href="../meteors-from-space/">宇宙から見る ver. →</a>
+  </header>
+
+  <div class="dome" id="dome">
+    <div class="dome-box" id="domeBox">
+      <canvas id="sky" aria-label="真上を見上げた空の魚眼の図。中心が真上、円のふちが地平線。北が上、東が左"></canvas>
+      <svg id="rim" viewBox="0 0 1000 1000" aria-hidden="true">
+        <defs>
+          <path id="arcBL" d="M 30 500 A 470 470 0 0 0 500 970" />
+          <path id="arcTR" d="M 500 22 A 478 478 0 0 1 978 500" />
+        </defs>
+        <circle class="rim-ring" cx="500" cy="500" r="440" />
+        <circle class="rim-alt" cx="500" cy="500" r="293.3" />
+        <circle class="rim-alt" cx="500" cy="500" r="146.7" />
+        <text class="rim-dir n" x="500" y="40">北</text>
+        <text class="rim-dir" x="38" y="500">東</text>
+        <text class="rim-dir" x="500" y="962">南</text>
+        <text class="rim-dir" x="962" y="500">西</text>
+        <text class="rim-time"><textPath href="#arcBL" startOffset="16%" id="rimTime">--:--</textPath></text>
+        <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="count"><b id="count">0</b><span>個の流星</span><small id="countNote">日没から いまの時刻まで ・ 地平線より上に流れた数（暗いもの・低いものも含む）</small></div>
+
+  <div class="panel-wrap">
+    <section class="tm" id="tm" aria-live="polite">
+      <div class="tm-head"><span class="tm-kicker">LAST METEOR</span><span class="tag" id="iTag" hidden>LEO</span></div>
+      <div id="iBody" hidden>
+        <div class="tm-name" id="iName">—</div>
+        <div class="tm-row">
+          <div class="tm-q"><div class="tm-k">MAG<small>ここから見た明るさ</small></div><div class="tm-v" id="iMag">—</div></div>
+          <div class="tm-q"><div class="tm-k">VELOCITY<small>速さ</small></div><div class="tm-v" id="iVel">—</div></div>
+          <div class="tm-q"><div class="tm-k">ALTITUDE<small>光った高さ</small></div><div class="tm-v" id="iAlt">—</div></div>
+        </div>
+        <svg class="tm-track" id="iTrack" viewBox="0 0 320 60" preserveAspectRatio="none"></svg>
+        <div class="tm-meta" id="iMeta"></div>
+      </div>
+      <div class="tm-empty" id="iEmpty">時刻を進めると、この空に流れた流星がここに出ます。</div>
+    </section>
+  </div>
+
+  <section class="time" aria-label="夜のタイムライン">
+    <div class="ctrl">
+      <button id="playBtn" class="on" aria-label="一時停止">❚❚</button>
+      <span class="lab">SPEED</span>
+      <button data-speed="1">実時間</button><button data-speed="60">60倍</button><button data-speed="120" class="cur">120倍<span class="note mono" style="font-size:.85em;opacity:.8">（1時間＝30秒）</span></button><button data-speed="600">600倍</button>
+    </div>
+    <div class="tl-wrap"><canvas id="tl" aria-label="日没から夜明けまでのタイムライン。縦線が流星、細い曲線がしし座の放射点の高さ。ドラッグで時刻を動かせる"></canvas></div>
+    <div class="credit">
+      データ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">Global Meteor Network</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）から抽出・加工 ／ 星の位置：<a href="https://www.iau.org/public/themes/naming_stars/" target="_blank" rel="noopener">IAU 恒星名カタログ</a> ／ 火花・尾・光る時間ののばしは演出 ／ 非公式のファンメイド試作
+      <button type="button" id="srcBtn">出典と注記</button>
+    </div>
+  </section>
+</div>
+
+<section class="sources" id="sources" hidden aria-label="出典と注記">
+  <button type="button" class="close" id="srcClose">閉じる</button>
+  <h2>出典と注記</h2>
+  <h3>流星のデータ</h3>
+  <p>Global Meteor Network（GMN）の軌道データ（日ごとの軌道サマリー）から、2026-11-18 08:00〜21:00 UTC に、光り始めか消えた点が北緯24〜46°・東経122〜146°に入る流星を抜き出し、見上げた空に描き直しました（加工）。使った値：開始の時刻・光り始めと消えた点の緯度・経度・高さ・速さ・最大の明るさ（等級）・一番明るかった高さ・継続時間・流星群のコード・観測した局の数。局のコードは使っていません。</p>
+  <ul>
+    <li>データのページ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">https://globalmeteornetwork.org/data/</a> ／ ライセンス：<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a> ／ 列の定義：<a href="https://globalmeteornetwork.org/data/media/GMN_orbit_data_columns.pdf" target="_blank" rel="noopener">GMN_orbit_data_columns.pdf</a></li>
+    <li id="srcFiles">使ったファイル：—</li>
+    <li>GMN はデータを作り直すことがあり、取り直すと件数が変わることがあります（<span id="srcGen">—</span> 版）</li>
+  </ul>
+  <p>GMN がデータを使うときに引用を求めている論文：</p>
+  <ul lang="en">
+    <li>Vida, D., Gural, P.S., Brown, P.G., Campbell-Brown, M. and Wiegert, P., 2020. Estimating trajectories of meteors: an observational Monte Carlo approach – I. Theory. <i>Monthly Notices of the Royal Astronomical Society</i>, 491(2), pp.2688–2705. <a href="https://academic.oup.com/mnras/article/491/2/2688/5626361" target="_blank" rel="noopener">MNRAS</a> ／ <a href="https://arxiv.org/abs/1911.02979" target="_blank" rel="noopener">arXiv</a></li>
+    <li>Vida, D., Šegon, D., Gural, P.S., Brown, P.G., McIntyre, M.J., Dijkema, T.J., Pavletić, L., Kukić, P., Mazur, M.J., Eschman, P. and Roggemans, P., 2021. The Global Meteor Network – Methodology and first results. <i>Monthly Notices of the Royal Astronomical Society</i>, 506(4), pp.5046–5074. <a href="https://academic.oup.com/mnras/article-abstract/506/4/5046/6347233" target="_blank" rel="noopener">MNRAS</a> ／ <a href="https://arxiv.org/abs/2107.12335" target="_blank" rel="noopener">arXiv</a></li>
+  </ul>
+  <h3>空の描き方</h3>
+  <ul>
+    <li>等距離射影の全天魚眼：中心が真上（天頂）、円のふちが地平線。北が上・東が左・西が右（見上げた空の向き）。点線の円は高さ30°・60°</li>
+    <li>流星：光り始めと消えた点を結ぶ3次元の直線を30に分け、見上げる場所からの方角・高さに直して描いています（だから曲線に見えます）。地平線より下の部分は描きません</li>
+    <li>見上げる場所：東京・大阪・福岡の、それぞれ市の中心あたりの代表の点（標高0 m）</li>
+    <li>「ここから見た明るさ」：GMN の最大の明るさ（100 km の距離に直した等級）を、見上げる場所から一番明るかった点までの距離で直したもの（等級＋5×log₁₀（距離÷100 km））。大気による減光は入れていないので、地平線に近い流星は実際にはもっと暗く見えます</li>
+    <li>線の太さ・輝き・残光の長さは「ここから見た明るさ」で決めています</li>
+    <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
+    <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
+  </ul>
+  <h3>星と放射点</h3>
+  <ul>
+    <li>星の位置と明るさ：IAU 恒星名ワーキンググループの星名カタログ（IAU-CSN。名前のある星のうち5.5等より明るい<span id="srcStars">—</span>個）。<a href="https://www.pas.rochester.edu/~emamajek/WGSN/IAU-CSN.txt" target="_blank" rel="noopener">IAU-CSN.txt</a>・公式の版 <a href="https://www.iau.org/public/themes/naming_stars/" target="_blank" rel="noopener">IAU</a>。名前のない星は入っていません。位置は J2000 で、時刻に合わせて恒星時で回しています</li>
+    <li>しし座流星群の放射点：赤経 154.4°・赤緯 +21.4°（<a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/pojedynczy_obiekt.php?kodstrumienia=00013" target="_blank" rel="noopener">IAU 流星データセンター</a>。Jenniskens 2023 の値）。しし座流星群がいくつか流れると、うっすら光らせています（演出）</li>
+    <li>日の入り・日の出・太陽と星の動きは、おおよその式で計算しています</li>
+  </ul>
+  <p>非公式のファンメイド試作です。</p>
+</section>
+
+<div class="msg" id="msg"></div>
+
+<script>
+(() => {
+'use strict';
+const DATA_URL = '../meteors-from-space/meteors_20261118_japan.json';
+const STARS_URL = 'stars-iau-csn.json';
+const RADIANT = { ra: 154.4, dec: 21.4 }; // curation/events/leonids-2026.json（IAU MDC）
+const CITIES = {
+  tokyo:   { ja: '東京', lat: 35.68, lon: 139.77 },
+  osaka:   { ja: '大阪', lat: 34.69, lon: 135.50 },
+  fukuoka: { ja: '福岡', lat: 33.59, lon: 130.40 },
+};
+const DEG = Math.PI / 180;
+const NPTS = 31;              // 直線を30に分ける
+const MIN_SHOW = 0.5;         // 光る時間の下限（秒）
+const SPARK_MAG = -2;         // これより明るい流星だけ火花と尾
+const DATA_FROM = Date.parse('2026-11-18T08:00:00Z'), DATA_TO = Date.parse('2026-11-18T21:00:00Z');
+const COL = { LEO: [255, 181, 71], OTHER: [143, 216, 255] };
+
+// ---------- 地球・空の計算 ----------
+const WA = 6378.137, WF = 1 / 298.257223563, WE2 = WF * (2 - WF);
+function ecef(lat, lon, h) {
+  const p = lat * DEG, l = lon * DEG, s = Math.sin(p), N = WA / Math.sqrt(1 - WE2 * s * s);
+  return [(N + h) * Math.cos(p) * Math.cos(l), (N + h) * Math.cos(p) * Math.sin(l), (N * (1 - WE2) + h) * s];
+}
+function enuFrame(lat, lon) {
+  const p = lat * DEG, l = lon * DEG;
+  return { o: ecef(lat, lon, 0),
+    e: [-Math.sin(l), Math.cos(l), 0],
+    n: [-Math.sin(p) * Math.cos(l), -Math.sin(p) * Math.sin(l), Math.cos(p)],
+    u: [Math.cos(p) * Math.cos(l), Math.cos(p) * Math.sin(l), Math.sin(p)] };
+}
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+function azAlt(F, P) { // P: ECEF の点 → 方角（北から東回り）・高さ（度）・距離（km）
+  const d = [P[0] - F.o[0], P[1] - F.o[1], P[2] - F.o[2]];
+  const E = dot(d, F.e), N = dot(d, F.n), U = dot(d, F.u), r = Math.hypot(E, N, U);
+  return { az: (Math.atan2(E, N) / DEG + 360) % 360, alt: Math.asin(U / r) / DEG, dist: r };
+}
+const jd = ms => ms / 86400000 + 2440587.5;
+const gmst = ms => ((280.46061837 + 360.98564736629 * (jd(ms) - 2451545)) % 360 + 360) % 360;
+function eqToHor(ra, dec, ms, lat, lon) {
+  const H = (gmst(ms) + lon - ra) * DEG, p = lat * DEG, d = dec * DEG;
+  const alt = Math.asin(Math.sin(p) * Math.sin(d) + Math.cos(p) * Math.cos(d) * Math.cos(H));
+  const az = Math.atan2(-Math.cos(d) * Math.sin(H), Math.sin(d) * Math.cos(p) - Math.cos(d) * Math.cos(H) * Math.sin(p));
+  return { az: (az / DEG + 360) % 360, alt: alt / DEG };
+}
+function sunRaDec(ms) {
+  const n = jd(ms) - 2451545, L = (280.46 + 0.9856474 * n) * DEG, g = (357.528 + 0.9856003 * n) * DEG;
+  const lam = L + (1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * DEG, eps = (23.439 - 4e-7 * n) * DEG;
+  return { ra: (Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)) / DEG + 360) % 360, dec: Math.asin(Math.sin(eps) * Math.sin(lam)) / DEG };
+}
+function sunAlt(ms, c) { const s = sunRaDec(ms); return eqToHor(s.ra, s.dec, ms, c.lat, c.lon).alt; }
+function findCross(c, from, to, rising) { // 太陽の上の縁が地平線（-0.833°）を通る時刻（1分刻み）
+  let prev = sunAlt(from, c);
+  for (let t = from + 60000; t <= to; t += 60000) {
+    const a = sunAlt(t, c);
+    if (rising ? (prev < -0.833 && a >= -0.833) : (prev > -0.833 && a <= -0.833)) return t;
+    prev = a;
+  }
+  return rising ? to : from;
+}
+const DIR8 = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
+const dir8 = az => DIR8[Math.round(az / 45) % 8];
+const fmtJST = (ms, sec) => new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', ...(sec ? { second: '2-digit' } : {}), hourCycle: 'h23' }).format(new Date(ms));
+const fmtUTC = ms => new Date(ms).toISOString().slice(11, 16);
+
+// ---------- 状態 ----------
+let meteors = [], stars = [], city = CITIES.osaka, F = enuFrame(city.lat, city.lon);
+let T0 = 0, T1 = 1, simT = Date.parse('2026-11-18T15:00:00Z'); // はじめは日本時間 0:00
+let speed = 120, playing = true, active = [], sparks = [], trains = [], radiantGlow = 0, lastShown = null;
+
+// 流星ごとに、いまの場所から見た形を前もって計算
+function prepare() {
+  F = enuFrame(city.lat, city.lon);
+  for (const m of meteors) {
+    const A = ecef(m.lat_beg, m.lon_beg, m.ht_beg_km), B = ecef(m.lat_end, m.lon_end, m.ht_end_km);
+    m.pts = [];
+    for (let i = 0; i < NPTS; i++) {
+      const f = i / (NPTS - 1);
+      m.pts.push(azAlt(F, [A[0] + (B[0] - A[0]) * f, A[1] + (B[1] - A[1]) * f, A[2] + (B[2] - A[2]) * f]));
+    }
+    m.visible = m.pts.some(p => p.alt > 0);
+    // 一番明るかった点（高さ Peak Ht）までの距離で、ここから見た明るさを出す
+    const span = m.ht_beg_km - m.ht_end_km;
+    const fp = span > 0.01 && m.peak_ht_km != null ? Math.min(1, Math.max(0, (m.ht_beg_km - m.peak_ht_km) / span)) : 0.5;
+    const ip = Math.round(fp * (NPTS - 1));
+    m.peakIdx = ip; m.peakF = fp;
+    m.distPeak = m.pts[ip].dist;
+    m.magHere = m.peak_absmag + 5 * Math.log10(m.distPeak / 100);
+    m.b = Math.max(0, Math.min(1, (4 - m.magHere) / 7)); // 0（+4等）〜1（−3等）
+  }
+}
+
+// ---------- 魚眼 ----------
+const domeEl = document.getElementById('dome'), boxEl = document.getElementById('domeBox'), sky = document.getElementById('sky'), ctx = sky.getContext('2d');
+let S = 300, DPR = Math.min(devicePixelRatio || 1, 2), cx = 0, cy = 0, R = 0;
+function layout() {
+  const r = domeEl.getBoundingClientRect();
+  S = Math.max(160, Math.floor(Math.min(r.width, r.height)));
+  boxEl.style.width = S + 'px'; boxEl.style.height = S + 'px';
+  sky.width = S * DPR; sky.height = S * DPR;
+  cx = S / 2; cy = S / 2; R = S * 0.44;
+  layoutTl();
+}
+// 等距離射影：中心が天頂・ふちが地平線。北が上、東が左
+function proj(az, alt) {
+  const r = R * (90 - alt) / 90, a = az * DEG;
+  return [cx - r * Math.sin(a), cy - r * Math.cos(a)];
+}
+
+function drawSky(now) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, S, S);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
+  // 空の地：真上は深い紺、ふちへ暗く落ちる。日の入り・日の出の近くはふちが少し明るむ
+  const sunA = sunAlt(simT, city);
+  const tw = Math.max(0, Math.min(1, (sunA + 18) / 18));
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+  g.addColorStop(0, `rgb(${8 + tw * 20},${16 + tw * 30},${34 + tw * 50})`);
+  g.addColorStop(0.75, `rgb(${5 + tw * 25},${10 + tw * 30},${22 + tw * 45})`);
+  g.addColorStop(1, `rgb(${3 + tw * 40},${6 + tw * 34},${14 + tw * 40})`);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+
+  // 星（時刻の恒星時で回る）
+  const starFade = Math.max(0, Math.min(1, (-sunA - 6) / 8));
+  if (starFade > 0) {
+    for (const st of stars) {
+      const h = eqToHor(st[0], st[1], simT, city.lat, city.lon);
+      if (h.alt <= 0) continue;
+      const [x, y] = proj(h.az, h.alt);
+      const m = st[2], low = Math.min(1, h.alt / 12);
+      const a = Math.max(0.12, Math.min(1, (6.2 - m) / 5.5)) * starFade * (0.45 + 0.55 * low);
+      const rad = Math.max(0.55, 2.3 - 0.36 * m) * (S / 700 + 0.4);
+      ctx.fillStyle = `rgba(225,235,255,${a})`;
+      ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // しし座の放射点：しし座流星群がいくつか流れると、うっすら光る（演出）
+  const rh = eqToHor(RADIANT.ra, RADIANT.dec, simT, city.lat, city.lon);
+  if (rh.alt > 0 && radiantGlow > 0.02) {
+    const [x, y] = proj(rh.az, rh.alt), rr = R * 0.16;
+    const rg = ctx.createRadialGradient(x, y, 0, x, y, rr);
+    rg.addColorStop(0, `rgba(255,181,71,${0.42 * radiantGlow})`);
+    rg.addColorStop(0.35, `rgba(255,181,71,${0.12 * radiantGlow})`);
+    rg.addColorStop(1, 'rgba(255,181,71,0)');
+    ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
+    if (radiantGlow > 0.35) {
+      ctx.font = `${Math.max(10, S * 0.022)}px "Zen Kaku Gothic New", sans-serif`;
+      ctx.fillStyle = `rgba(255,181,71,${Math.min(0.85, radiantGlow)})`; ctx.textAlign = 'center';
+      ctx.fillText('しし座の放射点', x, y + rr * 0.55);
+    }
+  }
+
+  // 流星
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineCap = 'round';
+  for (const tr of trains) drawTrain(tr, now);
+  for (const a of active) drawMeteor(a, now);
+  for (const p of sparks) {
+    const age = (now - p.t0) / 1000; if (age > p.life) continue;
+    const k = 1 - age / p.life;
+    const x = p.x + p.vx * age * (1 - age * 0.4), y = p.y + p.vy * age * (1 - age * 0.4) + 6 * age * age;
+    ctx.fillStyle = `rgba(${p.c[0]},${p.c[1]},${p.c[2]},${0.9 * k})`;
+    ctx.beginPath(); ctx.arc(x, y, p.r * (0.4 + 0.6 * k), 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+
+  // ふちの暗がり（周辺減光）
+  const v = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R);
+  v.addColorStop(0, 'rgba(2,6,15,0)'); v.addColorStop(1, 'rgba(2,6,15,0.78)');
+  ctx.fillStyle = v; ctx.fillRect(0, 0, S, S);
+  ctx.restore();
+}
+
+function pathPts(m, i0, i1) { // 地平線より上の点だけ
+  const out = [];
+  for (let i = Math.max(0, Math.floor(i0)); i <= Math.min(NPTS - 1, Math.ceil(i1)); i++) {
+    const p = m.pts[i]; out.push(p.alt > 0 ? proj(p.az, p.alt) : null);
+  }
+  return out;
+}
+function strokeFaded(pts, col, w, aHead, aTail) {
+  const n = pts.length;
+  for (let i = 1; i < n; i++) {
+    if (!pts[i - 1] || !pts[i]) continue;
+    const f = i / (n - 1), a = aTail + (aHead - aTail) * f;
+    ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${a})`;
+    ctx.lineWidth = w * (0.35 + 0.65 * f);
+    ctx.beginPath(); ctx.moveTo(pts[i - 1][0], pts[i - 1][1]); ctx.lineTo(pts[i][0], pts[i][1]); ctx.stroke();
+  }
+}
+const colOf = m => m.iau_code === 'LEO' ? COL.LEO : COL.OTHER;
+const lighten = (c, k) => c.map(v => Math.round(v + (255 - v) * k));
+function drawMeteor(a, now) {
+  const m = a.m, D = Math.max(MIN_SHOW, m.duration_s || 0), age = (now - a.t0) / 1000;
+  const fade = 0.25 + 0.9 * m.b; // 残光の長さ（明るいほど長い）
+  if (age > D + fade) { a.done = true; return; }
+  const p = Math.min(1, age / D), head = p * (NPTS - 1);
+  const tailLen = (0.25 + 0.45 * m.b) * (NPTS - 1);
+  const k = age <= D ? 1 : 1 - (age - D) / fade;
+  const col = colOf(m), hot = lighten(col, 0.55);
+  const w = (0.7 + 3.4 * m.b) * (S / 700 + 0.35);
+  const aMax = (0.25 + 0.75 * m.b) * k;
+  const pts = pathPts(m, Math.max(0, head - tailLen), head);
+  // 輝き（太く薄く）＋芯（細く明るく）
+  strokeFaded(pts, col, w * 3.2, aMax * 0.22, 0);
+  strokeFaded(pts, hot, w, aMax, 0);
+  // 頭の光
+  const hp = m.pts[Math.min(NPTS - 1, Math.round(head))];
+  if (hp.alt > 0 && age <= D) {
+    const [x, y] = proj(hp.az, hp.alt), rr = w * (2.2 + 2 * m.b);
+    const hg = ctx.createRadialGradient(x, y, 0, x, y, rr);
+    hg.addColorStop(0, `rgba(255,250,235,${aMax})`); hg.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
+    ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
+  }
+  // 明るい流星：消える瞬間に火花の粒と短い尾（演出）
+  if (age > D && !a.burst && m.magHere < SPARK_MAG) {
+    a.burst = true;
+    const ep = m.pts[NPTS - 1];
+    if (ep.alt > 0) {
+      const [x, y] = proj(ep.az, ep.alt), n = 10 + Math.round(16 * m.b);
+      const pp = m.pts[NPTS - 4], [px, py] = pp.alt > 0 ? proj(pp.az, pp.alt) : [x, y];
+      const dx = x - px, dy = y - py, L = Math.hypot(dx, dy) || 1;
+      for (let i = 0; i < n; i++) {
+        const sp = (8 + Math.random() * 26) * (S / 700 + 0.3), th = Math.atan2(dy, dx) + (Math.random() - 0.5) * 1.6;
+        sparks.push({ x, y, vx: Math.cos(th) * sp + dx / L * 10, vy: Math.sin(th) * sp + dy / L * 10, t0: now, life: 0.5 + Math.random() * 0.8,
+          r: (0.6 + Math.random() * 1.2) * (S / 700 + 0.4), c: Math.random() < 0.5 ? [255, 236, 200] : lighten(col, 0.2) });
+      }
+      trains.push({ m, t0: now, life: 1.2 + 1.3 * m.b });
+    }
+  }
+}
+function drawTrain(tr, now) { // 消えたあとに残る短い尾（演出）
+  const age = (now - tr.t0) / 1000; if (age > tr.life) { tr.done = true; return; }
+  const k = 1 - age / tr.life, m = tr.m, col = colOf(m);
+  const pts = pathPts(m, (NPTS - 1) * 0.55, NPTS - 1);
+  strokeFaded(pts, col, (1.6 + 2 * m.b) * (S / 700 + 0.35) * (1 + age * 0.8), 0.32 * k, 0.0);
+}
+
+// ---------- 夜のタイムライン ----------
+const tl = document.getElementById('tl'), tctx = tl.getContext('2d');
+let TW = 300, TH = 74;
+const PADL = 10, PADR = 10;
+function layoutTl() {
+  const r = tl.getBoundingClientRect();
+  TW = Math.max(200, r.width); TH = r.height;
+  tl.width = TW * DPR; tl.height = TH * DPR;
+}
+const tx = t => PADL + (TW - PADL - PADR) * (t - T0) / (T1 - T0);
+const xt = x => T0 + (T1 - T0) * Math.max(0, Math.min(1, (x - PADL) / (TW - PADL - PADR)));
+let radCurve = [];
+function prepTimeline() {
+  radCurve = [];
+  for (let t = T0; t <= T1; t += 5 * 60000) radCurve.push([t, eqToHor(RADIANT.ra, RADIANT.dec, t, city.lat, city.lon).alt]);
+}
+function drawTimeline() {
+  const c = tctx; c.setTransform(DPR, 0, 0, DPR, 0, 0); c.clearRect(0, 0, TW, TH);
+  const top = 8, bot = TH - 16, h = bot - top;
+  // 夜の帯
+  c.fillStyle = 'rgba(7,20,43,0.9)'; c.fillRect(PADL, top, TW - PADL - PADR, h);
+  // データのない時間（GMN の抽出は 08:00〜21:00 UTC）
+  c.fillStyle = 'rgba(2,6,15,0.75)';
+  if (DATA_FROM > T0) c.fillRect(tx(T0), top, tx(DATA_FROM) - tx(T0), h);
+  if (DATA_TO < T1) c.fillRect(tx(DATA_TO), top, tx(T1) - tx(DATA_TO), h);
+  c.strokeStyle = 'rgba(143,179,168,0.25)'; c.lineWidth = 1; c.strokeRect(PADL + 0.5, top + 0.5, TW - PADL - PADR - 1, h - 1);
+  // 時刻の目盛り（日本時間）
+  c.font = '9px "JetBrains Mono", monospace'; c.fillStyle = 'rgba(143,216,255,0.75)'; c.textAlign = 'center';
+  const h0 = Math.ceil(T0 / 3600000) * 3600000;
+  for (let t = h0; t <= T1; t += 3600000) {
+    const x = tx(t), hr = +fmtJST(t).slice(0, 2);
+    c.strokeStyle = 'rgba(143,179,168,0.18)'; c.beginPath(); c.moveTo(x + 0.5, top); c.lineTo(x + 0.5, bot); c.stroke();
+    if ((hr % 2 === 0 || TW > 700) && x > PADL + 70 && x < TW - PADR - 62) c.fillText(String(hr), x, TH - 4);
+  }
+  c.font = '9px "Zen Kaku Gothic New", sans-serif'; c.fillStyle = 'rgba(143,179,168,0.85)';
+  c.textAlign = 'left'; c.fillText('日の入り ' + fmtJST(T0), PADL, TH - 4);
+  c.textAlign = 'right'; c.fillText('日の出 ' + fmtJST(T1), TW - PADR, TH - 4);
+  // 流星（この空に見えたものだけ。高さは明るさ）
+  for (const m of meteors) {
+    if (!m.visible) continue;
+    const x = Math.round(tx(m._t)) + 0.5, len = 6 + 18 * m.b, col = colOf(m);
+    c.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${m._t <= simT ? 0.85 : 0.35})`;
+    c.beginPath(); c.moveTo(x, bot - 1); c.lineTo(x, bot - 1 - len); c.stroke();
+  }
+  // しし座の放射点の高さ（0°〜90°）
+  c.strokeStyle = 'rgba(255,181,71,0.75)'; c.lineWidth = 1.2; c.beginPath();
+  radCurve.forEach(([t, alt], i) => { const y = bot - h * Math.max(0, alt) / 90; i ? c.lineTo(tx(t), y) : c.moveTo(tx(t), y); });
+  c.stroke();
+  const lab = radCurve.find(p => p[1] > 12); // 放射点が昇りはじめたところに名前
+  if (lab) {
+    c.font = '9px "Zen Kaku Gothic New", sans-serif'; c.fillStyle = 'rgba(255,181,71,0.9)'; c.textAlign = 'right';
+    c.fillText('しし座の放射点の高さ →', tx(lab[0]) - 4, bot - h * lab[1] / 90 - 3);
+  }
+  // 再生位置（オレンジの丸い印）
+  const px = tx(simT);
+  c.strokeStyle = 'rgba(255,181,71,0.6)'; c.lineWidth = 1; c.beginPath(); c.moveTo(px + 0.5, top); c.lineTo(px + 0.5, bot); c.stroke();
+  c.fillStyle = '#07142b'; c.strokeStyle = '#ffb547'; c.lineWidth = 1.8;
+  c.beginPath(); c.arc(px, top + 1, 5, 0, Math.PI * 2); c.fill(); c.stroke();
+  c.fillStyle = '#ffb547'; c.beginPath(); c.arc(px, top + 1, 2, 0, Math.PI * 2); c.fill();
+}
+// ドラッグで時刻を動かす
+let dragging = false;
+function seek(clientX) {
+  const r = tl.getBoundingClientRect();
+  simT = xt(clientX - r.left);
+  active = []; sparks = []; trains = []; radiantGlow = 0; lastIdx = idxAt(simT);
+  updateCount(); showLast(lastVisibleBefore(simT));
+}
+tl.addEventListener('pointerdown', e => { dragging = true; tl.setPointerCapture(e.pointerId); seek(e.clientX); });
+tl.addEventListener('pointermove', e => { if (dragging) seek(e.clientX); });
+tl.addEventListener('pointerup', () => { dragging = false; });
+tl.addEventListener('pointercancel', () => { dragging = false; });
+
+// ---------- 数・計器 ----------
+function idxAt(t) { let i = 0; while (i < meteors.length && meteors[i]._t <= t) i++; return i; }
+let lastIdx = 0;
+function lastVisibleBefore(t) { for (let i = idxAt(t) - 1; i >= 0; i--) if (meteors[i].visible) return meteors[i]; return null; }
+function updateCount() {
+  let n = 0; for (const m of meteors) { if (m._t > simT) break; if (m.visible && m._t >= T0) n++; }
+  document.getElementById('count').textContent = n;
+}
+const NAMES = { LEO: 'しし座流星群', NTA: 'おうし座北流星群', STA: 'おうし座南流星群', AMO: 'いっかくじゅう座α流星群' };
+function showLast(m) {
+  lastShown = m;
+  const has = !!m;
+  document.getElementById('iBody').hidden = !has; document.getElementById('iEmpty').hidden = has;
+  const tag = document.getElementById('iTag'); tag.hidden = !has;
+  if (!has) return;
+  const code = m.iau_code;
+  tag.textContent = code || 'SPORADIC'; tag.classList.toggle('sky', code !== 'LEO');
+  const name = code ? (NAMES[code] || `その他の流星群（${code}）`) : '散在流星';
+  document.getElementById('iName').innerHTML = `${name}<small>${fmtJST(m._t, true)} JST</small>`;
+  const mg = m.magHere;
+  document.getElementById('iMag').innerHTML = `${mg < 0 ? '−' : '+'}${Math.abs(mg).toFixed(1)}<small>等</small>`;
+  document.getElementById('iVel').innerHTML = `${m.v_init_kms.toFixed(1)}<small>km/s</small>`;
+  document.getElementById('iAlt').innerHTML = `${Math.round(m.ht_beg_km)}→${Math.round(m.ht_end_km)}<small>km</small>`;
+  const b = m.pts[0], e = m.pts[NPTS - 1];
+  const where = (p) => p.alt > 0 ? `${dir8(p.az)} ${Math.round(p.alt)}°` : '地平線の下';
+  document.getElementById('iMeta').innerHTML =
+    `<span>SKY<b>${where(b)} → ${where(e)}</b></span><span>DURATION<b>${(m.duration_s ?? 0).toFixed(2)} s</b></span>` +
+    `<span>DIST<b>${Math.round(m.distPeak).toLocaleString()} km</b></span><span>STATIONS<b>${m.num_stations ?? '—'}</b></span>`;
+  // 光った道すじ（横：光り始めからの長さ、縦：高さ）。オレンジの印＝一番明るかった高さ
+  const A = ecef(m.lat_beg, m.lon_beg, m.ht_beg_km), B = ecef(m.lat_end, m.lon_end, m.ht_end_km);
+  const L = Math.hypot(B[0] - A[0], B[1] - A[1], B[2] - A[2]);
+  const H0 = 60, H1 = 130, X0 = 34, X1 = 312, yOf = h => 52 - 46 * (h - H0) / (H1 - H0);
+  const x1 = X0 + (X1 - X0) * Math.min(1, L / 120);
+  const pk = m.peak_ht_km ?? (m.ht_beg_km + m.ht_end_km) / 2, xp = X0 + (x1 - X0) * m.peakF;
+  document.getElementById('iTrack').innerHTML =
+    `<line class="grid" x1="${X0}" x2="${X1}" y1="${yOf(80)}" y2="${yOf(80)}"/><line class="grid" x1="${X0}" x2="${X1}" y1="${yOf(120)}" y2="${yOf(120)}"/>` +
+    `<line class="base" x1="${X0}" x2="${X1}" y1="56" y2="56"/>` +
+    `<text x="0" y="${yOf(120) + 3}">120km</text><text x="0" y="${yOf(80) + 3}">80km</text>` +
+    `<path class="path" d="M ${X0} ${yOf(m.ht_beg_km)} L ${x1} ${yOf(m.ht_end_km)}"/>` +
+    `<circle class="dot" cx="${xp}" cy="${yOf(pk)}" r="4.2"/><circle class="dot-in" cx="${xp}" cy="${yOf(pk)}" r="1.7"/>` +
+    `<text class="hl" x="${Math.min(X1 - 70, xp + 8)}" y="${yOf(pk) - 6}">PEAK ${Math.round(pk)} km</text>` +
+    `<text x="${X1}" y="${yOf(m.ht_end_km) + (yOf(m.ht_end_km) > 44 ? -6 : 12)}" text-anchor="end">LENGTH ${Math.round(L)} km</text>`;
+}
+
+// ---------- 時間を進める ----------
+const rimTime = document.getElementById('rimTime');
+let lastFrame = performance.now();
+function tick(now) {
+  const dt = Math.min(0.25, (now - lastFrame) / 1000); lastFrame = now;
+  if (playing && meteors.length) {
+    const prev = simT;
+    simT = Math.min(T1, simT + dt * speed * 1000);
+    // この間に始まった流星を光らせる
+    let spawned = false;
+    while (lastIdx < meteors.length && meteors[lastIdx]._t <= simT) {
+      const m = meteors[lastIdx++];
+      if (m._t <= prev || !m.visible) continue;
+      active.push({ m, t0: now }); showLast(m); spawned = true;
+    }
+    if (spawned) updateCount();
+    if (simT >= T1) setPlaying(false);
+  }
+  // 放射点の光：直前の空の時間 20分に流れたしし座流星群の数
+  let recent = 0;
+  for (let i = lastIdx - 1; i >= 0 && meteors[i]._t > simT - 20 * 60000; i--) if (meteors[i].visible && meteors[i].iau_code === 'LEO') recent++;
+  radiantGlow += (Math.min(1, recent / 4) - radiantGlow) * Math.min(1, dt * 1.5);
+  active = active.filter(a => !a.done); trains = trains.filter(t => !t.done);
+  sparks = sparks.filter(p => (now - p.t0) / 1000 < p.life);
+  drawSky(now);
+  drawTimeline();
+  rimTime.innerHTML = `${fmtJST(simT)} JST <tspan class="u">UTC ${fmtUTC(simT)}</tspan>`;
+  requestAnimationFrame(tick);
+}
+
+// ---------- 操作 ----------
+const playBtn = document.getElementById('playBtn');
+function setPlaying(v) {
+  if (v && simT >= T1) { simT = T0; active = []; lastIdx = idxAt(simT); updateCount(); }
+  playing = v; playBtn.classList.toggle('on', v); playBtn.textContent = v ? '❚❚' : '▶';
+  playBtn.setAttribute('aria-label', v ? '一時停止' : '再生');
+  document.getElementById('rimLive').textContent = v ? '観測中' : '一時停止';
+}
+playBtn.addEventListener('click', () => setPlaying(!playing));
+document.querySelectorAll('[data-speed]').forEach(b => b.addEventListener('click', () => {
+  speed = +b.dataset.speed; document.querySelectorAll('[data-speed]').forEach(x => x.classList.toggle('cur', x === b));
+}));
+function setCity(key) {
+  city = CITIES[key];
+  document.getElementById('cityName').textContent = city.ja;
+  document.querySelectorAll('[data-city]').forEach(x => x.classList.toggle('cur', x.dataset.city === key));
+  const base = Date.parse('2026-11-18T00:00:00Z');
+  T0 = findCross(city, base + 4 * 3600000, base + 12 * 3600000, false);
+  T1 = findCross(city, base + 18 * 3600000, base + 26 * 3600000, true);
+  simT = Math.max(T0, Math.min(T1, simT));
+  prepare(); prepTimeline();
+  active = []; sparks = []; trains = []; lastIdx = idxAt(simT);
+  updateCount(); showLast(lastVisibleBefore(simT));
+}
+document.querySelectorAll('[data-city]').forEach(b => b.addEventListener('click', () => setCity(b.dataset.city)));
+const src = document.getElementById('sources');
+document.getElementById('srcBtn').addEventListener('click', () => { src.hidden = false; });
+document.getElementById('srcClose').addEventListener('click', () => { src.hidden = true; });
+addEventListener('resize', layout);
+new ResizeObserver(layout).observe(domeEl);
+
+// ---------- 読み込み ----------
+(async () => {
+  try {
+    const [d, s] = await Promise.all([fetch(DATA_URL, { cache: 'no-cache' }).then(r => r.json()), fetch(STARS_URL).then(r => r.json())]);
+    meteors = d.meteors.map(m => ({ ...m, _t: Date.parse(m.utc) })).sort((a, b) => a._t - b._t);
+    stars = s.stars;
+    document.getElementById('srcFiles').innerHTML = '使ったファイル：' + d.meta.files.map(u => `<a href="${u}" target="_blank" rel="noopener">${u.split('/').pop()}</a>`).join('、');
+    document.getElementById('srcGen').textContent = (d.meta.files_generated_utc || []).map(x => String(x).slice(0, 16)).join('・') + ' UTC';
+    document.getElementById('srcStars').textContent = stars.length;
+  } catch (e) {
+    const el = document.getElementById('msg'); el.innerHTML = 'データを読み込めませんでした。<br><span class="mono">python3 -m http.server -d web</span> などで開いてください。'; el.classList.add('on');
+    return;
+  }
+  layout();
+  const q = new URLSearchParams(location.hash.slice(1));
+  if (q.get('t') && !isNaN(Date.parse(q.get('t')))) simT = Date.parse(q.get('t'));
+  if (q.get('speed') && document.querySelector(`[data-speed="${q.get('speed')}"]`)) document.querySelector(`[data-speed="${q.get('speed')}"]`).click();
+  setCity(CITIES[q.get('city')] ? q.get('city') : 'osaka');
+  requestAnimationFrame(tick);
+})();
+})();
+</script>
+</body>
+</html>

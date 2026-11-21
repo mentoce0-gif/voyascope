@@ -6,7 +6,7 @@
 
 - 日ごとのファイルは「太陽黄経 1 度ぶん」で区切られている（UTC の日付の区切りではない）。
   そのため、ファイル名の日付が 2026-11-17 と 2026-11-18 の2つを読み、時刻で絞る。
-- 局のコード（Participating stations）と局の数（Num stat）は読み飛ばし、出力に入れない。
+- 局のコード（Participating stations）は読み飛ばし、出力に入れない。局の「数」（Num stat）だけ出す。
   軌道ごとの識別子（Unique trajectory identifier）も使わない。
 
 使い方：
@@ -45,8 +45,11 @@ WANTED = {
     "Peak | AbsMag": "peak_absmag",
     "Vinit | km/s": "v_init_kms",
     "Vavg | km/s": "v_avg_kms",
+    "Peak Ht | km": "peak_ht_km",
+    "Duration | sec": "duration_s",
+    "Num | stat": "num_stations",
 }
-EXCLUDED = ("Participating", "Num", "Unique trajectory")  # 読まない列（出力に出さない）
+EXCLUDED = ("Participating", "Unique trajectory")  # 読まない列（出力に出さない）。局の「数」（Num stat）は出してよい（2026-11-21 オーナー）
 
 UA = {"User-Agent": "voyascope-mockup/0.1 (static site; one-off download)"}
 
@@ -112,8 +115,10 @@ def extract(text):
         rec = {"utc": c[idx["utc"]].strip()[:23].replace(" ", "T") + "Z",
                "iau_code": None if code == "..." else code}
         for k in ("iau_no", "lat_beg", "lon_beg", "ht_beg_km", "lat_end", "lon_end",
-                  "ht_end_km", "peak_absmag", "v_init_kms", "v_avg_kms"):
+                  "ht_end_km", "peak_absmag", "v_init_kms", "v_avg_kms", "peak_ht_km", "duration_s", "num_stations"):
             v = r[k]
+            if k == "num_stations" and v is not None:
+                v = int(v)
             rec[k] = round(v, 5 if k.startswith(("lat", "lon")) else 2) if isinstance(v, float) else v
         out.append(rec)
     return out
@@ -166,7 +171,8 @@ def main():
                 "heights are km above the WGS84 ellipsoid (HtBeg/HtEnd)",
                 "peak_absmag is normalized to 100 km range (Peak AbsMag)",
                 "iau_code null = sporadic (GMN code '...')",
-                "station codes are intentionally not included",
+                "station codes are intentionally not included (only the number of stations)",
+                "duration_s is the meteor duration (Duration, sec); peak_ht_km is the height of peak magnitude (Peak Ht)",
             ],
             "count": len(uniq),
         },
