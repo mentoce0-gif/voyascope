@@ -91,6 +91,10 @@
   .tm-name small { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 400; color: var(--text-dim); margin-left: 8px; letter-spacing: 0.06em; }
   .tm-sub { font-family: var(--font-mono); font-size: 0.66rem; color: var(--text-dim); letter-spacing: 0.04em; line-height: 1.5; }
   .tm-sub .from { font-family: var(--font-body); color: var(--sky); letter-spacing: 0.06em; }
+  .tm-see { margin-top: 4px; font-size: 0.7rem; color: var(--amber); letter-spacing: 0.04em; }
+  .tm-see::before { content: "◉ "; }
+  .tm-see.no { color: var(--text-dim); }
+  .tm-see.no::before { content: "◌ "; }
   .tm-row { display: flex; gap: 14px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--rule); }
   .tm-q { flex: 1 1 0; min-width: 0; }
   .tm-k { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.16em; color: var(--text-dim); line-height: 1.3; white-space: nowrap; }
@@ -190,7 +194,7 @@
     </div>
   </div>
 
-  <div class="count"><b id="count">0</b><span>個の流星</span><div class="count-break" id="countBreak"></div><small id="countNote">日没から いまの時刻まで ・ 地平線より上に流れた数（暗いもの・低いものも含む）</small></div>
+  <div class="count"><b id="count">0</b><span>個の流星を観測</span><div class="count-break" id="countBreak"></div><small id="countNote">日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）</small></div>
 
   <div class="panel-wrap">
     <section class="tm" id="tm" aria-live="polite">
@@ -198,6 +202,7 @@
       <div id="iBody" hidden>
         <div class="tm-name" id="iName">—</div>
         <div class="tm-sub" id="iSub"></div>
+        <div class="tm-see" id="iSee"></div>
         <div class="tm-row">
           <div class="tm-q"><div class="tm-k">MAG<small>ここから見た明るさ</small></div><div class="tm-v" id="iMag">—</div></div>
           <div class="tm-q"><div class="tm-k">VELOCITY<small>速さ</small></div><div class="tm-v" id="iVel">—</div></div>
@@ -246,6 +251,8 @@
     <li>見上げる場所：東京・大阪・福岡の、それぞれ市の中心あたりの代表の点（標高0 m）</li>
     <li>「ここから見た明るさ」：GMN の最大の明るさ（100 km の距離に直した等級）を、見上げる場所から一番明るかった点までの距離で直したもの（等級＋5×log₁₀（距離÷100 km））。大気による減光は入れていないので、地平線に近い流星は実際にはもっと暗く見えます</li>
     <li>線の太さ・輝き・残光の長さは「ここから見た明るさ」で決めています</li>
+    <li>ここから見て6等より暗い流星は「肉眼ではほぼ見えない」として、細い点線でうっすら描いています（飛んでいたことは GMN に記録されているため）。6等は目安の仮の値で、出典を確かめているところです。地平線の下の流星は空には描かず、計器とタイムラインにだけ出します</li>
+    <li>「◯個の流星を観測」：見上げる場所によらず、日本のまわり（上の範囲）で GMN のカメラが記録した流星の数です。実際に流れた流星のすべてではありません（カメラのない場所・曇り・暗すぎる流星は入りません）</li>
     <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
     <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
     <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は、しし座・おうし座北／南・いっかくじゅう座α 以外は、英名を星座名とギリシャ文字に直した訳です（公式の日本語名ではありません。「日本語名は訳」と出ます）</li>
@@ -277,6 +284,7 @@ const DEG = Math.PI / 180;
 const NPTS = 31;              // 直線を30に分ける
 const MIN_SHOW = 0.5;         // 光る時間の下限（秒）
 const SPARK_MAG = -2;         // これより明るい流星だけ火花と尾
+const EYE_LIMIT = 6;          // 肉眼で見える限界の目安（仮。出典はチャッピーへの依頼 C42 の答えで確かめる）
 const DATA_FROM = Date.parse('2026-11-18T08:00:00Z'), DATA_TO = Date.parse('2026-11-18T21:00:00Z');
 const COL = { LEO: [255, 181, 71], OTHER: [143, 216, 255] };
 
@@ -351,6 +359,7 @@ function prepare() {
     m.distPeak = m.pts[ip].dist;
     m.magHere = m.peak_absmag + 5 * Math.log10(m.distPeak / 100);
     m.b = Math.max(0, Math.min(1, (4 - m.magHere) / 7)); // 0（+4等）〜1（−3等）
+    m.eye = m.visible && m.magHere <= EYE_LIMIT;          // ここから肉眼で見えそうか（目安）
   }
 }
 
@@ -456,7 +465,19 @@ function strokeFaded(pts, col, w, aHead, aTail) {
 }
 const colOf = m => m.iau_code === 'LEO' ? COL.LEO : COL.OTHER;
 const lighten = (c, k) => c.map(v => Math.round(v + (255 - v) * k));
+function drawGhost(a, now) { // 肉眼ではほぼ見えない流星：細い点線でうっすら
+  const m = a.m, D = Math.max(MIN_SHOW, m.duration_s || 0), age = (now - a.t0) / 1000, life = D + 0.6;
+  if (age > life) { a.done = true; return; }
+  const k = age <= D ? 1 : 1 - (age - D) / 0.6, head = Math.min(1, age / D) * (NPTS - 1);
+  const pts = pathPts(m, 0, head).filter(Boolean), col = colOf(m);
+  if (pts.length < 2) return;
+  ctx.save(); ctx.setLineDash([2, 4]); ctx.lineWidth = 0.8;
+  ctx.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${0.35 * k})`;
+  ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke();
+  ctx.restore();
+}
 function drawMeteor(a, now) {
+  if (!a.m.eye) return drawGhost(a, now);
   const m = a.m, D = Math.max(MIN_SHOW, m.duration_s || 0), age = (now - a.t0) / 1000;
   const fade = 0.25 + 0.9 * m.b; // 残光の長さ（明るいほど長い）
   if (age > D + fade) { a.done = true; return; }
@@ -541,9 +562,9 @@ function drawTimeline() {
   c.textAlign = 'right'; c.fillText('日の出 ' + fmtJST(T1), TW - PADR, TH - 4);
   // 流星（この空に見えたものだけ。高さは明るさ）
   for (const m of meteors) {
-    if (!m.visible) continue;
-    const x = Math.round(tx(m._t)) + 0.5, len = 6 + 18 * m.b, col = colOf(m);
-    c.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${m._t <= simT ? 0.85 : 0.35})`;
+    const x = Math.round(tx(m._t)) + 0.5, len = m.visible ? 6 + 18 * m.b : 4, col = colOf(m);
+    const a = (m._t <= simT ? 0.85 : 0.35) * (m.eye ? 1 : 0.4);
+    c.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${a})`;
     c.beginPath(); c.moveTo(x, bot - 1); c.lineTo(x, bot - 1 - len); c.stroke();
   }
   // しし座の放射点の高さ（0°〜90°）
@@ -578,13 +599,13 @@ tl.addEventListener('pointercancel', () => { dragging = false; });
 // ---------- 数・計器 ----------
 function idxAt(t) { let i = 0; while (i < meteors.length && meteors[i]._t <= t) i++; return i; }
 let lastIdx = 0;
-function lastVisibleBefore(t) { for (let i = idxAt(t) - 1; i >= 0; i--) if (meteors[i].visible) return meteors[i]; return null; }
+function lastVisibleBefore(t) { const i = idxAt(t) - 1; return i >= 0 ? meteors[i] : null; }
 function updateCount() {
   let n = 0, leo = 0, sp = 0; const groups = new Set();
-  for (const m of meteors) { if (m._t > simT) break; if (m.visible && m._t >= T0) { n++; if (m.iau_code === 'LEO') leo++; else if (!m.iau_code) sp++; else groups.add(m.iau_code); } }
+  for (const m of meteors) { if (m._t > simT) break; if (m._t >= T0) { n++; if (m.iau_code === 'LEO') leo++; else if (!m.iau_code) sp++; else groups.add(m.iau_code); } }
   document.getElementById('count').textContent = n;
   const other = n - leo - sp;
-  document.getElementById('countBreak').innerHTML = n ? `<i class="o"></i>しし座流星群 <b>${leo}</b><i class="c"></i>ほかの流星群 <b>${other}</b>${groups.size ? `<span>（${groups.size}群）</span>` : ''}<i class="c"></i>散在流星 <b>${sp}</b>` : '';
+  document.getElementById('countBreak').innerHTML = n ? `<i class="o"></i>しし座 <b>${leo}</b><i class="c"></i>ほかの流星群 <b>${other}</b>${groups.size ? `<span>（${groups.size}群）</span>` : ''}<i class="c"></i>散在 <b>${sp}</b>` : '';
 }
 // 流星群の名前：英名と番号は IAU 流星データセンターの一覧（https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php 2026-11-21 確認）。
 // 日本語名：しし座・おうし座北／南・いっかくじゅう座α は国立天文台などの書き方。ほかは英名を星座名・ギリシャ文字に直した訳（公式の日本語名ではない）
@@ -627,8 +648,13 @@ function showLast(m) {
     : 'どの流星群にも属さない流星';
   document.getElementById('iName').innerHTML = `${name}<small>${fmtJST(m._t, true)} JST</small>`;
   document.getElementById('iSub').innerHTML = `${sub}<br><span class="from">${fromTxt}</span>`;
+  const see = document.getElementById('iSee');
+  see.className = 'tm-see' + (m.eye ? '' : ' no');
+  see.textContent = !m.visible ? `${city.ja}からは地平線の下で見えない（GMN のカメラが記録した流星）`
+    : m.eye ? `${city.ja}から肉眼で見える明るさ（目安）`
+    : `${city.ja}からは肉眼ではほぼ見えない（${EYE_LIMIT}等より暗い・目安）。飛んでいたことは記録されている`;
   const mg = m.magHere;
-  document.getElementById('iMag').innerHTML = `${mg < 0 ? '−' : '+'}${Math.abs(mg).toFixed(1)}<small>等</small>`;
+  document.getElementById('iMag').innerHTML = m.visible ? `${mg < 0 ? '−' : '+'}${Math.abs(mg).toFixed(1)}<small>等</small>` : '—';
   document.getElementById('iVel').innerHTML = `${m.v_init_kms.toFixed(1)}<small>km/s</small>`;
   document.getElementById('iAlt').innerHTML = `${Math.round(m.ht_beg_km)}→${Math.round(m.ht_end_km)}<small>km</small>`;
   const b = m.pts[0], e = m.pts[NPTS - 1];
@@ -664,8 +690,9 @@ function tick(now) {
     let spawned = false;
     while (lastIdx < meteors.length && meteors[lastIdx]._t <= simT) {
       const m = meteors[lastIdx++];
-      if (m._t <= prev || !m.visible) continue;
-      active.push({ m, t0: now }); showLast(m); spawned = true;
+      if (m._t <= prev) continue;
+      if (m.visible) active.push({ m, t0: now });
+      showLast(m); spawned = true;
     }
     if (spawned) updateCount();
     if (simT >= T1) setPlaying(false);
