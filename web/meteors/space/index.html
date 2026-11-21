@@ -203,6 +203,7 @@
   <ul>
     <li>流星の大きさ・明るさの描き分け：GMN の「Peak AbsMag」（100 km 先から見たときの明るさ。等級）から。数の小さい（明るい）流星ほど大きく描いています（見た目の演出）</li>
     <li>しし座の流星から伸びるうすい線：光り始めと消えた点を結んだ向きを、来た側へ 700 km まっすぐ伸ばしたもの。大気に入る前のちりは見えません（向きを見せるための線）。地球は回っているので、夜のあいだに向きは少しずつ変わります</li>
+    <li>光り方：光り始めはうすく、GMN の「一番明るかった高さ」（Peak Ht）でいちばん明るく（光の玉）、消える点へ弱めています。途中の明るさの変わり方は目安です</li>
     <li>流星の高さ：GMN の値（WGS84 の楕円体からの高さ）。「約80〜120 km」は、この夜の流星の消えた高さの下から1割（約78 km）〜光り始めの高さの上から1割（約118 km）（2026-11-21 に取り直した426件で計算）</li>
     <li>ISS の高さ 約400 km：<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">NASA</a>（平均約250マイル＝約402 km）</li>
   </ul>
@@ -366,7 +367,11 @@ function lineMesh(verts, order) {
   return m;
 }
 
-// 流星の光の筋（点を並べて、光り始めは大きく明るく、消える側は小さく暗く）
+// 流星の光り方：光り始めはうすく、落ちながら明るくなり、GMN の「一番明るかった高さ」（Peak Ht）でいちばん明るく、消える点へ弱まる
+// （光り始めを明るくすると、真横から見たとき下から上へ打ち上がるように見えてしまう。2026-11-21 オーナー）
+const peakF = m => { const sp = m.ht_beg_km - m.ht_end_km; return sp > 0.01 && m.peak_ht_km != null ? Math.min(1, Math.max(0, (m.ht_beg_km - m.peak_ht_km) / sp)) : 0.6; };
+const glowAt = (f, fp) => f <= fp ? 0.2 + 0.8 * (fp > 0.02 ? f / fp : 1) ** 1.3 : 1 - 0.7 * ((f - fp) / Math.max(0.02, 1 - fp));
+// 流星の光の筋（点を並べて、一番明るかったところを大きく明るく）
 const STEPS = 24;
 function streakMesh(meteors) {
   const N = meteors.length * STEPS;
@@ -374,13 +379,13 @@ function streakMesh(meteors) {
   const a = new THREE.Vector3(), b = new THREE.Vector3(), q = new THREE.Vector3();
   meteors.forEach((m, i) => {
     xyz(m.lat_beg, m.lon_beg, m.ht_beg_km, a); xyz(m.lat_end, m.lon_end, m.ht_end_km, b);
-    const leo = groupOf(m) === 'LEO', col = styleOf(m).color.map(v => Math.round(v + (255 - v) * 0.25)), ms = magSize(m.peak_absmag), ma = magAlpha(m.peak_absmag);
+    const leo = groupOf(m) === 'LEO', col = styleOf(m).color.map(v => Math.round(v + (255 - v) * 0.25)), ms = magSize(m.peak_absmag), ma = magAlpha(m.peak_absmag), fp = peakF(m);
     for (let k = 0; k < STEPS; k++) {
       const j = i * STEPS + k, f = k / (STEPS - 1);
       q.copy(a).lerp(b, f); p.set([q.x, q.y, q.z], j * 3);
-      const al = (leo ? 0.8 : 0.5) * ma * (1 - f) ** 1.4;
+      const gl = glowAt(f, fp), al = (leo ? 0.8 : 0.5) * ma * gl;
       c.set([col[0] / 255, col[1] / 255, col[2] / 255, al], j * 4);
-      r[j] = i; t[j] = f; s[j] = (leo ? 3.0 : 2.3) * ms * (1 - 0.7 * f);
+      r[j] = i; t[j] = f; s[j] = (leo ? 3.0 : 2.3) * ms * (0.35 + 0.65 * gl);
     }
   });
   const g = new THREE.BufferGeometry();
@@ -407,8 +412,8 @@ function buildMeteors(meteors) {
   const push = (o, lat, lon, h, col, a, i, tt) => { xyz(lat, lon, h, v); o.p.push(v.x, v.y, v.z); o.c.push(col[0] / 255, col[1] / 255, col[2] / 255, a); o.r.push(i); o.t.push(tt); };
   meteors.forEach((m, i) => {
     const col = styleOf(m).color, k = groupOf(m) === 'LEO' ? 1 : 0.6;
-    push(L, m.lat_beg, m.lon_beg, m.ht_beg_km, lighten(col), 0.95 * k, i, 0);
-    push(L, m.lat_end, m.lon_end, m.ht_end_km, col, 0.08 * k, i, 1);
+    push(L, m.lat_beg, m.lon_beg, m.ht_beg_km, col, 0.18 * k, i, 0);
+    push(L, m.lat_end, m.lon_end, m.ht_end_km, lighten(col), 0.5 * k, i, 1);
     push(D, m.lat_end, m.lon_end, m.ht_end_km, col, 0.42, i, 1);
     push(D, m.lat_end, m.lon_end, 0.5, col, 0.12, i, 1);
     push(S, m.lat_beg, m.lon_beg, 0.5, col, 0.13, i, 1);
@@ -469,12 +474,12 @@ function buildBox() {
   scene.add(staticLines(P, 1));
 }
 
-// 光のにじみ（明るい流星ほど大きく）。光り始めから3割ほどのところに1つ
+// 光のにじみ（明るい流星ほど大きく）。一番明るかった高さのところに1つ
 function haloMesh(meteors) {
   const N = meteors.length, p = new Float32Array(N * 3), c = new Float32Array(N * 4), r = new Float32Array(N), t = new Float32Array(N), s = new Float32Array(N);
   const a = new THREE.Vector3(), b = new THREE.Vector3();
   meteors.forEach((m, i) => {
-    xyz(m.lat_beg, m.lon_beg, m.ht_beg_km, a); xyz(m.lat_end, m.lon_end, m.ht_end_km, b); a.lerp(b, 0.3);
+    xyz(m.lat_beg, m.lon_beg, m.ht_beg_km, a); xyz(m.lat_end, m.lon_end, m.ht_end_km, b); a.lerp(b, peakF(m));
     p.set([a.x, a.y, a.z], i * 3);
     const col = styleOf(m).color, leo = groupOf(m) === 'LEO', ms = magSize(m.peak_absmag);
     c.set([col[0] / 255, col[1] / 255, col[2] / 255, (leo ? 0.11 : 0.05) * magAlpha(m.peak_absmag)], i * 4);
@@ -759,7 +764,7 @@ function legend() {
     ${row(SHOWERS.LEO.color, 'しし座流星群', n('LEO'), 4)}
     ${row(OTHER.color, 'ほかの流星群', n('OTHER'), 2)}
     ${row(SPORADIC.color, '散在流星', n('SPO'), 2)}</ul>
-    <div class="hint">明るい側＝光り始め・明るい流星ほど大きく<br>うすく伸びる線＝しし座の流星が来た向き<br>箱＝地面・高さ100 km の網・ISS の高さ<br>ほかの流星群：${named.join('・')}${named.length ? 'ほか' : ''}（${others.length}群）<br>線に触れると時刻・高さ・速さ<br>ドラッグで回す・ホイールで寄る</div>`;
+    <div class="hint">光の玉＝一番明るかった高さ（上から落ちてきて光る）・明るい流星ほど大きく<br>うすく伸びる線＝しし座の流星が来た向き<br>箱＝地面・高さ100 km の網・ISS の高さ<br>ほかの流星群：${named.join('・')}${named.length ? 'ほか' : ''}（${others.length}群）<br>線に触れると時刻・高さ・速さ<br>ドラッグで回す・ホイールで寄る</div>`;
 }
 
 resize();
