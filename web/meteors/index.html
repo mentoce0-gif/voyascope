@@ -1105,7 +1105,8 @@ sky.addEventListener('pointermove', e => {
   const dx = p[0] - dragPt[0], dy = p[1] - dragPt[1]; if (!dx && !dy) return; dragPt = p;
   // 指の動きと反対側の空を中心へ（つかんで引っぱる）
   const c = unproj(cx - dx, cy - dy);
-  if (c[2] < Math.sin(5 * DEG)) { const h = Math.hypot(c[0], c[1]) || 1, k = Math.cos(5 * DEG) / h; c[0] *= k; c[1] *= k; c[2] = Math.sin(5 * DEG); } // 中心は高さ5°まで
+  const MIN_ALT = 40 * DEG; // 中心は高さ40°まで（見上げる画面らしさを残す。2026-11-22 オーナー）
+  if (c[2] < Math.sin(MIN_ALT)) { const h = Math.hypot(c[0], c[1]) || 1, k = Math.cos(MIN_ALT) / h; c[0] *= k; c[1] *= k; c[2] = Math.sin(MIN_ALT); }
   setView(c, VIEW.up);
 });
 const endDrag = () => { if (skyDrag) { skyDrag = false; mw.key = ''; } }; // 指を離したら天の川を細かく描き直す
