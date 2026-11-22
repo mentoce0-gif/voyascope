@@ -50,6 +50,15 @@
 Vertical 9:16. A single thin beam of warm amber light travels away from the camera into deep navy-black space, stretching longer and fainter until it disappears into darkness. Sparse faint stars, very slow camera push forward. Minimal, calm, cinematic. Ends on near-black navy. no spacecraft, no satellites, no rockets, no logos, no text, no people, no planets with recognizable surface features
 ```
 
+**参照画像（画像から動画に。2026-11-22 追加）**
+- 始まりのコマ：`docs/promo/runway/voyager-start.jpg`（1080×1920。紺の空・まばらな星・手前から奥へ細くなる琥珀の筋）
+- 終わりのコマ（終わりを指定できるなら）：`docs/promo/runway/voyager-end.jpg`（筋のない暗い紺）
+- どちらも Claude Code がコードで描いたもの（星は乱数で、実在の星ではない。写真・他人の画像は使っていない）
+- 画像を渡すときのプロンプト（動きだけを書く）：
+```
+The amber beam of light slowly extends away from the camera toward the center and fades into the distance, as the camera gently pushes forward. Stars drift very slightly. Calm and minimal. The beam disappears completely by the end, leaving dark navy space.
+```
+
 **出典（テロップの数字）**
 - 約259億 km・1光日・人がつくったもので初めて：`curation/events/voyager-1-one-light-day.json`（NASA「Where Are Voyager 1 and Voyager 2 Now?」）
 - 2026年11月18日に届いた（10:16:07 UTC）：同じカード（NASA「Voyager One Light-Day Downloads」で `done`）
