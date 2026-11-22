@@ -842,13 +842,14 @@ function drawMeteor(a, now) {
   const w = (0.7 + 3.4 * m.b) * WC();
   const aMax = (0.25 + 0.75 * m.b) * k;
   // 尾は短く細く、いまの明るさに合わせる
-  const tailLen = (0.12 + 0.25 * m.b) * (NPTS - 1);
+  const lineOnly = m.magHere >= 0; // 0等より暗い小さな流星は、光の玉なしで線だけ（2026-11-22 オーナー）
+  const tailLen = (lineOnly ? 0.3 : 0.12 + 0.25 * m.b) * (NPTS - 1);
   const pts = pathPts(m, Math.max(0, head - tailLen), head);
   const ta = age <= D ? aMax * (0.25 + 0.75 * g) : aMax * 0.5;
   strokeFaded(pts, hot, w * (0.45 + 0.4 * g), ta, 0);
   // 頭の光：いまの明るさで大きさと明るさが変わる（一定の大きさの点が動くのではない）
   const hp = m.pts[Math.min(NPTS - 1, Math.round(head))];
-  if (hp.alt > 0 && age <= D) {
+  if (hp.alt > 0 && age <= D && !lineOnly) {
     const [x, y] = proj(hp.az, hp.alt), core = Math.max(0.8, w * (0.25 + 0.9 * g)), rr = core * (2.2 + 1.6 * m.b * g);
     const hg = ctx.createRadialGradient(x, y, 0, x, y, rr);
     hg.addColorStop(0, `rgba(255,252,240,${Math.min(1, aMax * (0.35 + 0.65 * g) * 1.1)})`);
