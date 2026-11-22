@@ -271,6 +271,7 @@
       <canvas id="sky" aria-label="真上を見上げた空の魚眼の図。中心が真上、円のふちが地平線。北が上、東が左"></canvas>
       <svg id="rim" viewBox="0 0 1000 1000" aria-hidden="true">
         <defs>
+          <!-- 日付・時刻は左下（約195°〜256°）。外周の光の弧はここにかからないように置く（2026-11-22） -->
           <path id="arcBL" d="M 22 500 A 478 478 0 0 0 500 978" /><!-- METEOR WATCH（arcTR）と同じ半径 478 -->
           <path id="arcTR" d="M 500 22 A 478 478 0 0 1 978 500" />
           <linearGradient id="rimGrad" x1="0.15" y1="0.05" x2="0.85" y2="0.95">
@@ -286,8 +287,8 @@
         </defs>
         <circle class="rim-glow" cx="500" cy="500" r="441" filter="url(#fGlow)" />
         <circle class="rim-ring" cx="500" cy="500" r="440" />
-        <path class="rim-arc a" d="M171.9 828.1 A464 464 0 0 1 379.9 51.8" filter="url(#fArc)" />
-        <path class="rim-arc a2" d="M46.0 621.6 A470 470 0 0 1 197.9 140.0" />
+        <path class="rim-arc a" d="M36.3 483.8 A464 464 0 0 1 435.4 40.5" filter="url(#fArc)" />
+        <path class="rim-arc a2" d="M49.2 353.5 A474 474 0 0 1 322.4 60.5" />
         <path class="rim-arc b" d="M964.2 540.6 A466 466 0 0 1 620.6 950.1" filter="url(#fArc)" />
         <path class="rim-tick" d="M461.7 61.7L460.9 52.7 M423.6 66.7L422.0 57.8 M386.1 75.0L383.8 66.3 M349.5 86.5L346.4 78.1 M314.0 101.2L310.2 93.1 M280.0 118.9L271.0 103.4 M247.6 139.6L242.5 132.2 M217.2 162.9L211.4 156.0 M188.9 188.9L182.5 182.5 M162.9 217.2L156.0 211.4 M139.6 247.6L132.2 242.5 M118.9 280.0L103.4 271.0 M101.2 314.0L93.1 310.2 M86.5 349.5L78.1 346.4 M75.0 386.1L66.3 383.8 M66.7 423.6L57.8 422.0 M61.7 461.7L52.7 460.9 M61.7 538.3L52.7 539.1 M66.7 576.4L57.8 578.0 M75.0 613.9L66.3 616.2 M86.5 650.5L78.1 653.6 M101.2 686.0L93.1 689.8 M118.9 720.0L103.4 729.0 M139.6 752.4L132.2 757.5 M162.9 782.8L156.0 788.6 M188.9 811.1L182.5 817.5 M217.2 837.1L211.4 844.0 M247.6 860.4L242.5 867.8 M280.0 881.1L271.0 896.6 M314.0 898.8L310.2 906.9 M349.5 913.5L346.4 921.9 M386.1 925.0L383.8 933.7 M423.6 933.3L422.0 942.2 M461.7 938.3L460.9 947.3 M538.3 938.3L539.1 947.3 M576.4 933.3L578.0 942.2 M613.9 925.0L616.2 933.7 M650.5 913.5L653.6 921.9 M686.0 898.8L689.8 906.9 M720.0 881.1L729.0 896.6 M752.4 860.4L757.5 867.8 M782.8 837.1L788.6 844.0 M811.1 811.1L817.5 817.5 M837.1 782.8L844.0 788.6 M860.4 752.4L867.8 757.5 M881.1 720.0L896.6 729.0 M898.8 686.0L906.9 689.8 M913.5 650.5L921.9 653.6 M925.0 613.9L933.7 616.2 M933.3 576.4L942.2 578.0 M938.3 538.3L947.3 539.1 M938.3 461.7L947.3 460.9 M933.3 423.6L942.2 422.0 M925.0 386.1L933.7 383.8 M913.5 349.5L921.9 346.4 M898.8 314.0L906.9 310.2 M881.1 280.0L896.6 271.0 M860.4 247.6L867.8 242.5 M837.1 217.2L844.0 211.4 M811.1 188.9L817.5 182.5 M782.8 162.9L788.6 156.0 M752.4 139.6L757.5 132.2 M720.0 118.9L729.0 103.4 M686.0 101.2L689.8 93.1 M650.5 86.5L653.6 78.1 M613.9 75.0L616.2 66.3 M576.4 66.7L578.0 57.8 M538.3 61.7L539.1 52.7" />
         <path class="rim-card" d="M500.0 70.0L500.0 38.0 M70.0 500.0L38.0 500.0 M500.0 930.0L500.0 962.0 M930.0 500.0L962.0 500.0" />
@@ -473,7 +474,7 @@ function drawMoon(mo) {
 
 // ---------- 天の川（ESO eso0932a：銀河座標の正距円筒。中心が銀河中心、銀経は左へ増える。
 //            図法は公式に書かれていないので、大小マゼラン雲・アンドロメダ銀河の位置で確かめた＝位置は目安） ----------
-const mw = { img: null, data: null, W: 0, H: 0, canvas: document.createElement('canvas'), N: 0, key: '', t: 0, pre: null };
+const mw = { img: null, data: null, W: 0, H: 0, canvas: document.createElement('canvas'), prev: document.createElement('canvas'), fade: 0, N: 0, key: '', t: 0, pre: null };
 function loadMilkyWay(url) {
   const im = new Image();
   im.onload = () => {
@@ -489,7 +490,7 @@ function updateMilkyWay() {
   if (!mw.data) return false;
   const N = Math.min(420, Math.round(2 * R)), key = `${N}|${city.lat}|${city.lon}`;
   if (key !== mw.key) { // 画素ごとの 時角・赤緯（場所と大きさが変わったときだけ）
-    mw.N = N; mw.canvas.width = N; mw.canvas.height = N;
+    mw.N = N; mw.canvas.width = N; mw.canvas.height = N; mw.prev.width = N; mw.prev.height = N; mw.fade = 0;
     const pre = new Float32Array(N * N * 2).fill(NaN), p = city.lat * DEG;
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
       const dx = (i + 0.5) / N * 2 - 1, dy = (j + 0.5) / N * 2 - 1, rr = Math.hypot(dx, dy);
@@ -502,7 +503,10 @@ function updateMilkyWay() {
     mw.pre = pre; mw.key = key; mw.t = NaN;
   }
   if (Math.abs(simT - mw.t) < 90000) return true; // 1分半ぶん（空は約0.4°）回るまで描き直さない
-  mw.t = simT;
+  const first = mw.t !== mw.t; mw.t = simT;
+  // いまの絵を「前の絵」にとっておき、新しい絵へ 0.35秒かけて溶け込ませる（ぱっと位置が変わらないように）
+  const pc = mw.prev.getContext('2d'); pc.clearRect(0, 0, mw.N, mw.N); if (!first) pc.drawImage(mw.canvas, 0, 0);
+  mw.fade = first ? 0 : performance.now();
   const lst = (gmst(simT) + city.lon) * DEG, N2 = mw.N, out = mw.canvas.getContext('2d').createImageData(N2, N2), od = out.data, src = mw.data, W = mw.W, Hh = mw.H;
   for (let q = 0; q < N2 * N2; q++) {
     const H = mw.pre[q * 2]; if (H !== H) continue;
@@ -574,9 +578,11 @@ function layout() {
     domeEl.style.height = ''; 
   } else { domeEl.style.height = ''; S = Math.max(160, Math.floor(Math.min(r.width, r.height))); }
   boxEl.style.width = S + 'px'; boxEl.style.height = S + 'px';
-  sky.width = S * DPR; sky.height = S * DPR;
+  const resized = sky.width !== S * DPR;
+  if (resized) { sky.width = S * DPR; sky.height = S * DPR; } // 板を作り直すと中身が消えるので、大きさが変わったときだけ
   cx = S / 2; cy = S / 2; R = S * 0.44;
   centerDome();
+  if (resized && meteors.length) drawSky(performance.now()); // 消えた板をすぐ描き直す（一瞬の黒を出さない）
   // ふちの文字：viewBox（1000）を画面の大きさに直すと小さくなるので、画面の上での最小の大きさを守る
   const k = 1000 / S, px = (min, base) => Math.max(base, min * k) + 'px';
   document.querySelectorAll('#rim .rim-dir').forEach(t => { t.style.fontSize = px(14, 30); });
@@ -590,14 +596,14 @@ function layout() {
 // スマホ：投影の窓（空の円）を画面の真ん中に。上の帯・計器にかからない範囲で（2026-11-22 オーナー）
 function centerDome() {
   // 上の帯と計器のあいだの余白のなかで、上の空き：下の空き ＝ 4：5（目で見た真ん中は少し上。Apple・Google の画面でもよく使う置き方）
-  boxEl.style.transform = '';
-  if (!narrowLayout()) return;
-  requestAnimationFrame(() => {
-    const b = boxEl.getBoundingClientRect(), top = document.querySelector('.top').getBoundingClientRect().bottom;
-    const bot = document.querySelector('.panel-wrap').getBoundingClientRect().top;
-    const free = Math.max(0, (bot - top) - b.height), want = top + free * 4 / 9;
-    boxEl.style.transform = `translateY(${Math.round(want - b.top)}px)`;
-  });
+  if (!narrowLayout()) { boxEl.style.transform = ''; return; }
+  // いまのずらし量を引いて、もとの位置から計算する（一度もとに戻すと、1コマだけ円がずれて見える）
+  const cur = parseFloat((boxEl.style.transform.match(/-?[\d.]+/) || [0])[0]) || 0;
+  const b = boxEl.getBoundingClientRect(), top = document.querySelector('.top').getBoundingClientRect().bottom;
+  const bot = document.querySelector('.panel-wrap').getBoundingClientRect().top;
+  const free = Math.max(0, (bot - top) - b.height), want = top + free * 4 / 9;
+  const next = Math.round(want - (b.top - cur));
+  if (next !== cur) boxEl.style.transform = `translateY(${next}px)`;
 }
 const narrowLayout = () => matchMedia('(max-width: 899px), (max-aspect-ratio: 1/1)').matches;
 // 星・流星の大きさの倍率。スマホ（空の円が小さい）でも小さくなりすぎないように下限を置く
@@ -628,8 +634,10 @@ function drawSky(now) {
   const starFade = Math.max(0, Math.min(1, (-sunA - 6) / 8));
   const mwA = starFade * (1 - 0.8 * ml);
   if (mwA > 0.02 && updateMilkyWay()) {
-    ctx.save(); ctx.globalAlpha = 0.9 * mwA; ctx.globalCompositeOperation = 'lighter';
-    ctx.drawImage(mw.canvas, cx - R, cy - R, 2 * R, 2 * R); ctx.restore();
+    const f = mw.fade ? Math.min(1, (now - mw.fade) / 350) : 1;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    if (f < 1) { ctx.globalAlpha = 0.9 * mwA * (1 - f); ctx.drawImage(mw.prev, cx - R, cy - R, 2 * R, 2 * R); }
+    ctx.globalAlpha = 0.9 * mwA * f; ctx.drawImage(mw.canvas, cx - R, cy - R, 2 * R, 2 * R); ctx.restore();
   }
 
   // 星（時刻の恒星時で回る）。月が出ていると暗い星は見えにくい
