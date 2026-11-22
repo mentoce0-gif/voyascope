@@ -842,7 +842,7 @@ function drawMeteor(a, now) {
   const w = (0.7 + 3.4 * m.b) * WC();
   const aMax = (0.25 + 0.75 * m.b) * k;
   // 尾は短く細く、いまの明るさに合わせる
-  const lineOnly = m.magHere >= 0; // 0等より暗い小さな流星は、光の玉なしで線だけ（2026-11-22 オーナー）
+  const lineOnly = m.magHere > 4; // 4等より暗い（数字が4より大きい）小さな流星は、光の玉なしで線だけ（2026-11-22 オーナー）
   const tailLen = (lineOnly ? 0.3 : 0.12 + 0.25 * m.b) * (NPTS - 1);
   const pts = pathPts(m, Math.max(0, head - tailLen), head);
   const ta = age <= D ? aMax * (0.25 + 0.75 * g) : aMax * 0.5;
