@@ -258,14 +258,14 @@
   .st dd { font-weight: 700; }
   .credit { border-top: 0 !important; text-align: center; }
   @media (max-width: 899px), (max-aspect-ratio: 1/1) {
-    .top { justify-content: center; }
+    .top { justify-content: space-between; }
     .where { flex: 1 1 auto; text-align: center; }
     .top .spacer { display: none; }
     .chips { flex: 0 0 auto !important; width: min(100%, 340px); border-radius: 999px !important; }
-    .regions { order: 9; flex: 1 0 100%; justify-content: center; height: 28px; }
-    .top { height: calc(env(safe-area-inset-top) + 0px + 122px); align-content: flex-start; flex-wrap: wrap; overflow: hidden; } /* 高さを固定（街の名前で変わらない） */
-    /* ロゴと地域の切り替えのあいだを空け、ロゴが反応するのはロゴの絵だけに（押し間違えてトップに戻らないように。2026-11-22 オーナー） */
-    .top .brand { flex: 1 0 100%; justify-content: center; height: 22px; margin-bottom: 14px; pointer-events: none; }
+    .regions { order: 2; flex: 0 0 auto; margin-left: auto; justify-content: flex-end; height: 28px; }
+    .top { height: calc(env(safe-area-inset-top) + 0px + 86px); align-content: flex-start; flex-wrap: wrap; overflow: hidden; row-gap: 8px; } /* 高さを固定（街の名前で変わらない） */
+    /* 1行目：ロゴは左、地域の切り替えは右（左右に離して押し間違えを減らす。高さは足さない。2026-11-22 オーナー）。ロゴが反応するのはロゴの絵だけ */
+    .top .brand { flex: 0 0 auto; justify-content: flex-start; height: 28px; align-items: center; pointer-events: none; }
     .top .brand a { pointer-events: auto; display: block; line-height: 0; }
     .chips { height: 40px; }
     .chips button { overflow: hidden; text-overflow: clip; padding-left: 4px !important; padding-right: 4px !important; }
