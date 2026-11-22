@@ -53,9 +53,9 @@
     },
     {
       "id": "meteors",
-      "label": "流星を眺める（meteors/・試験版）を開いたときに読むもの（ページ・流星のデータ・星の位置〈ヒッパルコス 6等未満〉・天の川〈ESO 2048×1024〉・ロゴ）。2026-11-21。2026-11-22 に天の川の画像（約180KB）を足すので 120 → 320KB（オーナー：パノラマを入れる）",
+      "label": "流星を眺める（meteors/・試験版）を開いたときに読むもの（ページ・流星のデータ・星の位置〈ヒッパルコス 6等未満〉・天の川〈ESO 2048×1024〉・ロゴ）。流星のデータは開いた地域の1つだけ読むので、いちばん大きいヨーロッパで数える（2026-11-22）。2026-11-21。2026-11-22 に天の川の画像（約180KB）を足すので 120 → 320KB（オーナー：パノラマを入れる）",
       "max_kb": 320,
-      "files": ["meteors/index.html", "meteors/data/*", "assets/brand/logo-600.webp"]
+      "files": ["meteors/index.html", "meteors/data/meteors_20261118_europe.json", "meteors/data/stars-hipparcos.json", "meteors/data/milkyway-eso0932a-2048.jpg", "assets/brand/logo-600.webp"]
     },
     {
       "id": "meteors-space",

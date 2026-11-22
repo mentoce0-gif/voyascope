@@ -23,13 +23,18 @@ import sys
 import urllib.request
 
 BASE = "https://globalmeteornetwork.org/data/traj_summary_data/daily/"
-FILE_DATES = ("20261117", "20261118")
-T_START = dt.datetime(2026, 11, 18, 8, 0, 0)
-T_END = dt.datetime(2026, 11, 18, 21, 0, 0)
-LAT = (24.0, 46.0)
-LON = (122.0, 146.0)
-OUT_DEFAULT = os.path.join(os.path.dirname(__file__), "..", "..", "web", "meteors",
-                           "data", "meteors_20261118_japan.json")
+# 地域ごとの「2026-11-18 の夜」（現地の日の入りの少し前〜日の出のあと）と範囲（2026-11-22 オーナー：北アメリカ・ヨーロッパも）
+REGIONS = {
+    "japan":    {"files": ("20261117", "20261118"), "t": ((2026, 11, 18, 8), (2026, 11, 18, 21)),  "lat": (24.0, 46.0), "lon": (122.0, 146.0)},
+    "europe":   {"files": ("20261118",),            "t": ((2026, 11, 18, 15), (2026, 11, 19, 8)),  "lat": (35.0, 62.0), "lon": (-12.0, 30.0)},
+    "namerica": {"files": ("20261118",),            "t": ((2026, 11, 18, 21), (2026, 11, 19, 15)), "lat": (25.0, 55.0), "lon": (-125.0, -60.0)},
+}
+FILE_DATES = REGIONS["japan"]["files"]
+T_START = dt.datetime(*REGIONS["japan"]["t"][0])
+T_END = dt.datetime(*REGIONS["japan"]["t"][1])
+LAT = REGIONS["japan"]["lat"]
+LON = REGIONS["japan"]["lon"]
+OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "web", "meteors", "data")
 
 # 列の定義 PDF の名前（ヘッダー1行目と2行目をつなげたもの）→ 出力のキー
 WANTED = {
@@ -114,12 +119,13 @@ def extract(text):
         r["iau_no"] = int(r["iau_no"]) if r["iau_no"] is not None else -1
         rec = {"utc": c[idx["utc"]].strip()[:23].replace(" ", "T") + "Z",
                "iau_code": None if code == "..." else code}
-        for k in ("iau_no", "lat_beg", "lon_beg", "ht_beg_km", "lat_end", "lon_end",
-                  "ht_end_km", "peak_absmag", "v_init_kms", "v_avg_kms", "peak_ht_km", "duration_s", "num_stations"):
+        # 画面で使う値だけ（ページを軽くする。2026-11-22：平均の速さ・流星群の番号は使っていないので出さない）
+        for k in ("lat_beg", "lon_beg", "ht_beg_km", "lat_end", "lon_end",
+                  "ht_end_km", "peak_absmag", "v_init_kms", "peak_ht_km", "duration_s", "num_stations"):
             v = r[k]
             if k == "num_stations" and v is not None:
                 v = int(v)
-            rec[k] = round(v, 5 if k.startswith(("lat", "lon")) else 2) if isinstance(v, float) else v
+            rec[k] = round(v, 4 if k.startswith(("lat", "lon")) else (1 if k.endswith("_km") else 2)) if isinstance(v, float) else v  # 緯度経度 約10 m・高さ 0.1 km
         out.append(rec)
     return out
 
@@ -127,13 +133,19 @@ def extract(text):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--local", help="ダウンロード済みファイルの置き場所")
-    ap.add_argument("--out", default=OUT_DEFAULT)
+    ap.add_argument("--region", default="japan", choices=sorted(REGIONS))
+    ap.add_argument("--out", default=None)
     a = ap.parse_args()
+    global FILE_DATES, T_START, T_END, LAT, LON
+    rg = REGIONS[a.region]
+    FILE_DATES, LAT, LON = rg["files"], rg["lat"], rg["lon"]
+    T_START, T_END = dt.datetime(*rg["t"][0]), dt.datetime(*rg["t"][1])
+    a.out = a.out or os.path.join(OUT_DIR, f"meteors_20261118_{a.region}.json")
 
     if a.local:
         files = sorted(os.path.join(a.local, f) for f in os.listdir(a.local)
                        if re.match(r"traj_summary_(%s)_" % "|".join(FILE_DATES), f))
-        texts = [(os.path.basename(f), open(f, encoding="utf-8").read()) for f in files]
+        texts = [(os.path.basename(f), open(f, encoding="utf-8", newline="").read()) for f in files]
         urls = [BASE + os.path.basename(f) for f in files]
     else:
         urls = find_files()
@@ -156,6 +168,7 @@ def main():
     doc = {
         "meta": {
             "source": "Global Meteor Network (GMN) trajectory summary",
+            "region": a.region,
             "source_page": "https://globalmeteornetwork.org/data/",
             "license": "CC BY 4.0 https://creativecommons.org/licenses/by/4.0/",
             "columns_doc": "https://globalmeteornetwork.org/data/media/GMN_orbit_data_columns.pdf",
@@ -180,7 +193,7 @@ def main():
     }
     os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
     with open(a.out, "w", encoding="utf-8") as f:
-        json.dump(doc, f, ensure_ascii=False, indent=1)
+        json.dump(doc, f, ensure_ascii=False, separators=(",", ":"))
     by = {}
     for r in uniq:
         by[r["iau_code"] or "散在"] = by.get(r["iau_code"] or "散在", 0) + 1

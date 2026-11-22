@@ -6,7 +6,7 @@
 <title>流星を眺める（試験版）— VOYASCOPE</title>
 <!-- 流星を眺める｜見上げるver.：試作の部屋 04 から、2026-11-21 に鍵なしの /meteors/ へ（オーナー）。試験版のあいだは検索に出さない -->
 <meta name="robots" content="noindex">
-<meta name="description" content="2026年11月18日の夜（しし座流星群）に日本のまわりで観測された流星を、東京・大阪・福岡から見上げた空に。Global Meteor Network のデータから。VOYASCOPE の試験版（非公式ファンメイド作品）。">
+<meta name="description" content="2026年11月18日の夜（しし座流星群）に観測された流星を、日本・北アメリカ・ヨーロッパの街から見上げた空に。Global Meteor Network のデータから。VOYASCOPE の試験版（非公式ファンメイド作品）。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://voyascope.org/meteors/">
 <meta property="og:image" content="https://voyascope.org/assets/earth/hero-1600.webp">
@@ -56,6 +56,10 @@
   .where .date-short { display: none; }
   @media (max-width: 899px), (max-aspect-ratio: 1/1) { .where .date-short { display: inline; color: var(--text-dim); } }
   .chips { display: flex; gap: 6px; }
+  /* 地域の切り替え（日本・北アメリカ・ヨーロッパ）：小さな文字のタブ */
+  .regions { display: flex; gap: 2px; }
+  .regions button { min-height: 26px; padding: 0.2em 0.7em; font-size: 0.72rem; border: 0; border-radius: 999px; background: transparent; color: var(--text-dim); }
+  .regions button.cur { color: var(--mint); background: var(--mint-faint); font-weight: 700; }
   button { appearance: none; font-family: var(--font-body); font-size: 0.78rem; line-height: 1.3; color: var(--mint);
     background: rgba(7, 20, 43, 0.72); border: 1px solid var(--mint-dim); border-radius: 3px; padding: 0.4em 0.8em;
     min-height: 32px; cursor: pointer; transition: background .15s, color .15s; touch-action: manipulation; }
@@ -254,7 +258,9 @@
     .top { justify-content: center; }
     .where { flex: 1 1 auto; text-align: center; }
     .top .spacer { display: none; }
-    .chips { flex: 0 0 auto !important; width: min(100%, 300px); border-radius: 999px !important; }
+    .chips { flex: 0 0 auto !important; width: min(100%, 340px); border-radius: 999px !important; }
+    .regions { order: 9; flex: 1 0 100%; justify-content: center; }
+    .chips button { white-space: nowrap; font-size: 0.78rem !important; }
     .chips button { border-radius: 999px !important; }
     .panel-wrap { padding: 8px 8px 4px; }
     .nm-name { font-size: 0.95rem !important; }
@@ -267,9 +273,8 @@
     <div class="brand"><a href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span></div>
     <div class="where"><span class="date-long">2026年11月18日の夜 ・ </span><span class="date-short mono">2026.11.18 夜 ・ </span><b id="cityName">福岡</b>の上空</div>
     <span class="spacer"></span>
-    <div class="chips" role="group" aria-label="見上げる場所">
-      <button data-city="tokyo"><svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg>東京</button><button data-city="osaka"><svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg>大阪</button><button data-city="fukuoka" class="cur"><svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg>福岡</button>
-    </div>
+    <div class="regions" role="group" aria-label="地域"><button data-region="japan" class="cur">日本</button><button data-region="namerica">北アメリカ</button><button data-region="europe">ヨーロッパ</button></div>
+    <div class="chips" id="cityChips" role="group" aria-label="見上げる場所"></div>
   </header>
 
   <div class="dome" id="dome">
@@ -334,7 +339,7 @@
   <button type="button" class="close" id="srcClose">閉じる</button>
   <h2>出典と注記</h2>
   <h3>流星のデータ</h3>
-  <p>Global Meteor Network（GMN）の軌道データ（日ごとの軌道サマリー）から、2026-11-18 08:00〜21:00 UTC に、光り始めか消えた点が北緯24〜46°・東経122〜146°に入る流星を抜き出し、見上げた空に描き直しました（加工）。使った値：開始の時刻・光り始めと消えた点の緯度・経度・高さ・速さ・最大の明るさ（等級）・一番明るかった高さ・継続時間・流星群のコード・観測した局の数。局のコードは使っていません。</p>
+  <p>Global Meteor Network（GMN）の軌道データ（日ごとの軌道サマリー）から、それぞれの地域の 2026-11-18 の夜（日本 08:00〜21:00 UTC・北緯24〜46°・東経122〜146°／北アメリカ 11/18 21:00〜11/19 15:00 UTC・北緯25〜55°・西経60〜125°／ヨーロッパ 11/18 15:00〜11/19 08:00 UTC・北緯35〜62°・西経12°〜東経30°）に、光り始めか消えた点がその範囲に入る流星を抜き出し、見上げた空に描き直しました（加工）。使った値：開始の時刻・光り始めと消えた点の緯度・経度・高さ・速さ・最大の明るさ（等級）・一番明るかった高さ・継続時間・流星群のコード・観測した局の数。局のコードは使っていません。</p>
   <ul>
     <li>データのページ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">https://globalmeteornetwork.org/data/</a> ／ ライセンス：<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a> ／ 列の定義：<a href="https://globalmeteornetwork.org/data/media/GMN_orbit_data_columns.pdf" target="_blank" rel="noopener">GMN_orbit_data_columns.pdf</a></li>
     <li id="srcFiles">使ったファイル：—</li>
@@ -349,14 +354,14 @@
   <ul>
     <li>等距離射影の全天魚眼：中心が真上（天頂）、円のふちが地平線。北が上・東が左・西が右（見上げた空の向き）。点線の円は高さ30°・60°</li>
     <li>流星：光り始めと消えた点を結ぶ3次元の直線を30に分け、見上げる場所からの方角・高さに直して描いています（だから曲線に見えます）。地平線より下の部分は描きません</li>
-    <li>見上げる場所：東京・大阪・福岡の、それぞれ市の中心あたりの代表の点（標高0 m）</li>
+    <li>見上げる場所：東京・大阪・福岡・ニューヨーク・トロント・デンバー・ロンドン・パリ・ザグレブの、それぞれ市の中心あたりの代表の点（標高0 m）。北アメリカとヨーロッパは、その地域で GMN の記録が多い街から選びました。時刻はその街の時刻（11月はどこも標準時）</li>
     <li>「ここから見た明るさ」：GMN の最大の明るさ（100 km の距離に直した等級）を、見上げる場所から一番明るかった点までの距離で直したもの（等級＋5×log₁₀（距離÷100 km））。大気による減光は入れていないので、地平線に近い流星は実際にはもっと暗く見えます</li>
     <li>線の太さ・輝き・残光の長さは「ここから見た明るさ」で決めています</li>
     <li>肉眼で見えるかの目安：ここから見て6等より暗い流星は「肉眼ではほぼ見えない」として、細い点線でうっすら描いています（飛んでいたことは GMN に記録されているため）。6等は「理想的な暗い夜空で、肉眼で見える限界」（<a href="https://prc.nao.ac.jp/freqras/glossary.html" target="_blank" rel="noopener">国立天文台「星の明るさ」</a>）。4等は都心の空の目安（ボートル・スカイ・スケールのクラス9「Inner-city sky」〜4.0。<a href="https://www.env.go.jp/content/900400131.pdf" target="_blank" rel="noopener">環境省掲載「星空環境の評価指標の比較」表1</a>）。見え方は空の条件・人・大気で変わります。地平線の下の流星は空には描かず、計器とタイムラインにだけ出します</li>
     <li>「〇〇くらい」：ここから見た明るさを、近い明るさの天体でたとえたものです。金星 −4.8等（2026年9月の最大光度。<a href="https://www.nao.ac.jp/astro/sky/2026/09-topics02.html" target="_blank" rel="noopener">国立天文台</a>）、木星 −2.1等（2026年11月16日。<a href="https://www.nao.ac.jp/astro/sky/2026/11-topics03.html" target="_blank" rel="noopener">国立天文台</a>）、シリウス −1.5・ベガ 0.0・スピカ 1.0・北極星 2.0（<a href="https://eco.mtk.nao.ac.jp/koyomi/faq/stars.html" target="_blank" rel="noopener">国立天文台暦計算室「おもな恒星」</a>）、満月 −12.74（<a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html" target="_blank" rel="noopener">NASA</a>）。1等ちがうと明るさは約2.5倍、5等で100倍です（国立天文台）。GMN の明るさは目で見る明るさと少しちがう色の範囲（Gaia の G バンド）で測っているので、「くらい」は近い目安です</li>
     <li>火球：100 km の距離で −4等より明るい流星に「FIREBALL 火球」と出します（<a href="https://www.iau.org/common/Uploaded%20files/Definitions%20of%20terms%20in%20meteor%20astronomy_F1.pdf" target="_blank" rel="noopener">IAU の用語の定義</a>。国立天文台は「マイナス4等程度より明るい流星のことを火球と呼ぶことが多い」。<a href="https://www.nao.ac.jp/faq/a0501.html" target="_blank" rel="noopener">国立天文台</a>）。見る場所によらない、流星そのものの明るさで決めています</li>
     <li>GMN の明るさの測り方の限界：とても明るい流星はカメラで −1等くらいから写りが飽和することがあり、暗い流星は記録から漏れます（GMN の論文 Vida ほか 2021。2020年のペルセウス座流星群では、記録全体の実効的な限界は平均 +3.95等。Vida ほか 2022）</li>
-    <li>「◯個の流星を観測」：見上げる場所によらず、日本のまわり（上の範囲）で GMN のカメラが記録した流星の数です。実際に流れた流星のすべてではありません（カメラのない場所・曇り・暗すぎる流星は入りません）</li>
+    <li>「◯個の流星を観測」：見上げる場所によらず、その地域のまわり（上の範囲）で GMN のカメラが記録した流星の数です。実際に流れた流星のすべてではありません（カメラのない場所・曇り・暗すぎる流星は入りません）</li>
     <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
     <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
     <li>下の計器：左の丸を押すたびに速さが変わります（実時間 → 60倍 → 120倍 → 600倍 → 停止）。丸い記号は、向きが空の上で流れた向き、線の長さと描く速さが流星の速さ（速いほど長く一瞬で。目安）。「北西（NW）・仰角61°」は、一番明るかったところが見えた方角と高さです。MAG はここから見た明るさ（指を置くと「〇〇くらい」）</li>
@@ -381,13 +386,28 @@
 <script>
 (() => {
 'use strict';
-const DATA_URL = 'data/meteors_20261118_japan.json';
+// 地域ごとのデータ（2026-11-22 オーナー：北アメリカ・ヨーロッパも）。街は、その地域で GMN の記録が多いところから3つ
+const REGIONS = {
+  japan:    { ja: '日本', area: '日本のまわり', file: 'data/meteors_20261118_japan.json', cities: ['tokyo', 'osaka', 'fukuoka'], def: 'fukuoka',
+              box: '北緯24〜46°・東経122〜146°' },
+  namerica: { ja: '北アメリカ', area: '北アメリカのまわり', file: 'data/meteors_20261118_namerica.json', cities: ['newyork', 'toronto', 'denver'], def: 'toronto',
+              box: '北緯25〜55°・西経60〜125°' },
+  europe:   { ja: 'ヨーロッパ', area: 'ヨーロッパのまわり', file: 'data/meteors_20261118_europe.json', cities: ['london', 'paris', 'zagreb'], def: 'zagreb',
+              box: '北緯35〜62°・西経12°〜東経30°' },
+};
 const STARS_URL = 'data/stars-hipparcos.json'; // ヒッパルコス星表・6等未満（星の位置は例外で ESA のデータも使う。2026-11-22 オーナー）
 const RADIANT = { ra: 154.4, dec: 21.4 }; // curation/events/leonids-2026.json（IAU MDC）
+// 見上げる場所：それぞれ市の中心あたりの代表の点。tz は時刻の表示（11月はどこも標準時）
 const CITIES = {
-  tokyo:   { ja: '東京', lat: 35.68, lon: 139.77 },
-  osaka:   { ja: '大阪', lat: 34.69, lon: 135.50 },
-  fukuoka: { ja: '福岡', lat: 33.59, lon: 130.40 },
+  tokyo:   { ja: '東京', lat: 35.68, lon: 139.77, region: 'japan', tz: 'Asia/Tokyo', tzl: 'JST', seed: 11 },
+  osaka:   { ja: '大阪', lat: 34.69, lon: 135.50, region: 'japan', tz: 'Asia/Tokyo', tzl: 'JST', seed: 47 },
+  fukuoka: { ja: '福岡', lat: 33.59, lon: 130.40, region: 'japan', tz: 'Asia/Tokyo', tzl: 'JST', seed: 83 },
+  newyork: { ja: 'ニューヨーク', lat: 40.71, lon: -74.01, region: 'namerica', tz: 'America/New_York', tzl: 'EST', seed: 17 },
+  toronto: { ja: 'トロント', lat: 43.65, lon: -79.38, region: 'namerica', tz: 'America/Toronto', tzl: 'EST', seed: 29 },
+  denver:  { ja: 'デンバー', lat: 39.74, lon: -104.99, region: 'namerica', tz: 'America/Denver', tzl: 'MST', seed: 61 },
+  london:  { ja: 'ロンドン', lat: 51.51, lon: -0.13, region: 'europe', tz: 'Europe/London', tzl: 'GMT', seed: 23 },
+  paris:   { ja: 'パリ', lat: 48.86, lon: 2.35, region: 'europe', tz: 'Europe/Paris', tzl: 'CET', seed: 37 },
+  zagreb:  { ja: 'ザグレブ', lat: 45.81, lon: 15.98, region: 'europe', tz: 'Europe/Zagreb', tzl: 'CET', seed: 71 },
 };
 const DEG = Math.PI / 180;
 const NPTS = 31;              // 直線を30に分ける
@@ -403,7 +423,7 @@ const MAG_REFS = [
   [2.5, '北極星（2等星）くらい'], [4, '3〜4等の星くらい'], [6, '暗い星（5〜6等）くらい'], [99, '肉眼では見えない暗さ'],
 ];
 const magLike = m => MAG_REFS.find(([lim]) => m <= lim)[1];
-const DATA_FROM = Date.parse('2026-11-18T08:00:00Z'), DATA_TO = Date.parse('2026-11-18T21:00:00Z');
+let DATA_FROM = Date.parse('2026-11-18T08:00:00Z'), DATA_TO = Date.parse('2026-11-18T21:00:00Z'); // 地域のデータを読んだら、そのデータの範囲に
 const COL = { LEO: [255, 181, 71], OTHER: [143, 216, 255] };
 
 // ---------- 地球・空の計算 ----------
@@ -574,8 +594,8 @@ function findCross(c, from, to, rising) { // 太陽の上の縁が地平線（-0
 }
 const DIR8 = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
 const dir8 = az => DIR8[Math.round(az / 45) % 8];
-const fmtJST = (ms, sec) => new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', ...(sec ? { second: '2-digit' } : {}), hourCycle: 'h23' }).format(new Date(ms));
-const fmtDateJST = ms => new Intl.DateTimeFormat('ja-JP', { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric' }).format(new Date(ms)); // 例：11/19
+const fmtJST = (ms, sec) => new Intl.DateTimeFormat('ja-JP', { timeZone: city.tz, hour: '2-digit', minute: '2-digit', ...(sec ? { second: '2-digit' } : {}), hourCycle: 'h23' }).format(new Date(ms));
+const fmtDateJST = ms => new Intl.DateTimeFormat('ja-JP', { timeZone: city.tz, month: 'numeric', day: 'numeric' }).format(new Date(ms)); // 例：11/19
 const fmtUTC = ms => new Date(ms).toISOString().slice(11, 16);
 
 // ---------- 状態 ----------
@@ -1048,6 +1068,19 @@ const SHOWER_NAMES = {
   DAD: ['12月りゅう座α流星群', 'December alpha-Draconids', 334],
   NZP: ['11月ペルセウス座ζ流星群', 'November zeta-Perseids', 486, true],
   TOL: ['やまねこ座28流星群', '28-Lyncids', 593, true], // 和名一覧の 29-Piscids＝うお座29流星群 にならう
+  // 北アメリカ・ヨーロッパで出てくるもの（2026-11-22）。和名は国立天文台の一覧、ないもの（true）は和名の決め方にならった訳
+  SAU: ['ぎょしゃ座63流星群', '63-Aurigids', 575],
+  THA: ['11月ぎょしゃ座θ流星群', 'November theta-Aurigids', 390],
+  AND: ['アンドロメダ座流星群', 'Andromedids', 18],
+  DRV: ['12月おとめ座ρ流星群', 'December rho-Virginids', 502],
+  NAA: ['11月ぎょしゃ座α流星群', 'November alpha-Aurigids', 812],
+  RPU: ['とも座ρ流星群', 'rho-Puppids', 512],
+  ACA: ['おおいぬ座α流星群', 'alpha-Canis Majorids', 394],
+  NID: ['11月りゅう座ι流星群', 'November i-Draconids', 392, true],
+  CMI: ['12月こいぬ座流星群', 'December Canis Minorids', 253, true],
+  DEL: ['12月やまねこ座流星群', 'December Lyncids', 494, true],
+  MCB: ['おおいぬ座β流星群', 'beta-Canis Majorids', 559, true],
+  PLE: ['しし座φ流星群', 'phi-Leonids', 882, true],
 };
 // 来た方向：通り道（消えた点→光り始め）を空のかなたへ伸ばした向き。その場所の空での方角と高さ
 function cameFrom(m) {
@@ -1140,7 +1173,7 @@ function tick(now) {
   sparks = sparks.filter(p => (now - p.t0) / 1000 < p.life);
   drawSky(now);
   drawTimeline();
-  rimTime.innerHTML = `${fmtDateJST(simT)} ${fmtJST(simT)} JST <tspan class="u">UTC ${fmtUTC(simT)}</tspan>`; // いつの流星か分かるように日付も（2026-11-22 オーナー）
+  rimTime.innerHTML = `${fmtDateJST(simT)} ${fmtJST(simT)} ${city.tzl} <tspan class="u">UTC ${fmtUTC(simT)}</tspan>`; // いつの流星か分かるように日付も（2026-11-22 オーナー）
   requestAnimationFrame(tick);
 }
 
@@ -1158,20 +1191,48 @@ function setSpeed(v) {
 }
 const setPlaying = v => setSpeed(v ? speed : 0);
 playBtn.addEventListener('click', () => setSpeed(SPEEDS[(SPEEDS.indexOf(playing ? speed : 0) + 1) % SPEEDS.length]));
-function setCity(key) {
-  city = CITIES[key];
-  skyline = buildSkyline({ tokyo: 11, osaka: 47, fukuoka: 83 }[key] * 7919);
+const regionData = {};
+async function loadRegion(rk) {
+  if (!regionData[rk]) regionData[rk] = fetch(REGIONS[rk].file, { cache: 'no-cache' }).then(r => r.json());
+  return regionData[rk];
+}
+let curRegion = null, hashT = false;
+async function setCity(key) {
+  const nc = CITIES[key], rk = nc.region, first = curRegion === null;
+  const frac = first ? (rk === 'japan' ? null : 0.45) : (simT - T0) / (T1 - T0); // はじめて開いたとき：日本は日本時間0時（または #t=）、ほかは夜の半ばすぎ
+  if (rk !== curRegion) {
+    const d = await loadRegion(rk);
+    meteors = d.meteors.map(m => ({ ...m, _t: Date.parse(m.utc) })).sort((a, b) => a._t - b._t);
+    DATA_FROM = Date.parse(d.meta.filter.utc_from); DATA_TO = Date.parse(d.meta.filter.utc_to);
+    document.getElementById('srcFiles').innerHTML = '使ったファイル：' + d.meta.files.map(u => `<a href="${u}" target="_blank" rel="noopener">${u.split('/').pop()}</a>`).join('、');
+    document.getElementById('srcGen').textContent = (d.meta.files_generated_utc || []).map(x => String(x).slice(0, 16)).join('・') + ' UTC';
+    renderCityButtons(rk);
+  }
+  const regionChanged = rk !== curRegion; curRegion = rk;
+  city = nc;
+  skyline = buildSkyline(city.seed * 7919);
   document.getElementById('cityName').textContent = city.ja;
   document.querySelectorAll('[data-city]').forEach(x => x.classList.toggle('cur', x.dataset.city === key));
-  const base = Date.parse('2026-11-18T00:00:00Z');
-  T0 = findCross(city, base + 4 * 3600000, base + 12 * 3600000, false);
-  T1 = findCross(city, base + 18 * 3600000, base + 26 * 3600000, true);
-  simT = Math.max(T0, Math.min(T1, simT));
+  document.querySelectorAll('[data-region]').forEach(x => x.classList.toggle('cur', x.dataset.region === rk));
+  document.querySelector('.count').title = `${REGIONS[rk].area}で GMN のカメラが記録した流星（日没から いまの時刻まで）`;
+  // その街の 11/18 の日の入り（現地の正午から探す）と、次の日の出
+  const noon = Date.UTC(2026, 10, 18, 12) - city.lon / 15 * 3600000;
+  T0 = findCross(city, noon, noon + 12 * 3600000, false);
+  T1 = findCross(city, T0 + 6 * 3600000, T0 + 20 * 3600000, true);
+  simT = regionChanged && frac !== null && !(first && hashT) ? T0 + frac * (T1 - T0) : Math.max(T0, Math.min(T1, simT)); // 地域を変えたら、夜のなかの同じくらいの時刻に
+  rimVer = -1; mw.key = '';
   prepare(); prepTimeline();
   active = []; sparks = []; trains = []; lastIdx = idxAt(simT);
   updateCount(); showLast(lastVisibleBefore(simT));
 }
-document.querySelectorAll('[data-city]').forEach(b => b.addEventListener('click', () => setCity(b.dataset.city)));
+const PIN = '<svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg>';
+function renderCityButtons(rk) {
+  const box = document.getElementById('cityChips');
+  box.innerHTML = REGIONS[rk].cities.map(k => `<button data-city="${k}">${PIN}${CITIES[k].ja}</button>`).join('');
+  box.querySelectorAll('[data-city]').forEach(b => b.addEventListener('click', () => setCity(b.dataset.city)));
+}
+document.querySelectorAll('[data-region]').forEach(b => b.addEventListener('click', () => { if (b.dataset.region !== curRegion) setCity(REGIONS[b.dataset.region].def); }));
+
 const src = document.getElementById('sources');
 document.getElementById('srcBtn').addEventListener('click', () => { src.hidden = false; });
 document.getElementById('srcClose').addEventListener('click', () => { src.hidden = true; });
@@ -1188,12 +1249,10 @@ new ResizeObserver(onResize).observe(domeEl);
 // ---------- 読み込み ----------
 (async () => {
   try {
-    const [d, s] = await Promise.all([fetch(DATA_URL, { cache: 'no-cache' }).then(r => r.json()), fetch(STARS_URL).then(r => r.json())]);
-    meteors = d.meteors.map(m => ({ ...m, _t: Date.parse(m.utc) })).sort((a, b) => a._t - b._t);
+    const q0 = new URLSearchParams(location.hash.slice(1)), ck = CITIES[q0.get('city')] ? q0.get('city') : 'fukuoka';
+    const [s] = await Promise.all([fetch(STARS_URL).then(r => r.json()), loadRegion(CITIES[ck].region)]);
     stars = s.stars; prepStars();
     loadMilkyWay('data/milkyway-eso0932a-2048.jpg');
-    document.getElementById('srcFiles').innerHTML = '使ったファイル：' + d.meta.files.map(u => `<a href="${u}" target="_blank" rel="noopener">${u.split('/').pop()}</a>`).join('、');
-    document.getElementById('srcGen').textContent = (d.meta.files_generated_utc || []).map(x => String(x).slice(0, 16)).join('・') + ' UTC';
     document.getElementById('srcStars').textContent = stars.length;
   } catch (e) {
     const el = document.getElementById('msg'); el.innerHTML = 'データを読み込めませんでした。<br><span class="mono">python3 -m http.server -d web</span> などで開いてください。'; el.classList.add('on');
@@ -1201,8 +1260,8 @@ new ResizeObserver(onResize).observe(domeEl);
   }
   layout();
   const q = new URLSearchParams(location.hash.slice(1));
-  if (q.get('t') && !isNaN(Date.parse(q.get('t')))) simT = Date.parse(q.get('t'));
-  setCity(CITIES[q.get('city')] ? q.get('city') : 'fukuoka'); // はじめは福岡（GMN の流星が近く、いちばんよく見える。2026-11-22 オーナー）
+  if (q.get('t') && !isNaN(Date.parse(q.get('t')))) { simT = Date.parse(q.get('t')); hashT = true; }
+  await setCity(CITIES[q.get('city')] ? q.get('city') : 'fukuoka'); // はじめは福岡（GMN の流星が近く、いちばんよく見える。2026-11-22 オーナー）
   setSpeed(SPEEDS.includes(+q.get('speed')) && +q.get('speed') > 0 ? +q.get('speed') : 120); // 日の入り・日の出が決まってから（先に呼ぶと時刻が戻る）
   requestAnimationFrame(tick);
 })();
