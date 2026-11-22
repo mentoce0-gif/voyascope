@@ -53,7 +53,7 @@
     },
     {
       "id": "meteors",
-      "label": "流星を眺める（meteors/・試験版）を開いたときに読むもの（ページ・流星のデータ・星の位置・ロゴ）。2026-11-21",
+      "label": "流星を眺める（meteors/・試験版）を開いたときに読むもの（ページ・流星のデータ・星の位置〈ヒッパルコス 6等未満〉・ロゴ）。2026-11-21",
       "max_kb": 120,
       "files": ["meteors/index.html", "meteors/data/*", "assets/brand/logo-600.webp"]
     },
