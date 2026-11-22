@@ -218,8 +218,13 @@
 
   /* ===== 投影の窓に目を集める（2026-11-22 オーナー：参考画像） ===== */
   body { background: radial-gradient(ellipse 70% 55% at 50% 45%, #0a1a38 0%, #050c1c 55%, #02060f 100%); }
-  .rim-glow { fill: none; stroke: rgba(143, 216, 255, 0.55); stroke-width: 10; filter: blur(9px); }
-  .rim-ring { stroke: rgba(190, 228, 255, 0.85) !important; stroke-width: 2 !important; }
+  .rim-glow { fill: none; stroke: url(#rimGrad); stroke-width: 12; filter: blur(10px); opacity: 0.85; }
+  /* 外周の光は左上が強く右下へ弱まるグラデーション。外側に部分的な弧を重ねて、ところどころ外径が大きく見えるように */
+  .rim-arc { fill: none; stroke-linecap: round; }
+  .rim-arc.a { stroke: url(#arcGradA); stroke-width: 5; filter: drop-shadow(0 0 10px rgba(143, 216, 255, 0.9)); }
+  .rim-arc.a2 { stroke: url(#arcGradA); stroke-width: 2; opacity: 0.8; }
+  .rim-arc.b { stroke: url(#arcGradB); stroke-width: 3.5; filter: drop-shadow(0 0 8px rgba(94, 242, 194, 0.7)); }
+  .rim-ring { stroke: url(#rimGrad) !important; stroke-width: 2.2 !important; }
   .rim-tick { stroke: rgba(190, 228, 255, 0.45); stroke-width: 1.6; }
   .rim-card { stroke: rgba(217, 244, 234, 0.85); stroke-width: 2.4; }
   .rim-dir { font-weight: 700; }
@@ -277,9 +282,20 @@
         <defs>
           <path id="arcBL" d="M 30 500 A 470 470 0 0 0 500 970" />
           <path id="arcTR" d="M 500 22 A 478 478 0 0 1 978 500" />
+          <linearGradient id="rimGrad" x1="0.15" y1="0.05" x2="0.85" y2="0.95">
+            <stop offset="0" stop-color="#d8f1ff" stop-opacity="1"/>
+            <stop offset="0.45" stop-color="#8fd8ff" stop-opacity="0.75"/>
+            <stop offset="0.8" stop-color="#5ef2c2" stop-opacity="0.35"/>
+            <stop offset="1" stop-color="#5ef2c2" stop-opacity="0.15"/>
+          </linearGradient>
+          <linearGradient id="arcGradA" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#8fd8ff" stop-opacity="0"/><stop offset="0.5" stop-color="#d8f1ff" stop-opacity="0.9"/><stop offset="1" stop-color="#8fd8ff" stop-opacity="0"/></linearGradient>
+          <linearGradient id="arcGradB" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ef2c2" stop-opacity="0"/><stop offset="0.5" stop-color="#8fd8ff" stop-opacity="0.6"/><stop offset="1" stop-color="#5ef2c2" stop-opacity="0"/></linearGradient>
         </defs>
         <circle class="rim-glow" cx="500" cy="500" r="441" />
         <circle class="rim-ring" cx="500" cy="500" r="440" />
+        <path class="rim-arc a" d="M176.1 823.9 A458 458 0 0 1 381.5 57.6" />
+        <path class="rim-arc a2" d="M46.0 621.6 A470 470 0 0 1 197.9 140.0" />
+        <path class="rim-arc b" d="M958.2 540.1 A460 460 0 0 1 619.1 944.3" />
         <path class="rim-tick" d="M461.7 61.7L460.9 52.7 M423.6 66.7L422.0 57.8 M386.1 75.0L383.8 66.3 M349.5 86.5L346.4 78.1 M314.0 101.2L310.2 93.1 M280.0 118.9L271.0 103.4 M247.6 139.6L242.5 132.2 M217.2 162.9L211.4 156.0 M188.9 188.9L182.5 182.5 M162.9 217.2L156.0 211.4 M139.6 247.6L132.2 242.5 M118.9 280.0L103.4 271.0 M101.2 314.0L93.1 310.2 M86.5 349.5L78.1 346.4 M75.0 386.1L66.3 383.8 M66.7 423.6L57.8 422.0 M61.7 461.7L52.7 460.9 M61.7 538.3L52.7 539.1 M66.7 576.4L57.8 578.0 M75.0 613.9L66.3 616.2 M86.5 650.5L78.1 653.6 M101.2 686.0L93.1 689.8 M118.9 720.0L103.4 729.0 M139.6 752.4L132.2 757.5 M162.9 782.8L156.0 788.6 M188.9 811.1L182.5 817.5 M217.2 837.1L211.4 844.0 M247.6 860.4L242.5 867.8 M280.0 881.1L271.0 896.6 M314.0 898.8L310.2 906.9 M349.5 913.5L346.4 921.9 M386.1 925.0L383.8 933.7 M423.6 933.3L422.0 942.2 M461.7 938.3L460.9 947.3 M538.3 938.3L539.1 947.3 M576.4 933.3L578.0 942.2 M613.9 925.0L616.2 933.7 M650.5 913.5L653.6 921.9 M686.0 898.8L689.8 906.9 M720.0 881.1L729.0 896.6 M752.4 860.4L757.5 867.8 M782.8 837.1L788.6 844.0 M811.1 811.1L817.5 817.5 M837.1 782.8L844.0 788.6 M860.4 752.4L867.8 757.5 M881.1 720.0L896.6 729.0 M898.8 686.0L906.9 689.8 M913.5 650.5L921.9 653.6 M925.0 613.9L933.7 616.2 M933.3 576.4L942.2 578.0 M938.3 538.3L947.3 539.1 M938.3 461.7L947.3 460.9 M933.3 423.6L942.2 422.0 M925.0 386.1L933.7 383.8 M913.5 349.5L921.9 346.4 M898.8 314.0L906.9 310.2 M881.1 280.0L896.6 271.0 M860.4 247.6L867.8 242.5 M837.1 217.2L844.0 211.4 M811.1 188.9L817.5 182.5 M782.8 162.9L788.6 156.0 M752.4 139.6L757.5 132.2 M720.0 118.9L729.0 103.4 M686.0 101.2L689.8 93.1 M650.5 86.5L653.6 78.1 M613.9 75.0L616.2 66.3 M576.4 66.7L578.0 57.8 M538.3 61.7L539.1 52.7" />
         <path class="rim-card" d="M500.0 70.0L500.0 38.0 M70.0 500.0L38.0 500.0 M500.0 930.0L500.0 962.0 M930.0 500.0L962.0 500.0" />
         <circle class="rim-alt" cx="500" cy="500" r="293.3" />
