@@ -280,7 +280,7 @@
       <canvas id="sky" aria-label="真上を見上げた空の魚眼の図。中心が真上、円のふちが地平線。北が上、東が左"></canvas>
       <svg id="rim" viewBox="0 0 1000 1000" aria-hidden="true">
         <defs>
-          <path id="arcBL" d="M 30 500 A 470 470 0 0 0 500 970" />
+          <path id="arcBL" d="M 22 500 A 478 478 0 0 0 500 978" /><!-- METEOR WATCH（arcTR）と同じ半径 478 -->
           <path id="arcTR" d="M 500 22 A 478 478 0 0 1 978 500" />
           <linearGradient id="rimGrad" x1="0.15" y1="0.05" x2="0.85" y2="0.95">
             <stop offset="0" stop-color="#d8f1ff" stop-opacity="1"/>
@@ -304,7 +304,7 @@
         <text class="rim-dir" x="30" y="500">東</text>
         <text class="rim-dir" x="500" y="974">南</text>
         <text class="rim-dir" x="970" y="500">西</text>
-        <text class="rim-time"><textPath href="#arcBL" startOffset="16%" id="rimTime">--:--</textPath></text>
+        <text class="rim-time" dominant-baseline="hanging"><textPath href="#arcBL" startOffset="16%" id="rimTime">--:--</textPath></text>
         <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
       </svg>
       <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="cnt-row"><svg class="cnt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 L15 9" /><path d="M8 22 L20 10" opacity=".55"/><circle cx="15.5" cy="8.5" r="1.8"/><circle cx="20.5" cy="9.5" r="1.4" opacity=".55"/></svg><b id="count">0</b></span><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
