@@ -509,7 +509,7 @@ function updateMilkyWay(now) {
   }
   if (mw.job) {
     const jb = mw.job, N2 = mw.N, od = jb.out.data, src = mw.data, W = mw.W, Hh = mw.H, lst = jb.lst;
-    const end = jb.first ? N2 * N2 : Math.min(N2 * N2, jb.q + 30000); // はじめの1回は一度に（すぐ見えるように）
+    const end = jb.first ? N2 * N2 : Math.min(N2 * N2, jb.q + 10000); // はじめの1回は一度に（すぐ見えるように）。あとは1コマ1万画素ずつ（1コマを重くしない）
     for (let q = jb.q; q < end; q++) {
       const H = mw.pre[q * 2]; if (H !== H) continue;
       const dec = mw.pre[q * 2 + 1], ra = lst - H, cd = Math.cos(dec);
@@ -651,19 +651,7 @@ function drawSky(now) {
 
   // 星（時刻の恒星時で回る）。月が出ていると暗い星は見えにくい
   const magCut = 6 - 2.2 * ml;
-  if (starFade > 0) {
-    for (const st of stars) {
-      if (st[2] > magCut) break; // 明るい順に並んでいる
-      const h = eqToHor(st[0], st[1], simT, city.lat, city.lon);
-      if (h.alt <= 0) continue;
-      const [x, y] = proj(h.az, h.alt);
-      const m = st[2], low = Math.min(1, h.alt / 12);
-      const a = Math.max(0.1, Math.min(0.85, (6.2 - m) / 6)) * starFade * (0.45 + 0.55 * low);
-      const rad = Math.max(0.5, 1.6 - 0.26 * m) * Math.min(SC(), 1); // 星は流星より目立たないように小さめに（2026-11-22 オーナー）
-      ctx.fillStyle = `rgba(225,235,255,${a})`;
-      ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
-    }
-  }
+  if (starFade > 0) drawStars(starFade, magCut);
 
   drawMoon(mo);
 
@@ -712,17 +700,52 @@ function drawSky(now) {
 }
 
 // 空の大きな線（赤経・赤緯の点の列）を、地平線より上だけ点線で
-function drawSkyLine(fn, color, label) {
-  ctx.save(); ctx.setLineDash([3, 5]); ctx.strokeStyle = color; ctx.lineWidth = 1;
-  let best = null, pen = false;
-  ctx.beginPath();
-  for (let t = 0; t <= 360; t += 1.5) {
-    const q = fn(t), h = eqToHor(q.ra, q.dec, simT, city.lat, city.lon);
-    if (h.alt <= 0) { pen = false; continue; }
-    const [x, y] = proj(h.az, h.alt);
-    pen ? ctx.lineTo(x, y) : ctx.moveTo(x, y); pen = true;
-    if (!best || h.alt > best.alt) best = { x, y, alt: h.alt }; // いちばん高いところに名前
+// 星：読み込んだときに sin・cos を前もって計算しておき、毎コマは入れ物を作らずに計算する（後片付けで止まらないように）。
+// 明るさを16段に分け、段ごとにまとめて塗る
+let starTab = null;
+function prepStars() {
+  const n = stars.length; starTab = { n, ra: new Float32Array(n), sd: new Float32Array(n), cd: new Float32Array(n), m: new Float32Array(n) };
+  stars.forEach((st, i) => { starTab.ra[i] = st[0] * DEG; starTab.sd[i] = Math.sin(st[1] * DEG); starTab.cd[i] = Math.cos(st[1] * DEG); starTab.m[i] = st[2]; });
+}
+const STAR_LEVELS = 16, starFills = Array.from({ length: STAR_LEVELS }, (_, i) => `rgba(225,235,255,${((i + 0.5) / STAR_LEVELS).toFixed(3)})`);
+function drawStars(starFade, magCut) {
+  if (!starTab) return;
+  const lst = (gmst(simT) + city.lon) * DEG, sl = Math.sin(city.lat * DEG), cl = Math.cos(city.lat * DEG), scale = Math.min(SC(), 1);
+  const T = starTab, paths = [];
+  for (let k = 0; k < STAR_LEVELS; k++) paths.push(null);
+  for (let i = 0; i < T.n; i++) {
+    const m = T.m[i]; if (m > magCut) break; // 明るい順に並んでいる
+    const H = lst - T.ra[i], ch = Math.cos(H), sa = sl * T.sd[i] + cl * T.cd[i] * ch;
+    if (sa <= 0) continue;
+    const alt = Math.asin(sa) / DEG, ey = -T.cd[i] * Math.sin(H), nx = T.sd[i] * cl - T.cd[i] * ch * sl, nn = Math.hypot(ey, nx) || 1;
+    const r = R * (90 - alt) / 90, x = cx - r * ey / nn, y = cy - r * nx / nn;
+    const low = Math.min(1, alt / 12), a = Math.max(0.1, Math.min(0.85, (6.2 - m) / 6)) * starFade * (0.45 + 0.55 * low);
+    const lv = Math.min(STAR_LEVELS - 1, Math.floor(a * STAR_LEVELS)), rad = Math.max(0.5, 1.6 - 0.26 * m) * scale; // 星は流星より目立たないように小さめに
+    let pth = paths[lv]; if (!pth) pth = paths[lv] = new Path2D();
+    pth.moveTo(x + rad, y); pth.arc(x, y, rad, 0, Math.PI * 2);
   }
+  for (let k = 0; k < STAR_LEVELS; k++) if (paths[k]) { ctx.fillStyle = starFills[k]; ctx.fill(paths[k]); }
+}
+
+// 天の赤道・黄道の線：点の計算は空が少し回ったとき（30秒ぶん）だけやり直す
+const skyLineCache = {};
+function drawSkyLine(fn, color, label) {
+  const key = `${city.lat}|${city.lon}|${S}`, c = skyLineCache[label];
+  if (!c || c.key !== key || Math.abs(simT - c.t) > 30000) {
+    const segs = []; let cur = null, best = null;
+    for (let t = 0; t <= 360; t += 1.5) {
+      const q = fn(t), h = eqToHor(q.ra, q.dec, simT, city.lat, city.lon);
+      if (h.alt <= 0) { cur = null; continue; }
+      const [x, y] = proj(h.az, h.alt);
+      if (!cur) segs.push(cur = []);
+      cur.push(x, y);
+      if (!best || h.alt > best.alt) best = { x, y, alt: h.alt };
+    }
+    skyLineCache[label] = { key, t: simT, segs, best };
+  }
+  const { segs, best } = skyLineCache[label];
+  ctx.save(); ctx.setLineDash([3, 5]); ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.beginPath();
+  for (const sg of segs) { ctx.moveTo(sg[0], sg[1]); for (let i = 2; i < sg.length; i += 2) ctx.lineTo(sg[i], sg[i + 1]); }
   ctx.stroke(); ctx.restore();
   if (best) {
     ctx.font = `${Math.max(11, S * 0.019)}px "Zen Kaku Gothic New", sans-serif`;
@@ -1067,7 +1090,7 @@ new ResizeObserver(layout).observe(domeEl);
   try {
     const [d, s] = await Promise.all([fetch(DATA_URL, { cache: 'no-cache' }).then(r => r.json()), fetch(STARS_URL).then(r => r.json())]);
     meteors = d.meteors.map(m => ({ ...m, _t: Date.parse(m.utc) })).sort((a, b) => a._t - b._t);
-    stars = s.stars;
+    stars = s.stars; prepStars();
     loadMilkyWay('data/milkyway-eso0932a-2048.jpg');
     document.getElementById('srcFiles').innerHTML = '使ったファイル：' + d.meta.files.map(u => `<a href="${u}" target="_blank" rel="noopener">${u.split('/').pop()}</a>`).join('、');
     document.getElementById('srcGen').textContent = (d.meta.files_generated_utc || []).map(x => String(x).slice(0, 16)).join('・') + ' UTC';
