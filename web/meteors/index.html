@@ -175,8 +175,8 @@
   .tl-wrap { position: relative; height: 74px; }
   #tl { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: pointer; }
 
-  .credit { font-size: 0.64rem; line-height: 1.6; color: var(--text-dim); padding: 6px 0 calc(6px + env(safe-area-inset-bottom)); border-top: 1px solid var(--panel-border); margin-top: 4px; }
-  .credit button { font-size: 0.64rem; min-height: 0; padding: 1px 8px; margin-left: 4px; }
+  .credit { font-size: 0.56rem; line-height: 1.5; color: var(--text-dim); padding: 6px 0 calc(6px + env(safe-area-inset-bottom)); border-top: 1px solid var(--panel-border); margin-top: 4px; }
+  .credit button { font-size: 0.56rem; min-height: 0; padding: 0 6px; margin-left: 4px; }
 
   .sources { position: fixed; z-index: 8; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(580px, calc(100% - 28px));
     max-height: calc(100% - 80px); overflow: auto; padding: 16px 18px; font-size: 0.8rem; line-height: 1.75;
@@ -259,7 +259,12 @@
     .where { flex: 1 1 auto; text-align: center; }
     .top .spacer { display: none; }
     .chips { flex: 0 0 auto !important; width: min(100%, 340px); border-radius: 999px !important; }
-    .regions { order: 9; flex: 1 0 100%; justify-content: center; }
+    .regions { order: 9; flex: 1 0 100%; justify-content: center; height: 28px; }
+    .top { height: calc(env(safe-area-inset-top) + 0px + 108px); align-content: flex-start; flex-wrap: wrap; overflow: hidden; } /* 高さを固定（街の名前で変わらない） */
+    .top .brand { flex: 1 0 100%; justify-content: center; height: 22px; }
+    .chips { height: 40px; }
+    .chips button { overflow: hidden; text-overflow: clip; padding-left: 4px !important; padding-right: 4px !important; }
+    .chips button.long { font-size: 0.7rem !important; letter-spacing: -0.02em; }
     .chips button { white-space: nowrap; font-size: 0.78rem !important; }
     .chips button { border-radius: 999px !important; }
     .panel-wrap { padding: 8px 8px 4px; }
@@ -271,7 +276,6 @@
 <div class="app">
   <header class="top">
     <div class="brand"><a href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span></div>
-    <div class="where"><span class="date-long">2026年11月18日の夜 ・ </span><span class="date-short mono">2026.11.18 夜 ・ </span><b id="cityName">福岡</b>の上空</div>
     <span class="spacer"></span>
     <div class="regions" role="group" aria-label="地域"><button data-region="japan" class="cur">日本</button><button data-region="namerica">北アメリカ</button><button data-region="europe">ヨーロッパ</button></div>
     <div class="chips" id="cityChips" role="group" aria-label="見上げる場所"></div>
@@ -329,7 +333,7 @@
 
   <section class="time" aria-label="出典">
     <div class="credit">
-      データ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">Global Meteor Network</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）から抽出・加工 ／ 星の位置：<a href="https://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=I/239" target="_blank" rel="noopener">ヒッパルコス星表（ESA）</a> ／ 天の川：<a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>。空の向きに描き直し・ぼかし） ／ 火花・尾・光る時間ののばしは演出 ／ 非公式のファンメイド試作
+      データ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">Global Meteor Network</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>・加工）／ 星：<a href="https://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=I/239" target="_blank" rel="noopener">ヒッパルコス星表（ESA）</a>／ 天の川：<a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>・加工）／ 演出あり ／ 非公式ファンメイド
       <button type="button" id="srcBtn">出典と注記</button>
     </div>
   </section>
@@ -1211,7 +1215,6 @@ async function setCity(key) {
   const regionChanged = rk !== curRegion; curRegion = rk;
   city = nc;
   skyline = buildSkyline(city.seed * 7919);
-  document.getElementById('cityName').textContent = city.ja;
   document.querySelectorAll('[data-city]').forEach(x => x.classList.toggle('cur', x.dataset.city === key));
   document.querySelectorAll('[data-region]').forEach(x => x.classList.toggle('cur', x.dataset.region === rk));
   document.querySelector('.count').title = `${REGIONS[rk].area}で GMN のカメラが記録した流星（日没から いまの時刻まで）`;
@@ -1228,7 +1231,7 @@ async function setCity(key) {
 const PIN = '<svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg>';
 function renderCityButtons(rk) {
   const box = document.getElementById('cityChips');
-  box.innerHTML = REGIONS[rk].cities.map(k => `<button data-city="${k}">${PIN}${CITIES[k].ja}</button>`).join('');
+  box.innerHTML = REGIONS[rk].cities.map(k => `<button data-city="${k}"${CITIES[k].ja.length >= 5 ? ' class="long"' : ''}>${PIN}${CITIES[k].ja}</button>`).join(''); // 長い名前（ニューヨーク）は字を小さく
   box.querySelectorAll('[data-city]').forEach(b => b.addEventListener('click', () => setCity(b.dataset.city)));
 }
 document.querySelectorAll('[data-region]').forEach(b => b.addEventListener('click', () => { if (b.dataset.region !== curRegion) setCity(REGIONS[b.dataset.region].def); }));
