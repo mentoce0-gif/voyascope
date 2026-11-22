@@ -68,6 +68,9 @@
   .dome { grid-area: dome; position: relative; min-height: 0; display: grid; place-items: center; }
   .dome-box { position: relative; }
   .dome canvas, .dome svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .dome canvas#sky { touch-action: none; cursor: grab; }
+  .dome canvas#sky:active { cursor: grabbing; }
+  .view-reset { position: absolute; right: 0; top: 0; z-index: 3; font-size: 0.72rem; min-height: 30px; padding: 0.3em 0.8em; border-radius: 999px; background: rgba(7, 20, 43, 0.9); }
   .dome svg { pointer-events: none; overflow: visible; }
   .rim-ring { fill: none; stroke: rgba(143, 216, 255, 0.28); stroke-width: 1.2; }
   .rim-alt { fill: none; stroke: rgba(143, 216, 255, 0.07); stroke-width: 1; stroke-dasharray: 2 8; }
@@ -272,7 +275,8 @@
   <div class="dome" id="dome">
     <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="cnt-row"><svg class="cnt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 L15 9" /><path d="M8 22 L20 10" opacity=".55"/><circle cx="15.5" cy="8.5" r="1.8"/><circle cx="20.5" cy="9.5" r="1.4" opacity=".55"/></svg><b id="count">0</b></span><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
     <div class="dome-box" id="domeBox">
-      <canvas id="sky" aria-label="真上を見上げた空の魚眼の図。中心が真上、円のふちが地平線。北が上、東が左"></canvas>
+      <canvas id="sky" aria-label="見上げた空の魚眼の図。はじめは中心が真上、円のふちが地平線、北が上、東が左。スワイプで見る方向を変えられる"></canvas>
+      <button type="button" class="view-reset" id="viewReset" hidden>真上に戻す</button>
       <svg id="rim" viewBox="0 0 1000 1000" aria-hidden="true">
         <defs>
           <!-- 日付・時刻は左下（約195°〜256°）。外周の光の弧はここにかからないように置く（2026-11-22） -->
@@ -298,10 +302,10 @@
         <path class="rim-card" d="M500.0 70.0L500.0 38.0 M70.0 500.0L38.0 500.0 M500.0 930.0L500.0 962.0 M930.0 500.0L962.0 500.0" />
         <circle class="rim-alt" cx="500" cy="500" r="293.3" />
         <circle class="rim-alt" cx="500" cy="500" r="146.7" />
-        <text class="rim-dir n" x="500" y="26">北</text>
-        <text class="rim-dir" x="30" y="500">東</text>
-        <text class="rim-dir" x="500" y="974">南</text>
-        <text class="rim-dir" x="970" y="500">西</text>
+        <text class="rim-dir n" data-d="n" x="500" y="26">北</text>
+        <text class="rim-dir" data-d="e" x="30" y="500">東</text>
+        <text class="rim-dir" data-d="s" x="500" y="974">南</text>
+        <text class="rim-dir" data-d="w" x="970" y="500">西</text>
         <text class="rim-time" dominant-baseline="hanging"><textPath href="#arcBL" startOffset="16%" id="rimTime">--:--</textPath></text>
         <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
       </svg>
@@ -478,7 +482,7 @@ function drawMoon(mo) {
 
 // ---------- 天の川（ESO eso0932a：銀河座標の正距円筒。中心が銀河中心、銀経は左へ増える。
 //            図法は公式に書かれていないので、大小マゼラン雲・アンドロメダ銀河の位置で確かめた＝位置は目安） ----------
-const mw = { img: null, data: null, W: 0, H: 0, canvas: document.createElement('canvas'), prev: document.createElement('canvas'), fade: 0, job: null, N: 0, key: '', t: 0, pre: null };
+const mw = { img: null, data: null, W: 0, H: 0, canvas: document.createElement('canvas'), prev: document.createElement('canvas'), fade: 0, job: null, N: 0, key: '', t: 0, view: -1 };
 function loadMilkyWay(url) {
   const im = new Image();
   im.onload = () => {
@@ -490,48 +494,72 @@ function loadMilkyWay(url) {
 }
 // 赤道座標（J2000）→ 銀河座標の回転（IAU 1958 の定義の値）
 const GAL = [[-0.0548755604, -0.8734370902, -0.4838350155], [0.4941094279, -0.4448296300, 0.7469822445], [-0.8676661490, -0.1980763734, 0.4559837762]];
+const ground = { canvas: document.createElement('canvas'), ver: -1 };
 function updateMilkyWay(now) {
-  if (!mw.data) return false;
-  const N = Math.min(420, Math.round(2 * R)), key = `${N}|${city.lat}|${city.lon}`;
-  if (key !== mw.key) { // 画素ごとの 時角・赤緯（場所と大きさが変わったときだけ）
+  const N = Math.min(skyDrag ? 180 : 420, Math.round(2 * R)), key = `${N}|${city.lat}|${city.lon}`;
+  if (key !== mw.key) {
     mw.N = N; mw.canvas.width = N; mw.canvas.height = N; mw.prev.width = N; mw.prev.height = N; mw.fade = 0;
-    const pre = new Float32Array(N * N * 2).fill(NaN), p = city.lat * DEG;
-    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
-      const dx = (i + 0.5) / N * 2 - 1, dy = (j + 0.5) / N * 2 - 1, rr = Math.hypot(dx, dy);
-      if (rr > 1) continue;
-      const alt = (90 - rr * 90) * DEG, az = Math.atan2(-dx, -dy);
-      const sd = Math.sin(p) * Math.sin(alt) + Math.cos(p) * Math.cos(alt) * Math.cos(az), dec = Math.asin(sd);
-      const H = Math.atan2(-Math.sin(az) * Math.cos(alt), Math.sin(alt) * Math.cos(p) - Math.cos(alt) * Math.sin(p) * Math.cos(az));
-      const o = (j * N + i) * 2; pre[o] = H; pre[o + 1] = dec;
-    }
-    mw.pre = pre; mw.key = key; mw.t = NaN; mw.job = null;
+    ground.canvas.width = N; ground.canvas.height = N; ground.ver = -1;
+    mw.key = key; mw.t = NaN; mw.job = null;
   }
-  // 描き直しは数コマに分けて少しずつ進め（1コマが重くなって止まらないように）、出来上がってから入れ替える
-  if (!mw.job && (mw.t !== mw.t || Math.abs(simT - mw.t) >= 90000)) { // 1分半ぶん（空は約0.4°）回ったら描き直しを始める
-    const first = mw.t !== mw.t; mw.t = simT;
-    mw.job = { out: mw.canvas.getContext('2d').createImageData(mw.N, mw.N), q: 0, lst: (gmst(simT) + city.lon) * DEG, first };
+  // 見る向きが変わったら描き直す（スワイプ中は小さな板で毎コマ）。空が1分半ぶん回ったときも
+  const viewChanged = mw.view !== VIEW.ver;
+  if (!mw.job && (mw.t !== mw.t || viewChanged || Math.abs(simT - mw.t) >= 90000)) {
+    const first = mw.t !== mw.t || viewChanged; mw.t = simT; mw.view = VIEW.ver;
+    mw.job = { out: mw.canvas.getContext('2d').createImageData(mw.N, mw.N), gout: ground.canvas.getContext('2d').createImageData(mw.N, mw.N), q: 0,
+      lst: (gmst(simT) + city.lon) * DEG, first, C: VIEW.c.slice(), U: VIEW.up.slice(), T: VIEW.rt.slice(), ver: VIEW.ver };
   }
   if (mw.job) {
-    const jb = mw.job, N2 = mw.N, od = jb.out.data, src = mw.data, W = mw.W, Hh = mw.H, lst = jb.lst;
-    const end = jb.first ? N2 * N2 : Math.min(N2 * N2, jb.q + 10000); // はじめの1回は一度に（すぐ見えるように）。あとは1コマ1万画素ずつ（1コマを重くしない）
+    const jb = mw.job, N2 = mw.N, od = jb.out.data, gd = jb.gout.data, src = mw.data, W = mw.W, Hh = mw.H, lst = jb.lst;
+    const sp = Math.sin(city.lat * DEG), cp = Math.cos(city.lat * DEG), C = jb.C, U = jb.U, T = jb.T;
+    const end = jb.first ? N2 * N2 : Math.min(N2 * N2, jb.q + 10000); // はじめ（と向きを変えたとき）は一度に。あとは1コマ1万画素ずつ
     for (let q = jb.q; q < end; q++) {
-      const H = mw.pre[q * 2]; if (H !== H) continue;
-      const dec = mw.pre[q * 2 + 1], ra = lst - H, cd = Math.cos(dec);
+      const i = q % N2, j = (q / N2) | 0, dx = (i + 0.5) / N2 * 2 - 1, dy = (j + 0.5) / N2 * 2 - 1, rr = Math.hypot(dx, dy);
+      if (rr > 1) continue;
+      const th = rr * Math.PI / 2, st = Math.sin(th), ct = Math.cos(th), sx = rr ? dx / rr : 0, sy = rr ? -dy / rr : 0;
+      const e = ct * C[0] + st * (sx * T[0] + sy * U[0]), n = ct * C[1] + st * (sx * T[1] + sy * U[1]), u = ct * C[2] + st * (sx * T[2] + sy * U[2]);
+      const o4 = q * 4;
+      if (u < 0) { gd[o4] = 3; gd[o4 + 1] = 6; gd[o4 + 2] = 12; gd[o4 + 3] = Math.min(255, 200 + (-u) * 600); continue; } // 地平線より下＝地面
+      if (!src) continue;
+      const dec = Math.asin(Math.max(-1, Math.min(1, sp * u + cp * n))), H = Math.atan2(-e, cp * u - sp * n);
+      const ra = lst - H, cd = Math.cos(dec);
       const X = cd * Math.cos(ra), Y = cd * Math.sin(ra), Z = Math.sin(dec);
       const gx = GAL[0][0] * X + GAL[0][1] * Y + GAL[0][2] * Z, gy = GAL[1][0] * X + GAL[1][1] * Y + GAL[1][2] * Z, gz = GAL[2][0] * X + GAL[2][1] * Y + GAL[2][2] * Z;
       let l = Math.atan2(gy, gx) / DEG; if (l > 180) l -= 360; const b = Math.asin(Math.max(-1, Math.min(1, gz))) / DEG;
-      const u = Math.min(W - 1, Math.max(0, Math.floor((0.5 - l / 360) * W))), v = Math.min(Hh - 1, Math.max(0, Math.floor((0.5 - b / 180) * Hh)));
-      const s4 = (v * W + u) * 4, o4 = q * 4;
+      const uu = Math.min(W - 1, Math.max(0, Math.floor((0.5 - l / 360) * W))), v = Math.min(Hh - 1, Math.max(0, Math.floor((0.5 - b / 180) * Hh)));
+      const s4 = (v * W + uu) * 4;
       od[o4] = src[s4]; od[o4 + 1] = src[s4 + 1]; od[o4 + 2] = src[s4 + 2]; od[o4 + 3] = 255;
     }
     jb.q = end;
-    if (end >= N2 * N2) { // 出来上がり：いまの絵を「前の絵」にとっておき、新しい絵へ 0.35秒かけて溶け込ませる
+    if (end >= N2 * N2) { // 出来上がり：天の川は前の絵から 0.35秒で溶け込ませる（向きを変えたときはすぐ入れ替える）
       const pc = mw.prev.getContext('2d'); pc.clearRect(0, 0, N2, N2); if (!jb.first) pc.drawImage(mw.canvas, 0, 0);
       mw.canvas.getContext('2d').putImageData(jb.out, 0, 0);
+      ground.canvas.getContext('2d').putImageData(jb.gout, 0, 0); ground.ver = jb.ver;
       mw.fade = jb.first ? 0 : now; mw.job = null;
     }
   }
-  return true;
+  return !!mw.data;
+}
+
+// ふちの方角の文字と東西南北の線：その方角の地平線が、画面の中心から見てどちらにあるかで置く
+let rimVer = -1;
+function updateRim() {
+  if (rimVer === VIEW.ver) return; rimVer = VIEW.ver;
+  const z = isZenith(), card = [];
+  for (const [k, az] of [['n', 0], ['e', 90], ['s', 180], ['w', 270]]) {
+    const d = enu(az, 0), el = document.querySelector(`#rim .rim-dir[data-d="${k}"]`);
+    const dot = d[0] * VIEW.c[0] + d[1] * VIEW.c[1] + d[2] * VIEW.c[2];
+    if (dot < -0.02) { el.style.display = 'none'; continue; } // 見ている半分の外の方角は出さない
+    el.style.display = '';
+    const [px, py] = projV(d[0], d[1], d[2]), X = (px - cx) * 1000 / S, Y = (py - cy) * 1000 / S, r = Math.hypot(X, Y) || 1, a = Math.atan2(-Y, X);
+    // 円のふちの近くなら外側に、円の中（傾けて地平線が中に入ったとき）なら地平線のすぐ下に
+    const rl = r > 415 ? 474 : r + 30;
+    el.setAttribute('x', (500 + rl * Math.cos(a)).toFixed(1)); el.setAttribute('y', (500 - rl * Math.sin(a)).toFixed(1));
+    if (r > 415) card.push(`M${(500 + 430 * Math.cos(a)).toFixed(1)} ${(500 - 430 * Math.sin(a)).toFixed(1)}L${(500 + 462 * Math.cos(a)).toFixed(1)} ${(500 - 462 * Math.sin(a)).toFixed(1)}`);
+  }
+  document.querySelector('#rim .rim-card').setAttribute('d', card.join(' '));
+  document.querySelector('#rim .rim-tick').style.display = z ? '' : 'none'; // 方角の目盛りは真上を見ているときだけ
+  document.getElementById('viewReset').hidden = z;
 }
 
 function sunAlt(ms, c) { const s = sunRaDec(ms); return eqToHor(s.ra, s.dec, ms, c.lat, c.lon).alt; }
@@ -621,12 +649,41 @@ const narrowLayout = () => matchMedia('(max-width: 899px), (max-aspect-ratio: 1/
 // 星・流星の大きさの倍率。スマホ（空の円が小さい）でも小さくなりすぎないように下限を置く
 const SC = () => Math.max(1.15, S / 700 + 0.4), WC = () => Math.max(1.05, S / 700 + 0.35);
 // 等距離射影：中心が天頂・ふちが地平線。北が上、東が左
-function proj(az, alt) {
-  const r = R * (90 - alt) / 90, a = az * DEG;
-  return [cx - r * Math.sin(a), cy - r * Math.cos(a)];
+// 見る向き：投影の中心 c・画面の上 up・画面の右 rt（どれも 東・北・天頂 の向きのベクトル）。はじめは真上（北が上・東が左）
+// スワイプで空をつかんで動かすように中心を変える（2026-11-22 オーナー：流星の多い方角へ向けたい）
+const VIEW = { c: [0, 0, 1], up: [0, 1, 0], rt: [-1, 0, 0], ver: 0 };
+const isZenith = () => VIEW.c[2] > 0.99999;
+function setView(c, upHint) {
+  const n = Math.hypot(c[0], c[1], c[2]); c = c.map(v => v / n);
+  // 画面の上：前の上を新しい中心の接平面に移して使う（向きが急に回らないように）。地平線は少しずつ水平に戻す
+  let u = upHint.map((v, i) => v - (upHint[0] * c[0] + upHint[1] * c[1] + upHint[2] * c[2]) * c[i]);
+  const zt = [-c[2] * c[0], -c[2] * c[1], 1 - c[2] * c[2]], zn = Math.hypot(zt[0], zt[1], zt[2]);
+  // 真上から離れるほど、画面の上を天頂の向きにそろえる（地平線が下に水平に来る）。真上の近くは前の向きのまま
+  if (zn > 1e-4) { const w = Math.min(1, Math.max(0, (0.985 - c[2]) / 0.12)); u = u.map((v, i) => v * (1 - w) + zt[i] / zn * w); }
+  const un = Math.hypot(u[0], u[1], u[2]) || 1; u = u.map(v => v / un);
+  VIEW.c = c; VIEW.up = u; VIEW.rt = [c[1] * u[2] - c[2] * u[1], c[2] * u[0] - c[0] * u[2], c[0] * u[1] - c[1] * u[0]]; VIEW.ver++;
+}
+const enu = (az, alt) => { const a = az * DEG, h = alt * DEG; return [Math.cos(h) * Math.sin(a), Math.cos(h) * Math.cos(a), Math.sin(h)]; };
+// 等距離射影：中心からの角度に比例して中心から離す（中心から90°が円のふち）
+function projV(e, n, u) {
+  const C = VIEW.c, U = VIEW.up, T = VIEW.rt;
+  const ct = Math.max(-1, Math.min(1, e * C[0] + n * C[1] + u * C[2])), th = Math.acos(ct);
+  const sx = e * T[0] + n * T[1] + u * T[2], sy = e * U[0] + n * U[1] + u * U[2], sn = Math.hypot(sx, sy);
+  if (sn < 1e-9) return [cx, cy];
+  const r = R * th / (Math.PI / 2);
+  return [cx + r * sx / sn, cy - r * sy / sn];
+}
+function proj(az, alt) { const d = enu(az, alt); return projV(d[0], d[1], d[2]); }
+// 画面の点 → 空の向き（東・北・天頂）
+function unproj(x, y) {
+  const dx = (x - cx) / R, dy = (y - cy) / R, rr = Math.hypot(dx, dy);
+  if (rr < 1e-9) return VIEW.c.slice();
+  const th = Math.min(Math.PI, rr * Math.PI / 2), sx = dx / rr, sy = -dy / rr, C = VIEW.c, U = VIEW.up, T = VIEW.rt, st = Math.sin(th), ct = Math.cos(th);
+  return [0, 1, 2].map(i => ct * C[i] + st * (sx * T[i] + sy * U[i]));
 }
 
 function drawSky(now) {
+  updateRim();
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.clearRect(0, 0, S, S);
   ctx.save();
@@ -645,7 +702,8 @@ function drawSky(now) {
   // 天の川：ESO の全天パノラマ（銀河座標）を、その時刻・その場所の空に描き直したもの。月明かりと薄明でうすくなる
   const starFade = Math.max(0, Math.min(1, (-sunA - 6) / 8));
   const mwA = starFade * (1 - 0.8 * ml);
-  if (mwA > 0.02 && updateMilkyWay(now)) {
+  const mwOk = updateMilkyWay(now);
+  if (mwA > 0.02 && mwOk) {
     // 溶け込みの割合は 0〜1 に収める（範囲の外だと透明度の指定が無視され、1コマだけ全力の明るさで光っていた）
     const f = mw.fade ? Math.max(0, Math.min(1, (now - mw.fade) / 350)) : 1;
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
@@ -693,6 +751,8 @@ function drawSky(now) {
   }
   ctx.globalCompositeOperation = 'source-over';
 
+  // 地平線より下（傾けたとき円の中に入ってくる地面）
+  if (!isZenith() && ground.ver >= 0) ctx.drawImage(ground.canvas, cx - R, cy - R, 2 * R, 2 * R);
   // 地平線のシルエット（演出。特定の場所の景色ではない）：建物の縦の辺は、魚眼では空の中心へ向かう線になる
   drawSkyline();
 
@@ -721,8 +781,9 @@ function drawStars(starFade, magCut) {
     const m = T.m[i]; if (m > magCut) break; // 明るい順に並んでいる
     const H = lst - T.ra[i], ch = Math.cos(H), sa = sl * T.sd[i] + cl * T.cd[i] * ch;
     if (sa <= 0) continue;
-    const alt = Math.asin(sa) / DEG, ey = -T.cd[i] * Math.sin(H), nx = T.sd[i] * cl - T.cd[i] * ch * sl, nn = Math.hypot(ey, nx) || 1;
-    const r = R * (90 - alt) / 90, x = cx - r * ey / nn, y = cy - r * nx / nn;
+    const alt = Math.asin(sa) / DEG, ey = -T.cd[i] * Math.sin(H), nx = T.sd[i] * cl - T.cd[i] * ch * sl;
+    const C = VIEW.c; if (ey * C[0] + nx * C[1] + sa * C[2] < 0) continue; // 見ている半球の外
+    const [x, y] = projV(ey, nx, sa);
     const low = Math.min(1, alt / 12), a = Math.max(0.1, Math.min(0.85, (6.2 - m) / 6)) * starFade * (0.45 + 0.55 * low);
     const lv = Math.min(STAR_LEVELS - 1, Math.floor(a * STAR_LEVELS)), rad = Math.max(0.5, 1.6 - 0.26 * m) * scale; // 星は流星より目立たないように小さめに
     let pth = paths[lv]; if (!pth) pth = paths[lv] = new Path2D();
@@ -734,7 +795,7 @@ function drawStars(starFade, magCut) {
 // 天の赤道・黄道の線：点の計算は空が少し回ったとき（30秒ぶん）だけやり直す
 const skyLineCache = {};
 function drawSkyLine(fn, color, label) {
-  const key = `${city.lat}|${city.lon}|${S}`, c = skyLineCache[label];
+  const key = `${city.lat}|${city.lon}|${S}|${VIEW.ver}`, c = skyLineCache[label];
   if (!c || c.key !== key || Math.abs(simT - c.t) > 30000) {
     const segs = []; let cur = null, best = null;
     for (let t = 0; t <= 360; t += 1.5) {
@@ -1034,6 +1095,22 @@ function showLast(m) {
   document.getElementById('iAlt').innerHTML = `${Math.round(m.ht_beg_km)}→${Math.round(m.ht_end_km)}<small>km</small>`;
 }
 const embBase = () => '<circle class="emb-ring" cx="30" cy="30" r="27"/><line class="emb-n" x1="30" y1="1" x2="30" y2="6"/>';
+
+// ---------- スワイプで見る向きを変える（空をつかんで引っぱる） ----------
+let skyDrag = false, dragPt = null;
+sky.addEventListener('pointerdown', e => { skyDrag = true; sky.setPointerCapture(e.pointerId); const r = sky.getBoundingClientRect(); dragPt = [e.clientX - r.left, e.clientY - r.top]; });
+sky.addEventListener('pointermove', e => {
+  if (!skyDrag) return;
+  const r = sky.getBoundingClientRect(), p = [e.clientX - r.left, e.clientY - r.top];
+  const dx = p[0] - dragPt[0], dy = p[1] - dragPt[1]; if (!dx && !dy) return; dragPt = p;
+  // 指の動きと反対側の空を中心へ（つかんで引っぱる）
+  const c = unproj(cx - dx, cy - dy);
+  if (c[2] < Math.sin(5 * DEG)) { const h = Math.hypot(c[0], c[1]) || 1, k = Math.cos(5 * DEG) / h; c[0] *= k; c[1] *= k; c[2] = Math.sin(5 * DEG); } // 中心は高さ5°まで
+  setView(c, VIEW.up);
+});
+const endDrag = () => { if (skyDrag) { skyDrag = false; mw.key = ''; } }; // 指を離したら天の川を細かく描き直す
+sky.addEventListener('pointerup', endDrag); sky.addEventListener('pointercancel', endDrag);
+document.getElementById('viewReset').addEventListener('click', () => { setView([0, 0, 1], [0, 1, 0]); VIEW.up = [0, 1, 0]; VIEW.rt = [-1, 0, 0]; VIEW.ver++; mw.key = ''; });
 
 // ---------- 時間を進める ----------
 const rimTime = document.getElementById('rimTime');
