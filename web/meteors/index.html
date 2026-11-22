@@ -55,11 +55,20 @@
   .spacer { flex: 1; }
   .where .date-short { display: none; }
   @media (max-width: 899px), (max-aspect-ratio: 1/1) { .where .date-short { display: inline; color: var(--text-dim); } }
-  .chips { display: flex; gap: 6px; }
-  /* 地域の切り替え（日本・北アメリカ・ヨーロッパ）：小さな文字のタブ */
-  .regions { display: flex; gap: 2px; }
-  .regions button { min-height: 26px; padding: 0.2em 0.7em; font-size: 0.72rem; border: 0; border-radius: 999px; background: transparent; color: var(--text-dim); }
-  .regions button.cur { color: var(--mint); background: var(--mint-faint); font-weight: 700; }
+  /* タイトルバー：左に VOYASCOPE、右に「国・地域」（枠だけ）と「街」（塗りつぶし）の丸いボタン。押すと端末の選択画面（2026-11-22 オーナー） */
+  .top { background: rgba(7, 20, 43, 0.82); border: 1px solid var(--panel-border); border-radius: 18px; padding: 8px 8px 8px 16px !important;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); flex-wrap: nowrap !important; }
+  .top .brand { pointer-events: none; } .top .brand a { pointer-events: auto; display: block; line-height: 0; }
+  .pills { margin-left: auto; display: flex; gap: 8px; flex: none; }
+  .pill { position: relative; display: inline-flex; align-items: center; gap: 4px; height: 40px; padding: 0 30px 0 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+  .pill::after { content: ""; position: absolute; right: 13px; top: 50%; width: 6px; height: 6px; margin-top: -5px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(45deg); pointer-events: none; }
+  .pill select { appearance: none; -webkit-appearance: none; background: transparent; border: 0; color: inherit; font: inherit; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.04em; cursor: pointer; padding: 0; outline: none; }
+  .pill select option { color: #000; }
+  .pill:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .pill-o { border: 1.5px solid var(--mint-dim); color: var(--text); }
+  .pill-f { background: var(--mint); color: var(--navy-800); }
+  .pill .pin { width: 11px; height: 14px; fill: currentColor; flex: none; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   button { appearance: none; font-family: var(--font-body); font-size: 0.78rem; line-height: 1.3; color: var(--mint);
     background: rgba(7, 20, 43, 0.72); border: 1px solid var(--mint-dim); border-radius: 3px; padding: 0.4em 0.8em;
     min-height: 32px; cursor: pointer; transition: background .15s, color .15s; touch-action: manipulation; }
@@ -209,10 +218,6 @@
     .where .date-long { display: none; }
     .top { gap: 8px; }
     /* 場所の切り替え：ひとつながりのセグメントを横いっぱいに（iOS・Android で見慣れた形。押しやすい高さ 36px） */
-    .chips { order: 10; flex: 1 0 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; padding: 3px;
-      border: 1px solid var(--panel-border); border-radius: 10px; background: rgba(7, 20, 43, 0.6); }
-    .chips button { border: 0; border-radius: 7px; min-height: 34px; background: transparent; color: var(--text-dim); font-size: 0.82rem; }
-    .chips button.cur { background: var(--mint); color: var(--navy-800); font-weight: 700; }
     .top { row-gap: 10px; }
     .where { font-size: 0.82rem; }
     .tm { padding: 8px 12px 7px; }
@@ -243,8 +248,6 @@
   .rim-card { stroke: rgba(217, 244, 234, 0.85); stroke-width: 2.4; }
   .rim-dir { font-weight: 700; }
   .rim-log { opacity: 0.7; }
-  .chips button .pin { width: 10px; height: 13px; margin-right: 5px; vertical-align: -1px; fill: currentColor; display: none; }
-  .chips button.cur .pin { display: inline-block; }
   .cnt-row { display: inline-flex; align-items: center; gap: 6px; }
   .dome .count svg.cnt-ic { position: static; inset: auto; width: 26px; height: 26px; flex: none; stroke: var(--amber); stroke-width: 2.2; stroke-linecap: round; fill: var(--amber); }
   .count-break span.leo { display: inline-block; border: 1px solid var(--amber-dim); border-radius: 999px; padding: 1px 10px 1px 8px; margin: 2px 0 3px -2px; background: rgba(255, 181, 71, 0.08); color: var(--text); }
@@ -258,20 +261,30 @@
   .st dd { font-weight: 700; }
   .credit { border-top: 0 !important; text-align: center; }
   @media (max-width: 899px), (max-aspect-ratio: 1/1) {
-    .top { justify-content: space-between; }
+    .top { justify-content: space-between; height: auto; margin-top: 2px; }
+    .top .brand img { height: 15px; }
+    /* ボタンの幅は固定（街の名前で帯が広がらない）。長い名前は字を小さく */
+    .pill { height: 36px; padding: 0 24px 0 12px; justify-content: flex-start; } .pill::after { right: 11px; }
+    .pill-o { width: 112px; } .pill-f { width: 134px; }
+    .pill select { font-size: 0.8rem; letter-spacing: 0.02em; width: 100%; min-width: 0; text-overflow: ellipsis; }
+    .pill-f.long select { font-size: 0.72rem; letter-spacing: -0.01em; }
+  }
+  @media (max-width: 404px) {
+    .top { padding-left: 12px !important; }
+    .top .brand img { height: 12px; }
+    .pills { gap: 6px; }
+    .pill-o { width: 100px; } .pill-f { width: 122px; }
+    .pill { padding: 0 20px 0 10px; } .pill::after { right: 9px; }
+    .pill select { font-size: 0.74rem; } .pill-f.long select { font-size: 0.66rem; }
+  }
+  @media (max-width: 339px) {
+    .top .brand img { height: 10px; }
+    .pill-o { width: 90px; } .pill-f { width: 110px; }
+    .pill { padding: 0 18px 0 8px; } .pill::after { right: 8px; width: 5px; height: 5px; }
+    .pill select { font-size: 0.68rem; } .pill-f.long select { font-size: 0.6rem; }
+    .pill .pin { width: 9px; height: 12px; }
     .where { flex: 1 1 auto; text-align: center; }
     .top .spacer { display: none; }
-    .chips { flex: 0 0 auto !important; width: min(100%, 340px); border-radius: 999px !important; }
-    .regions { order: 2; flex: 0 0 auto; margin-left: auto; justify-content: flex-end; height: 28px; }
-    .top { height: calc(env(safe-area-inset-top) + 0px + 86px); align-content: flex-start; flex-wrap: wrap; overflow: hidden; row-gap: 8px; } /* 高さを固定（街の名前で変わらない） */
-    /* 1行目：ロゴは左、地域の切り替えは右（左右に離して押し間違えを減らす。高さは足さない。2026-11-22 オーナー）。ロゴが反応するのはロゴの絵だけ */
-    .top .brand { flex: 0 0 auto; justify-content: flex-start; height: 28px; align-items: center; pointer-events: none; }
-    .top .brand a { pointer-events: auto; display: block; line-height: 0; }
-    .chips { height: 40px; }
-    .chips button { overflow: hidden; text-overflow: clip; padding-left: 4px !important; padding-right: 4px !important; }
-    .chips button.long { font-size: 0.7rem !important; letter-spacing: -0.02em; }
-    .chips button { white-space: nowrap; font-size: 0.78rem !important; }
-    .chips button { border-radius: 999px !important; }
     .panel-wrap { padding: 8px 8px 4px; }
     .nm-name { font-size: 0.95rem !important; line-height: 1.3rem; height: 1.3rem; }
   }
@@ -281,9 +294,10 @@
 <div class="app">
   <header class="top">
     <div class="brand"><a href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span></div>
-    <span class="spacer"></span>
-    <div class="regions" role="group" aria-label="地域"><button data-region="japan" class="cur">日本</button><button data-region="namerica">北アメリカ</button><button data-region="europe">ヨーロッパ</button></div>
-    <div class="chips" id="cityChips" role="group" aria-label="見上げる場所"></div>
+    <div class="pills">
+      <label class="pill pill-o"><span class="sr">国・地域</span><select id="regionSel" aria-label="国・地域"><option value="japan">日本</option><option value="namerica">北アメリカ</option><option value="europe">ヨーロッパ</option></select></label>
+      <label class="pill pill-f"><svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg><span class="sr">見上げる場所</span><select id="citySel" aria-label="見上げる場所"></select></label>
+    </div>
   </header>
 
   <div class="dome" id="dome">
@@ -1228,8 +1242,8 @@ async function setCity(key) {
   const regionChanged = rk !== curRegion; curRegion = rk;
   city = nc;
   skyline = buildSkyline(city.seed * 7919);
-  document.querySelectorAll('[data-city]').forEach(x => x.classList.toggle('cur', x.dataset.city === key));
-  document.querySelectorAll('[data-region]').forEach(x => x.classList.toggle('cur', x.dataset.region === rk));
+  document.getElementById('citySel').value = key; document.getElementById('regionSel').value = rk;
+  document.getElementById('citySel').parentElement.classList.toggle('long', city.ja.length >= 5); // ニューヨークなど長い名前は字を小さく
   document.querySelector('.count').title = `${REGIONS[rk].area}で GMN のカメラが記録した流星（日没から いまの時刻まで）`;
   // その街の 11/18 の日の入り（現地の正午から探す）と、次の日の出
   const noon = Date.UTC(2026, 10, 18, 12) - city.lon / 15 * 3600000;
@@ -1241,13 +1255,14 @@ async function setCity(key) {
   active = []; sparks = []; trains = []; lastIdx = idxAt(simT);
   updateCount(); showLast(lastVisibleBefore(simT));
 }
-const PIN = '<svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg>';
 function renderCityButtons(rk) {
-  const box = document.getElementById('cityChips');
-  box.innerHTML = REGIONS[rk].cities.map(k => `<button data-city="${k}"${CITIES[k].ja.length >= 5 ? ' class="long"' : ''}>${PIN}${CITIES[k].ja}</button>`).join(''); // 長い名前（ニューヨーク）は字を小さく
-  box.querySelectorAll('[data-city]').forEach(b => b.addEventListener('click', () => setCity(b.dataset.city)));
+  const sel = document.getElementById('citySel');
+  sel.innerHTML = REGIONS[rk].cities.map(k => `<option value="${k}">${CITIES[k].ja}</option>`).join('');
+  document.getElementById('regionSel').value = rk;
+
 }
-document.querySelectorAll('[data-region]').forEach(b => b.addEventListener('click', () => { if (b.dataset.region !== curRegion) setCity(REGIONS[b.dataset.region].def); }));
+document.getElementById('regionSel').addEventListener('change', e => { if (e.target.value !== curRegion) setCity(REGIONS[e.target.value].def); });
+document.getElementById('citySel').addEventListener('change', e => setCity(e.target.value));
 
 const src = document.getElementById('sources');
 document.getElementById('srcBtn').addEventListener('click', () => { src.hidden = false; });
