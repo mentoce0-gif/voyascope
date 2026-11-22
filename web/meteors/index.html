@@ -474,7 +474,7 @@ function drawMoon(mo) {
 
 // ---------- 天の川（ESO eso0932a：銀河座標の正距円筒。中心が銀河中心、銀経は左へ増える。
 //            図法は公式に書かれていないので、大小マゼラン雲・アンドロメダ銀河の位置で確かめた＝位置は目安） ----------
-const mw = { img: null, data: null, W: 0, H: 0, canvas: document.createElement('canvas'), prev: document.createElement('canvas'), fade: 0, N: 0, key: '', t: 0, pre: null };
+const mw = { img: null, data: null, W: 0, H: 0, canvas: document.createElement('canvas'), prev: document.createElement('canvas'), fade: 0, job: null, N: 0, key: '', t: 0, pre: null };
 function loadMilkyWay(url) {
   const im = new Image();
   im.onload = () => {
@@ -486,7 +486,7 @@ function loadMilkyWay(url) {
 }
 // 赤道座標（J2000）→ 銀河座標の回転（IAU 1958 の定義の値）
 const GAL = [[-0.0548755604, -0.8734370902, -0.4838350155], [0.4941094279, -0.4448296300, 0.7469822445], [-0.8676661490, -0.1980763734, 0.4559837762]];
-function updateMilkyWay() {
+function updateMilkyWay(now) {
   if (!mw.data) return false;
   const N = Math.min(420, Math.round(2 * R)), key = `${N}|${city.lat}|${city.lon}`;
   if (key !== mw.key) { // 画素ごとの 時角・赤緯（場所と大きさが変わったときだけ）
@@ -500,25 +500,33 @@ function updateMilkyWay() {
       const H = Math.atan2(-Math.sin(az) * Math.cos(alt), Math.sin(alt) * Math.cos(p) - Math.cos(alt) * Math.sin(p) * Math.cos(az));
       const o = (j * N + i) * 2; pre[o] = H; pre[o + 1] = dec;
     }
-    mw.pre = pre; mw.key = key; mw.t = NaN;
+    mw.pre = pre; mw.key = key; mw.t = NaN; mw.job = null;
   }
-  if (Math.abs(simT - mw.t) < 90000) return true; // 1分半ぶん（空は約0.4°）回るまで描き直さない
-  const first = mw.t !== mw.t; mw.t = simT;
-  // いまの絵を「前の絵」にとっておき、新しい絵へ 0.35秒かけて溶け込ませる（ぱっと位置が変わらないように）
-  const pc = mw.prev.getContext('2d'); pc.clearRect(0, 0, mw.N, mw.N); if (!first) pc.drawImage(mw.canvas, 0, 0);
-  mw.fade = first ? 0 : performance.now();
-  const lst = (gmst(simT) + city.lon) * DEG, N2 = mw.N, out = mw.canvas.getContext('2d').createImageData(N2, N2), od = out.data, src = mw.data, W = mw.W, Hh = mw.H;
-  for (let q = 0; q < N2 * N2; q++) {
-    const H = mw.pre[q * 2]; if (H !== H) continue;
-    const dec = mw.pre[q * 2 + 1], ra = lst - H, cd = Math.cos(dec);
-    const X = cd * Math.cos(ra), Y = cd * Math.sin(ra), Z = Math.sin(dec);
-    const gx = GAL[0][0] * X + GAL[0][1] * Y + GAL[0][2] * Z, gy = GAL[1][0] * X + GAL[1][1] * Y + GAL[1][2] * Z, gz = GAL[2][0] * X + GAL[2][1] * Y + GAL[2][2] * Z;
-    let l = Math.atan2(gy, gx) / DEG; if (l > 180) l -= 360; const b = Math.asin(Math.max(-1, Math.min(1, gz))) / DEG;
-    const u = Math.min(W - 1, Math.max(0, Math.floor((0.5 - l / 360) * W))), v = Math.min(Hh - 1, Math.max(0, Math.floor((0.5 - b / 180) * Hh)));
-    const s4 = (v * W + u) * 4, o4 = q * 4;
-    od[o4] = src[s4]; od[o4 + 1] = src[s4 + 1]; od[o4 + 2] = src[s4 + 2]; od[o4 + 3] = 255;
+  // 描き直しは数コマに分けて少しずつ進め（1コマが重くなって止まらないように）、出来上がってから入れ替える
+  if (!mw.job && (mw.t !== mw.t || Math.abs(simT - mw.t) >= 90000)) { // 1分半ぶん（空は約0.4°）回ったら描き直しを始める
+    const first = mw.t !== mw.t; mw.t = simT;
+    mw.job = { out: mw.canvas.getContext('2d').createImageData(mw.N, mw.N), q: 0, lst: (gmst(simT) + city.lon) * DEG, first };
   }
-  mw.canvas.getContext('2d').putImageData(out, 0, 0);
+  if (mw.job) {
+    const jb = mw.job, N2 = mw.N, od = jb.out.data, src = mw.data, W = mw.W, Hh = mw.H, lst = jb.lst;
+    const end = jb.first ? N2 * N2 : Math.min(N2 * N2, jb.q + 30000); // はじめの1回は一度に（すぐ見えるように）
+    for (let q = jb.q; q < end; q++) {
+      const H = mw.pre[q * 2]; if (H !== H) continue;
+      const dec = mw.pre[q * 2 + 1], ra = lst - H, cd = Math.cos(dec);
+      const X = cd * Math.cos(ra), Y = cd * Math.sin(ra), Z = Math.sin(dec);
+      const gx = GAL[0][0] * X + GAL[0][1] * Y + GAL[0][2] * Z, gy = GAL[1][0] * X + GAL[1][1] * Y + GAL[1][2] * Z, gz = GAL[2][0] * X + GAL[2][1] * Y + GAL[2][2] * Z;
+      let l = Math.atan2(gy, gx) / DEG; if (l > 180) l -= 360; const b = Math.asin(Math.max(-1, Math.min(1, gz))) / DEG;
+      const u = Math.min(W - 1, Math.max(0, Math.floor((0.5 - l / 360) * W))), v = Math.min(Hh - 1, Math.max(0, Math.floor((0.5 - b / 180) * Hh)));
+      const s4 = (v * W + u) * 4, o4 = q * 4;
+      od[o4] = src[s4]; od[o4 + 1] = src[s4 + 1]; od[o4 + 2] = src[s4 + 2]; od[o4 + 3] = 255;
+    }
+    jb.q = end;
+    if (end >= N2 * N2) { // 出来上がり：いまの絵を「前の絵」にとっておき、新しい絵へ 0.35秒かけて溶け込ませる
+      const pc = mw.prev.getContext('2d'); pc.clearRect(0, 0, N2, N2); if (!jb.first) pc.drawImage(mw.canvas, 0, 0);
+      mw.canvas.getContext('2d').putImageData(jb.out, 0, 0);
+      mw.fade = jb.first ? 0 : now; mw.job = null;
+    }
+  }
   return true;
 }
 
@@ -633,8 +641,9 @@ function drawSky(now) {
   // 天の川：ESO の全天パノラマ（銀河座標）を、その時刻・その場所の空に描き直したもの。月明かりと薄明でうすくなる
   const starFade = Math.max(0, Math.min(1, (-sunA - 6) / 8));
   const mwA = starFade * (1 - 0.8 * ml);
-  if (mwA > 0.02 && updateMilkyWay()) {
-    const f = mw.fade ? Math.min(1, (now - mw.fade) / 350) : 1;
+  if (mwA > 0.02 && updateMilkyWay(now)) {
+    // 溶け込みの割合は 0〜1 に収める（範囲の外だと透明度の指定が無視され、1コマだけ全力の明るさで光っていた）
+    const f = mw.fade ? Math.max(0, Math.min(1, (now - mw.fade) / 350)) : 1;
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     if (f < 1) { ctx.globalAlpha = 0.9 * mwA * (1 - f); ctx.drawImage(mw.prev, cx - R, cy - R, 2 * R, 2 * R); }
     ctx.globalAlpha = 0.9 * mwA * f; ctx.drawImage(mw.canvas, cx - R, cy - R, 2 * R, 2 * R); ctx.restore();
