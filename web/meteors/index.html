@@ -473,7 +473,7 @@ function drawMoon(mo) {
 
 // ---------- 天の川（ESO eso0932a：銀河座標の正距円筒。中心が銀河中心、銀経は左へ増える。
 //            図法は公式に書かれていないので、大小マゼラン雲・アンドロメダ銀河の位置で確かめた＝位置は目安） ----------
-const mw = { img: null, data: null, W: 0, H: 0, canvas: document.createElement('canvas'), N: 0, key: '', t: 0, pre: null };
+const mw = { img: null, data: null, W: 0, H: 0, canvas: document.createElement('canvas'), prev: document.createElement('canvas'), fade: 0, N: 0, key: '', t: 0, pre: null };
 function loadMilkyWay(url) {
   const im = new Image();
   im.onload = () => {
@@ -489,7 +489,7 @@ function updateMilkyWay() {
   if (!mw.data) return false;
   const N = Math.min(420, Math.round(2 * R)), key = `${N}|${city.lat}|${city.lon}`;
   if (key !== mw.key) { // 画素ごとの 時角・赤緯（場所と大きさが変わったときだけ）
-    mw.N = N; mw.canvas.width = N; mw.canvas.height = N;
+    mw.N = N; mw.canvas.width = N; mw.canvas.height = N; mw.prev.width = N; mw.prev.height = N; mw.fade = 0;
     const pre = new Float32Array(N * N * 2).fill(NaN), p = city.lat * DEG;
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
       const dx = (i + 0.5) / N * 2 - 1, dy = (j + 0.5) / N * 2 - 1, rr = Math.hypot(dx, dy);
@@ -502,7 +502,10 @@ function updateMilkyWay() {
     mw.pre = pre; mw.key = key; mw.t = NaN;
   }
   if (Math.abs(simT - mw.t) < 90000) return true; // 1分半ぶん（空は約0.4°）回るまで描き直さない
-  mw.t = simT;
+  const first = mw.t !== mw.t; mw.t = simT;
+  // いまの絵を「前の絵」にとっておき、新しい絵へ 0.35秒かけて溶け込ませる（ぱっと位置が変わらないように）
+  const pc = mw.prev.getContext('2d'); pc.clearRect(0, 0, mw.N, mw.N); if (!first) pc.drawImage(mw.canvas, 0, 0);
+  mw.fade = first ? 0 : performance.now();
   const lst = (gmst(simT) + city.lon) * DEG, N2 = mw.N, out = mw.canvas.getContext('2d').createImageData(N2, N2), od = out.data, src = mw.data, W = mw.W, Hh = mw.H;
   for (let q = 0; q < N2 * N2; q++) {
     const H = mw.pre[q * 2]; if (H !== H) continue;
@@ -574,9 +577,11 @@ function layout() {
     domeEl.style.height = ''; 
   } else { domeEl.style.height = ''; S = Math.max(160, Math.floor(Math.min(r.width, r.height))); }
   boxEl.style.width = S + 'px'; boxEl.style.height = S + 'px';
-  sky.width = S * DPR; sky.height = S * DPR;
+  const resized = sky.width !== S * DPR;
+  if (resized) { sky.width = S * DPR; sky.height = S * DPR; } // 板を作り直すと中身が消えるので、大きさが変わったときだけ
   cx = S / 2; cy = S / 2; R = S * 0.44;
   centerDome();
+  if (resized && meteors.length) drawSky(performance.now()); // 消えた板をすぐ描き直す（一瞬の黒を出さない）
   // ふちの文字：viewBox（1000）を画面の大きさに直すと小さくなるので、画面の上での最小の大きさを守る
   const k = 1000 / S, px = (min, base) => Math.max(base, min * k) + 'px';
   document.querySelectorAll('#rim .rim-dir').forEach(t => { t.style.fontSize = px(14, 30); });
@@ -590,14 +595,14 @@ function layout() {
 // スマホ：投影の窓（空の円）を画面の真ん中に。上の帯・計器にかからない範囲で（2026-11-22 オーナー）
 function centerDome() {
   // 上の帯と計器のあいだの余白のなかで、上の空き：下の空き ＝ 4：5（目で見た真ん中は少し上。Apple・Google の画面でもよく使う置き方）
-  boxEl.style.transform = '';
-  if (!narrowLayout()) return;
-  requestAnimationFrame(() => {
-    const b = boxEl.getBoundingClientRect(), top = document.querySelector('.top').getBoundingClientRect().bottom;
-    const bot = document.querySelector('.panel-wrap').getBoundingClientRect().top;
-    const free = Math.max(0, (bot - top) - b.height), want = top + free * 4 / 9;
-    boxEl.style.transform = `translateY(${Math.round(want - b.top)}px)`;
-  });
+  if (!narrowLayout()) { boxEl.style.transform = ''; return; }
+  // いまのずらし量を引いて、もとの位置から計算する（一度もとに戻すと、1コマだけ円がずれて見える）
+  const cur = parseFloat((boxEl.style.transform.match(/-?[\d.]+/) || [0])[0]) || 0;
+  const b = boxEl.getBoundingClientRect(), top = document.querySelector('.top').getBoundingClientRect().bottom;
+  const bot = document.querySelector('.panel-wrap').getBoundingClientRect().top;
+  const free = Math.max(0, (bot - top) - b.height), want = top + free * 4 / 9;
+  const next = Math.round(want - (b.top - cur));
+  if (next !== cur) boxEl.style.transform = `translateY(${next}px)`;
 }
 const narrowLayout = () => matchMedia('(max-width: 899px), (max-aspect-ratio: 1/1)').matches;
 // 星・流星の大きさの倍率。スマホ（空の円が小さい）でも小さくなりすぎないように下限を置く
@@ -628,8 +633,10 @@ function drawSky(now) {
   const starFade = Math.max(0, Math.min(1, (-sunA - 6) / 8));
   const mwA = starFade * (1 - 0.8 * ml);
   if (mwA > 0.02 && updateMilkyWay()) {
-    ctx.save(); ctx.globalAlpha = 0.9 * mwA; ctx.globalCompositeOperation = 'lighter';
-    ctx.drawImage(mw.canvas, cx - R, cy - R, 2 * R, 2 * R); ctx.restore();
+    const f = mw.fade ? Math.min(1, (now - mw.fade) / 350) : 1;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    if (f < 1) { ctx.globalAlpha = 0.9 * mwA * (1 - f); ctx.drawImage(mw.prev, cx - R, cy - R, 2 * R, 2 * R); }
+    ctx.globalAlpha = 0.9 * mwA * f; ctx.drawImage(mw.canvas, cx - R, cy - R, 2 * R, 2 * R); ctx.restore();
   }
 
   // 星（時刻の恒星時で回る）。月が出ていると暗い星は見えにくい
