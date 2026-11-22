@@ -2,18 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-21T19:15:48.354Z",
+  "fetched_at": "2026-11-22T06:47:50.723Z",
   "days_ahead": 45,
   "launches": [
     {
       "id": "951a341f-236b-42fe-a667-4ab2fcf36eac",
-      "net": "2026-11-22T12:16:00.000Z",
-      "precision": "min",
+      "net": "2026-11-22T12:23:56.000Z",
+      "precision": "sec",
       "window_end": "2026-11-22T12:46:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-20T17:43:32Z",
+      "updated": "2026-11-22T05:25:07Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -130,7 +130,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-21T15:55:17Z",
+      "updated": "2026-11-21T20:29:25Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
