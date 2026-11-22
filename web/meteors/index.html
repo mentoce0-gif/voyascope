@@ -114,6 +114,10 @@
   .nm-name sup { font-size: 0.6em; color: var(--text-dim); margin-left: 1px; }
   .nm-name .fire { margin-left: 8px; font-size: 0.6rem; font-weight: 700; color: #ffd9a0; border: 1px solid rgba(255, 217, 160, 0.7); border-radius: 3px; padding: 0 5px; vertical-align: 3px; }
   .nm-dir { margin-top: 2px; font-size: 0.72rem; color: var(--sky); letter-spacing: 0.04em; }
+  /* 計器の高さを変えない（折り返しで高さが変わり、投影窓の大きさまで変わっていた。2026-11-22）：
+     名前は1行、方角の行はいつも2行ぶんの高さをとる（「肉眼ではほぼ見えない」が付いても切れない） */
+  .nm-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nm-dir { white-space: pre-line; line-height: 1.45; height: 2.9em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .st { flex: none; margin: 0; display: grid; gap: 1px; font-family: var(--font-mono); font-size: 0.72rem; }
   .st div { display: grid; grid-template-columns: 3.2em auto; gap: 6px; }
   .st dt { color: var(--text-dim); letter-spacing: 0.08em; }
@@ -827,25 +831,36 @@ function drawGhost(a, now) { // 肉眼ではほぼ見えない流星：細い点
 function drawMeteor(a, now) {
   if (!a.m.eye) return drawGhost(a, now);
   const m = a.m, D = Math.max(MIN_SHOW, m.duration_s || 0), age = (now - a.t0) / 1000;
-  const fade = 0.25 + 0.9 * m.b; // 残光の長さ（明るいほど長い）
+  const fade = 0.18 + 0.5 * m.b; // 消えたあとに残る短い光
   if (age > D + fade) { a.done = true; return; }
   const p = Math.min(1, age / D), head = p * (NPTS - 1);
-  const tailLen = (0.25 + 0.45 * m.b) * (NPTS - 1);
+  // 光り方の山（光度曲線）：小さな点で現れ、GMN の「一番明るかった高さ」（Peak Ht）で最も大きく明るくなり、萎んで消える（2026-11-22 オーナーの参考動画）
+  const fp = Math.max(0.15, Math.min(0.9, m.peakF ?? 0.6));
+  const g = age > D ? 0 : p <= fp ? 0.12 + 0.88 * Math.pow(p / fp, 1.6) : 1 - 0.92 * Math.pow((p - fp) / (1 - fp), 0.9);
   const k = age <= D ? 1 : 1 - (age - D) / fade;
   const col = colOf(m), hot = lighten(col, 0.55);
   const w = (0.7 + 3.4 * m.b) * WC();
   const aMax = (0.25 + 0.75 * m.b) * k;
+  // 尾は短く細く、いまの明るさに合わせる
+  const lineOnly = m.magHere > 4; // 4等より暗い（数字が4より大きい）小さな流星は、光の玉なしで線だけ（2026-11-22 オーナー）
+  const tailLen = (lineOnly ? 0.3 : 0.12 + 0.25 * m.b) * (NPTS - 1);
   const pts = pathPts(m, Math.max(0, head - tailLen), head);
-  // 輝き（太く薄く）＋芯（細く明るく）
-  strokeFaded(pts, col, w * 1.5, aMax * 0.05, 0); // にじみはごく控えめに（実際の流星に近く。2026-11-22 オーナー）
-  strokeFaded(pts, hot, w, aMax, 0);
-  // 頭の光
+  const ta = age <= D ? aMax * (0.25 + 0.75 * g) : aMax * 0.5;
+  strokeFaded(pts, hot, w * (0.45 + 0.4 * g), ta, 0);
+  // 頭の光：いまの明るさで大きさと明るさが変わる（一定の大きさの点が動くのではない）
   const hp = m.pts[Math.min(NPTS - 1, Math.round(head))];
-  if (hp.alt > 0 && age <= D) {
-    const [x, y] = proj(hp.az, hp.alt), rr = w * (0.9 + 0.6 * m.b);
+  if (hp.alt > 0 && age <= D && !lineOnly) {
+    const [x, y] = proj(hp.az, hp.alt), core = Math.max(0.8, w * (0.25 + 0.9 * g)), rr = core * (2.2 + 1.6 * m.b * g);
     const hg = ctx.createRadialGradient(x, y, 0, x, y, rr);
-    hg.addColorStop(0, `rgba(255,250,235,${aMax})`); hg.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
+    hg.addColorStop(0, `rgba(255,252,240,${Math.min(1, aMax * (0.35 + 0.65 * g) * 1.1)})`);
+    hg.addColorStop(core / rr, `rgba(${hot[0]},${hot[1]},${hot[2]},${aMax * 0.55 * g})`);
+    hg.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
     ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
+    // とても明るい流星：一番明るいあたりで空全体がほんのり明るくなる（参考動画のように）
+    if (m.magHere < -1.5) {
+      const sk = Math.min(1, (-m.magHere - 1.5) / 3) * g * g * 0.12;
+      ctx.fillStyle = `rgba(200,225,255,${sk})`; ctx.fillRect(0, 0, S, S);
+    }
   }
   // 明るい流星：消える瞬間に火花の粒と短い尾（演出）
   if (age > D && !a.burst && m.magHere < SPARK_MAG) {
@@ -998,7 +1013,7 @@ function showLast(m) {
   else {
     const [bx, by] = P(b), [ex, ey] = P(e), ang = Math.atan2(-(ey - by), ex - bx) / DEG;
     const arrow = ARROWS[((Math.round(ang / 45) % 8) + 8) % 8], d = dir8(pk.az);
-    dirTxt = `${arrow} ${d}（${DIR_EN[d]}）・仰角${Math.round(Math.max(0, pk.alt))}°` + (m.eye ? '' : ' ・ 肉眼ではほぼ見えない');
+    dirTxt = `${arrow} ${d}（${DIR_EN[d]}）・仰角${Math.round(Math.max(0, pk.alt))}°` + (m.eye ? '' : '\n肉眼ではほぼ見えない'); // 2行目に分ける（途中で折れないように）
   }
   document.getElementById('iDir').textContent = dirTxt;
   // 記号：向きは空の上で流れた向き、長さと描く速さは流星の速さ（速いほど長く、一瞬で）。位置は記号なので中心に
@@ -1082,8 +1097,15 @@ document.querySelectorAll('[data-city]').forEach(b => b.addEventListener('click'
 const src = document.getElementById('sources');
 document.getElementById('srcBtn').addEventListener('click', () => { src.hidden = false; });
 document.getElementById('srcClose').addEventListener('click', () => { src.hidden = true; });
-addEventListener('resize', layout);
-new ResizeObserver(layout).observe(domeEl);
+// 投影窓の大きさは、画面そのものの大きさが変わったとき（回転・アドレスバーの出入り）だけ計算し直す。
+// 計器の中身が変わって高さが少し動いても、円の大きさは変えない（位置だけ合わせ直す）
+let lastVW = 0, lastVH = 0;
+function onResize() {
+  if (innerWidth !== lastVW || innerHeight !== lastVH || !S) { lastVW = innerWidth; lastVH = innerHeight; layout(); }
+  else { centerDome(); layoutTl(); }
+}
+addEventListener('resize', onResize);
+new ResizeObserver(onResize).observe(domeEl);
 
 // ---------- 読み込み ----------
 (async () => {
