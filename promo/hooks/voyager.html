@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Voyager Hook</title>
+<!--
+  YouTube ショート1本目（ボイジャー1号 1光日）の冒頭。2026-11-22。
+  リポジトリの根から配る：python3 -m http.server 8000 → http://localhost:8000/promo/hooks/voyager.html
+  ?t=0.5 でその時刻（秒）の止め絵。window.setT(秒) で1コマ描く（書き出し用：promo/hooks/render.mjs）。
+  模型は遠くを見る部屋と同じ自作の形（web/js/far/models.js）。地球は画像を使わず青い点。星は乱数で実在の星ではない。
+  数字は curation/events/voyager-1-one-light-day.json の「約259億 km」「1光日」だけ。web/ の外なので公開されない。
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+  :root { --navy: #07142b; --deep: #030a17; --amber: #ffb547; --mint: #5ef2c2; --text: #eef6f3; --dim: #9fb3c8; }
+  html, body { margin: 0; background: #000; }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--deep); transform-origin: 0 0; }
+  canvas { position: absolute; inset: 0; width: 1080px; height: 1920px; display: block; }
+  .ov { position: absolute; left: 0; right: 0; pointer-events: none; text-align: center; }
+  #telop { top: 230px; left: 80px; text-align: left; font: 700 112px/1.2 "Zen Kaku Gothic New", sans-serif; color: var(--text); letter-spacing: .04em; text-shadow: 0 4px 40px rgba(0,0,0,.6); }
+  #telop small { display: block; font: 700 46px/1.4 "Zen Kaku Gothic New", sans-serif; color: var(--amber); letter-spacing: .12em; margin-bottom: 18px; }
+  #meter { top: 1290px; left: auto; right: 70px; text-align: right; font: 700 34px/1.5 "JetBrains Mono", monospace; color: var(--mint); letter-spacing: .08em; }
+  #meter .lbl { color: var(--dim); font-weight: 400; font-size: 26px; display: block; }
+  #meter .big { font-size: 76px; color: var(--mint); display: block; }
+  #arrive { top: 250px; left: 80px; text-align: left; font-size: 58px; font: 700 50px/1.45 "Zen Kaku Gothic New", sans-serif; color: var(--text); }
+  #arrive b { color: var(--amber); }
+  #foot { bottom: 70px; font: 400 24px/1.6 "Zen Kaku Gothic New", sans-serif; color: var(--dim); }
+  #foot span { font-family: "JetBrains Mono", monospace; color: var(--text); }
+  #tag { width: 300px; margin-left: -150px; font: 400 26px/1 "JetBrains Mono", monospace; color: var(--dim); letter-spacing: .1em; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="gl" width="1080" height="1920"></canvas>
+  <div class="ov" id="telop"><small>VOYAGER 1</small>光でも<br>まる1日</div>
+  <div class="ov" id="tag">EARTH ▲</div>
+  <div class="ov" id="meter"><span class="lbl">地球を出た光</span><span class="big" id="clock">+00:00:00</span></div>
+  <div class="ov" id="arrive">ボイジャー1号<br>地球から <b>約259億 km</b></div>
+  <div class="ov" id="foot"><span>voyascope.org</span>　非公式ファンメイド<br>時間は縮めて表示。大きさと距離は縮尺どおりではありません</div>
+</div>
+<script type="module">
+import * as THREE from "../../web/vendor/three-r128.min.js";
+import { makeKit, MODELS } from "../../web/js/far/models.js";
+
+const W = 1080, H = 1920, DUR = 5.0;
+const T0 = 0.55, T1 = 3.75; // 光が地球を出る・ボイジャーに届く（秒）
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("gl"), antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H, false);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.setClearColor(0x030a17, 1);
+
+const scene = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(42, W / H, 0.05, 1000);
+
+// 背景：紺のグラデーション（大きな球の内側）
+{
+  const m = new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false,
+    vertexShader: `varying vec3 v; void main(){ v = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+    fragmentShader: `varying vec3 v; void main(){ float k = smoothstep(-.2, 1., dot(v, normalize(vec3(0.,-.05,-1.)))); gl_FragColor = vec4(mix(vec3(.012,.039,.09), vec3(.05,.13,.26), k*.8), 1.); }`,
+  });
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(500, 32, 16), m));
+}
+// 星（乱数。実在の星ではない）
+{
+  let s = 11; const r = () => ((s = (1664525 * s + 1013904223) >>> 0) / 4294967296);
+  const n = 1400, pos = new Float32Array(n * 3), sz = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const u = r() * 2 - 1, a = r() * Math.PI * 2, q = Math.sqrt(1 - u * u);
+    pos.set([300 * q * Math.cos(a), 300 * u, 300 * q * Math.sin(a)], i * 3);
+    sz[i] = 1.2 + Math.pow(r(), 6) * 4.5;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.setAttribute("sz", new THREE.BufferAttribute(sz, 1));
+  scene.add(new THREE.Points(g, new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false,
+    vertexShader: `attribute float sz; void main(){ gl_PointSize = sz; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+    fragmentShader: `void main(){ float d = length(gl_PointCoord-.5)*2.; if (d>1.) discard; gl_FragColor = vec4(.82,.88,1., (1.-d*d)*.85); }`,
+  })));
+}
+
+// 光の点の絵（加算で重ねる）
+function glowTex(inner, outer) {
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const g = c.getContext("2d"), gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  gr.addColorStop(0, inner); gr.addColorStop(.18, outer); gr.addColorStop(1, "rgba(0,0,0,0)");
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(c);
+}
+// この three.js は部品を絞った版（Sprite なし）なので、いつもカメラを向く板で描く
+const boards = [];
+const sprite = (tex) => {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { map: { value: tex } },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+    fragmentShader: `uniform sampler2D map; varying vec2 vUv; void main(){ gl_FragColor = texture2D(map, vUv); }`,
+  }));
+  boards.push(m);
+  return m;
+};
+
+// 地球：青い点（遠く。画像は使わない）
+const EARTH = new THREE.Vector3(-2.2, -4.9, -3);
+const earth = sprite(glowTex("rgba(225,240,255,1)", "rgba(94,168,255,.55)"));
+earth.position.copy(EARTH); earth.scale.setScalar(0.9);
+scene.add(earth);
+
+// ボイジャー1号（自作の形。遠くを見る部屋と同じ）
+const kit = makeKit(THREE);
+const vg = MODELS.voyager(THREE, kit);
+const voy = new THREE.Group();
+voy.add(vg);
+voy.scale.setScalar(1.15);
+const VOY = new THREE.Vector3(1.5, 1.15, 0);
+voy.position.copy(VOY);
+// アンテナ（+Y）を地球に向ける
+voy.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), EARTH.clone().sub(VOY).normalize());
+voy.rotateY(0.9);
+scene.add(voy);
+// 太陽（地球の向こう）からの光＝こちらからは逆光。輪郭の光と、見えるだけの弱い環境光
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.0); sun.position.set(-2.5, -6, -2); scene.add(sun);
+const fill = new THREE.DirectionalLight(0x7fa6d6, 0.7); fill.position.set(3, 2, 6); scene.add(fill);
+scene.add(new THREE.AmbientLight(0x5a6f90, 0.5));
+const hit = new THREE.DirectionalLight(0xffb547, 0); hit.position.copy(EARTH); hit.target = voy; scene.add(hit);
+
+// 光の筋：地球から光の点まで、先ほど太い円すい
+const trailMat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+  uniforms: { uA: { value: 0 } },
+  vertexShader: `varying float vy; void main(){ vy = uv.y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+  fragmentShader: `uniform float uA; varying float vy; void main(){ float a = pow(vy, 2.2); gl_FragColor = vec4(vec3(1.,.71,.28) * (0.6 + .4*a), a * uA); }`,
+});
+const trailGeo = new THREE.CylinderGeometry(0.035, 0.0, 1, 12, 1, true); // 上（uv.y=1）が太い＝光の点の側
+trailGeo.translate(0, 0.5, 0);
+const trail = new THREE.Mesh(trailGeo, trailMat);
+scene.add(trail);
+const pulse = sprite(glowTex("rgba(255,248,230,1)", "rgba(255,181,71,.7)"));
+scene.add(pulse);
+const flash = sprite(glowTex("rgba(255,240,210,1)", "rgba(255,181,71,.35)"));
+flash.position.copy(VOY).lerp(EARTH, 0.11);
+scene.add(flash);
+
+const el = (id) => document.getElementById(id);
+const pad = (n) => String(Math.floor(n)).padStart(2, "0");
+const UP = new THREE.Vector3(0, 1, 0);
+
+function setT(t) {
+  // カメラ：ボイジャーの後ろから地球のほうを振り返る。ゆっくり寄る
+  const k = t / DUR;
+  cam.position.set(0.6 - 0.5 * k, -0.6 + 0.4 * k, 12.5 - 1.6 * smooth(0, DUR, t));
+  cam.lookAt(new THREE.Vector3(-0.1, -0.9 + 0.15 * k, 0));
+  cam.rotation.z += 0.02 * Math.sin(k * Math.PI);
+
+  // 光の進み（0〜1）：遠くはゆっくり、近づくと速く見える（遠近のまま）
+  const s = clamp((t - T0) / (T1 - T0));
+  const target = VOY.clone().lerp(EARTH, 0.11);
+  const p = EARTH.clone().lerp(target, s);
+  pulse.position.copy(p);
+  const on = t >= T0 && t < T1 + 0.05;
+  const dist = p.distanceTo(cam.position);
+  pulse.scale.setScalar(on ? dist * 0.06 * (1 + 0.15 * Math.sin(t * 40)) : 0.0001);
+  // 筋
+  const len = EARTH.distanceTo(p);
+  trail.visible = t >= T0 && len > 0.01;
+  trail.position.copy(EARTH);
+  trail.quaternion.setFromUnitVectors(UP, p.clone().sub(EARTH).normalize());
+  trail.scale.set(1.6, Math.max(len, 0.001), 1.6);
+  trailMat.uniforms.uA.value = (t < T1 ? 1 : 1 - smooth(T1, T1 + 1.0, t)) * smooth(T0, T0 + 0.2, t);
+  // 届いた瞬間
+  const f = t < T1 ? 0 : Math.exp(-(t - T1) * 3.2);
+  flash.scale.setScalar(0.0001 + f * 6);
+  hit.intensity = f * 3 + (t > T1 ? 0.4 : 0);
+  // 地球の点はまたたく
+  earth.scale.setScalar(0.9 * (1 + 0.08 * Math.sin(t * 9)));
+
+  boards.forEach((b) => b.quaternion.copy(cam.quaternion));
+  renderer.render(scene, cam);
+
+  // 文字
+  const fade = smooth(0, 0.4, t);
+  el("stage").style.opacity = String(fade);
+  el("telop").style.opacity = String(smooth(0.15, 0.55, t) * (1 - smooth(T1, T1 + 0.25, t)));
+  el("telop").style.transform = `translateY(${(1 - smooth(0.15, 0.6, t)) * 30}px)`;
+  const ep = EARTH.clone().project(cam);
+  el("tag").style.left = `${(ep.x + 1) / 2 * W}px`;
+  el("tag").style.top = `${(1 - ep.y) / 2 * H + 34}px`;
+  el("tag").style.opacity = String(smooth(0.3, 0.6, t) * 1);
+  const hrs = 24 * s;
+  el("clock").textContent = `+${pad(hrs)}:${pad((hrs * 60) % 60)}:${pad((hrs * 3600) % 60)}`;
+  el("clock").style.color = t >= T1 ? "var(--amber)" : "var(--mint)";
+  el("meter").style.opacity = String(smooth(T0 - 0.2, T0 + 0.1, t));
+  el("arrive").style.opacity = String(smooth(T1 + 0.3, T1 + 0.65, t));
+  el("arrive").style.transform = `translateY(${(1 - smooth(T1 + 0.3, T1 + 0.7, t)) * 24}px)`;
+}
+window.setT = setT;
+window.DUR = DUR;
+window.ready = document.fonts.ready.then(() => true);
+
+const q = new URLSearchParams(location.search);
+if (q.has("t")) setT(+q.get("t"));
+else if (!q.has("capture")) {
+  // 画面に合わせて縮めて、くり返し再生
+  const fit = () => { const s = Math.min(innerWidth / W, innerHeight / H); el("stage").style.transform = `scale(${s})`; };
+  addEventListener("resize", fit); fit();
+  const t0 = performance.now();
+  const loop = (now) => { setT(((now - t0) / 1000) % (DUR + 0.8)); requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
