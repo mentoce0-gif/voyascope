@@ -323,7 +323,7 @@
 
   <section class="time" aria-label="出典">
     <div class="credit">
-      データ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">Global Meteor Network</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）から抽出・加工 ／ 星の位置：<a href="https://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=I/239" target="_blank" rel="noopener">ヒッパルコス星表（ESA）</a> ／ 火花・尾・光る時間ののばしは演出 ／ 非公式のファンメイド試作
+      データ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">Global Meteor Network</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）から抽出・加工 ／ 星の位置：<a href="https://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=I/239" target="_blank" rel="noopener">ヒッパルコス星表（ESA）</a> ／ 天の川：<a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier</a>（<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>。空の向きに描き直し・ぼかし） ／ 火花・尾・光る時間ののばしは演出 ／ 非公式のファンメイド試作
       <button type="button" id="srcBtn">出典と注記</button>
     </div>
   </section>
@@ -359,7 +359,7 @@
     <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
     <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
     <li>下の計器：左の丸を押すたびに速さが変わります（実時間 → 60倍 → 120倍 → 600倍 → 停止）。丸い記号は、向きが空の上で流れた向き、線の長さと描く速さが流星の速さ（速いほど長く一瞬で。目安）。「北西（NW）・仰角61°」は、一番明るかったところが見えた方角と高さです。MAG はここから見た明るさ（指を置くと「〇〇くらい」）</li>
-    <li><b>演出</b>：円のふちの建物・木のシルエット、窓と地平線の近くの街明かりは、魚眼の見え方を分かりやすくするための作りものです（その街の本当の景色ではありません）。建物の縦の辺は、魚眼では空の中心へ向かう線になります</li>
+    <li><b>演出</b>：円のふちの建物・木のシルエットは、魚眼の見え方を分かりやすくするための作りものです（その街の本当の景色ではありません）。建物の縦の辺は、魚眼では空の中心へ向かう線になります。地上の光（街明かり・窓の明かり）は描いていません（本来の夜空）</li>
     <li>点線の曲線：天の赤道（水色）と黄道（ミント）。空の大きな円で、魚眼ではふちに近いほど大きく曲がって見えます。しし座の放射点は黄道の近くにあります</li>
     <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は<a href="https://www.nao.ac.jp/new-info/meteor/table-code.html" target="_blank" rel="noopener">国立天文台「流星群の和名一覧」</a>（2026年11月5日更新）。一覧にない5つ（おうし座τ・おうし座λ・うみへび座π・11月ペルセウス座ζ・やまねこ座28）は、<a href="https://www.nao.ac.jp/new-info/meteor/index.html" target="_blank" rel="noopener">国立天文台の和名の決め方</a>にならって英名を直した訳です（公式の和名ではありません。名前に「＊」が付きます）</li>
     <li>「来た方向」：その流星の通り道（消えた点→光り始め）を空のかなたへまっすぐ伸ばした向きを、見上げる場所の方角と高さで表したもの。散在流星にも出します</li>
@@ -368,6 +368,8 @@
   <ul>
     <li>星の位置と明るさ：ヒッパルコス星表から、6等より明るい星<span id="srcStars">—</span>個（ESA, 1997, The Hipparcos and Tycho Catalogues, ESA SP-1200。<a href="https://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=I/239" target="_blank" rel="noopener">CDS/VizieR I/239</a> から取り出し。This research has made use of the VizieR catalogue access tool, CDS, Strasbourg, France〈DOI: 10.26093/cds/vizier〉）。6等は理想的な暗い夜空で肉眼で見える限界の目安（国立天文台）。位置は ICRS で、時刻に合わせて恒星時で回しています</li>
     <li>しし座流星群の放射点：赤経 154.4°・赤緯 +21.4°（<a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/pojedynczy_obiekt.php?kodstrumienia=00013" target="_blank" rel="noopener">IAU 流星データセンター</a>。Jenniskens 2023 の値）。しし座流星群がいくつか流れると、うっすら光らせています（演出）</li>
+    <li>天の川：ESO の全天の天の川パノラマ「The Milky Way panorama」（画像 eso0932a。クレジット <a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier</a>。<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）を、2048×1024 に縮めて少しぼかし、その時刻・その場所の空の向きに描き直しています（加工）。地上で撮った写真をつなげたものです。画像の図法は公式には書かれていないので、銀河座標の正距円筒図法として大小マゼラン雲・アンドロメダ銀河の位置で確かめました（天の川の位置は目安）。月明かりや薄明があるとうすくしています</li>
+    <li>月：位置と満ち欠けは簡単な式で計算しています（国立天文台の月の入り〈福岡 19日 0:50・大阪 0:28・東京 0:10〉と 2〜3分、NASA の輝面比〈11/18 21時 約60%〉と 0.2% 以内で合うことを確かめました）。見やすいように実際（約0.5°）より大きく描いています。月が出ているあいだは空を明るくし、暗い星と天の川をうすくしています（目安）</li>
     <li>日の入り・日の出・太陽と星の動きは、おおよその式で計算しています</li>
   </ul>
   <p>非公式のファンメイド試作です。</p>
@@ -435,6 +437,95 @@ function sunRaDec(ms) {
   const lam = L + (1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g)) * DEG, eps = (23.439 - 4e-7 * n) * DEG;
   return { ra: (Math.atan2(Math.cos(eps) * Math.sin(lam), Math.cos(lam)) / DEG + 360) % 360, dec: Math.asin(Math.sin(eps) * Math.sin(lam)) / DEG };
 }
+// ---------- 月（簡単な式。国立天文台の月の入りと 2〜3分、NASA の輝面比と 0.2% 以内で合うことを確かめた） ----------
+function moonPos(ms) {
+  const d = jd(ms) - 2451545, r = x => ((x % 360) + 360) % 360 * DEG;
+  const L = 218.316 + 13.176396 * d, M = 134.963 + 13.064993 * d, F = 93.272 + 13.229350 * d, D = 297.850 + 12.190749 * d, Ms = 357.529 + 0.98560028 * d;
+  const lam = L + 6.289 * Math.sin(r(M)) + 1.274 * Math.sin(r(2 * D - M)) + 0.658 * Math.sin(r(2 * D)) + 0.214 * Math.sin(r(2 * M)) - 0.186 * Math.sin(r(Ms)) - 0.114 * Math.sin(r(2 * F));
+  const bet = 5.128 * Math.sin(r(F)) + 0.281 * Math.sin(r(M + F)) + 0.278 * Math.sin(r(M - F)) + 0.173 * Math.sin(r(2 * D - F));
+  const dist = 385001 - 20905 * Math.cos(r(M)) - 3699 * Math.cos(r(2 * D - M)) - 2956 * Math.cos(r(2 * D));
+  const eps = (23.439 - 4e-7 * d) * DEG, l = r(lam), b = bet * DEG;
+  const ra = (Math.atan2(Math.sin(l) * Math.cos(eps) - Math.tan(b) * Math.sin(eps), Math.cos(l)) / DEG + 360) % 360;
+  const dec = Math.asin(Math.sin(b) * Math.cos(eps) + Math.cos(b) * Math.sin(eps) * Math.sin(l)) / DEG;
+  return { ra, dec, dist, lam: lam % 360, bet };
+}
+function moonNow() {
+  const m = moonPos(simT), h = eqToHor(m.ra, m.dec, simT, city.lat, city.lon);
+  const hp = Math.asin(6378.14 / m.dist) / DEG; h.alt -= hp * Math.cos(h.alt * DEG); // 地上から見た高さ（視差）
+  const s = sunRaDec(simT), sh = eqToHor(s.ra, s.dec, simT, city.lat, city.lon);
+  const nd = jd(simT) - 2451545, gS = (357.528 + 0.9856003 * nd) * DEG, lamS = 280.46 + 0.9856474 * nd + 1.915 * Math.sin(gS) + 0.020 * Math.sin(2 * gS);
+  const el = Math.acos(Math.cos(m.bet * DEG) * Math.cos((m.lam - lamS) * DEG));
+  const k = (1 - Math.cos(el)) / 2; // 輝面比
+  const light = h.alt > 0 ? k * Math.pow(Math.sin(Math.min(90, h.alt) * DEG), 0.5) : 0;
+  return { az: h.az, alt: h.alt, k, light, sunAz: sh.az, sunAlt: sh.alt };
+}
+function drawMoon(mo) {
+  if (mo.alt <= -0.5) return;
+  const [x, y] = proj(mo.az, Math.max(0, mo.alt)), r = Math.max(4.5, R * 0.022); // 見やすいように実際（約0.5°）より大きく
+  // まわりの光（月明かり）
+  const hg = ctx.createRadialGradient(x, y, r, x, y, r * 9);
+  hg.addColorStop(0, `rgba(230,235,245,${0.22 * mo.k})`); hg.addColorStop(1, 'rgba(230,235,245,0)');
+  ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(x, y, r * 9, 0, Math.PI * 2); ctx.fill();
+  // 欠け方：太陽のある向きに明るい側（太陽が地平線の下でも、魚眼の円の外へ延ばした位置で向きを出す）
+  const [sx, sy] = proj(mo.sunAz, Math.max(-60, Math.min(89, mo.sunAlt)));
+  const ang = Math.atan2(sy - y, sx - x);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+  ctx.fillStyle = 'rgba(40,46,60,0.9)'; ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#f2f0e6';
+  const tx = r * Math.abs(2 * mo.k - 1);
+  ctx.beginPath(); ctx.arc(0, 0, r, -Math.PI / 2, Math.PI / 2, false); // 太陽側の半円
+  if (mo.k >= 0.5) ctx.ellipse(0, 0, tx, r, 0, Math.PI / 2, -Math.PI / 2, false); // ふくらむ側
+  else ctx.ellipse(0, 0, tx, r, 0, Math.PI / 2, -Math.PI / 2, true);
+  ctx.fill(); ctx.restore();
+}
+
+// ---------- 天の川（ESO eso0932a：銀河座標の正距円筒。中心が銀河中心、銀経は左へ増える。
+//            図法は公式に書かれていないので、大小マゼラン雲・アンドロメダ銀河の位置で確かめた＝位置は目安） ----------
+const mw = { img: null, data: null, W: 0, H: 0, canvas: document.createElement('canvas'), N: 0, key: '', t: 0, pre: null };
+function loadMilkyWay(url) {
+  const im = new Image();
+  im.onload = () => {
+    const c = document.createElement('canvas'); c.width = im.width; c.height = im.height;
+    const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+    mw.data = x.getImageData(0, 0, im.width, im.height).data; mw.W = im.width; mw.H = im.height; mw.key = '';
+  };
+  im.src = url;
+}
+// 赤道座標（J2000）→ 銀河座標の回転（IAU 1958 の定義の値）
+const GAL = [[-0.0548755604, -0.8734370902, -0.4838350155], [0.4941094279, -0.4448296300, 0.7469822445], [-0.8676661490, -0.1980763734, 0.4559837762]];
+function updateMilkyWay() {
+  if (!mw.data) return false;
+  const N = Math.min(420, Math.round(2 * R)), key = `${N}|${city.lat}|${city.lon}`;
+  if (key !== mw.key) { // 画素ごとの 時角・赤緯（場所と大きさが変わったときだけ）
+    mw.N = N; mw.canvas.width = N; mw.canvas.height = N;
+    const pre = new Float32Array(N * N * 2).fill(NaN), p = city.lat * DEG;
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const dx = (i + 0.5) / N * 2 - 1, dy = (j + 0.5) / N * 2 - 1, rr = Math.hypot(dx, dy);
+      if (rr > 1) continue;
+      const alt = (90 - rr * 90) * DEG, az = Math.atan2(-dx, -dy);
+      const sd = Math.sin(p) * Math.sin(alt) + Math.cos(p) * Math.cos(alt) * Math.cos(az), dec = Math.asin(sd);
+      const H = Math.atan2(-Math.sin(az) * Math.cos(alt), Math.sin(alt) * Math.cos(p) - Math.cos(alt) * Math.sin(p) * Math.cos(az));
+      const o = (j * N + i) * 2; pre[o] = H; pre[o + 1] = dec;
+    }
+    mw.pre = pre; mw.key = key; mw.t = NaN;
+  }
+  if (Math.abs(simT - mw.t) < 90000) return true; // 1分半ぶん（空は約0.4°）回るまで描き直さない
+  mw.t = simT;
+  const lst = (gmst(simT) + city.lon) * DEG, N2 = mw.N, out = mw.canvas.getContext('2d').createImageData(N2, N2), od = out.data, src = mw.data, W = mw.W, Hh = mw.H;
+  for (let q = 0; q < N2 * N2; q++) {
+    const H = mw.pre[q * 2]; if (H !== H) continue;
+    const dec = mw.pre[q * 2 + 1], ra = lst - H, cd = Math.cos(dec);
+    const X = cd * Math.cos(ra), Y = cd * Math.sin(ra), Z = Math.sin(dec);
+    const gx = GAL[0][0] * X + GAL[0][1] * Y + GAL[0][2] * Z, gy = GAL[1][0] * X + GAL[1][1] * Y + GAL[1][2] * Z, gz = GAL[2][0] * X + GAL[2][1] * Y + GAL[2][2] * Z;
+    let l = Math.atan2(gy, gx) / DEG; if (l > 180) l -= 360; const b = Math.asin(Math.max(-1, Math.min(1, gz))) / DEG;
+    const u = Math.min(W - 1, Math.max(0, Math.floor((0.5 - l / 360) * W))), v = Math.min(Hh - 1, Math.max(0, Math.floor((0.5 - b / 180) * Hh)));
+    const s4 = (v * W + u) * 4, o4 = q * 4;
+    od[o4] = src[s4]; od[o4 + 1] = src[s4 + 1]; od[o4 + 2] = src[s4 + 2]; od[o4 + 3] = 255;
+  }
+  mw.canvas.getContext('2d').putImageData(out, 0, 0);
+  return true;
+}
+
 function sunAlt(ms, c) { const s = sunRaDec(ms); return eqToHor(s.ra, s.dec, ms, c.lat, c.lon).alt; }
 function findCross(c, from, to, rising) { // 太陽の上の縁が地平線（-0.833°）を通る時刻（1分刻み）
   let prev = sunAlt(from, c);
@@ -534,20 +625,26 @@ function drawSky(now) {
   const sunA = sunAlt(simT, city);
   const tw = Math.max(0, Math.min(1, (sunA + 18) / 18));
   const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
-  g.addColorStop(0, `rgb(${8 + tw * 20},${16 + tw * 30},${34 + tw * 50})`);
-  g.addColorStop(0.75, `rgb(${5 + tw * 25},${10 + tw * 30},${22 + tw * 45})`);
-  g.addColorStop(1, `rgb(${3 + tw * 40},${6 + tw * 34},${14 + tw * 40})`);
+  const mo = moonNow(), ml = mo.light; // 月明かり（0〜1）：月が高く、よく満ちているほど空が明るい
+  g.addColorStop(0, `rgb(${6 + tw * 20 + ml * 14},${12 + tw * 30 + ml * 22},${28 + tw * 50 + ml * 34})`);
+  g.addColorStop(0.75, `rgb(${4 + tw * 25 + ml * 12},${8 + tw * 30 + ml * 18},${20 + tw * 45 + ml * 28})`);
+  g.addColorStop(1, `rgb(${2 + tw * 40 + ml * 10},${5 + tw * 34 + ml * 14},${12 + tw * 40 + ml * 22})`);
   ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+  // 地上の光は描かない（本来の夜空。2026-11-22 オーナー）
 
-  // 地平線の近くの街明かり（演出。特定の場所の景色ではない）
-  const lp = ctx.createRadialGradient(cx, cy, R * 0.84, cx, cy, R);
-  lp.addColorStop(0, 'rgba(255,170,90,0)'); lp.addColorStop(1, `rgba(255,170,90,${0.08 * (1 - tw)})`);
-  ctx.fillStyle = lp; ctx.fillRect(0, 0, S, S);
-
-  // 星（時刻の恒星時で回る）
+  // 天の川：ESO の全天パノラマ（銀河座標）を、その時刻・その場所の空に描き直したもの。月明かりと薄明でうすくなる
   const starFade = Math.max(0, Math.min(1, (-sunA - 6) / 8));
+  const mwA = starFade * (1 - 0.8 * ml);
+  if (mwA > 0.02 && updateMilkyWay()) {
+    ctx.save(); ctx.globalAlpha = 0.9 * mwA; ctx.globalCompositeOperation = 'lighter';
+    ctx.drawImage(mw.canvas, cx - R, cy - R, 2 * R, 2 * R); ctx.restore();
+  }
+
+  // 星（時刻の恒星時で回る）。月が出ていると暗い星は見えにくい
+  const magCut = 6 - 2.2 * ml;
   if (starFade > 0) {
     for (const st of stars) {
+      if (st[2] > magCut) break; // 明るい順に並んでいる
       const h = eqToHor(st[0], st[1], simT, city.lat, city.lon);
       if (h.alt <= 0) continue;
       const [x, y] = proj(h.az, h.alt);
@@ -558,6 +655,8 @@ function drawSky(now) {
       ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
     }
   }
+
+  drawMoon(mo);
 
   // 空の大きな線：天の赤道と黄道（大きな円は魚眼ではふちに向かって大きく曲がる）
   drawSkyLine(t => ({ ra: t, dec: 0 }), 'rgba(143,216,255,0.26)', '天の赤道');
@@ -659,10 +758,7 @@ function drawSkyline() {
     }
     const [x1, y1] = proj(p.az1, -2); ctx.lineTo(x1, y1); ctx.closePath(); ctx.fill(); ctx.stroke();
   }
-  // 窓の明かり（演出）
-  ctx.fillStyle = 'rgba(255,196,120,0.55)';
-  const dot = Math.max(0.7, S / 900);
-  for (const p of skyline) if (p.lights) for (const [a, h] of p.lights) { const [x, y] = proj(a, h); ctx.fillRect(x - dot / 2, y - dot / 2, dot, dot); }
+  // 窓の明かりは描かない（本来の夜空。2026-11-22 オーナー）
   ctx.restore();
 }
 
@@ -709,12 +805,12 @@ function drawMeteor(a, now) {
   const aMax = (0.25 + 0.75 * m.b) * k;
   const pts = pathPts(m, Math.max(0, head - tailLen), head);
   // 輝き（太く薄く）＋芯（細く明るく）
-  strokeFaded(pts, col, w * 2, aMax * 0.1, 0); // にじみは控えめに（跡が見えるように。2026-11-22 オーナー）
+  strokeFaded(pts, col, w * 1.5, aMax * 0.05, 0); // にじみはごく控えめに（実際の流星に近く。2026-11-22 オーナー）
   strokeFaded(pts, hot, w, aMax, 0);
   // 頭の光
   const hp = m.pts[Math.min(NPTS - 1, Math.round(head))];
   if (hp.alt > 0 && age <= D) {
-    const [x, y] = proj(hp.az, hp.alt), rr = w * (1.3 + 1.1 * m.b);
+    const [x, y] = proj(hp.az, hp.alt), rr = w * (0.9 + 0.6 * m.b);
     const hg = ctx.createRadialGradient(x, y, 0, x, y, rr);
     hg.addColorStop(0, `rgba(255,250,235,${aMax})`); hg.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
     ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(x, y, rr, 0, Math.PI * 2); ctx.fill();
@@ -740,7 +836,7 @@ function drawTrain(tr, now) { // 消えたあとに残る短い尾（演出）
   const age = (now - tr.t0) / 1000; if (age > tr.life) { tr.done = true; return; }
   const k = 1 - age / tr.life, m = tr.m, col = colOf(m);
   const pts = pathPts(m, (NPTS - 1) * 0.55, NPTS - 1);
-  strokeFaded(pts, col, (1.6 + 2 * m.b) * WC() * (1 + age * 0.5), 0.22 * k, 0.0);
+  strokeFaded(pts, col, (1.6 + 2 * m.b) * WC() * (1 + age * 0.3), 0.14 * k, 0.0);
 }
 
 // ---------- 夜のタイムライン ----------
@@ -963,6 +1059,7 @@ new ResizeObserver(layout).observe(domeEl);
     const [d, s] = await Promise.all([fetch(DATA_URL, { cache: 'no-cache' }).then(r => r.json()), fetch(STARS_URL).then(r => r.json())]);
     meteors = d.meteors.map(m => ({ ...m, _t: Date.parse(m.utc) })).sort((a, b) => a._t - b._t);
     stars = s.stars;
+    loadMilkyWay('data/milkyway-eso0932a-2048.jpg');
     document.getElementById('srcFiles').innerHTML = '使ったファイル：' + d.meta.files.map(u => `<a href="${u}" target="_blank" rel="noopener">${u.split('/').pop()}</a>`).join('、');
     document.getElementById('srcGen').textContent = (d.meta.files_generated_utc || []).map(x => String(x).slice(0, 16)).join('・') + ' UTC';
     document.getElementById('srcStars').textContent = stars.length;
