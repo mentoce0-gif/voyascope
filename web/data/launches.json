@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-23T07:38:54.360Z",
+  "fetched_at": "2026-11-23T23:53:39.186Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -46,13 +46,13 @@
     },
     {
       "id": "7bdc412b-c965-4517-a131-f57a01189803",
-      "net": "2026-11-24T11:09:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-11-24T11:38:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-11-23T06:54:19Z",
+      "net": "2026-11-24T10:45:00.000Z",
+      "precision": "min",
+      "window_end": "2026-11-24T11:14:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-23T16:18:07Z",
       "rocket": {
         "name": "Ariane 64",
         "full_name": "Ariane 64 Block 2"
@@ -279,45 +279,6 @@
       }
     },
     {
-      "id": "8b46d360-6b3b-423f-9036-d5568e485624",
-      "net": "2026-11-29T01:00:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-11-29T04:00:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-11-20T00:28:53Z",
-      "rocket": {
-        "name": "Kinetica 1",
-        "full_name": "Kinetica 1"
-      },
-      "provider": {
-        "name": "CAS Space",
-        "ja": null
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 185,
-        "name": "Haiyang Oriental Spaceport",
-        "ja": null,
-        "short": null,
-        "pad": "South China Sea (launch location 3)",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 21.366667,
-          "lng": 112.116667
-        }
-      }
-    },
-    {
       "id": "13270554-4bdb-42ae-916f-1bb54492204f",
       "net": "2026-11-29T03:50:00.000Z",
       "precision": "hour",
@@ -435,41 +396,80 @@
       }
     },
     {
-      "id": "5ce59e3a-c343-430f-ae4e-e608ba536754",
-      "net": "2026-12-10T07:00:00.000Z",
+      "id": "8b46d360-6b3b-423f-9036-d5568e485624",
+      "net": "2026-12-01T01:45:00.000Z",
       "precision": "hour",
-      "window_end": "2026-12-10T10:00:00.000Z",
+      "window_end": "2026-12-01T02:03:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-23T15:39:32Z",
+      "rocket": {
+        "name": "Kinetica 1",
+        "full_name": "Kinetica 1"
+      },
+      "provider": {
+        "name": "CAS Space",
+        "ja": null
+      },
+      "mission": {
+        "name": "積み荷は非公表",
+        "placeholder": true,
+        "type": null,
+        "type_ja": null,
+        "orbit": null,
+        "orbit_ja": null
+      },
+      "site": {
+        "location_id": 185,
+        "name": "Haiyang Oriental Spaceport",
+        "ja": null,
+        "short": null,
+        "pad": "South China Sea (launch location 4)",
+        "country": "CHN",
+        "country_ja": "中国",
+        "position": {
+          "lat": 21.133333,
+          "lng": 112.683333
+        }
+      }
+    },
+    {
+      "id": "5591cfa3-6336-41ab-a37a-7c57aa28ab5f",
+      "net": "2026-12-02T20:30:00.000Z",
+      "precision": "min",
+      "window_end": "2026-12-03T00:30:00.000Z",
       "status": "tbc",
       "status_label": "TBC",
       "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-11-20T00:22:19Z",
+      "updated": "2026-11-23T16:43:43Z",
       "rocket": {
-        "name": "Long March 12",
-        "full_name": "Long March 12"
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
       },
       "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
+        "name": "SpaceX",
+        "ja": "スペースX"
       },
       "mission": {
-        "name": "SatNet LEO Group TBD?",
+        "name": "NROL-132",
         "placeholder": false,
-        "type": "Communications",
-        "type_ja": "通信",
+        "type": "Government/Top Secret",
+        "type_ja": "政府（内容は非公開）",
         "orbit": "Low Earth Orbit",
         "orbit_ja": "低軌道"
       },
       "site": {
-        "location_id": 8,
-        "name": "Wenchang Space Launch Site, People's Republic of China",
-        "ja": "文昌宇宙発射場",
-        "short": "文昌",
-        "pad": "Commercial LC-2",
-        "country": "CHN",
-        "country_ja": "中国",
+        "location_id": 11,
+        "name": "Vandenberg SFB, CA, USA",
+        "ja": "ヴァンデンバーグ宇宙軍基地",
+        "short": "ヴァンデンバーグ",
+        "pad": "Space Launch Complex 4E",
+        "country": "USA",
+        "country_ja": "アメリカ",
         "position": {
-          "lat": 19.59755,
-          "lng": 110.936481
+          "lat": 34.632,
+          "lng": -120.611
         }
       }
     }
