@@ -34,6 +34,13 @@
   .tag { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; font-size: 12px; font-weight: 700; color: var(--mint); text-shadow: 0 0 8px var(--navy); }
   .tag.amber { color: var(--amber); }
   .tag.dim { font-weight: 500; font-size: 11px; color: #9fb3c8; }
+  /* 全体の図の MMX の印（2026-11-23 オーナー：MMX がどこかわからない）。いまは地球のすぐそばで模型が地球の印に重なるので、輪と引き出し線で示す */
+  .tag.ctr { transform: translate(-50%, -50%); }
+  .mmx-ret { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border: 1.5px solid var(--mint); border-radius: 50%; box-shadow: 0 0 10px rgba(94,242,194,.55), inset 0 0 6px rgba(94,242,194,.35); pointer-events: none; opacity: 0; }
+  .mmx-ret::after { content: ""; position: absolute; inset: -1.5px; border: 1.5px solid var(--mint); border-radius: 50%; animation: retp 2.4s ease-out infinite; }
+  @keyframes retp { from { transform: scale(1); opacity: .8; } to { transform: scale(2.1); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .mmx-ret::after { animation: none; opacity: 0; } }
+  .mmx-lead { position: absolute; height: 1px; background: var(--mint); opacity: 0; transform-origin: 0 50%; pointer-events: none; box-shadow: 0 0 4px var(--navy); }
   .top { position: absolute; left: 14px; right: 14px; top: 14px; display: flex; align-items: center; gap: 10px; pointer-events: auto; }
   [hidden] { display: none !important; }
   .btn { white-space: nowrap; appearance: none; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 14px; border: 1px solid rgba(94,242,194,.55); border-radius: 999px; background: rgba(5,14,31,.72); color: var(--text); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; backdrop-filter: blur(4px); }
@@ -216,6 +223,8 @@
   </nav>
   <details class="note" id="note"><summary><span class="ni" aria-hidden="true">i</span>模式図・出典・非公式のファンメイド作品<span class="nc" aria-hidden="true">＋</span></summary><div class="note-body">模式図<wbr>（位置は計算・到着日は仮〈<a href="https://cnes.fr/projets/mmx/en-details" target="_blank" rel="noopener">CNES</a> の「2027年8月」の中ごろに置いた〉・<wbr>大きさは実際の比ではない）。<wbr>打ち上げ後の位置は、<wbr>公式で確かめてから出す。<wbr>出典：<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">JAXA 打上げ計画書（10月改訂版）</a>・<a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/live-public_viewing.html" target="_blank" rel="noopener">中継の案内</a>・<a href="https://www.nasa.gov/learning-resources/for-kids-and-students/what-is-the-international-space-station-grades-5-8/" target="_blank" rel="noopener">ISS の高さ（NASA）</a>・<wbr><a href="https://fanfun.jaxa.jp/countdown/mmx_h3f10/files/mmx_press-kit_ja_20260918.pdf" target="_blank" rel="noopener">MMX プレスキット</a>。<wbr>MMX の形は、JAXA の<a href="https://www.jaxa.jp/press/2026/10/files/jaxa20261018-1_01.pdf" target="_blank" rel="noopener">航行イメージ（計画書 図5）</a>（計画）にもとづく。<wbr>速さ（EST）は、計画の軌道から計算した太陽に対する速さの推定。<wbr>非公式のファンメイド作品</div></details>
   <div class="tag" id="tag-tane">種子島</div>
+  <div class="mmx-ret" id="mmx-ret" aria-hidden="true"></div>
+  <div class="mmx-lead" id="mmx-lead" aria-hidden="true"></div>
   <div class="tag" id="tag-mmx">MMX</div>
   <div class="tag amber" id="tag-h3">H3ロケット10号機（MMX を搭載）</div>
   <div class="tag" id="tag-mars">火星</div>
@@ -1059,8 +1068,17 @@ function declutter() {
     const r = sel === ".cap" ? [...el.children].filter((c) => c.textContent).map((c) => c.getBoundingClientRect()) : [el.getBoundingClientRect()];
     boxes.push(...r.filter((b) => b.width > 0)); }
   const hit = (a, b) => a.left < b.right + 4 && a.right > b.left - 4 && a.top < b.bottom + 2 && a.bottom > b.top - 2;
+  if (+retEl.style.opacity > 0) { const r = retEl.getBoundingClientRect(); boxes.push(new DOMRect(r.left - 4, r.top - 4, r.width + 8, r.height + 8)); } // MMX の輪には、ほかの名前を重ねない
   for (const el of TAG_ORDER()) {
     if (!el || +el.style.opacity <= 0.01) continue;
+    const alts = el === tags.mmx ? mmxAlts : el === tagEarth ? earthAlts : null;
+    if (alts) { // 全体の図の MMX・地球の名前：たがいに反対の向きから順に、空いているところを探す。どこも空いていなければ名前は出さない（輪は出す）
+      const a = alts.find((a) => { el.style.left = `${a.x}px`; el.style.top = `${a.y}px`; const r = el.getBoundingClientRect();
+        return !(r.left < 2 || r.right > W - 2 || r.top < 2 || boxes.some((b) => hit(r, b))); });
+      if (!a) { el.style.opacity = 0; if (el === tags.mmx) leadEl.style.opacity = 0; continue; }
+      if (el === tags.mmx) { leadEl.style.left = `${a.lx}px`; leadEl.style.top = `${a.ly}px`; leadEl.style.width = `${a.len}px`; leadEl.style.transform = `rotate(${a.ang}rad)`; leadEl.style.opacity = 0.8; }
+      boxes.push(el.getBoundingClientRect()); continue;
+    }
     const r = el.getBoundingClientRect();
     if (r.left < 2 || r.right > W - 2 || boxes.some((b) => hit(r, b))) { el.style.opacity = 0; continue; }
     boxes.push(r);
@@ -1074,8 +1092,11 @@ const tagMarsNow = document.getElementById("tag-marsnow"), tagMoon = document.ge
 let allLines = null;
 let watchMMX = V(0, 0, 0);
 let viewMode = "plan";
+const retEl = document.getElementById("mmx-ret"), leadEl = document.getElementById("mmx-lead");
+let mmxAlts = null, earthAlts = null; // 全体の図の MMX・地球の名前の置き場所の候補（declutter で順に試す）
 function nowObjs(mode) {
   viewMode = mode;
+  if (mode !== "overview") { retEl.style.opacity = 0; leadEl.style.opacity = 0; mmxAlts = earthAlts = null; tags.mmx.classList.remove("ctr"); tagEarth.classList.remove("ctr"); tags.mmx.textContent = "MMX"; }
   if (camera.view?.enabled) camera.clearViewOffset();
   if (mode !== "overview") mmxHolder.position.copy(mmxPos);
   if (!allLines) { allLines = []; scene.traverse((o) => { if (o.isLineSegments || o.isLine) allLines.push(o); }); } // "plan"（打ち上げ前・打ち上げの日・オープニング）／"overview"／"track"
@@ -1139,10 +1160,35 @@ function watchAt(t) {
   renderer.render(scene, camera);
   watchCaption();
   document.querySelector(".cap").style.opacity = 1;
-  place(tags.tane, pinWorld, 0); place(tags.mmx, watchMMX, 1, -26); place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 0.55, 30); place(tags.phobos, phobosPos, 0);
-  tagEarth.textContent = "地球（いま）"; place(tagEarth, earthNow.position, 1, 22); place(tagEarth0, earthLaunch.position, FLYING ? 0.85 : 0, 22); place(tagMarsNow, marsNow.position.clone().add(V(0, -RM, 0)), 1, 26); tagMoon.style.opacity = 0;
+  place(tags.tane, pinWorld, 0); place(tags.mars, marsPos.clone().add(V(0, -RM, 0)), 0.55, 30); place(tags.phobos, phobosPos, 0);
+  tagEarth.textContent = "地球（いま）"; place(tagEarth, earthNow.position, 1, 22); mmxMark(); place(tagEarth0, earthLaunch.position, FLYING ? 0.85 : 0, 22); place(tagMarsNow, marsNow.position.clone().add(V(0, -RM, 0)), 1, 26); tagMoon.style.opacity = 0;
 }
 window.watchAt = watchAt;
+// 全体の図の MMX の印：模型のところに輪、名前は地球と反対の向きに離して引き出し線でつなぐ（2026-11-23 オーナー：MMX がどこかわからない）
+function mmxMark() {
+  const scr = (p) => { const v = p.clone().project(camera); return { x: (v.x + 1) / 2 * W, y: (1 - v.y) / 2 * H, ok: v.z < 1 }; };
+  const m = scr(watchMMX), e = scr(earthNow.position);
+  const on = FLYING && m.ok && !blendFrom;
+  retEl.style.opacity = on ? 1 : 0; retEl.style.left = `${m.x}px`; retEl.style.top = `${m.y}px`;
+  tags.mmx.textContent = "MMX（いま）"; tags.mmx.classList.add("ctr");
+  if (!on) { tags.mmx.style.opacity = 0; leadEl.style.opacity = 0; mmxAlts = earthAlts = null; tagEarth.classList.remove("ctr"); return; }
+  tags.mmx.style.opacity = 1;
+  let dx = m.x - e.x, dy = m.y - e.y; const d = Math.hypot(dx, dy); if (d < 1) { dx = 1; dy = -1; }
+  const a0 = Math.atan2(dy, dx);
+  // 中心 c から向き a へ、半径 r0 の外に GAP をあけて、名前の箱 el を置く候補（a0 に近い向きから順に）
+  const around = (el, c, a0, r0, gap) => { const r = el.getBoundingClientRect(), hw = r.width / 2 + 2, hh = r.height / 2 + 1;
+    return [0, -0.7, 0.7, -1.4, 1.4, -2.1, 2.1, Math.PI].map((k) => {
+      const a = a0 + k, co = Math.cos(a), si = Math.sin(a), t = Math.min(hw / Math.max(1e-3, Math.abs(co)), hh / Math.max(1e-3, Math.abs(si))); // 箱の中心から向き a で、ふちまで
+      const R = r0 + gap + t;
+      return { x: c.x + co * R, y: c.y + si * R, lx: c.x + co * (r0 + 1), ly: c.y + si * (r0 + 1), len: gap - 3, ang: a };
+    }); };
+  mmxAlts = around(tags.mmx, m, a0, 8, 30); // 名前は地球と反対の向きに離して、引き出し線で輪とつなぐ
+  tags.mmx.style.left = `${mmxAlts[0].x}px`; tags.mmx.style.top = `${mmxAlts[0].y}px`;
+  // 地球の名前は MMX と反対の向きに（地球の印の見かけの半径の外）
+  const er = Math.hypot(...(() => { const q = scr(earthNow.position.clone().add(V(1, 0, 0).applyQuaternion(camera.quaternion).multiplyScalar(EARTH_OV))); return [q.x - e.x, q.y - e.y]; })());
+  tagEarth.classList.add("ctr"); earthAlts = around(tagEarth, e, a0 + Math.PI, Math.max(er, d + 14), 4); // MMX の輪の外まで離す
+  tagEarth.style.left = `${earthAlts[0].x}px`; tagEarth.style.top = `${earthAlts[0].y}px`;
+}
 // ---------- MMX を追う（2026-10-20 オーナー：しばらくは監視モードの「いまの位置」を主に）：MMX のそば・日の当たる側から。なぞって回す・寄せ引き ----------
 // 打ち上げから5日ほどは MMX を追う視点を最初に。そのあとは全体の図（火星との距離に関心が移るころ。2026-10-20 オーナー）。どちらもボタンで切り替えられる
 const TRACK_DAYS = 5;
