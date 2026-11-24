@@ -51,6 +51,20 @@ export function builderLine(card) {
   return type ? `${who}<span class="k">（${type}）</span>` : who;
 }
 
+// 載せている機器・技術の行（カードの payloads）。名前は出典へのリンク。書いていない機体は null
+export function payloadLine(card) {
+  const items = (card.payloads ?? []).filter((p) => p.summary?.value);
+  if (!items.length) return null;
+  return items
+    .map((p) => {
+      const name = verified(p.summary.source)
+        ? `<a href="${esc(p.summary.source)}" target="_blank" rel="noopener noreferrer">${esc(p.name.ja)}</a>`
+        : esc(p.name.ja);
+      return `<span class="pl"><b>${name}</b><span class="k">：</span>${esc(p.summary.value)}</span>`;
+    })
+    .join("<br>");
+}
+
 // 機体の画像（カードの image。公式の画像を出典・クレジットつきで）
 export const imageCredit = (img) =>
   `${esc(img.caption)}　<a href="${esc(img.source)}" target="_blank" rel="noopener noreferrer">${esc(img.credit)}</a>`;
@@ -231,6 +245,7 @@ function overviewHtml(card, aboard, family, statusSum, realNow) {
       <div class="plate-rows">
         ${row("◉", "運用", operator)}
         ${row("◇", "つくり手", builderLine(card))}
+        ${row("▤", "搭載", payloadLine(card))}
         ${row("◆", "状態", st.status)}
         ${row("◎", "軌道", orbitLine.join("　"))}
         ${row("▣", "規模", scale.join("　"))}

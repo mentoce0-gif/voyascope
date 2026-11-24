@@ -55,6 +55,20 @@
       "note": "おおよその値。翼の端から端まで"
     }
   },
+  "payloads": [
+    {
+      "name": {
+        "ja": "高精度測位システム（ASNAV）",
+        "en": "Advanced Satellite Navigation System (ASNAV)"
+      },
+      "summary": {
+        "value": "みちびきの位置と時刻をより正確に求める JAXA のシステム。スマートフォンなどの測位の誤差を、5〜10m程度から1mに縮めるのが目標",
+        "source": "https://fanfun.jaxa.jp/countdown/h3f9/files/ASNAV_presskit_20260811.pdf",
+        "as_of": "2026-11-24",
+        "note": "5・6・7号機に搭載。5号機を失ったため、衛星どうしの測距（ISR）の実証は8号機まで待つ"
+      }
+    }
+  ],
   "image": {
     "file": "assets/craft/qzs-6.jpg",
     "source": "https://qzss.go.jp/7satellite-constellation/qzs-6/outline.html",

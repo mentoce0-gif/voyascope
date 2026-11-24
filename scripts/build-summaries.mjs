@@ -241,7 +241,9 @@ function cardPage(c, group) {
 
   // Q1 何？
   parts.push(sec(1, "何？", `    <p class="one">${esc(c.mission.value)}${cite(c.mission)}</p>
-    <p class="sub">運用：${esc(val(c.operator))}${c.operator.note ? `（${esc(c.operator.note)}）` : ""}${cite(c.operator)}</p>`));
+    <p class="sub">運用：${esc(val(c.operator))}${c.operator.note ? `（${esc(c.operator.note)}）` : ""}${cite(c.operator)}</p>${(c.payloads ?? [])
+      .map((p) => `\n    <p class="sub">搭載：${esc(p.name.ja)}　${esc(p.summary.value)}${cite(p.summary)}</p>`)
+      .join("")}`));
 
   // Q2 いま何が起きた？（カードの「いまの状態」。日付は出典を確かめた日）
   if (c.status) {
