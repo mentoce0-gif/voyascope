@@ -2,18 +2,18 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-23T23:53:39.186Z",
+  "fetched_at": "2026-11-24T09:54:44.698Z",
   "days_ahead": 45,
   "launches": [
     {
       "id": "8dd5de11-831b-445f-86f0-bffefe0550d9",
-      "net": "2026-11-24T10:13:00.000Z",
+      "net": "2026-11-24T10:17:00.000Z",
       "precision": "min",
       "window_end": null,
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-11-22T19:47:17Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-24T09:51:34Z",
       "rocket": {
         "name": "Soyuz 2.1b",
         "full_name": "Soyuz 2.1b"
@@ -85,13 +85,13 @@
     },
     {
       "id": "460d9db7-eaf6-4cd9-b095-cff433534c09",
-      "net": "2026-11-24T15:55:00.000Z",
-      "precision": "min",
+      "net": "2026-11-24T16:08:59.000Z",
+      "precision": "sec",
       "window_end": "2026-11-24T19:55:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-23T00:27:48Z",
+      "updated": "2026-11-24T07:32:26Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
