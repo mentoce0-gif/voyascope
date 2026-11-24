@@ -644,6 +644,7 @@ body { overflow: hidden; }
 .st-tag { display: inline-block; margin-right: 6px; padding: 0 5px; border: 1px solid var(--amber); border-radius: 3px; color: var(--amber); font-size: 0.7rem; }
 .st-src { margin-top: 4px; }
 .st-src a { color: var(--mint); }
+.pl a { color: var(--mint); text-underline-offset: 3px; }
 .st-badge { display: inline-block; margin-left: 4px; padding: 0 4px; border: 1px dashed var(--amber-dim); border-radius: 3px; color: var(--amber); font-size: 0.65rem; font-weight: 400; vertical-align: 1px; }
 .st-badge.down { border-style: solid; }
 .crew-summary { font-weight: 700; }
