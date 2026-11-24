@@ -99,3 +99,25 @@ test("取得後に停止期間に入ったら、サービスの行も停止中�
   assert.equal(s.live.services.find((x) => x.code === "PNT").ok, false);
   assert.equal(summarizeStatus({}, live, new Date("2026-09-30T00:00:00Z")).live.services.find((x) => x.code === "PNT").ok, true);
 });
+
+test("サービス開始前の確認中（in-commissioning）は停止中ではなく準備中", () => {
+  const live = {
+    source: "https://sys.qzss.go.jp/dod/constellation.html",
+    source_label: "みちびきウェブサイト「衛星運用状況」",
+    page_updated: "2026-11-24",
+    fetched_at: "2026-11-24T00:00:00Z",
+    services: [
+      { service: "PNT", signals: "L1C, L5", state: "in-commissioning", ok: false, naqu: null },
+      { service: "PNT", signals: "L1C/B", state: "in-commissioning", ok: false, naqu: null },
+      { service: "MADOCA-PPP", signals: "L6E", state: "in-commissioning", ok: false, naqu: null },
+    ],
+    notices: [],
+  };
+  const s = summarizeStatus({}, live, new Date("2026-11-24T01:00:00Z"));
+  assert.equal(s.badge, "準備中");
+  assert.equal(s.live.down.length, 0);
+  assert.equal(s.live.preparing, true);
+  // 一部だけ準備中なら札は付けない
+  const mixed = { ...live, services: [{ ...live.services[0], state: "in-operation", ok: true }, live.services[2]] };
+  assert.equal(summarizeStatus({}, mixed, new Date("2026-11-24T01:00:00Z")).badge, null);
+});

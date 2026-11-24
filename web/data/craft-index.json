@@ -26,6 +26,14 @@
       "sample": false
     },
     {
+      "id": "qzs-7",
+      "card": "data/cards/qzs-7.json",
+      "orbit": "data/orbits/qzs-7.json",
+      "crew": null,
+      "status": "data/status/qzs-7.json",
+      "sample": false
+    },
+    {
       "id": "qzs-2",
       "card": "data/cards/qzs-2.json",
       "orbit": "data/orbits/qzs-2.json",
