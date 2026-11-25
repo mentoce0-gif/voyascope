@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-25T08:34:32.372Z",
+  "fetched_at": "2026-11-25T21:42:04.406Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -13,7 +13,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-20T09:12:38Z",
+      "updated": "2026-11-25T13:35:20Z",
       "rocket": {
         "name": "Long March 2D",
         "full_name": "Long March 2D"
@@ -208,7 +208,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-24T19:47:23Z",
+      "updated": "2026-11-25T17:21:30Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -357,6 +357,45 @@
       }
     },
     {
+      "id": "8bf5f61e-a7e1-41e6-aede-7b87e4beebab",
+      "net": "2026-12-04T12:55:00.000Z",
+      "precision": "min",
+      "window_end": "2026-12-04T13:24:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-25T18:22:04Z",
+      "rocket": {
+        "name": "Falcon 9",
+        "full_name": "Falcon 9 Block 5"
+      },
+      "provider": {
+        "name": "SpaceX",
+        "ja": "スペースX"
+      },
+      "mission": {
+        "name": "CHORUS",
+        "placeholder": false,
+        "type": "Earth Science",
+        "type_ja": "地球観測",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 12,
+        "name": "Cape Canaveral SFS, FL, USA",
+        "ja": "ケープカナベラル宇宙軍基地",
+        "short": "ケープカナベラル",
+        "pad": "Space Launch Complex 40",
+        "country": "USA",
+        "country_ja": "アメリカ",
+        "position": {
+          "lat": 28.56194122,
+          "lng": -80.57735736
+        }
+      }
+    },
+    {
       "id": "5ce59e3a-c343-430f-ae4e-e608ba536754",
       "net": "2026-12-10T07:00:00.000Z",
       "precision": "hour",
@@ -392,6 +431,45 @@
         "position": {
           "lat": 19.59755,
           "lng": 110.936481
+        }
+      }
+    },
+    {
+      "id": "22e117bf-041c-49d5-9d09-7b180036e143",
+      "net": "2026-12-18T00:36:00.000Z",
+      "precision": "min",
+      "window_end": null,
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-25T09:14:15Z",
+      "rocket": {
+        "name": "Ariane 62",
+        "full_name": "Ariane 62"
+      },
+      "provider": {
+        "name": "Arianespace",
+        "ja": "アリアンスペース"
+      },
+      "mission": {
+        "name": "Metop-SG B1",
+        "placeholder": false,
+        "type": "Earth Science",
+        "type_ja": "地球観測",
+        "orbit": "Sun-Synchronous Orbit",
+        "orbit_ja": "太陽同期軌道"
+      },
+      "site": {
+        "location_id": 13,
+        "name": "Guiana Space Centre, French Guiana",
+        "ja": "ギアナ宇宙センター",
+        "short": "ギアナ",
+        "pad": "Ariane Launch Area 4",
+        "country": "GUF",
+        "country_ja": "フランス領ギアナ",
+        "position": {
+          "lat": 5.256319,
+          "lng": -52.786838
         }
       }
     }
