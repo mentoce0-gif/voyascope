@@ -16,6 +16,7 @@
 | 国際宇宙ステーション | ソユーズから撮影した ISS（iss056e201248、2018-10-04） | https://images.nasa.gov/details/iss056e201248 | NASA |
 | ひまわり9号 | ひまわり8号・9号のイラスト（2機は同じ形） | https://www.data.jma.go.jp/sat_info/himawari/satellite.html | 気象庁提供 |
 | みちびき6号機 | みちびき6号機のイメージ（ページ冒頭の画像。第三者の提供表示なし） | https://qzss.go.jp/7satellite-constellation/qzs-6/outline.html | 提供：内閣府宇宙開発戦略推進事務局 |
+| みちびき7号機 | みちびき7号機のイメージ（ページ冒頭の画像。第三者の提供表示なし。同じページの構成図2枚は「提供：三菱電機株式会社」なので使わない。720×405 に縮小） | https://qzss.go.jp/7satellite-constellation/qzs-7/outline.html | 提供：内閣府宇宙開発戦略推進事務局 |
 
 ## 入れなかった画像
 

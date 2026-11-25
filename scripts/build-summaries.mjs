@@ -58,7 +58,7 @@ const HORIZONS = JSON.parse(readFileSync(join(ROOT, "web", "data", "horizons.jso
 // 距離を出す日：Horizons の表のはじめの日（日本時間 0時）。表がなければ距離は出さない
 const REF = Object.values(HORIZONS.probes ?? {})[0]?.start ? new Date(Object.values(HORIZONS.probes)[0].start) : null;
 const REF_LABEL = REF ? `${ymd(jstDay(REF.toISOString()))}の値` : "";
-const STATUS = { operating: "運用中", standby: "待機中", ended: "運用終了", not_launched: "打ち上げ前" };
+const STATUS = { operating: "運用中", commissioning: "準備中", standby: "待機中", ended: "運用終了", not_launched: "打ち上げ前" };
 
 // 出典のついた値：配列は「・」でつなぐ。非公開は「非公開（運用者が公表していない）」
 const val = (f) => (f.undisclosed ? "非公開（運用者が公表していない）" : Array.isArray(f.value) ? f.value.join("・") : String(f.value));

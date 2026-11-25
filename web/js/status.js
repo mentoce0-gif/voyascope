@@ -3,7 +3,7 @@
 // - 自動取得の運用状況（いまはみちびきだけ）：web/data/status/<id>.json（scripts/fetch-status.mjs）
 // 時刻は観測時刻ではなく、実際の今（運用状況は「いま」の情報なので）
 
-export const STATUS_LABELS = { operating: "運用中", standby: "待機中", ended: "運用終了" };
+export const STATUS_LABELS = { operating: "運用中", commissioning: "準備中", standby: "待機中", ended: "運用終了" };
 
 // サービス名の日本語（出典：https://qzss.go.jp/overview/services/index.html）。ないものは略号のまま出す
 export const QZSS_SERVICE_JA = {
@@ -45,26 +45,35 @@ export function summarizeStatus(card, live, now = new Date()) {
 
   // サービスごとに：どれか1つでも X なら停止中（同じサービスで信号が複数ある）。
   // 表を取得したあとで停止期間に入ったお知らせも、停止中として扱う
+  // 打ち上げのあとサービス開始前の確認中（表の行の class が in-commissioning）は、止まっているのではなく「準備中」
   const byService = new Map();
   for (const s of live.services) {
     const prev = byService.get(s.service);
-    byService.set(s.service, { code: s.service, ok: (prev?.ok ?? true) && s.ok });
+    const prep = !s.ok && s.state === "in-commissioning";
+    byService.set(s.service, {
+      code: s.service,
+      ok: (prev?.ok ?? true) && s.ok,
+      commissioning: (prev?.commissioning ?? true) && prep,
+    });
   }
   const activeCodes = new Set(notices.filter((n) => n.active).map((n) => n.code));
   const services = [...byService.values()].map((s) => ({
     ...s,
     ok: s.ok && !activeCodes.has(s.code),
+    commissioning: s.commissioning && !activeCodes.has(s.code),
     ja: serviceJa(s.code),
   }));
-  const down = services.filter((s) => !s.ok);
+  const down = services.filter((s) => !s.ok && !s.commissioning);
+  const preparing = services.length > 0 && services.every((s) => s.commissioning);
 
   const stale = t - Date.parse(live.fetched_at) > STALE_MS;
-  const badge = down.length || notices.some((n) => n.active) ? "停止中" : notices.length ? "停止予定" : null;
+  const badge = down.length || notices.some((n) => n.active) ? "停止中" : notices.length ? "停止予定" : preparing ? "準備中" : null;
   return {
     base,
     live: {
       services,
       down,
+      preparing,
       notices,
       stale,
       source: live.source,

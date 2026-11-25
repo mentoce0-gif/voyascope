@@ -556,6 +556,7 @@ function startApp({ craft, prefectures, events, launchesData, later }) {
   // 状態の点：運用中は緑、止まっている／止まる予定は琥珀、分からなければ灰色
   const statusPip = (c) => {
     const s = summarizeStatus(c.card, c.status, new Date());
+    if (s.badge === "準備中") return "unknown";
     if (s.badge) return "warn";
     return s.base?.value === "operating" ? "ok" : "unknown";
   };
