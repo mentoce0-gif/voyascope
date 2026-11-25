@@ -172,14 +172,23 @@ function statusRows(sum) {
   const lines = [];
   if (main) {
     lines.push(
-      `<div class="st-line"><span class="st-dot ${main.ok ? "ok" : "down"}"></span>${esc(main.ja)}：<strong>${main.ok ? "運用中" : "停止中"}</strong></div>`,
+      `<div class="st-line"><span class="st-dot ${main.ok ? "ok" : main.commissioning ? "prep" : "down"}"></span>${esc(main.ja)}：<strong>${
+        main.ok ? "運用中" : main.commissioning ? "開始の準備中" : "停止中"
+      }</strong></div>`,
     );
   }
   if (others.length) {
-    const d = others.filter((s) => !s.ok);
+    const d = others.filter((s) => !s.ok && !s.commissioning);
+    const prep = others.filter((s) => s.commissioning);
     lines.push(
       `<div class="st-line k">ほかのサービス ${others.length}件：${
-        d.length ? `<span class="amber">${d.map((s) => esc(s.ja)).join("・")} が停止中</span>` : "すべて運用中"
+        d.length
+          ? `<span class="amber">${d.map((s) => esc(s.ja)).join("・")} が停止中</span>`
+          : prep.length === others.length
+            ? "すべて開始の準備中"
+            : prep.length
+              ? `${prep.map((s) => esc(s.ja)).join("・")} は開始の準備中、ほかは運用中`
+              : "すべて運用中"
       }</div>`,
     );
   }

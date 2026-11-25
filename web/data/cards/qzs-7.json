@@ -1,0 +1,96 @@
+{
+  "id": "qzs-7",
+  "norad_id": 100270,
+  "name": {
+    "ja": "みちびき7号機",
+    "en": "QZS-7"
+  },
+  "class": "navigation",
+  "operator": {
+    "value": "内閣府",
+    "source": "https://www8.cao.go.jp/space/qzs/qzs.html",
+    "as_of": "2026-11-24",
+    "note": "運用は PFI 事業として準天頂衛星システムサービス株式会社が行う"
+  },
+  "operator_type": {
+    "value": "civil",
+    "source": "https://www8.cao.go.jp/space/qzs/qzs.html",
+    "as_of": "2026-11-24"
+  },
+  "launch_date": {
+    "value": "2026-08-11",
+    "source": "https://www.jaxa.jp/press/2026/08/20260811-1_j.html",
+    "as_of": "2026-11-24",
+    "note": "日本時間。H3ロケット9号機"
+  },
+  "mission": {
+    "value": "GPS と一体で使える測位の信号を送り、位置を安定して測れるようにする",
+    "source": "https://qzss.go.jp/overview/services/sv04_pnt.html",
+    "as_of": "2026-11-24"
+  },
+  "status": {
+    "value": "commissioning",
+    "source": "https://qzss.go.jp/info/information/qzs7_261113.html",
+    "as_of": "2026-11-24",
+    "note": "サービス開始は2027年2月下旬の予定（SBAS は5月ごろ）"
+  },
+  "stats": {
+    "altitude_km": {
+      "value": 36000,
+      "unit": "km",
+      "source": "https://qzss.go.jp/info/information/qzs7_260822.html",
+      "as_of": "2026-11-24",
+      "note": "おおよその値。準静止軌道（赤道に対してわずかに傾く）の運用位置の高さ"
+    },
+    "mass_kg": {
+      "value": 1800,
+      "unit": "kg",
+      "source": "https://qzss.go.jp/7satellite-constellation/qzs-7/outline.html",
+      "as_of": "2026-11-24",
+      "note": "おおよその値。ドライ質量（打ち上げ時は約4,900 kg）"
+    },
+    "length_m": {
+      "value": 19,
+      "unit": "m",
+      "source": "https://qzss.go.jp/7satellite-constellation/qzs-7/outline.html",
+      "as_of": "2026-11-24",
+      "note": "おおよその値。翼の端から端まで"
+    }
+  },
+  "payloads": [
+    {
+      "name": {
+        "ja": "高精度測位システム（ASNAV）",
+        "en": "Advanced Satellite Navigation System (ASNAV)"
+      },
+      "summary": {
+        "value": "みちびきの位置と時刻をより正確に求める JAXA のシステム。スマートフォンなどの測位の誤差を、5〜10m程度から1mに縮めるのが目標",
+        "source": "https://fanfun.jaxa.jp/countdown/h3f9/files/ASNAV_presskit_20260811.pdf",
+        "as_of": "2026-11-24",
+        "note": "5・6・7号機に搭載。7号機打ち上げ後に約3か月の確認、2028年度末まで実証運用の計画"
+      }
+    }
+  ],
+  "image": {
+    "file": "assets/craft/qzs-7.jpg",
+    "source": "https://qzss.go.jp/7satellite-constellation/qzs-7/outline.html",
+    "credit": "提供：内閣府宇宙開発戦略推進事務局",
+    "caption": "みちびき7号機のイメージ",
+    "terms": "https://qzss.go.jp/policy/rule.html"
+  },
+  "official_links": [
+    {
+      "label": "みちびき7号機",
+      "url": "https://qzss.go.jp/7satellite-constellation/qzs-7/outline.html"
+    },
+    {
+      "label": "みちびき7号機の準備状況",
+      "url": "https://qzss.go.jp/info/information/qzs7_261113.html"
+    },
+    {
+      "label": "みちびき 衛星運用状況",
+      "url": "https://sys.qzss.go.jp/dod/constellation.html"
+    }
+  ],
+  "updated_at": "2026-11-24"
+}

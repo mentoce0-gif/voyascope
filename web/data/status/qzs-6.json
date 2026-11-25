@@ -4,23 +4,23 @@
   "source": "https://sys.qzss.go.jp/dod/constellation.html",
   "source_label": "みちびきウェブサイト「衛星運用状況」",
   "page_updated": "2026-11-24",
-  "fetched_at": "2026-11-24T09:54:40.279Z",
+  "fetched_at": "2026-11-24T22:26:32.612Z",
   "name": "QZS06",
   "svn": "007",
   "services": [
     {
       "service": "PNT",
       "signals": "L1C, L5",
-      "state": "outage",
-      "ok": false,
-      "naqu": "2026267"
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
     },
     {
       "service": "PNT",
       "signals": "L1C/B",
-      "state": "outage",
-      "ok": false,
-      "naqu": "2026267"
+      "state": "in-operation",
+      "ok": true,
+      "naqu": null
     },
     {
       "service": "PTV",
@@ -51,15 +51,5 @@
       "naqu": null
     }
   ],
-  "notices": [
-    {
-      "number": "2026267",
-      "type": "PNT_FCSTDV",
-      "kind": "forecast",
-      "svn": "007",
-      "subject": "SVN007 (PRN200) FORECAST OUTAGE JDAY 328/0359 - JDAY 332/0359",
-      "start": "2026-11-24T03:59:00.000Z",
-      "stop": "2026-11-28T03:59:00.000Z"
-    }
-  ]
+  "notices": []
 }
