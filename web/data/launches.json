@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-24T22:26:33.725Z",
+  "fetched_at": "2026-11-25T08:34:32.372Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "c9605b67-8a53-4239-a8ae-577fe3b79799",
-      "net": "2026-11-25T00:18:00.000Z",
-      "precision": "min",
-      "window_end": "2026-11-25T00:48:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-24T20:33:13Z",
-      "rocket": {
-        "name": "Long March 2F/G",
-        "full_name": "Long March 2F/G"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "Shenzhou 24",
-        "placeholder": false,
-        "type": "Human Exploration",
-        "type_ja": "有人飛行",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
-      },
-      "site": {
-        "location_id": 17,
-        "name": "Jiuquan Satellite Launch Center, People's Republic of China",
-        "ja": "酒泉衛星発射センター",
-        "short": "酒泉",
-        "pad": "Launch Area 91 (SLS-1 / 921)",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 40.957893,
-          "lng": 100.290944
-        }
-      }
-    },
     {
       "id": "b00f0e9a-48d6-4f26-9cb5-7d19169ff7c4",
       "net": "2026-11-26T09:35:00.000Z",
