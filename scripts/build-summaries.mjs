@@ -476,7 +476,7 @@ const index = {
 const pages = [index, artemis, ...probes, ...craft];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[{ path: "" }, { path: "tour/artemis2/" }, { path: "mmx/now/" }, ...pages]
+${[{ path: "" }, { path: "tour/artemis2/" }, { path: "mmx/now/" }, { path: "meteors/" }, ...pages]
   .map((p) => `  <url><loc>${SITE}/${p.path}</loc>${p.lastmod ? `<lastmod>${p.lastmod}</lastmod>` : ""}</url>`)
   .join("\n")}
 </urlset>
