@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-26T08:17:43.342Z",
+  "fetched_at": "2026-11-26T21:31:51.213Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "b00f0e9a-48d6-4f26-9cb5-7d19169ff7c4",
-      "net": "2026-11-26T09:35:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-11-26T09:52:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-25T13:35:20Z",
-      "rocket": {
-        "name": "Long March 2D",
-        "full_name": "Long March 2D"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 16,
-        "name": "Xichang Satellite Launch Center, People's Republic of China",
-        "ja": "西昌衛星発射センター",
-        "short": "西昌",
-        "pad": "Launch Complex 3 (LC-3/LA-1)",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 28.247059,
-          "lng": 102.029008
-        }
-      }
-    },
     {
       "id": "2093e4fc-ac8c-4296-a1b5-deececee6a72",
       "net": "2026-11-27T00:05:00.000Z",
@@ -52,7 +13,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-25T22:25:34Z",
+      "updated": "2026-11-26T19:42:10Z",
       "rocket": {
         "name": "Electron",
         "full_name": "Electron"
@@ -169,7 +130,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-26T04:39:21Z",
+      "updated": "2026-11-26T11:45:38Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -208,7 +169,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-25T17:21:30Z",
+      "updated": "2026-11-26T11:44:54Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
