@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-26T21:31:51.213Z",
+  "fetched_at": "2026-11-27T08:33:43.905Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "2093e4fc-ac8c-4296-a1b5-deececee6a72",
-      "net": "2026-11-27T00:05:00.000Z",
-      "precision": "min",
-      "window_end": null,
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-26T19:42:10Z",
-      "rocket": {
-        "name": "Electron",
-        "full_name": "Electron"
-      },
-      "provider": {
-        "name": "Rocket Lab",
-        "ja": "ロケットラボ"
-      },
-      "mission": {
-        "name": "Night Owls Never Sleep (StriX Launch 14)",
-        "placeholder": false,
-        "type": "Earth Science",
-        "type_ja": "地球観測",
-        "orbit": "Low Earth Orbit",
-        "orbit_ja": "低軌道"
-      },
-      "site": {
-        "location_id": 10,
-        "name": "Rocket Lab Launch Complex 1, Mahia Peninsula, New Zealand",
-        "ja": "マヒア半島の発射場",
-        "short": "マヒア",
-        "pad": "Rocket Lab Launch Complex 1B",
-        "country": "NZL",
-        "country_ja": "ニュージーランド",
-        "position": {
-          "lat": -39.262833,
-          "lng": 177.864469
-        }
-      }
-    },
     {
       "id": "a6421db3-7c8a-4cf7-a659-cec195140f7f",
       "net": "2026-11-27T13:00:00.000Z",
@@ -241,13 +202,13 @@
     },
     {
       "id": "e2523821-9760-4cb4-ad1f-7ce2e30419bd",
-      "net": "2026-12-01T08:00:00.000Z",
+      "net": "2026-12-02T11:55:00.000Z",
       "precision": "hour",
-      "window_end": "2026-12-01T16:00:00.000Z",
-      "status": "tbc",
-      "status_label": "TBC",
-      "status_ja": "日付はほぼ決まり、公式の確認を待っている",
-      "updated": "2026-11-24T10:47:49Z",
+      "window_end": "2026-12-02T12:33:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-27T05:58:50Z",
       "rocket": {
         "name": "Kuaizhou 11",
         "full_name": "Kuaizhou 11"
@@ -431,6 +392,45 @@
         "position": {
           "lat": 5.256319,
           "lng": -52.786838
+        }
+      }
+    },
+    {
+      "id": "21561fba-dc41-41b3-9d18-e13339fc3396",
+      "net": "2027-01-10T23:00:00.000Z",
+      "precision": "min",
+      "window_end": "2027-01-11T01:00:00.000Z",
+      "status": "go",
+      "status_label": "Go",
+      "status_ja": "日時が確かめられている",
+      "updated": "2026-11-20T02:39:33Z",
+      "rocket": {
+        "name": "H3-30",
+        "full_name": "H3-30"
+      },
+      "provider": {
+        "name": "Mitsubishi Heavy Industries",
+        "ja": "三菱重工業"
+      },
+      "mission": {
+        "name": "IGS Optical Diversification 1",
+        "placeholder": false,
+        "type": "Government/Top Secret",
+        "type_ja": "政府（内容は非公開）",
+        "orbit": "Low Earth Orbit",
+        "orbit_ja": "低軌道"
+      },
+      "site": {
+        "location_id": 26,
+        "name": "Tanegashima Space Center, Japan",
+        "ja": "種子島宇宙センター",
+        "short": "種子島",
+        "pad": "Yoshinobu Launch Complex LP-2",
+        "country": "JPN",
+        "country_ja": "日本",
+        "position": {
+          "lat": 30.400938,
+          "lng": 130.97564
         }
       }
     }
