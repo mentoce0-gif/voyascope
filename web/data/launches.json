@@ -2,48 +2,9 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-27T08:33:43.905Z",
+  "fetched_at": "2026-11-27T21:17:29.580Z",
   "days_ahead": 45,
   "launches": [
-    {
-      "id": "a6421db3-7c8a-4cf7-a659-cec195140f7f",
-      "net": "2026-11-27T13:00:00.000Z",
-      "precision": "hour",
-      "window_end": "2026-11-27T13:15:00.000Z",
-      "status": "go",
-      "status_label": "Go",
-      "status_ja": "日時が確かめられている",
-      "updated": "2026-11-20T17:15:10Z",
-      "rocket": {
-        "name": "Long March 6A",
-        "full_name": "Long March 6A"
-      },
-      "provider": {
-        "name": "China Aerospace Science and Technology Corporation",
-        "ja": "中国航天科技集団（CASC）"
-      },
-      "mission": {
-        "name": "積み荷は非公表",
-        "placeholder": true,
-        "type": null,
-        "type_ja": null,
-        "orbit": null,
-        "orbit_ja": null
-      },
-      "site": {
-        "location_id": 19,
-        "name": "Taiyuan Satellite Launch Center, People's Republic of China",
-        "ja": "太原衛星発射センター",
-        "short": "太原",
-        "pad": "Launch Complex 9A",
-        "country": "CHN",
-        "country_ja": "中国",
-        "position": {
-          "lat": 38.8583,
-          "lng": 111.5802
-        }
-      }
-    },
     {
       "id": "13270554-4bdb-42ae-916f-1bb54492204f",
       "net": "2026-11-29T03:50:00.000Z",
@@ -91,7 +52,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-26T11:45:38Z",
+      "updated": "2026-11-27T18:31:10Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -130,7 +91,7 @@
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-26T11:44:54Z",
+      "updated": "2026-11-27T20:59:10Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
