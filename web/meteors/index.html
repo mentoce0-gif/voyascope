@@ -289,17 +289,26 @@
   .corners .icon-btn { position: absolute; bottom: 0; width: 44px; height: 44px; pointer-events: auto; color: #a9e9cf; }
   #constBtn { left: 0; } #viewReset { right: 0; }
   .stats { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; text-shadow: 0 0 8px #02060f, 0 0 2px #02060f;
-    display: flex; flex-direction: column; gap: 8px; --k: 1; }
-  /* 計器の読み：左に英字（等幅・字間広め）と日本語の2行、縦の線、大きな数字（MMX の「いまどこ」の計器と同じ形） */
-  .ro { --f: 1; display: flex; align-items: center; gap: calc(8px * var(--k) * var(--f)); white-space: nowrap; pointer-events: auto; }
-  .ro-l { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; padding-right: calc(8px * var(--k) * var(--f)); border-right: 1.5px solid rgba(217, 244, 234, 0.55); }
-  .ro-en { font-family: var(--font-mono); font-size: calc(9px * var(--k) * var(--f)); letter-spacing: 0.12em; color: #8ea3c2; }
-  .ro-ja { font-size: calc(10.5px * var(--k) * var(--f)); letter-spacing: 0.02em; color: #b9c8dc; }
-  .ro-n { font-family: var(--font-mono); font-weight: 700; font-size: calc(26px * var(--k) * var(--f)); line-height: 1; color: #f2f7fc; letter-spacing: 0; font-variant-numeric: tabular-nums; }
-  .ro-total .ro-n { font-size: calc(40px * var(--k) * var(--f)); }
-  .ro-total .ro-l { border-right-color: var(--mint-dim); }
-  .ro-leo .ro-l { border-right-color: var(--amber); } .ro-leo .ro-en { color: var(--amber); }
-  .ro-spo .ro-l, .ro-oth .ro-l { border-right-color: var(--sky); }
+    display: flex; flex-direction: column; gap: 10px; }
+  .tot { display: flex; flex-direction: column; line-height: 1; pointer-events: auto; }
+  .tot-l { font-size: 12px; letter-spacing: 0.06em; color: #b9c8dc; }
+  .tot-n { margin-top: 6px; white-space: nowrap; }
+  .tot-n b { font-family: var(--font-mono); font-size: 40px; font-weight: 700; color: #f2f7fc; font-variant-numeric: tabular-nums; }
+  .tot-n small { margin-left: 4px; font-size: 13px; color: #b9c8dc; }
+  /* 内訳：色の点・名前・割合の横棒・個数（列をそろえるため、3行を1つのグリッドに） */
+  .brk { display: grid; grid-template-columns: 8px max-content minmax(28px, 1fr) max-content; align-items: center; column-gap: 8px; row-gap: 7px;
+    font-size: 12px; line-height: 1.35; color: #d4deeb; width: 236px; pointer-events: auto; }
+  .brk .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .brk .bl { white-space: nowrap; letter-spacing: 0.02em; }
+  .brk .bar { position: relative; height: 6px; border-radius: 3px; background: rgba(142, 163, 194, 0.18); overflow: hidden; }
+  .brk .bar span { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 3px; transition: width .3s; }
+  .brk .bn { text-align: right; white-space: nowrap; }
+  .brk .bn b { font-family: var(--font-mono); font-size: 13px; font-weight: 700; color: #f2f7fc; font-variant-numeric: tabular-nums; }
+  .brk .bn small { margin-left: 3px; font-size: 10.5px; color: #b9c8dc; }
+  /* 色は空の上の流星と同じ（しし座＝琥珀・ほかの群と散在＝水色。散在は少し淡く） */
+  .dot.leo, .bar.leo span { background: var(--amber); }
+  .dot.oth, .bar.oth span { background: var(--sky); }
+  .dot.spo, .bar.spo span { background: rgba(143, 216, 255, 0.55); }
   @media (min-width: 900px) and (min-aspect-ratio: 1/1) {
     .top { flex-direction: row; align-items: center; gap: 24px; }
     .brandbar { flex: 1 1 auto; }
@@ -315,11 +324,17 @@
     .dome { display: block; flex: none; margin-top: 8px; overflow-x: clip; overflow-y: visible; margin-left: -16px; margin-right: -16px; padding: 0 16px; }
     .dome-box { position: absolute; }
     .corners { left: 16px !important; right: 16px !important; }
-    .stats { inset: 0; display: block; pointer-events: none; }
-    .stats .ro { position: absolute; }
+    .stats { left: 16px; right: 16px; flex-direction: row; justify-content: space-between; align-items: flex-end; gap: 12px; }
+    .brk { width: auto; flex: 0 1 236px; min-width: 0; }
     .panel-wrap { margin-top: 12px; }
     .time { margin-top: 4px; }
     .rim-log { display: none; } /* METEOR WATCH は上の行に出したので、輪のまわりからは外す */
+  }
+  @media (max-width: 370px) {
+    /* 狭い画面（320〜370幅）：4桁でも内訳が切れないように、字を少し小さく・群の数は省く */
+    .tot-l { font-size: 11px; } .tot-n b { font-size: 32px; }
+    .brk { font-size: 11px; column-gap: 6px; } .brk .bn b { font-size: 12px; }
+    .brk .grp { display: none; }
   }
 </style>
 </head>
@@ -347,12 +362,14 @@
   </header>
 
   <div class="dome" id="dome">
-    <!-- 統計：計器の読み（左に英字と日本語の2行・縦線・大きな数字）を、輪の上側に沿って散らして置く（2026-11-28 オーナー：MMX の計器の形）。位置は layout() で -->
+    <!-- 統計：左に この日の流星総数（場所チップの真下）、右に内訳（色の点・名前・割合の横棒・個数）。2026-11-28 オーナーの参考画像 -->
     <div class="stats" id="stats">
-      <div class="ro ro-total" id="roTotal" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="ro-l"><span class="ro-en">METEORS</span><span class="ro-ja">個の流星を観測</span></span><b class="ro-n" id="count">0</b></div>
-      <div class="ro ro-leo" id="roLeo"><span class="ro-l"><span class="ro-en">LEO</span><span class="ro-ja">しし座</span></span><b class="ro-n" id="cLeo">0</b></div>
-      <div class="ro ro-spo" id="roSpo"><span class="ro-l"><span class="ro-en">SPORADIC</span><span class="ro-ja">散在</span></span><b class="ro-n" id="cSpo">0</b></div>
-      <div class="ro ro-oth" id="roOth"><span class="ro-l"><span class="ro-en">SHOWERS</span><span class="ro-ja" id="cOthJa">ほかの群</span></span><b class="ro-n" id="cOth">0</b></div>
+      <div class="tot" id="roTotal" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="tot-l">この日の流星総数</span><span class="tot-n"><b id="count">0</b><small>個</small></span></div>
+      <div class="brk" aria-label="内訳">
+        <i class="dot leo"></i><span class="bl">しし座</span><span class="bar leo"><span id="bLeo"></span></span><span class="bn"><b id="cLeo">0</b><small>個</small></span>
+        <i class="dot oth"></i><span class="bl" id="cOthJa">ほかの群</span><span class="bar oth"><span id="bOth"></span></span><span class="bn"><b id="cOth">0</b><small>個</small></span>
+        <i class="dot spo"></i><span class="bl">散在</span><span class="bar spo"><span id="bSpo"></span></span><span class="bn"><b id="cSpo">0</b><small>個</small></span>
+      </div>
     </div>
     <div class="dome-box" id="domeBox">
       <canvas id="sky" aria-label="見上げた空の魚眼の図。はじめは中心が真上、円のふちが地平線、北が上、東が左。スワイプで見る方向を変えられる"></canvas>
@@ -712,32 +729,6 @@ function prepare() {
 // ---------- 魚眼 ----------
 const cornersEl = document.getElementById('corners'), domeEl = document.getElementById('dome'), boxEl = document.getElementById('domeBox'), sky = document.getElementById('sky'), ctx = sky.getContext('2d');
 let S = 300, DPR = Math.min(devicePixelRatio || 1, 3), /* スマホの多くは 3倍。2倍で止めるとにじむ（2026-11-22 オーナー「ファジー」） */ cx = 0, cy = 0, R = 0;
-// 統計の読みを、輪の上側に沿って散らして置く（スマホ）。数字は 390 幅の見本の大きさ（D＝380）を基準に、画面の幅で伸び縮み。
-// 位置は輪の中心からの x（右が正）と、読みの下端の高さ y（上が正）。輪の外径＋余白（196）より外に、左下・右下の角が来るように
-const RO_POS = { roTotal: { right: -10, y: 214 }, roLeo: { x: 24, y: 248 }, roSpo: { x: 56, y: 214 }, roOth: { x: 84, y: 180 } };
-function placeStats(D, statsH) {
-  const st = document.getElementById('stats'), k = D / 380, W = domeEl.clientWidth, cxp = W / 2, cyp = statsH + D / 2;
-  st.style.setProperty('--k', k.toFixed(3));
-  for (const [id, q] of Object.entries(RO_POS)) {
-    const el = document.getElementById(id), h = el.offsetHeight;
-    el.style.top = (cyp - q.y * k - h) + 'px';
-    if (q.right != null) { el.style.left = '16px'; el.style.right = ''; statsBoxTotal = cxp + q.right * k - 16; }
-    else { el.style.left = (cxp + q.x * k) + 'px'; el.style.right = ''; }
-  }
-  statsBox = { W, totalMax: statsBoxTotal }; fitStats();
-}
-let statsBoxTotal = 0;
-// 桁が増えて（ヨーロッパの夜の終わりは 1,989・散在 1,063）画面の端や輪の手前の線を越えるときだけ、その読みの字を縮める
-let statsBox = null, statsSig = '';
-function fitStats() {
-  if (!statsBox) return;
-  for (const id of Object.keys(RO_POS)) {
-    const el = document.getElementById(id); el.style.setProperty('--f', 1);
-    const lim = id === 'roTotal' ? statsBox.totalMax : statsBox.W - 8 - parseFloat(el.style.left), w = el.scrollWidth;
-    if (w > lim) el.style.setProperty('--f', (lim / w * 0.98).toFixed(3));
-  }
-}
-function clearStats() { statsBox = null; for (const id of Object.keys(RO_POS)) { const e = document.getElementById(id); Object.assign(e.style, { top: '', left: '', right: '' }); e.style.setProperty('--f', 1); } }
 // 光の輪（外周のぼかし）の外径。箱の大きさ S に対する直径の割合（輪は半径 0.44・ぼかしは約 0.467）
 const OUTER = 0.934;
 function layout() {
@@ -747,14 +738,13 @@ function layout() {
     // タブレットや横向きのように高さが足りないときだけ抑える
     const D = Math.floor(Math.min(innerWidth - 10, 560, Math.max(260, innerHeight - 200)));
     S = Math.round(D / OUTER);
-    const inset = (S - D) / 2, statsH = Math.round(88 * D / 380); // 統計を輪の上側に沿って置くぶんの高さ
+    const inset = (S - D) / 2, statsH = document.getElementById('stats').offsetHeight + 8; // 統計（総数・内訳）の行の下に光の輪
     domeEl.style.height = (statsH + D) + 'px';
     boxEl.style.left = `calc(50% - ${S / 2}px)`; boxEl.style.top = (statsH - inset) + 'px';
     // 四隅のボタン：左右は外の余白（16px）にそろえ、下はドームの外径の下端に
     cornersEl.style.top = statsH + 'px'; cornersEl.style.height = D + 'px';
-    placeStats(D, statsH);
   } else {
-    domeEl.style.height = ''; boxEl.style.left = ''; boxEl.style.top = ''; clearStats();
+    domeEl.style.height = ''; boxEl.style.left = ''; boxEl.style.top = '';
     S = Math.max(160, Math.floor(Math.min(r.width, r.height)));
   }
   boxEl.style.width = S + 'px'; boxEl.style.height = S + 'px';
@@ -1170,9 +1160,9 @@ function updateCount() {
   const other = n - leo - sp;
   document.getElementById('count').textContent = n;
   document.getElementById('cLeo').textContent = leo; document.getElementById('cSpo').textContent = sp; document.getElementById('cOth').textContent = other;
-  document.getElementById('cOthJa').textContent = groups.size ? `ほか${groups.size}群` : 'ほかの群';
-  const sig = [n, leo, sp, other].map(v => String(v).length).join() + groups.size; // 桁が変わったときだけ収まりを見直す
-  if (sig !== statsSig) { statsSig = sig; fitStats(); }
+  document.getElementById('cOthJa').innerHTML = groups.size ? `ほかの群<span class="grp">（${groups.size}群）</span>` : 'ほかの群';
+  // 横棒：総数に対する割合
+  for (const [id, v] of [['bLeo', leo], ['bOth', other], ['bSpo', sp]]) document.getElementById(id).style.width = (n ? 100 * v / n : 0).toFixed(1) + '%';
 }
 // 流星群の名前：英名と番号は IAU 流星データセンターの一覧（https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php 2026-11-21 確認）。
 // 日本語名：国立天文台「流星群の和名一覧（略符順）」（https://www.nao.ac.jp/new-info/meteor/table-code.html 2026-11-05 更新・2026-11-21 確認。C43）。
