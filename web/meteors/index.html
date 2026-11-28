@@ -6,12 +6,12 @@
 <title>流星を眺める（試験版）— VOYASCOPE</title>
 <!-- 流星を眺める｜見上げるver.：試作の部屋 04 から、2026-11-21 に鍵なしの /meteors/ へ（オーナー）。試験版のあいだは検索に出さない -->
 <meta name="robots" content="noindex">
-<meta name="description" content="2026年11月18日の夜（しし座流星群）に観測された流星を、日本・北アメリカ・ヨーロッパの街から見上げた空に。Global Meteor Network のデータから。VOYASCOPE の試験版（非公式ファンメイド作品）。">
+<meta name="description" content="流星群の夜（ふたご座・ペルセウス座・しし座など）に観測された流星を、日本・北アメリカ・ヨーロッパの街から見上げた空に。Global Meteor Network のデータから。VOYASCOPE の試験版（非公式ファンメイド作品）。">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://voyascope.org/meteors/">
 <meta property="og:image" content="https://voyascope.org/assets/earth/hero-1600.webp">
 <meta property="og:title" content="流星を眺める（試験版）— VOYASCOPE">
-<meta property="og:description" content="しし座流星群の夜、日本のまわりで観測された流星を、見上げた空に（非公式ファンメイド作品）。">
+<meta property="og:description" content="流星群の夜に実際に観測された流星を、見上げた空に（非公式ファンメイド作品）。">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#050e1f">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
@@ -295,12 +295,28 @@
   .sheet-note { margin: -4px 0 0; font-size: 11px; line-height: 1.6; color: #8ea3c2; }
   .sheet-go { height: 48px; min-height: 48px; border-radius: 24px; border: 0; background: #8ff0c8; color: #06231a; font-size: 15px; font-weight: 700; margin-top: 2px; }
   .sheet-go:hover { background: #a6f4d4; }
+  /* 日付のシート：おまかせ＋流星群の夜のリスト（見本の形。選んでいる夜は琥珀の枠） */
+  .night-list { display: flex; flex-direction: column; gap: 8px; max-height: min(46vh, 380px); overflow-y: auto; margin: -2px -2px 0; padding: 2px; }
+  .night-row { width: 100%; min-height: 52px; border-radius: 14px; border: 1.5px solid #2a3d66; background: #0b1a2c; color: #e6eef8;
+    display: flex; align-items: center; gap: 12px; padding: 0 14px; text-align: left; font-family: var(--font-body); }
+  .night-row:hover { background: #12243a; }
+  .night-row[aria-pressed="true"] { border-color: #f2b155; background: #2a1f10; }
+  .night-row .dot { width: 8px; height: 8px; border-radius: 50%; background: #f2b155; flex: none; }
+  .night-row .nr-name { flex: 1 1 auto; min-width: 0; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .night-row .nr-date { font-size: 12px; color: #a9bbd4; }
+  .night-row .nr-n { font-size: 12px; color: #f2d7a6; min-width: 46px; text-align: right; }
+  .night-auto { color: #8ff0c8; }
+  .night-auto svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; flex: none; }
+  .night-auto[aria-pressed="true"] { border-color: #8ff0c8; background: #0b1a2c; }
+  /* カードの群名の上：おまかせ再生（ミント）／選んだ日（淡い琥珀） */
+  .nm-mode { font-size: 11px; line-height: 14px; height: 14px; letter-spacing: 0.04em; color: #8ff0c8; white-space: nowrap; overflow: hidden; }
+  .nm-mode.pick { color: #f2d7a6; }
   .icon-btn { flex: none; width: 48px; height: 48px; min-height: 0; border-radius: 50%; padding: 0; border: 1.5px solid #2f6f5d; background: #0b1a2c; color: #8ff0c8;
     display: inline-flex; align-items: center; justify-content: center; }
   .icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
   .icon-btn:hover { background: #10263a; }
   .icon-btn[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); border-color: var(--mint); }
-  #calBtn[aria-disabled="true"], #constBtn[aria-disabled="true"] { cursor: default; }
+  #constBtn[aria-disabled="true"] { cursor: default; }
   #viewReset[aria-disabled="true"] { opacity: 0.4; cursor: default; }
   #constBtn svg circle { fill: currentColor; stroke: none; }
   #constBtn svg { width: 22px; height: 22px; stroke-width: 1.6; }
@@ -378,8 +394,7 @@
         <span class="sr">見上げる場所：</span><span class="place-label" id="placeLabel">—</span><span class="sr">（押すと選べます）</span>
         <svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
       </button>
-      <!-- 日付の選択は段階3で。いまは見た目だけ -->
-      <button type="button" class="icon-btn" id="calBtn" aria-label="流星群の日を選ぶ（準備中）" aria-disabled="true" title="準備中">
+      <button type="button" class="icon-btn" id="calBtn" aria-label="流星群の日を選ぶ" aria-haspopup="dialog" aria-expanded="false" aria-controls="dateSheet">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
       </button>
     </div>
@@ -390,7 +405,7 @@
     <div class="stats" id="stats">
       <div class="tot" id="roTotal" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="tot-l">この夜の流星</span><span class="tot-n"><b id="count">0</b><small>個</small></span></div>
       <div class="brk" aria-label="内訳">
-        <i class="dot leo"></i><span class="bl">しし座</span><span class="bar leo"><span id="bLeo"></span></span><span class="bn"><b id="cLeo">0</b><small>個</small></span>
+        <i class="dot leo"></i><span class="bl" id="lMain">しし座</span><span class="bar leo"><span id="bLeo"></span></span><span class="bn"><b id="cLeo">0</b><small>個</small></span>
         <i class="dot oth"></i><span class="bl" id="cOthJa">ほかの群</span><span class="bar oth"><span id="bOth"></span></span><span class="bn"><b id="cOth">0</b><small>個</small></span>
         <i class="dot spo"></i><span class="bl">散在</span><span class="bar spo"><span id="bSpo"></span></span><span class="bn"><b id="cSpo">0</b><small>個</small></span>
       </div>
@@ -445,7 +460,7 @@
     <section class="tm" id="tm" aria-live="polite">
       <button id="playBtn" class="play on" type="button" aria-label="速さを変える（押すたびに）"><span class="pi" id="playIcon">▶</span><span class="ps mono" id="playSpeed">×120</span></button>
       <svg class="emb" id="iEmb" viewBox="0 0 60 60" aria-hidden="true"></svg>
-      <div class="nm"><div class="nm-name" id="iName">—</div><div class="nm-dir" id="iDir">時刻が進むと、流れた流星がここに出ます</div></div>
+      <div class="nm"><div class="nm-mode" id="iMode"></div><div class="nm-name" id="iName">—</div><div class="nm-dir" id="iDir">時刻が進むと、流れた流星がここに出ます</div></div>
       <dl class="st"><div><dt>MAG</dt><dd id="iMag">—</dd></div><div><dt>VELO</dt><dd id="iVel">—</dd></div><div><dt>ALTI</dt><dd id="iAlt">—</dd></div></dl>
     </section>
     <div class="tl-wrap"><canvas id="tl" aria-label="日没から夜明けまでのタイムライン。縦線が流星、細い曲線がしし座の放射点の高さ。ドラッグで時刻を動かせる"></canvas></div>
@@ -463,7 +478,7 @@
   <button type="button" class="close" id="srcClose">閉じる</button>
   <h2>出典と注記</h2>
   <h3>流星のデータ</h3>
-  <p>Global Meteor Network（GMN）の軌道データ（日ごとの軌道サマリー）から、それぞれの地域の 2026-11-18 の夜（日本 08:00〜21:00 UTC・北緯24〜46°・東経122〜146°／北アメリカ 11/18 21:00〜11/19 15:00 UTC・北緯25〜55°・西経60〜125°／ヨーロッパ 11/18 15:00〜11/19 08:00 UTC・北緯35〜62°・西経12°〜東経30°）に、光り始めか消えた点がその範囲に入る流星を抜き出し、見上げた空に描き直しました（加工）。使った値：開始の時刻・光り始めと消えた点の緯度・経度・高さ・速さ・最大の明るさ（等級）・一番明るかった高さ・継続時間・流星群のコード・観測した局の数。局のコードは使っていません。</p>
+  <p>Global Meteor Network（GMN）の軌道データ（日ごとの軌道サマリー）から、選んだ夜（夜の始まりの日を D として、日本 D 08:00〜21:00 UTC・北緯24〜46°・東経122〜146°／北アメリカ D 21:00〜翌日 15:00 UTC・北緯25〜55°・西経60〜125°／ヨーロッパ D 15:00〜翌日 08:00 UTC・北緯35〜62°・西経12°〜東経30°）に、光り始めか消えた点がその範囲に入る流星を抜き出し、見上げた空に描き直しました（加工）。使った値：開始の時刻・光り始めと消えた点の緯度・経度・高さ・速さ・最大の明るさ（等級）・一番明るかった高さ・継続時間・流星群のコード・観測した局の数。局のコードは使っていません。</p>
   <ul>
     <li>データのページ：<a href="https://globalmeteornetwork.org/data/" target="_blank" rel="noopener">https://globalmeteornetwork.org/data/</a> ／ ライセンス：<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a> ／ 列の定義：<a href="https://globalmeteornetwork.org/data/media/GMN_orbit_data_columns.pdf" target="_blank" rel="noopener">GMN_orbit_data_columns.pdf</a></li>
     <li id="srcFiles">使ったファイル：—</li>
@@ -478,7 +493,7 @@
   <ul>
     <li>等距離射影の全天魚眼：中心が真上（天頂）、円のふちが地平線。北が上・東が左・西が右（見上げた空の向き）。点線の円は高さ30°・60°</li>
     <li>流星：光り始めと消えた点を結ぶ3次元の直線を30に分け、見上げる場所からの方角・高さに直して描いています（だから曲線に見えます）。地平線より下の部分は描きません</li>
-    <li>見上げる場所：東京・大阪・福岡・ニューヨーク・トロント・デンバー・ロンドン・パリ・ザグレブの、それぞれ市の中心あたりの代表の点（標高0 m）。北アメリカとヨーロッパは、その地域で GMN の記録が多い街から選びました。時刻はその街の時刻（11月はどこも標準時）</li>
+    <li>見上げる場所：東京・大阪・福岡・ニューヨーク・トロント・デンバー・ロンドン・パリ・ザグレブの、それぞれ市の中心あたりの代表の点（標高0 m）。北アメリカとヨーロッパは、その地域で GMN の記録が多い街から選びました。時刻はその街の時刻（夏の夜は夏時間。EDT・MDT・BST・CEST）</li>
     <li>「ここから見た明るさ」：GMN の最大の明るさ（100 km の距離に直した等級）を、見上げる場所から一番明るかった点までの距離で直したもの（等級＋5×log₁₀（距離÷100 km））。大気による減光は入れていないので、地平線に近い流星は実際にはもっと暗く見えます</li>
     <li>線の太さ・輝き・残光の長さは「ここから見た明るさ」で決めています</li>
     <li>肉眼で見えるかの目安：ここから見て6等より暗い流星は「肉眼ではほぼ見えない」として、細い点線でうっすら描いています（飛んでいたことは GMN に記録されているため）。6等は「理想的な暗い夜空で、肉眼で見える限界」（<a href="https://prc.nao.ac.jp/freqras/glossary.html" target="_blank" rel="noopener">国立天文台「星の明るさ」</a>）。4等は都心の空の目安（ボートル・スカイ・スケールのクラス9「Inner-city sky」〜4.0。<a href="https://www.env.go.jp/content/900400131.pdf" target="_blank" rel="noopener">環境省掲載「星空環境の評価指標の比較」表1</a>）。見え方は空の条件・人・大気で変わります。地平線の下の流星は空には描かず、計器とタイムラインにだけ出します</li>
@@ -487,19 +502,21 @@
     <li>GMN の明るさの測り方の限界：とても明るい流星はカメラで −1等くらいから写りが飽和することがあり、暗い流星は記録から漏れます（GMN の論文 Vida ほか 2021。2020年のペルセウス座流星群では、記録全体の実効的な限界は平均 +3.95等。Vida ほか 2022）</li>
     <li>「◯個の流星を観測」：見上げる場所によらず、その地域のまわり（上の範囲）で GMN のカメラが記録した流星の数です。実際に流れた流星のすべてではありません（カメラのない場所・曇り・暗すぎる流星は入りません）</li>
     <li><b>演出</b>：光っている時間は GMN の継続時間に合わせ、0.5秒より短いものは0.5秒までのばしています。ここから見て −2等より明るい流星だけ、消えるときの火花の粒と短い尾をつけています（実際の見え方の再現ではありません）</li>
-    <li>色：しし座流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
+    <li>流星群の日：有名な流星群ごとに、目安の日の前後2晩のうち、その地域で GMN がその群の流星をいちばん多く記録した夜です（極大の予報ではありません。天気で地域ごとに夜がずれることがあります）。その群の流星が150個より少ない夜は載せていません。日付は夜の始まりの日です</li>
+    <li>おまかせ再生：日付を選ばないと、その地域の流星群の日から選びます。今日が出現期間の流星群があれば、その夜を優先します（出現期間は<a href="https://www.nao.ac.jp/astro/basic/major-meteor-shower.html" target="_blank" rel="noopener">国立天文台「主な流星群」</a>の表。毎年の目安）</li>
+    <li>色：その夜の主な流星群をオレンジ、それ以外を水色（流星の本当の色ではありません）</li>
     <li>下の計器：左の丸を押すたびに速さが変わります（実時間 → 60倍 → 120倍 → 600倍 → 停止）。丸い記号は、向きが空の上で流れた向き、線の長さと描く速さが流星の速さ（速いほど長く一瞬で。目安）。「北西（NW）・仰角61°」は、一番明るかったところが見えた方角と高さです。MAG はここから見た明るさ（指を置くと「〇〇くらい」）</li>
     <li><b>演出</b>：円のふちの建物・木のシルエットは、魚眼の見え方を分かりやすくするための作りものです（その街の本当の景色ではありません）。建物の縦の辺は、魚眼では空の中心へ向かう線になります。地上の光（街明かり・窓の明かり）は描いていません（本来の夜空）</li>
-    <li>点線の曲線：天の赤道（水色）と黄道（ミント）。空の大きな円で、魚眼ではふちに近いほど大きく曲がって見えます。しし座の放射点は黄道の近くにあります</li>
-    <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は<a href="https://www.nao.ac.jp/new-info/meteor/table-code.html" target="_blank" rel="noopener">国立天文台「流星群の和名一覧」</a>（2026年11月5日更新）。一覧にない5つ（おうし座τ・おうし座λ・うみへび座π・11月ペルセウス座ζ・やまねこ座28）は、<a href="https://www.nao.ac.jp/new-info/meteor/index.html" target="_blank" rel="noopener">国立天文台の和名の決め方</a>にならって英名を直した訳です（公式の和名ではありません。名前に「＊」が付きます）</li>
+    <li>点線の曲線：天の赤道（水色）と黄道（ミント）。空の大きな円で、魚眼ではふちに近いほど大きく曲がって見えます</li>
+    <li>流星群の名前：GMN の流星群のコードから。英名と番号は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php" target="_blank" rel="noopener">IAU 流星データセンターの一覧</a>。日本語名は<a href="https://www.nao.ac.jp/new-info/meteor/table-code.html" target="_blank" rel="noopener">国立天文台「流星群の和名一覧」</a>（2026年11月5日更新）。一覧にない10（おうし座τ・おうし座λ・うみへび座π・11月ペルセウス座ζ・やまねこ座28・11月りゅう座ι・12月こいぬ座・12月やまねこ座・おおいぬ座β・しし座φ）は、<a href="https://www.nao.ac.jp/new-info/meteor/index.html" target="_blank" rel="noopener">国立天文台の和名の決め方</a>にならって英名を直した訳です（公式の和名ではありません。名前に「＊」が付きます）。ほかの夜に出てくる小さな流星群で、一覧になく訳もまだないものは「流星群 XAR」のようにコードで出しています</li>
     <li>「来た方向」：その流星の通り道（消えた点→光り始め）を空のかなたへまっすぐ伸ばした向きを、見上げる場所の方角と高さで表したもの。散在流星にも出します</li>
   </ul>
   <h3>星と放射点</h3>
   <ul>
     <li>星の位置と明るさ：ヒッパルコス星表から、6等より明るい星<span id="srcStars">—</span>個（ESA, 1997, The Hipparcos and Tycho Catalogues, ESA SP-1200。<a href="https://vizier.cfa.harvard.edu/viz-bin/VizieR?-source=I/239" target="_blank" rel="noopener">CDS/VizieR I/239</a> から取り出し。This research has made use of the VizieR catalogue access tool, CDS, Strasbourg, France〈DOI: 10.26093/cds/vizier〉）。6等は理想的な暗い夜空で肉眼で見える限界の目安（国立天文台）。位置は ICRS で、時刻に合わせて恒星時で回しています</li>
-    <li>しし座流星群の放射点：赤経 154.4°・赤緯 +21.4°（<a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/pojedynczy_obiekt.php?kodstrumienia=00013" target="_blank" rel="noopener">IAU 流星データセンター</a>。Jenniskens 2023 の値）。しし座流星群がいくつか流れると、うっすら光らせています（演出）</li>
+    <li>放射点：<span id="srcRadiant">—</span>。その夜にその地域で GMN が記録した、その群の流星の地心放射点（RAgeo・DECgeo）の中央値です（目安。2026-11-28 から。しし座流星群は前は <a href="https://www.ta3.sk/IAUC22DB/MDC2022/Roje/pojedynczy_obiekt.php?kodstrumienia=00013" target="_blank" rel="noopener">IAU 流星データセンター</a>の赤経 154.4°・赤緯 +21.4° を使っていました）。主な流星群がいくつか流れると、うっすら光らせています（演出）</li>
     <li>天の川：ESO の全天の天の川パノラマ「The Milky Way panorama」（画像 eso0932a。クレジット <a href="https://www.eso.org/public/images/eso0932a/" target="_blank" rel="noopener">ESO/S. Brunier</a>。<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>）を、2048×1024 に縮めて少しぼかし、その時刻・その場所の空の向きに描き直しています（加工）。地上で撮った写真をつなげたものです。画像の図法は公式には書かれていないので、銀河座標の正距円筒図法として大小マゼラン雲・アンドロメダ銀河の位置で確かめました（天の川の位置は目安）。月明かりや薄明があるとうすくしています</li>
-    <li>月：位置と満ち欠けは簡単な式で計算しています（国立天文台の月の入り〈福岡 19日 0:50・大阪 0:28・東京 0:10〉と 2〜3分、NASA の輝面比〈11/18 21時 約60%〉と 0.2% 以内で合うことを確かめました）。見やすいように実際（約0.5°）より大きく描いています。月が出ているあいだは空を明るくし、暗い星と天の川をうすくしています（目安）</li>
+    <li>月：位置と満ち欠けは簡単な式で計算しています（2026-11-18 の夜で、国立天文台の月の入り〈福岡 19日 0:50・大阪 0:28・東京 0:10〉と 2〜3分、NASA の輝面比〈11/18 21時 約60%〉と 0.2% 以内で合うことを確かめました）。見やすいように実際（約0.5°）より大きく描いています。月が出ているあいだは空を明るくし、暗い星と天の川をうすくしています（目安）</li>
     <li>日の入り・日の出・太陽と星の動きは、おおよその式で計算しています</li>
   </ul>
   <p>非公式のファンメイド試作です。</p>
@@ -516,6 +533,19 @@
     <button type="button" class="sheet-go" id="placeGo">この場所で見る</button>
   </div>
 </div>
+<div class="sheet-wrap" id="dateSheet" hidden>
+  <button type="button" class="sheet-back" id="dateBack" tabindex="-1" aria-label="閉じる"></button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dateTitle">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <h2 id="dateTitle">流星群の日を選ぶ</h2>
+    <p class="sheet-note" id="dateSub">選ばなければ、用意した夜からおまかせで再生します</p>
+    <button type="button" class="night-row night-auto" id="nightAuto" aria-pressed="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c2 0 3.2 1 4.3 2.6l2.4 4.8C14.3 16 15.5 17 17.5 17H21M3 17h3.5c1.4 0 2.4-.5 3.2-1.4M14.3 8.4C15.1 7.5 16.1 7 17.5 7H21M18 4l3 3-3 3M18 14l3 3-3 3"/></svg>
+      <span class="nr-name">おまかせ（ランダム）</span>
+    </button>
+    <div class="night-list" id="nightList"></div>
+  </div>
+</div>
 <div class="msg" id="msg"></div>
 
 <script>
@@ -524,26 +554,32 @@
 // 地域ごとのデータ（2026-11-22 オーナー：北アメリカ・ヨーロッパも）。街は、その地域で GMN の記録が多いところから3つ。
 // 並びの先頭が地域のはじめの街（地域を変えたら先頭に戻す。2026-11-28 段階2）。日本は福岡（いちばんよく見える。2026-11-22 オーナー）
 const REGIONS = {
-  japan:    { ja: '日本', area: '日本のまわり', file: 'data/meteors_20261118_japan.json', cities: ['fukuoka', 'tokyo', 'osaka'], def: 'fukuoka',
+  japan:    { ja: '日本', area: '日本のまわり', cities: ['fukuoka', 'tokyo', 'osaka'], def: 'fukuoka',
               box: '北緯24〜46°・東経122〜146°' },
-  namerica: { ja: '北アメリカ', area: '北アメリカのまわり', file: 'data/meteors_20261118_namerica.json', cities: ['toronto', 'newyork', 'denver'], def: 'toronto',
+  namerica: { ja: '北アメリカ', area: '北アメリカのまわり', cities: ['toronto', 'newyork', 'denver'], def: 'toronto',
               box: '北緯25〜55°・西経60〜125°' },
-  europe:   { ja: 'ヨーロッパ', area: 'ヨーロッパのまわり', file: 'data/meteors_20261118_europe.json', cities: ['zagreb', 'london', 'paris'], def: 'zagreb',
+  europe:   { ja: 'ヨーロッパ', area: 'ヨーロッパのまわり', cities: ['zagreb', 'london', 'paris'], def: 'zagreb',
               box: '北緯35〜62°・西経12°〜東経30°' },
 };
 const STARS_URL = 'data/stars-hipparcos.json'; // ヒッパルコス星表・6等未満（星の位置は例外で ESA のデータも使う。2026-11-22 オーナー）
-const RADIANT = { ra: 154.4, dec: 21.4 }; // curation/events/leonids-2026.json（IAU MDC）
-// 見上げる場所：それぞれ市の中心あたりの代表の点。tz は時刻の表示（11月はどこも標準時）
+// 夜：data/nights.json（GMN が実際に多く記録した、流星群の夜。地域ごと。scripts/gmn/fetch_and_filter.py --auto で作る。2026-11-28 段階3）
+let NIGHTS = null, night = null, mode = 'auto'; // mode：'auto'＝おまかせ再生・'pick'＝選んだ日
+// その夜の主な流星群と放射点（放射点は、その夜にその地域で GMN が記録したその群の流星の地心放射点の中央値。ファイルの meta.radiant）
+let MAIN = 'LEO', RADIANT = { ra: 154.4, dec: 21.4 };
+// 流星群の出現期間（おまかせで、今日が期間中の群の夜を優先する）：国立天文台「主な流星群」の表（https://www.nao.ac.jp/astro/basic/major-meteor-shower.html 2026-11-28 確認。毎年の目安）
+const ACTIVE = { QUA: ['12-28', '01-12'], LYR: ['04-14', '04-30'], PER: ['07-17', '08-24'], ORI: ['10-02', '11-07'], LEO: ['11-06', '11-30'], GEM: ['12-04', '12-20'] };
+const shortName = code => ((SHOWER_NAMES[code] || [code])[0]).replace(/流星群$/, '');
+// 見上げる場所：それぞれ市の中心あたりの代表の点。tz は時刻の表示（tzl＝標準時・tzd＝夏時間の略号。夏の夜は夏時間）
 const CITIES = {
   tokyo:   { ja: '東京', lat: 35.68, lon: 139.77, region: 'japan', tz: 'Asia/Tokyo', tzl: 'JST', seed: 11 },
   osaka:   { ja: '大阪', lat: 34.69, lon: 135.50, region: 'japan', tz: 'Asia/Tokyo', tzl: 'JST', seed: 47 },
   fukuoka: { ja: '福岡', lat: 33.59, lon: 130.40, region: 'japan', tz: 'Asia/Tokyo', tzl: 'JST', seed: 83 },
-  newyork: { ja: 'ニューヨーク', lat: 40.71, lon: -74.01, region: 'namerica', tz: 'America/New_York', tzl: 'EST', seed: 17 },
-  toronto: { ja: 'トロント', lat: 43.65, lon: -79.38, region: 'namerica', tz: 'America/Toronto', tzl: 'EST', seed: 29 },
-  denver:  { ja: 'デンバー', lat: 39.74, lon: -104.99, region: 'namerica', tz: 'America/Denver', tzl: 'MST', seed: 61 },
-  london:  { ja: 'ロンドン', lat: 51.51, lon: -0.13, region: 'europe', tz: 'Europe/London', tzl: 'GMT', seed: 23 },
-  paris:   { ja: 'パリ', lat: 48.86, lon: 2.35, region: 'europe', tz: 'Europe/Paris', tzl: 'CET', seed: 37 },
-  zagreb:  { ja: 'ザグレブ', lat: 45.81, lon: 15.98, region: 'europe', tz: 'Europe/Zagreb', tzl: 'CET', seed: 71 },
+  newyork: { ja: 'ニューヨーク', lat: 40.71, lon: -74.01, region: 'namerica', tz: 'America/New_York', tzl: 'EST', tzd: 'EDT', seed: 17 },
+  toronto: { ja: 'トロント', lat: 43.65, lon: -79.38, region: 'namerica', tz: 'America/Toronto', tzl: 'EST', tzd: 'EDT', seed: 29 },
+  denver:  { ja: 'デンバー', lat: 39.74, lon: -104.99, region: 'namerica', tz: 'America/Denver', tzl: 'MST', tzd: 'MDT', seed: 61 },
+  london:  { ja: 'ロンドン', lat: 51.51, lon: -0.13, region: 'europe', tz: 'Europe/London', tzl: 'GMT', tzd: 'BST', seed: 23 },
+  paris:   { ja: 'パリ', lat: 48.86, lon: 2.35, region: 'europe', tz: 'Europe/Paris', tzl: 'CET', tzd: 'CEST', seed: 37 },
+  zagreb:  { ja: 'ザグレブ', lat: 45.81, lon: 15.98, region: 'europe', tz: 'Europe/Zagreb', tzl: 'CET', tzd: 'CEST', seed: 71 },
 };
 const DEG = Math.PI / 180;
 const NPTS = 31;              // 直線を30に分ける
@@ -730,9 +766,22 @@ function findCross(c, from, to, rising) { // 太陽の上の縁が地平線（-0
 }
 const DIR8 = ['北', '北東', '東', '南東', '南', '南西', '西', '北西'];
 const dir8 = az => DIR8[Math.round(az / 45) % 8];
-const fmtJST = (ms, sec) => new Intl.DateTimeFormat('ja-JP', { timeZone: city.tz, hour: '2-digit', minute: '2-digit', ...(sec ? { second: '2-digit' } : {}), hourCycle: 'h23' }).format(new Date(ms));
-const fmtDateJST = ms => new Intl.DateTimeFormat('ja-JP', { timeZone: city.tz, month: 'numeric', day: 'numeric' }).format(new Date(ms)); // 例：11/19
+// 日付の書式は作るのが重いので、街の時間帯ごとに作り置き（毎コマ作っていた。2026-11-28）
+const DTF = {};
+const dtf = (tz, kind) => DTF[tz + kind] || (DTF[tz + kind] = new Intl.DateTimeFormat(kind === 'p' ? 'en-US' : 'ja-JP',
+  kind === 'hm' ? { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' } :
+  kind === 'hms' ? { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' } :
+  kind === 'md' ? { timeZone: tz, month: 'numeric', day: 'numeric' } :
+  { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }));
+const fmtJST = (ms, sec) => dtf(city.tz, sec ? 'hms' : 'hm').format(new Date(ms));
+const fmtDateJST = ms => dtf(city.tz, 'md').format(new Date(ms)); // 例：11/19
 const fmtUTC = ms => new Date(ms).toISOString().slice(11, 16);
+// その時刻のその街の UTC からのずれ（分）。1月より進んでいれば夏時間
+function tzOffset(tz, ms) {
+  const p = Object.fromEntries(dtf(tz, 'p').formatToParts(new Date(ms)).map(x => [x.type, x.value]));
+  return Math.round((Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute) - Math.floor(ms / 60000) * 60000) / 60000);
+}
+const tzLabel = (c, ms) => c.tzd && tzOffset(c.tz, ms) > tzOffset(c.tz, Date.UTC(new Date(ms).getUTCFullYear(), 0, 15)) ? c.tzd : c.tzl;
 
 // ---------- 状態 ----------
 let meteors = [], stars = [], city = CITIES.fukuoka, F = enuFrame(city.lat, city.lon);
@@ -887,7 +936,7 @@ function drawSky(now) {
   drawSkyLine(t => ({ ra: t, dec: 0 }), 'rgba(143,216,255,0.26)', '天の赤道');
   drawSkyLine(t => { const l = t * DEG, e = 23.44 * DEG; return { ra: (Math.atan2(Math.cos(e) * Math.sin(l), Math.cos(l)) / DEG + 360) % 360, dec: Math.asin(Math.sin(e) * Math.sin(l)) / DEG }; }, 'rgba(94,242,194,0.2)', '黄道');
 
-  // しし座の放射点：しし座流星群がいくつか流れると、うっすら光る（演出）
+  // その夜の主な流星群の放射点：その群の流星がいくつか流れると、うっすら光る（演出）
   const rh = eqToHor(RADIANT.ra, RADIANT.dec, simT, city.lat, city.lon);
   if (rh.alt > 0 && radiantGlow > 0.02) {
     const [x, y] = proj(rh.az, rh.alt), rr = R * 0.16;
@@ -899,7 +948,7 @@ function drawSky(now) {
     if (radiantGlow > 0.35) {
       ctx.font = `${Math.max(12, S * 0.022)}px "Zen Kaku Gothic New", sans-serif`;
       ctx.fillStyle = `rgba(255,181,71,${Math.min(0.85, radiantGlow)})`; ctx.textAlign = 'center';
-      ctx.fillText('しし座の放射点', x, y + rr * 0.55);
+      ctx.fillText(`${shortName(MAIN)}の放射点`, x, y + rr * 0.55);
     }
   }
 
@@ -1042,7 +1091,7 @@ function strokeFaded(pts, col, w, aHead, aTail) {
     ctx.beginPath(); ctx.moveTo(pts[i - 1][0], pts[i - 1][1]); ctx.lineTo(pts[i][0], pts[i][1]); ctx.stroke();
   }
 }
-const colOf = m => m.iau_code === 'LEO' ? COL.LEO : COL.OTHER;
+const colOf = m => m.iau_code === MAIN ? COL.LEO : COL.OTHER; // その夜の主な流星群は琥珀（COL.LEO の色）
 const lighten = (c, k) => c.map(v => Math.round(v + (255 - v) * k));
 function drawGhost(a, now) { // 肉眼ではほぼ見えない流星：細い点線でうっすら
   const m = a.m, D = Math.max(MIN_SHOW, m.duration_s || 0), age = (now - a.t0) / 1000, life = D + 0.6;
@@ -1129,6 +1178,30 @@ function prepTimeline() {
   radCurve = [];
   for (let t = T0; t <= T1; t += 5 * 60000) radCurve.push([t, eqToHor(RADIANT.ra, RADIANT.dec, t, city.lat, city.lon).alt]);
 }
+let tlCache = null;
+function tlLayers() {
+  if (!TW || !TH) return null;
+  const key = `${TW}|${TH}|${DPR}|${T0}|${T1}|${meteors.length}|${meteors[0] ? meteors[0]._t : 0}|${city.lat}|${city.lon}|${MAIN}`;
+  if (tlCache && tlCache.key === key) return tlCache;
+  const bot = TH - 16, mk = alphaK => {
+    const cv = document.createElement('canvas'); cv.width = TW * DPR; cv.height = TH * DPR;
+    const g = cv.getContext('2d'); g.setTransform(DPR, 0, 0, DPR, 0, 0); g.lineWidth = 1;
+    const groups = new Map(); // 色と濃さが同じ線はまとめて1回で引く
+    for (const m of meteors) {
+      const col = colOf(m), a = (alphaK * (m.eye ? 1 : 0.4)).toFixed(3), k = `${col.join(',')},${a}`;
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(m);
+    }
+    for (const [k, list] of groups) {
+      g.strokeStyle = `rgba(${k})`; g.beginPath();
+      for (const m of list) { const x = Math.round(tx(m._t)) + 0.5, len = m.visible ? 6 + 18 * m.b : 4; g.moveTo(x, bot - 1); g.lineTo(x, bot - 1 - len); }
+      g.stroke();
+    }
+    return cv;
+  };
+  tlCache = { key, past: mk(0.85), future: mk(0.35) };
+  return tlCache;
+}
 function drawTimeline() {
   const c = tctx; c.setTransform(DPR, 0, 0, DPR, 0, 0); c.clearRect(0, 0, TW, TH);
   const top = 8, bot = TH - 16, h = bot - top;
@@ -1150,21 +1223,21 @@ function drawTimeline() {
   c.font = '9px "Zen Kaku Gothic New", sans-serif'; c.fillStyle = 'rgba(143,179,168,0.85)';
   c.textAlign = 'left'; c.fillText('日の入り ' + fmtJST(T0), PADL, TH - 4);
   c.textAlign = 'right'; c.fillText('日の出 ' + fmtJST(T1), TW - PADR, TH - 4);
-  // 流星（この空に見えたものだけ。高さは明るさ）
-  for (const m of meteors) {
-    const x = Math.round(tx(m._t)) + 0.5, len = m.visible ? 6 + 18 * m.b : 4, col = colOf(m);
-    const a = (m._t <= simT ? 0.85 : 0.35) * (m.eye ? 1 : 0.4);
-    c.strokeStyle = `rgba(${col[0]},${col[1]},${col[2]},${a})`;
-    c.beginPath(); c.moveTo(x, bot - 1); c.lineTo(x, bot - 1 - len); c.stroke();
+  // 流星（この空に見えたものだけ。高さは明るさ）：再生位置より前は濃く、あとはうすく。
+  // 流星が多い夜（ヨーロッパのペルセウス座は 1万6千個）でも軽いように、2枚の板に前もって描いて、毎コマは貼るだけ（2026-11-28）
+  const ly = tlLayers(); if (ly) {
+    const sx = Math.max(PADL, Math.min(TW, Math.round(tx(simT)) + 1));
+    c.drawImage(ly.future, sx * DPR, 0, (TW - sx) * DPR, TH * DPR, sx, 0, TW - sx, TH);
+    c.drawImage(ly.past, 0, 0, sx * DPR, TH * DPR, 0, 0, sx, TH);
   }
-  // しし座の放射点の高さ（0°〜90°）
+  // 主な流星群の放射点の高さ（0°〜90°）
   c.strokeStyle = 'rgba(255,181,71,0.75)'; c.lineWidth = 1.2; c.beginPath();
   radCurve.forEach(([t, alt], i) => { const y = bot - h * Math.max(0, alt) / 90; i ? c.lineTo(tx(t), y) : c.moveTo(tx(t), y); });
   c.stroke();
   const lab = radCurve.find(p => p[1] > 12); // 放射点が昇りはじめたところに名前
   if (lab) {
     c.font = '9px "Zen Kaku Gothic New", sans-serif'; c.fillStyle = 'rgba(255,181,71,0.9)'; c.textAlign = 'right';
-    c.fillText('しし座の放射点の高さ →', tx(lab[0]) - 4, bot - h * lab[1] / 90 - 3);
+    c.fillText(`${shortName(MAIN)}の放射点の高さ →`, tx(lab[0]) - 4, bot - h * lab[1] / 90 - 3);
   }
   // 再生位置（オレンジの丸い印）
   const px = tx(simT);
@@ -1187,12 +1260,24 @@ tl.addEventListener('pointerup', () => { dragging = false; });
 tl.addEventListener('pointercancel', () => { dragging = false; });
 
 // ---------- 数・計器 ----------
-function idxAt(t) { let i = 0; while (i < meteors.length && meteors[i]._t <= t) i++; return i; }
+function idxAt(t) { let lo = 0, hi = meteors.length; while (lo < hi) { const mid = (lo + hi) >> 1; if (meteors[mid]._t <= t) lo = mid + 1; else hi = mid; } return lo; } // t までに始まった流星の数（二分探索）
 let lastIdx = 0;
 function lastVisibleBefore(t) { const i = idxAt(t) - 1; return i >= 0 ? meteors[i] : null; }
+// 数の累計（流星を並べた順に、日没からの 総数・主な群・散在・ほかの群の種類の数）。夜や場所を変えたときに作り直す
+let cum = null;
+function prepCount() {
+  const N = meteors.length, n = new Int32Array(N + 1), leo = new Int32Array(N + 1), sp = new Int32Array(N + 1), gs = new Int32Array(N + 1), seen = new Set();
+  for (let i = 0; i < N; i++) {
+    const m = meteors[i], on = m._t >= T0;
+    n[i + 1] = n[i] + (on ? 1 : 0); leo[i + 1] = leo[i] + (on && m.iau_code === MAIN ? 1 : 0); sp[i + 1] = sp[i] + (on && !m.iau_code ? 1 : 0);
+    if (on && m.iau_code && m.iau_code !== MAIN) seen.add(m.iau_code);
+    gs[i + 1] = seen.size;
+  }
+  cum = { n, leo, sp, gs, T0 };
+}
 function updateCount() {
-  let n = 0, leo = 0, sp = 0; const groups = new Set();
-  for (const m of meteors) { if (m._t > simT) break; if (m._t >= T0) { n++; if (m.iau_code === 'LEO') leo++; else if (!m.iau_code) sp++; else groups.add(m.iau_code); } }
+  if (!cum || cum.T0 !== T0 || cum.n.length !== meteors.length + 1) prepCount();
+  const i = idxAt(simT), n = cum.n[i], leo = cum.leo[i], sp = cum.sp[i], groups = { size: cum.gs[i] };
   const other = n - leo - sp;
   document.getElementById('count').textContent = n;
   document.getElementById('cLeo').textContent = leo; document.getElementById('cSpo').textContent = sp; document.getElementById('cOth').textContent = other;
@@ -1230,6 +1315,55 @@ const SHOWER_NAMES = {
   DEL: ['12月やまねこ座流星群', 'December Lyncids', 494, true],
   MCB: ['おおいぬ座β流星群', 'beta-Canis Majorids', 559, true],
   PLE: ['しし座φ流星群', 'phi-Leonids', 882, true],
+  // ほかの流星群の夜（2026-11-28 段階3）で出てくるもの。和名・英名・番号は国立天文台「流星群の和名一覧」（2026-11-05 更新・2026-11-28 確認）。
+  // 一覧にないもの（48）は名前を付けず「流星群 XXX」と出す（訳はオーナーの判断待ち）
+  GEM: ['ふたご座流星群', 'Geminids', 4],
+  LYR: ['4月こと座流星群', 'April Lyrids', 6],
+  ORI: ['オリオン座流星群', 'Orionids', 8],
+  PER: ['ペルセウス座流星群', 'Perseids', 7],
+  QUA: ['しぶんぎ座流星群', 'Quadrantids', 10],
+  AHY: ['うみへび座α流星群', 'alpha-Hydrids', 331],
+  AIC: ['8月くじら座ι流星群', 'August iota-Cetids', 505],
+  ARC: ['4月はくちょう座ρ流星群', 'April rho-Cygnids', 348],
+  AUD: ['8月りゅう座流星群', 'August Draconids', 197],
+  AVB: ['おとめ座α流星群', 'alpha-Virginids', 21],
+  AXC: ['8月カシオペヤ座ξ流星群', 'August xi-Cassiopeiids', 465],
+  COM: ['かみのけ座流星群', 'Comae Berenicids', 20],
+  CTA: ['おうし座χ流星群', 'chi-Taurids', 388],
+  DAB: ['12月うしかい座α流星群', 'December alpha-Bootids', 497],
+  DOU: ['12月おおぐま座ω流星群', 'December omega-Ursae Majorids', 563],
+  DSV: ['12月おとめ座σ流星群', 'December sigma-Virginids', 428],
+  EGE: ['ふたご座ε流星群', 'epsilon-Geminids', 23],
+  EHY: ['うみへび座η流星群', 'eta-Hydrids', 529],
+  ERI: ['エリダヌス座η流星群', 'eta-Eridanids', 191],
+  ETA: ['みずがめ座η流星群', 'eta-Aquariids', 31],
+  FTC: ['カシオペヤ座43流星群', '43-Cassiopeiids', 546],
+  HYD: ['うみへび座σ流星群', 'sigma-Hydrids', 16],
+  JBC: ['1月コップ座β流星群', 'January beta-Craterids', 582],
+  JLL: ['1月しし座λ流星群', 'January lambda-Leonids', 644],
+  JPE: ['7月ペガスス座流星群', 'July Pegasids', 175],
+  KCG: ['はくちょう座κ流星群', 'kappa-Cygnids', 12],
+  KSE: ['へび座κ流星群', 'kappa-Serpentids', 27],
+  LMI: ['こじし座流星群', 'Leonis Minorids', 22],
+  MON: ['12月いっかくじゅう座流星群', 'December Monocerotids', 19],
+  NCC: ['かに座δ北流星群', 'Northern delta-Cancrids', 96],
+  NDA: ['みずがめ座δ北流星群', 'Northern delta-Aquariids', 26],
+  NPE: ['ペガスス座ν流星群', 'nu-Pegasids', 827],
+  NUE: ['エリダヌス座ν流星群', 'nu-Eridanids', 337],
+  NZC: ['6月わし座北流星群', 'Northern June Aquilids', 164],
+  OAG: ['10月ぎょしゃ座流星群', 'October Aurigids', 818],
+  OCU: ['10月おおぐま座流星群', 'October Ursae Majorids', 333],
+  OHD: ['うみへび座ω流星群', 'omega-Hydrids', 877],
+  OLE: ['しし座ο流星群', 'omicron-Leonids', 515],
+  PAU: ['みなみのうお座流星群', 'Piscis Austrinids', 183],
+  SCC: ['かに座δ南流星群', 'Southern delta-Cancrids', 97],
+  SDA: ['みずがめ座δ南流星群', 'Southern delta-Aquariids', 5],
+  SFD: ['りゅう座64流星群', '64-Draconids', 557],
+  TCA: ['かに座τ流星群', 'tau-Cancrids', 480],
+  TPY: ['らしんばん座θ流星群', 'theta-Pyxidids', 340],
+  TTB: ['うしかい座22流星群', '22-Bootids', 543],
+  XVI: ['12月おとめ座χ流星群', 'December chi-Virginids', 335],
+  ZCY: ['はくちょう座ζ流星群', 'zeta-Cygnids', 40],
 };
 // 来た方向：通り道（消えた点→光り始め）を空のかなたへ伸ばした向き。その場所の空での方角と高さ
 function cameFrom(m) {
@@ -1268,12 +1402,12 @@ function showLast(m) {
   }
   document.getElementById('iDir').textContent = dirTxt;
   // 記号：向きは空の上で流れた向き、長さと描く速さは流星の速さ（速いほど長く、一瞬で）。位置は記号なので中心に
-  const col = m.iau_code === 'LEO' ? 'var(--amber)' : 'var(--sky)';
+  const col = m.iau_code === MAIN ? 'var(--amber)' : 'var(--sky)';
   if (m.visible) {
     const [bx, by] = P(b), [ex, ey] = P(e), dl = Math.hypot(ex - bx, ey - by) || 1, ux = (ex - bx) / dl, uy = (ey - by) / dl;
     const L = 14 + 30 * Math.max(0, Math.min(1, (m.v_init_kms - 11) / 62)), x0 = 30 - ux * L / 2, y0 = 30 - uy * L / 2, x1 = 30 + ux * L / 2, y1 = 30 + uy * L / 2;
     const dur = Math.max(0.25, Math.min(1.4, 1.7 - m.v_init_kms / 55)).toFixed(2), gid = 'g' + m._t;
-    emb.innerHTML = embBase() + `<defs><linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"><stop offset="0" stop-color="${m.iau_code === 'LEO' ? '#ffb547' : '#8fd8ff'}" stop-opacity="0"/><stop offset="1" stop-color="${m.iau_code === 'LEO' ? '#ffb547' : '#8fd8ff'}"/></linearGradient></defs>` +
+    emb.innerHTML = embBase() + `<defs><linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="${x0.toFixed(1)}" y1="${y0.toFixed(1)}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}"><stop offset="0" stop-color="${m.iau_code === MAIN ? '#ffb547' : '#8fd8ff'}" stop-opacity="0"/><stop offset="1" stop-color="${m.iau_code === MAIN ? '#ffb547' : '#8fd8ff'}"/></linearGradient></defs>` +
       `<path class="emb-path" d="M ${x0.toFixed(1)} ${y0.toFixed(1)} L ${x1.toFixed(1)} ${y1.toFixed(1)}" pathLength="100" style="stroke:url(#${gid});animation-duration:${dur}s"/>` +
       `<circle class="emb-head" cx="${x1.toFixed(1)}" cy="${y1.toFixed(1)}" r="2.4" style="fill:${col};animation-delay:${dur}s"/>`;
   } else emb.innerHTML = embBase();
@@ -1312,25 +1446,25 @@ function tick(now) {
     const prev = simT;
     simT = Math.min(T1, simT + dt * speed * 1000);
     // この間に始まった流星を光らせる
-    let spawned = false;
+    let spawned = null;
     while (lastIdx < meteors.length && meteors[lastIdx]._t <= simT) {
       const m = meteors[lastIdx++];
       if (m._t <= prev) continue;
       if (m.visible) active.push({ m, t0: now });
-      showLast(m); spawned = true;
+      spawned = m; // カードは、このコマで最後に始まった流星だけ（多い夜に何度も書き直さない）
     }
-    if (spawned) updateCount();
+    if (spawned) { showLast(spawned); updateCount(); }
     if (simT >= T1) setPlaying(false);
   }
-  // 放射点の光：直前の空の時間 20分に流れたしし座流星群の数
+  // 放射点の光：直前の空の時間 20分に流れた主な流星群の数
   let recent = 0;
-  for (let i = lastIdx - 1; i >= 0 && meteors[i]._t > simT - 20 * 60000; i--) if (meteors[i].visible && meteors[i].iau_code === 'LEO') recent++;
+  for (let i = lastIdx - 1; i >= 0 && meteors[i]._t > simT - 20 * 60000; i--) if (meteors[i].visible && meteors[i].iau_code === MAIN) recent++;
   radiantGlow += (Math.min(1, recent / 4) - radiantGlow) * Math.min(1, dt * 1.5);
   active = active.filter(a => !a.done); trains = trains.filter(t => !t.done);
   sparks = sparks.filter(p => (now - p.t0) / 1000 < p.life);
   drawSky(now);
   drawTimeline();
-  rimTime.innerHTML = `${fmtDateJST(simT)} ${fmtJST(simT)} ${city.tzl} <tspan class="u">UTC ${fmtUTC(simT)}</tspan>`; // いつの流星か分かるように日付も（2026-11-22 オーナー）
+  rimTime.innerHTML = `${fmtDateJST(simT)} ${fmtJST(simT)} ${tzLabel(city, simT)} <tspan class="u">UTC ${fmtUTC(simT)}</tspan>`; // いつの流星か分かるように日付も（2026-11-22 オーナー）
   requestAnimationFrame(tick);
 }
 
@@ -1348,38 +1482,108 @@ function setSpeed(v) {
 }
 const setPlaying = v => setSpeed(v ? speed : 0);
 playBtn.addEventListener('click', () => setSpeed(SPEEDS[(SPEEDS.indexOf(playing ? speed : 0) + 1) % SPEEDS.length]));
-const regionData = {};
-async function loadRegion(rk) {
-  if (!regionData[rk]) regionData[rk] = fetch(REGIONS[rk].file, { cache: 'no-cache' }).then(r => r.json());
-  return regionData[rk];
+// ---------- 夜（流星群の日）と場所 ----------
+const fileData = {};
+async function loadFile(file) { // 夜のファイルは開いたものだけ読む（いちばん大きいヨーロッパのペルセウス座は gzip で約700KB）
+  if (!fileData[file]) fileData[file] = fetch('data/' + file, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(file); return r.json(); });
+  return fileData[file];
 }
-let curRegion = null, hashT = false;
-async function setCity(key) {
+const nightsOf = rk => (NIGHTS && NIGHTS.regions[rk]) || [];
+const fmtNight = n => n.replace(/-/g, '/'); // 夜の始まりの日（例：2026/11/18）
+function isActive(code, d = new Date()) { // 今日がその群の出現期間か（年をまたぐしぶんぎ座も）
+  const r = ACTIVE[code]; if (!r) return false;
+  const md = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return r[0] <= r[1] ? md >= r[0] && md <= r[1] : md >= r[0] || md <= r[1];
+}
+// おまかせ：その地域の夜（どれも、その群の流星が MIN_SHOWER 個以上＝曇りの夜は入っていない）から。今日が出現期間の群があれば、その夜を優先
+function chooseAuto(rk, exclude) {
+  const list = nightsOf(rk), act = list.filter(n => isActive(n.shower));
+  let pool = (act.length ? act : list).filter(n => n !== exclude);
+  if (!pool.length) pool = list.filter(n => n !== exclude);
+  if (!pool.length) pool = list;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+let curRegion = null, hashT = false, sceneBusy = false;
+// 場所（街）と夜を決めて描き直す。nt を省くと：同じ地域なら今の夜、ほかの地域なら同じ流星群の夜（なければおまかせ）
+async function setCity(key, nt) {
   const nc = CITIES[key], rk = nc.region, first = curRegion === null;
-  const frac = first ? (rk === 'japan' ? null : 0.45) : (simT - T0) / (T1 - T0); // はじめて開いたとき：日本は日本時間0時（または #t=）、ほかは夜の半ばすぎ
-  if (rk !== curRegion) {
-    const d = await loadRegion(rk);
+  if (!nt) {
+    nt = rk === curRegion && night ? night : (night && nightsOf(rk).find(n => n.shower === night.shower));
+    if (!nt) { nt = chooseAuto(rk); mode = 'auto'; }
+  }
+  const frac = first ? 0 : (simT - T0) / (T1 - T0);
+  const fileChanged = !night || nt.file !== night.file;
+  if (fileChanged) {
+    const d = await loadFile(nt.file);
     meteors = d.meteors.map(m => ({ ...m, _t: Date.parse(m.utc) })).sort((a, b) => a._t - b._t);
     DATA_FROM = Date.parse(d.meta.filter.utc_from); DATA_TO = Date.parse(d.meta.filter.utc_to);
+    MAIN = d.meta.shower; if (d.meta.radiant) RADIANT = { ra: d.meta.radiant.ra, dec: d.meta.radiant.dec };
     document.getElementById('srcFiles').innerHTML = '使ったファイル：' + d.meta.files.map(u => `<a href="${u}" target="_blank" rel="noopener">${u.split('/').pop()}</a>`).join('、');
     document.getElementById('srcGen').textContent = (d.meta.files_generated_utc || []).map(x => String(x).slice(0, 16)).join('・') + ' UTC';
+    document.getElementById('srcRadiant').textContent = d.meta.radiant ? `${SHOWER_NAMES[MAIN] ? SHOWER_NAMES[MAIN][0] : MAIN}：赤経 ${d.meta.radiant.ra}°・赤緯 ${d.meta.radiant.dec >= 0 ? '+' : ''}${d.meta.radiant.dec}°（${d.meta.radiant.n}個の中央値）` : '—';
+    document.getElementById('lMain').textContent = shortName(MAIN);
+    document.getElementById('tl').setAttribute('aria-label', `日没から夜明けまでのタイムライン。縦線が流星、細い曲線が${shortName(MAIN)}の放射点の高さ。ドラッグで時刻を動かせる`);
   }
-  const regionChanged = rk !== curRegion; curRegion = rk;
+  const changed = rk !== curRegion || fileChanged; curRegion = rk; night = nt;
   city = nc;
   skyline = buildSkyline(city.seed * 7919);
   renderPlaceChips();
-  document.getElementById('placeLabel').textContent = `${REGIONS[rk].ja} · ${city.ja}`; // 「国・地域 · 街」（町の段は段階2で）
+  document.getElementById('placeLabel').textContent = `${REGIONS[rk].ja} · ${city.ja}`;
   document.getElementById('roTotal').title = `${REGIONS[rk].area}で GMN のカメラが記録した流星（日没から いまの時刻まで）`;
-  // その街の 11/18 の日の入り（現地の正午から探す）と、次の日の出
-  const noon = Date.UTC(2026, 10, 18, 12) - city.lon / 15 * 3600000;
+  // その街の、夜の始まりの日の日の入り（現地の正午から探す）と、次の日の出
+  const [Y, M, D] = nt.night.split('-').map(Number);
+  const noon = Date.UTC(Y, M - 1, D, 12) - city.lon / 15 * 3600000;
   T0 = findCross(city, noon, noon + 12 * 3600000, false);
   T1 = findCross(city, T0 + 6 * 3600000, T0 + 20 * 3600000, true);
-  simT = regionChanged && frac !== null && !(first && hashT) ? T0 + frac * (T1 - T0) : Math.max(T0, Math.min(T1, simT)); // 地域を変えたら、夜のなかの同じくらいの時刻に
+  // はじめて開いたとき：日本は日本時間0時、ほかは夜の半ばすぎ（#t= があればその時刻）。地域や夜を変えたら、夜のなかの同じくらいの時刻に
+  if (first) { if (!hashT) simT = rk === 'japan' ? Date.UTC(Y, M - 1, D, 15) : T0 + 0.45 * (T1 - T0); }
+  else if (changed) simT = T0 + frac * (T1 - T0);
+  simT = Math.max(T0, Math.min(T1, simT));
   rimVer = -1; mw.key = '';
-  prepare(); prepTimeline();
+  prepare(); prepTimeline(); cum = null; tlCache = null;
   active = []; sparks = []; trains = []; lastIdx = idxAt(simT);
   updateCount(); showLast(lastVisibleBefore(simT));
+  showMode(); renderNightList(); syncURL();
 }
+// カードの群名の上：おまかせ再生（ミント）か、選んだ日（淡い琥珀）か
+function showMode() {
+  const el = document.getElementById('iMode');
+  el.textContent = `${mode === 'auto' ? 'おまかせ再生' : '選んだ日'} · ${fmtNight(night.night)}`;
+  el.classList.toggle('pick', mode === 'pick');
+}
+// URL に夜と場所を載せる（共有したときに同じ夜が出るように）。おまかせで決まった夜は auto=1 をつける（開き直しても選び直さない）
+function syncURL() {
+  const key = Object.keys(CITIES).find(k => CITIES[k] === city), q = new URLSearchParams();
+  q.set('date', night.night); q.set('city', key); if (mode === 'auto') q.set('auto', '1');
+  try { history.replaceState(null, '', location.pathname + '?' + q.toString()); } catch (e) { /* file:// など */ }
+}
+async function goScene(key, nt) {
+  if (sceneBusy) return; sceneBusy = true;
+  try { await setCity(key, nt); } finally { sceneBusy = false; }
+}
+
+// ---------- 下から出るシート（場所・日付） ----------
+function openSheet(sheet, opener, focusSel) {
+  sheet.hidden = false; sheet.classList.add('opening'); opener.setAttribute('aria-expanded', 'true');
+  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.remove('opening')));
+  const on = sheet.querySelector(focusSel) || sheet.querySelector('.sheet button'); if (on) on.focus();
+}
+function closeSheet(sheet, opener) {
+  if (sheet.hidden || sheet.classList.contains('closing')) return;
+  opener.setAttribute('aria-expanded', 'false');
+  const done = () => { sheet.hidden = true; sheet.classList.remove('closing'); };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) done(); else { sheet.classList.add('closing'); setTimeout(done, 230); }
+  opener.focus();
+}
+function sheetKeys(sheet, close) {
+  sheet.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return; // シートの中でフォーカスを回す
+    const f = [...sheet.querySelectorAll('.sheet button')]; const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  });
+}
+
 // 場所の選択：チップを押すと下からシート。地域・街のチップを押すとすぐに切り替わり、「この場所で見る」で閉じる（見本と同じ）。
 // 地域を変えたら街はその地域の先頭に。地域が変わるのは本人が選んだときだけ（位置情報などで自動に変えない）
 const placeBtn = document.getElementById('placeBtn'), placeSheet = document.getElementById('placeSheet');
@@ -1389,39 +1593,38 @@ function renderPlaceChips() {
   document.getElementById('chipsRegion').innerHTML = Object.entries(REGIONS).map(([k, R]) => chip(k, R.ja, k === rk, 'region')).join('');
   document.getElementById('chipsCity').innerHTML = REGIONS[rk].cities.map(k => chip(k, CITIES[k].ja, k === key, 'city')).join('');
 }
-let placeBusy = false;
-async function pickPlace(key) {
-  if (placeBusy || CITIES[key] === city) return;
-  placeBusy = true;
-  try { await setCity(key); } finally { placeBusy = false; }
-}
 placeSheet.addEventListener('click', e => {
   const r = e.target.closest('[data-region]'), c = e.target.closest('[data-city]');
   // チップは並べ直すので、押したチップにフォーカスを戻す（キーボードで続けて選べるように）
-  if (r) { const k = r.dataset.region; if (k !== city.region) pickPlace(REGIONS[k].cities[0]).then(() => { const b = placeSheet.querySelector(`[data-region="${k}"]`); if (b) b.focus(); }); }
-  else if (c) pickPlace(c.dataset.city).then(() => { const b = placeSheet.querySelector(`[data-city="${c.dataset.city}"]`); if (b) b.focus(); });
+  if (r) { const k = r.dataset.region; if (k !== city.region) goScene(REGIONS[k].cities[0]).then(() => { const b = placeSheet.querySelector(`[data-region="${k}"]`); if (b) b.focus(); }); }
+  else if (c && CITIES[c.dataset.city] !== city) goScene(c.dataset.city).then(() => { const b = placeSheet.querySelector(`[data-city="${c.dataset.city}"]`); if (b) b.focus(); });
 });
-function openPlace() {
-  renderPlaceChips();
-  placeSheet.hidden = false; placeSheet.classList.add('opening'); placeBtn.setAttribute('aria-expanded', 'true');
-  requestAnimationFrame(() => requestAnimationFrame(() => placeSheet.classList.remove('opening')));
-  const on = placeSheet.querySelector('#chipsRegion [aria-pressed="true"]'); if (on) on.focus();
-}
-function closePlace() {
-  if (placeSheet.hidden || placeSheet.classList.contains('closing')) return;
-  placeBtn.setAttribute('aria-expanded', 'false');
-  const done = () => { placeSheet.hidden = true; placeSheet.classList.remove('closing'); };
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) done(); else { placeSheet.classList.add('closing'); setTimeout(done, 230); }
-  placeBtn.focus();
-}
-placeBtn.addEventListener('click', openPlace);
+const closePlace = () => closeSheet(placeSheet, placeBtn);
+placeBtn.addEventListener('click', () => { renderPlaceChips(); openSheet(placeSheet, placeBtn, '#chipsRegion [aria-pressed="true"]'); });
 document.getElementById('placeGo').addEventListener('click', closePlace);
 document.getElementById('placeBack').addEventListener('click', closePlace);
-placeSheet.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { e.preventDefault(); closePlace(); return; }
-  if (e.key !== 'Tab') return; // シートの中でフォーカスを回す
-  const f = [...placeSheet.querySelectorAll('.sheet button')]; const i = f.indexOf(document.activeElement);
-  if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+sheetKeys(placeSheet, closePlace);
+
+// 日付の選択：先頭に「おまかせ（ランダム）」、その下に用意した流星群の夜（群名・日付・流星の数）。選ぶと閉じる（見本と同じ）
+const calBtn = document.getElementById('calBtn'), dateSheet = document.getElementById('dateSheet');
+function renderNightList() {
+  const rk = city.region;
+  document.getElementById('dateSub').textContent = `選ばなければ、用意した夜からおまかせで再生します。どれも${REGIONS[rk].area}で GMN が実際に多く記録した夜です`;
+  document.getElementById('nightAuto').setAttribute('aria-pressed', mode === 'auto');
+  document.getElementById('nightList').innerHTML = nightsOf(rk).map(n => {
+    const on = mode === 'pick' && n === night;
+    return `<button type="button" class="night-row" data-night="${n.night}" aria-pressed="${on}"><i class="dot leo" aria-hidden="true"></i><span class="nr-name">${SHOWER_NAMES[n.shower] ? SHOWER_NAMES[n.shower][0] : n.shower}</span><span class="nr-date mono">${fmtNight(n.night)}</span><span class="nr-n mono" aria-label="${n.count}個">${n.count.toLocaleString('ja-JP')}</span></button>`;
+  }).join('');
+}
+const closeDate = () => closeSheet(dateSheet, calBtn);
+calBtn.addEventListener('click', () => { renderNightList(); openSheet(dateSheet, calBtn, mode === 'auto' ? '#nightAuto' : '.night-row[aria-pressed="true"]'); });
+document.getElementById('dateBack').addEventListener('click', closeDate);
+sheetKeys(dateSheet, closeDate);
+dateSheet.addEventListener('click', e => {
+  const key = Object.keys(CITIES).find(k => CITIES[k] === city);
+  if (e.target.closest('#nightAuto')) { mode = 'auto'; closeDate(); goScene(key, chooseAuto(city.region, night)); return; }
+  const r = e.target.closest('[data-night]');
+  if (r) { const nt = nightsOf(city.region).find(n => n.night === r.dataset.night); mode = 'pick'; closeDate(); if (nt === night) { showMode(); renderNightList(); syncURL(); } else goScene(key, nt); }
 });
 
 const src = document.getElementById('sources');
@@ -1440,9 +1643,8 @@ new ResizeObserver(onResize).observe(domeEl);
 // ---------- 読み込み ----------
 (async () => {
   try {
-    const q0 = new URLSearchParams(location.hash.slice(1)), ck = CITIES[q0.get('city')] ? q0.get('city') : 'fukuoka';
-    const [s] = await Promise.all([fetch(STARS_URL).then(r => r.json()), loadRegion(CITIES[ck].region)]);
-    stars = s.stars; prepStars();
+    const [st, nj] = await Promise.all([fetch(STARS_URL).then(r => r.json()), fetch('data/nights.json', { cache: 'no-cache' }).then(r => r.json())]);
+    stars = st.stars; prepStars(); NIGHTS = nj;
     loadMilkyWay('data/milkyway-eso0932a-2048.jpg');
     document.getElementById('srcStars').textContent = stars.length;
   } catch (e) {
@@ -1450,10 +1652,20 @@ new ResizeObserver(onResize).observe(domeEl);
     return;
   }
   layout();
-  const q = new URLSearchParams(location.hash.slice(1));
-  if (q.get('t') && !isNaN(Date.parse(q.get('t')))) { simT = Date.parse(q.get('t')); hashT = true; }
-  await setCity(CITIES[q.get('city')] ? q.get('city') : 'fukuoka'); // はじめは福岡（GMN の流星が近く、いちばんよく見える。2026-11-22 オーナー）
-  setSpeed(SPEEDS.includes(+q.get('speed')) && +q.get('speed') > 0 ? +q.get('speed') : 120); // 日の入り・日の出が決まってから（先に呼ぶと時刻が戻る）
+  // URL：?date=2026-11-18&city=fukuoka（&auto=1 はおまかせで決まった夜）。前の形の #city=…&t=…&speed=… も開ける
+  const qs = new URLSearchParams(location.search), qh = new URLSearchParams(location.hash.slice(1));
+  const qv = k => qs.get(k) || qh.get(k);
+  if (qv('t') && !isNaN(Date.parse(qv('t')))) { simT = Date.parse(qv('t')); hashT = true; }
+  let key = CITIES[qv('city')] ? qv('city') : null, date = qv('date'), nt = null;
+  if (date && !key) { const rk = Object.keys(REGIONS).find(r => nightsOf(r).some(n => n.night === date)); if (rk) key = REGIONS[rk].cities[0]; }
+  key = key || 'fukuoka'; // はじめは福岡（GMN の流星が近く、いちばんよく見える。2026-11-22 オーナー）
+  const list = nightsOf(CITIES[key].region);
+  if (date) nt = list.find(n => n.night === date);
+  if (!nt && hashT) nt = list.find(n => { const d0 = Date.parse(n.night + 'T00:00:00Z'); return simT >= d0 && simT < d0 + 2 * 86400000; }); // 前の形の共有リンク（時刻だけ）
+  if (nt) mode = date && qv('auto') === '1' ? 'auto' : 'pick';
+  else { nt = chooseAuto(CITIES[key].region); mode = 'auto'; hashT = false; } // URL に日付がないとき：おまかせ
+  await setCity(key, nt);
+  setSpeed(SPEEDS.includes(+qv('speed')) && +qv('speed') > 0 ? +qv('speed') : 120); // 日の入り・日の出が決まってから（先に呼ぶと時刻が戻る）
   requestAnimationFrame(tick);
 })();
 })();
