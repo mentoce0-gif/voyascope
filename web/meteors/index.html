@@ -266,13 +266,35 @@
   .ctl { display: flex; align-items: center; gap: 8px; }
   .place { position: relative; flex: 1 1 auto; min-width: 0; height: 48px; border-radius: 24px; background: #8ff0c8; color: #06231a;
     display: flex; align-items: center; gap: 8px; padding: 0 16px; font-size: 16px; font-weight: 700; cursor: pointer; }
-  .place:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .place { border: 0; min-height: 0; text-align: left; font-family: var(--font-body); }
+  .place:hover { background: #a6f4d4; }
+  .place:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
   .place .ic { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.2; }
   .place .chev { stroke-width: 2.4; }
   .place-label { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.02em; }
-  /* 端末の選択画面（iPhone はホイール）を出す透明の select をチップ全体に重ねる。シートは段階2で */
-  .place select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; border: 0; appearance: none; -webkit-appearance: none; }
-  .place select option { color: #000; }
+  /* 場所のシート（下から出る）：観測網の地域と街の2段のチップ。2026-11-28 段階2（オーナーの改修案。町の段は置かない） */
+  .sheet-wrap { position: fixed; inset: 0; z-index: 7; display: flex; flex-direction: column; justify-content: flex-end; }
+  .sheet-back { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; border: 0; border-radius: 0; padding: 0; background: rgba(2, 5, 12, 0.62); cursor: default; }
+  .sheet-back:hover { background: rgba(2, 5, 12, 0.62); }
+  .sheet { position: relative; width: 100%; max-width: 520px; margin: 0 auto; background: #0d1730; border: 1px solid #2a3d66; border-bottom: 0; border-radius: 24px 24px 0 0;
+    padding: 10px 18px calc(26px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 14px;
+    transform: translateY(0); transition: transform .22s ease-out; }
+  .sheet-wrap.closing .sheet, .sheet-wrap.opening .sheet { transform: translateY(100%); }
+  .sheet-wrap.closing .sheet-back, .sheet-wrap.opening .sheet-back { opacity: 0; }
+  .sheet-back { transition: opacity .22s; }
+  @media (prefers-reduced-motion: reduce) { .sheet, .sheet-back { transition: none; } }
+  .sheet-handle { align-self: center; width: 40px; height: 4px; border-radius: 2px; background: #3a4c72; }
+  .sheet h2 { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: 0.02em; }
+  .sheet-row { display: flex; flex-direction: column; gap: 6px; }
+  .sheet-lab { font-size: 12px; color: #8ea3c2; letter-spacing: 0.04em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { height: 44px; min-height: 44px; border-radius: 22px; border: 1.5px solid #2a3d66; background: #0b1a2c; color: #e6eef8; padding: 0 16px;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
+  .chip:hover { background: #12243a; }
+  .chip[aria-pressed="true"] { border-color: #8ff0c8; background: #8ff0c8; color: #06231a; }
+  .sheet-note { margin: -4px 0 0; font-size: 11px; line-height: 1.6; color: #8ea3c2; }
+  .sheet-go { height: 48px; min-height: 48px; border-radius: 24px; border: 0; background: #8ff0c8; color: #06231a; font-size: 15px; font-weight: 700; margin-top: 2px; }
+  .sheet-go:hover { background: #a6f4d4; }
   .icon-btn { flex: none; width: 48px; height: 48px; min-height: 0; border-radius: 50%; padding: 0; border: 1.5px solid #2f6f5d; background: #0b1a2c; color: #8ff0c8;
     display: inline-flex; align-items: center; justify-content: center; }
   .icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
@@ -314,6 +336,9 @@
     .brandbar { flex: 1 1 auto; }
     .ctl { flex: none; width: 460px; }
     .logo img { height: 22px; }
+    /* 広い画面：統計は右の列の上（カードの上）。左上の角は画面の比率によって輪にかかるため（1280×800 で重なっていた） */
+    .stats { left: calc(100% + 28px); top: 12px; width: 460px; flex-direction: row; justify-content: space-between; align-items: flex-end; gap: 16px; }
+    .brk { width: 270px; }
   }
   @media (max-width: 899px), (max-aspect-ratio: 1/1) {
     /* スマホ：縦に流す（ドームの大きさは画面の幅で決める。アドレスバーの出入りで変わらない）。低い画面ではページを送る */
@@ -348,12 +373,11 @@
       <span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span>
     </div>
     <div class="ctl">
-      <label class="place">
+      <button type="button" class="place" id="placeBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="placeSheet">
         <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
-        <span class="place-label" id="placeLabel" aria-hidden="true">—</span>
+        <span class="sr">見上げる場所：</span><span class="place-label" id="placeLabel">—</span><span class="sr">（押すと選べます）</span>
         <svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-        <select id="citySel" aria-label="見上げる場所（国・地域と街）"></select>
-      </label>
+      </button>
       <!-- 日付の選択は段階3で。いまは見た目だけ -->
       <button type="button" class="icon-btn" id="calBtn" aria-label="流星群の日を選ぶ（準備中）" aria-disabled="true" title="準備中">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
@@ -481,18 +505,30 @@
   <p>非公式のファンメイド試作です。</p>
 </section>
 
+<div class="sheet-wrap" id="placeSheet" hidden>
+  <button type="button" class="sheet-back" id="placeBack" tabindex="-1" aria-label="閉じる"></button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="placeTitle">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <h2 id="placeTitle">見上げる場所を選ぶ</h2>
+    <div class="sheet-row"><div class="sheet-lab" id="labRegion">観測網の地域</div><div class="chips" id="chipsRegion" role="group" aria-labelledby="labRegion"></div></div>
+    <div class="sheet-row"><div class="sheet-lab" id="labCity">街</div><div class="chips" id="chipsCity" role="group" aria-labelledby="labCity"></div></div>
+    <p class="sheet-note">流星の数は、その地域のまわりで GMN のカメラが記録した数です（街を変えても同じ。空の見え方が変わります）</p>
+    <button type="button" class="sheet-go" id="placeGo">この場所で見る</button>
+  </div>
+</div>
 <div class="msg" id="msg"></div>
 
 <script>
 (() => {
 'use strict';
-// 地域ごとのデータ（2026-11-22 オーナー：北アメリカ・ヨーロッパも）。街は、その地域で GMN の記録が多いところから3つ
+// 地域ごとのデータ（2026-11-22 オーナー：北アメリカ・ヨーロッパも）。街は、その地域で GMN の記録が多いところから3つ。
+// 並びの先頭が地域のはじめの街（地域を変えたら先頭に戻す。2026-11-28 段階2）。日本は福岡（いちばんよく見える。2026-11-22 オーナー）
 const REGIONS = {
-  japan:    { ja: '日本', area: '日本のまわり', file: 'data/meteors_20261118_japan.json', cities: ['tokyo', 'osaka', 'fukuoka'], def: 'fukuoka',
+  japan:    { ja: '日本', area: '日本のまわり', file: 'data/meteors_20261118_japan.json', cities: ['fukuoka', 'tokyo', 'osaka'], def: 'fukuoka',
               box: '北緯24〜46°・東経122〜146°' },
-  namerica: { ja: '北アメリカ', area: '北アメリカのまわり', file: 'data/meteors_20261118_namerica.json', cities: ['newyork', 'toronto', 'denver'], def: 'toronto',
+  namerica: { ja: '北アメリカ', area: '北アメリカのまわり', file: 'data/meteors_20261118_namerica.json', cities: ['toronto', 'newyork', 'denver'], def: 'toronto',
               box: '北緯25〜55°・西経60〜125°' },
-  europe:   { ja: 'ヨーロッパ', area: 'ヨーロッパのまわり', file: 'data/meteors_20261118_europe.json', cities: ['london', 'paris', 'zagreb'], def: 'zagreb',
+  europe:   { ja: 'ヨーロッパ', area: 'ヨーロッパのまわり', file: 'data/meteors_20261118_europe.json', cities: ['zagreb', 'london', 'paris'], def: 'zagreb',
               box: '北緯35〜62°・西経12°〜東経30°' },
 };
 const STARS_URL = 'data/stars-hipparcos.json'; // ヒッパルコス星表・6等未満（星の位置は例外で ESA のデータも使う。2026-11-22 オーナー）
@@ -1331,7 +1367,7 @@ async function setCity(key) {
   const regionChanged = rk !== curRegion; curRegion = rk;
   city = nc;
   skyline = buildSkyline(city.seed * 7919);
-  document.getElementById('citySel').value = key;
+  renderPlaceChips();
   document.getElementById('placeLabel').textContent = `${REGIONS[rk].ja} · ${city.ja}`; // 「国・地域 · 街」（町の段は段階2で）
   document.getElementById('roTotal').title = `${REGIONS[rk].area}で GMN のカメラが記録した流星（日没から いまの時刻まで）`;
   // その街の 11/18 の日の入り（現地の正午から探す）と、次の日の出
@@ -1344,10 +1380,49 @@ async function setCity(key) {
   active = []; sparks = []; trains = []; lastIdx = idxAt(simT);
   updateCount(); showLast(lastVisibleBefore(simT));
 }
-// 場所の選択：1つの select に「国・地域」ごとのまとまりで街を並べる（シートは段階2で）
-document.getElementById('citySel').innerHTML = Object.entries(REGIONS).map(([rk, R]) =>
-  `<optgroup label="${R.ja}">${R.cities.map(k => `<option value="${k}">${CITIES[k].ja}</option>`).join('')}</optgroup>`).join('');
-document.getElementById('citySel').addEventListener('change', e => setCity(e.target.value));
+// 場所の選択：チップを押すと下からシート。地域・街のチップを押すとすぐに切り替わり、「この場所で見る」で閉じる（見本と同じ）。
+// 地域を変えたら街はその地域の先頭に。地域が変わるのは本人が選んだときだけ（位置情報などで自動に変えない）
+const placeBtn = document.getElementById('placeBtn'), placeSheet = document.getElementById('placeSheet');
+function renderPlaceChips() {
+  const rk = city.region, key = Object.keys(CITIES).find(k => CITIES[k] === city);
+  const chip = (v, label, on, kind) => `<button type="button" class="chip" data-${kind}="${v}" aria-pressed="${on}">${label}</button>`;
+  document.getElementById('chipsRegion').innerHTML = Object.entries(REGIONS).map(([k, R]) => chip(k, R.ja, k === rk, 'region')).join('');
+  document.getElementById('chipsCity').innerHTML = REGIONS[rk].cities.map(k => chip(k, CITIES[k].ja, k === key, 'city')).join('');
+}
+let placeBusy = false;
+async function pickPlace(key) {
+  if (placeBusy || CITIES[key] === city) return;
+  placeBusy = true;
+  try { await setCity(key); } finally { placeBusy = false; }
+}
+placeSheet.addEventListener('click', e => {
+  const r = e.target.closest('[data-region]'), c = e.target.closest('[data-city]');
+  // チップは並べ直すので、押したチップにフォーカスを戻す（キーボードで続けて選べるように）
+  if (r) { const k = r.dataset.region; if (k !== city.region) pickPlace(REGIONS[k].cities[0]).then(() => { const b = placeSheet.querySelector(`[data-region="${k}"]`); if (b) b.focus(); }); }
+  else if (c) pickPlace(c.dataset.city).then(() => { const b = placeSheet.querySelector(`[data-city="${c.dataset.city}"]`); if (b) b.focus(); });
+});
+function openPlace() {
+  renderPlaceChips();
+  placeSheet.hidden = false; placeSheet.classList.add('opening'); placeBtn.setAttribute('aria-expanded', 'true');
+  requestAnimationFrame(() => requestAnimationFrame(() => placeSheet.classList.remove('opening')));
+  const on = placeSheet.querySelector('#chipsRegion [aria-pressed="true"]'); if (on) on.focus();
+}
+function closePlace() {
+  if (placeSheet.hidden || placeSheet.classList.contains('closing')) return;
+  placeBtn.setAttribute('aria-expanded', 'false');
+  const done = () => { placeSheet.hidden = true; placeSheet.classList.remove('closing'); };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) done(); else { placeSheet.classList.add('closing'); setTimeout(done, 230); }
+  placeBtn.focus();
+}
+placeBtn.addEventListener('click', openPlace);
+document.getElementById('placeGo').addEventListener('click', closePlace);
+document.getElementById('placeBack').addEventListener('click', closePlace);
+placeSheet.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { e.preventDefault(); closePlace(); return; }
+  if (e.key !== 'Tab') return; // シートの中でフォーカスを回す
+  const f = [...placeSheet.querySelectorAll('.sheet button')]; const i = f.indexOf(document.activeElement);
+  if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+});
 
 const src = document.getElementById('sources');
 document.getElementById('srcBtn').addEventListener('click', () => { src.hidden = false; });
