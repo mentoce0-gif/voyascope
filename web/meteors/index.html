@@ -257,12 +257,12 @@
   .brandbar { height: 22px; display: flex; align-items: center; gap: 12px; }
   /* ロゴは VOYASCOPE 本体と同じ画像（2026-11-28 オーナー）。押せる高さは 44px（行は 22px のまま） */
   .logo { display: flex; align-items: center; height: 44px; margin: -11px 0; }
-  .logo img { display: block; height: 15px; width: auto; }
+  .logo img { display: block; height: 19px; width: auto; }
   /* 「出典と注記」：字は小さいまま、押せる範囲を 44px に広げる */
   .credit button#srcBtn { position: relative; }
   .credit button#srcBtn::after { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 64px); height: 44px; transform: translate(-50%, -50%); } /* 押せる高さ 44px（字の行は 22px のまま） */
   .logo:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-  .mw { margin-left: auto; font-size: 10px; letter-spacing: 0.18em; color: #8ea3c2; }
+  .mw { font-size: 10px; letter-spacing: 0.18em; color: #8ea3c2; padding-left: 12px; border-left: 1px solid rgba(142, 163, 194, 0.5); line-height: 14px; } /* ロゴの右に「| METEOR WATCH」 */
   .ctl { display: flex; align-items: center; gap: 8px; }
   .place { position: relative; flex: 1 1 auto; min-width: 0; height: 48px; border-radius: 24px; background: #8ff0c8; color: #06231a;
     display: flex; align-items: center; gap: 8px; padding: 0 16px; font-size: 16px; font-weight: 700; cursor: pointer; }
@@ -288,13 +288,23 @@
   .corners { position: absolute; z-index: 3; pointer-events: none; }
   .corners .icon-btn { position: absolute; bottom: 0; width: 44px; height: 44px; pointer-events: auto; color: #a9e9cf; }
   #constBtn { left: 0; } #viewReset { right: 0; }
-  .stats { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; text-shadow: 0 0 8px #02060f, 0 0 2px #02060f; }
-  .stats .count { position: static; }
+  .stats { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; text-shadow: 0 0 8px #02060f, 0 0 2px #02060f;
+    display: flex; flex-direction: column; gap: 8px; --k: 1; }
+  /* 計器の読み：左に英字（等幅・字間広め）と日本語の2行、縦の線、大きな数字（MMX の「いまどこ」の計器と同じ形） */
+  .ro { --f: 1; display: flex; align-items: center; gap: calc(8px * var(--k) * var(--f)); white-space: nowrap; pointer-events: auto; }
+  .ro-l { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; padding-right: calc(8px * var(--k) * var(--f)); border-right: 1.5px solid rgba(217, 244, 234, 0.55); }
+  .ro-en { font-family: var(--font-mono); font-size: calc(9px * var(--k) * var(--f)); letter-spacing: 0.12em; color: #8ea3c2; }
+  .ro-ja { font-size: calc(10.5px * var(--k) * var(--f)); letter-spacing: 0.02em; color: #b9c8dc; }
+  .ro-n { font-family: var(--font-mono); font-weight: 700; font-size: calc(26px * var(--k) * var(--f)); line-height: 1; color: #f2f7fc; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  .ro-total .ro-n { font-size: calc(40px * var(--k) * var(--f)); }
+  .ro-total .ro-l { border-right-color: var(--mint-dim); }
+  .ro-leo .ro-l { border-right-color: var(--amber); } .ro-leo .ro-en { color: var(--amber); }
+  .ro-spo .ro-l, .ro-oth .ro-l { border-right-color: var(--sky); }
   @media (min-width: 900px) and (min-aspect-ratio: 1/1) {
     .top { flex-direction: row; align-items: center; gap: 24px; }
     .brandbar { flex: 1 1 auto; }
     .ctl { flex: none; width: 460px; }
-    .logo img { height: 18px; }
+    .logo img { height: 22px; }
   }
   @media (max-width: 899px), (max-aspect-ratio: 1/1) {
     /* スマホ：縦に流す（ドームの大きさは画面の幅で決める。アドレスバーの出入りで変わらない）。低い画面ではページを送る */
@@ -305,16 +315,8 @@
     .dome { display: block; flex: none; margin-top: 8px; overflow-x: clip; overflow-y: visible; margin-left: -16px; margin-right: -16px; padding: 0 16px; }
     .dome-box { position: absolute; }
     .corners { left: 16px !important; right: 16px !important; }
-    .stats { left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
-    .count { line-height: 1; }
-    .count .cnt-row { gap: 0; }
-    .dome .count svg.cnt-ic { display: none; }
-    .count b { font-size: 40px; color: #f2f7fc; }
-    .count .unit { margin-top: 4px; font-size: 12px; letter-spacing: 0.04em; color: #b9c8dc; }
-    .count-break { margin-top: 2px; text-align: right; font-size: 12px; color: #b9c8dc; line-height: 1.5; }
-    .count-break span { display: block; }
-    .count-break span.leo { display: inline-block; margin: 0 0 3px; }
-    .count .count-break b, .count-break b { font-family: var(--font-mono); font-weight: 700; color: var(--text); margin-left: 4px; }
+    .stats { inset: 0; display: block; pointer-events: none; }
+    .stats .ro { position: absolute; }
     .panel-wrap { margin-top: 12px; }
     .time { margin-top: 4px; }
     .rim-log { display: none; } /* METEOR WATCH は上の行に出したので、輪のまわりからは外す */
@@ -327,8 +329,8 @@
   <header class="top">
     <div class="brandbar">
       <a class="logo" href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a>
-      <span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span>
       <span class="mw mono">METEOR WATCH</span>
+      <span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span>
     </div>
     <div class="ctl">
       <label class="place">
@@ -345,9 +347,12 @@
   </header>
 
   <div class="dome" id="dome">
-    <div class="stats">
-      <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="cnt-row"><svg class="cnt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 L15 9" /><path d="M8 22 L20 10" opacity=".55"/><circle cx="15.5" cy="8.5" r="1.8"/><circle cx="20.5" cy="9.5" r="1.4" opacity=".55"/></svg><b id="count">0</b></span><span class="unit">個の流星を観測</span></div>
-      <div class="count-break" id="countBreak"></div>
+    <!-- 統計：計器の読み（左に英字と日本語の2行・縦線・大きな数字）を、輪の上側に沿って散らして置く（2026-11-28 オーナー：MMX の計器の形）。位置は layout() で -->
+    <div class="stats" id="stats">
+      <div class="ro ro-total" id="roTotal" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="ro-l"><span class="ro-en">METEORS</span><span class="ro-ja">個の流星を観測</span></span><b class="ro-n" id="count">0</b></div>
+      <div class="ro ro-leo" id="roLeo"><span class="ro-l"><span class="ro-en">LEO</span><span class="ro-ja">しし座</span></span><b class="ro-n" id="cLeo">0</b></div>
+      <div class="ro ro-spo" id="roSpo"><span class="ro-l"><span class="ro-en">SPORADIC</span><span class="ro-ja">散在</span></span><b class="ro-n" id="cSpo">0</b></div>
+      <div class="ro ro-oth" id="roOth"><span class="ro-l"><span class="ro-en">SHOWERS</span><span class="ro-ja" id="cOthJa">ほかの群</span></span><b class="ro-n" id="cOth">0</b></div>
     </div>
     <div class="dome-box" id="domeBox">
       <canvas id="sky" aria-label="見上げた空の魚眼の図。はじめは中心が真上、円のふちが地平線、北が上、東が左。スワイプで見る方向を変えられる"></canvas>
@@ -707,6 +712,32 @@ function prepare() {
 // ---------- 魚眼 ----------
 const cornersEl = document.getElementById('corners'), domeEl = document.getElementById('dome'), boxEl = document.getElementById('domeBox'), sky = document.getElementById('sky'), ctx = sky.getContext('2d');
 let S = 300, DPR = Math.min(devicePixelRatio || 1, 3), /* スマホの多くは 3倍。2倍で止めるとにじむ（2026-11-22 オーナー「ファジー」） */ cx = 0, cy = 0, R = 0;
+// 統計の読みを、輪の上側に沿って散らして置く（スマホ）。数字は 390 幅の見本の大きさ（D＝380）を基準に、画面の幅で伸び縮み。
+// 位置は輪の中心からの x（右が正）と、読みの下端の高さ y（上が正）。輪の外径＋余白（196）より外に、左下・右下の角が来るように
+const RO_POS = { roTotal: { right: -10, y: 214 }, roLeo: { x: 24, y: 248 }, roSpo: { x: 56, y: 214 }, roOth: { x: 84, y: 180 } };
+function placeStats(D, statsH) {
+  const st = document.getElementById('stats'), k = D / 380, W = domeEl.clientWidth, cxp = W / 2, cyp = statsH + D / 2;
+  st.style.setProperty('--k', k.toFixed(3));
+  for (const [id, q] of Object.entries(RO_POS)) {
+    const el = document.getElementById(id), h = el.offsetHeight;
+    el.style.top = (cyp - q.y * k - h) + 'px';
+    if (q.right != null) { el.style.left = '16px'; el.style.right = ''; statsBoxTotal = cxp + q.right * k - 16; }
+    else { el.style.left = (cxp + q.x * k) + 'px'; el.style.right = ''; }
+  }
+  statsBox = { W, totalMax: statsBoxTotal }; fitStats();
+}
+let statsBoxTotal = 0;
+// 桁が増えて（ヨーロッパの夜の終わりは 1,989・散在 1,063）画面の端や輪の手前の線を越えるときだけ、その読みの字を縮める
+let statsBox = null, statsSig = '';
+function fitStats() {
+  if (!statsBox) return;
+  for (const id of Object.keys(RO_POS)) {
+    const el = document.getElementById(id); el.style.setProperty('--f', 1);
+    const lim = id === 'roTotal' ? statsBox.totalMax : statsBox.W - 8 - parseFloat(el.style.left), w = el.scrollWidth;
+    if (w > lim) el.style.setProperty('--f', (lim / w * 0.98).toFixed(3));
+  }
+}
+function clearStats() { statsBox = null; for (const id of Object.keys(RO_POS)) { const e = document.getElementById(id); Object.assign(e.style, { top: '', left: '', right: '' }); e.style.setProperty('--f', 1); } }
 // 光の輪（外周のぼかし）の外径。箱の大きさ S に対する直径の割合（輪は半径 0.44・ぼかしは約 0.467）
 const OUTER = 0.934;
 function layout() {
@@ -716,13 +747,14 @@ function layout() {
     // タブレットや横向きのように高さが足りないときだけ抑える
     const D = Math.floor(Math.min(innerWidth - 10, 560, Math.max(260, innerHeight - 200)));
     S = Math.round(D / OUTER);
-    const inset = (S - D) / 2, statsH = 60; // 統計（総数・内訳）はドームの上の 60px（見本と同じ）
+    const inset = (S - D) / 2, statsH = Math.round(88 * D / 380); // 統計を輪の上側に沿って置くぶんの高さ
     domeEl.style.height = (statsH + D) + 'px';
     boxEl.style.left = `calc(50% - ${S / 2}px)`; boxEl.style.top = (statsH - inset) + 'px';
     // 四隅のボタン：左右は外の余白（16px）にそろえ、下はドームの外径の下端に
     cornersEl.style.top = statsH + 'px'; cornersEl.style.height = D + 'px';
+    placeStats(D, statsH);
   } else {
-    domeEl.style.height = ''; boxEl.style.left = ''; boxEl.style.top = '';
+    domeEl.style.height = ''; boxEl.style.left = ''; boxEl.style.top = ''; clearStats();
     S = Math.max(160, Math.floor(Math.min(r.width, r.height)));
   }
   boxEl.style.width = S + 'px'; boxEl.style.height = S + 'px';
@@ -1135,9 +1167,12 @@ function lastVisibleBefore(t) { const i = idxAt(t) - 1; return i >= 0 ? meteors[
 function updateCount() {
   let n = 0, leo = 0, sp = 0; const groups = new Set();
   for (const m of meteors) { if (m._t > simT) break; if (m._t >= T0) { n++; if (m.iau_code === 'LEO') leo++; else if (!m.iau_code) sp++; else groups.add(m.iau_code); } }
-  document.getElementById('count').textContent = n;
   const other = n - leo - sp;
-  document.getElementById('countBreak').innerHTML = n ? `<span class="leo"><i class="o"></i>しし座<b>${leo}</b></span><span><i class="c"></i>ほかの群<b>${other}</b>${groups.size ? `<small>（${groups.size}群）</small>` : ''}</span><span><i class="c"></i>散在<b>${sp}</b></span>` : '';
+  document.getElementById('count').textContent = n;
+  document.getElementById('cLeo').textContent = leo; document.getElementById('cSpo').textContent = sp; document.getElementById('cOth').textContent = other;
+  document.getElementById('cOthJa').textContent = groups.size ? `ほか${groups.size}群` : 'ほかの群';
+  const sig = [n, leo, sp, other].map(v => String(v).length).join() + groups.size; // 桁が変わったときだけ収まりを見直す
+  if (sig !== statsSig) { statsSig = sig; fitStats(); }
 }
 // 流星群の名前：英名と番号は IAU 流星データセンターの一覧（https://www.ta3.sk/IAUC22DB/MDC2022/Roje/roje_lista.php 2026-11-21 確認）。
 // 日本語名：国立天文台「流星群の和名一覧（略符順）」（https://www.nao.ac.jp/new-info/meteor/table-code.html 2026-11-05 更新・2026-11-21 確認。C43）。
@@ -1308,7 +1343,7 @@ async function setCity(key) {
   skyline = buildSkyline(city.seed * 7919);
   document.getElementById('citySel').value = key;
   document.getElementById('placeLabel').textContent = `${REGIONS[rk].ja} · ${city.ja}`; // 「国・地域 · 街」（町の段は段階2で）
-  document.querySelector('.count').title = `${REGIONS[rk].area}で GMN のカメラが記録した流星（日没から いまの時刻まで）`;
+  document.getElementById('roTotal').title = `${REGIONS[rk].area}で GMN のカメラが記録した流星（日没から いまの時刻まで）`;
   // その街の 11/18 の日の入り（現地の正午から探す）と、次の日の出
   const noon = Date.UTC(2026, 10, 18, 12) - city.lon / 15 * 3600000;
   T0 = findCross(city, noon, noon + 12 * 3600000, false);
