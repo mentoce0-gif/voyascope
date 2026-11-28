@@ -55,19 +55,6 @@
   .spacer { flex: 1; }
   .where .date-short { display: none; }
   @media (max-width: 899px), (max-aspect-ratio: 1/1) { .where .date-short { display: inline; color: var(--text-dim); } }
-  /* タイトルバー：左に VOYASCOPE、右に「国・地域」（枠だけ）と「街」（塗りつぶし）の丸いボタン。押すと端末の選択画面（2026-11-22 オーナー） */
-  .top { background: rgba(7, 20, 43, 0.82); border: 1px solid var(--panel-border); border-radius: 18px; padding: 8px 8px 8px 16px !important;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); flex-wrap: nowrap !important; }
-  .top .brand { pointer-events: none; } .top .brand a { pointer-events: auto; display: block; line-height: 0; }
-  .pills { margin-left: auto; display: flex; gap: 8px; flex: none; }
-  .pill { position: relative; display: inline-flex; align-items: center; gap: 4px; height: 40px; padding: 0 30px 0 16px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
-  .pill::after { content: ""; position: absolute; right: 13px; top: 50%; width: 6px; height: 6px; margin-top: -5px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(45deg); pointer-events: none; }
-  .pill select { appearance: none; -webkit-appearance: none; background: transparent; border: 0; color: inherit; font: inherit; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.04em; cursor: pointer; padding: 0; outline: none; }
-  .pill select option { color: #000; }
-  .pill:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; }
-  .pill-o { border: 1.5px solid var(--mint-dim); color: var(--text); }
-  .pill-f { background: var(--mint); color: var(--navy-800); }
-  .pill .pin { width: 11px; height: 14px; fill: currentColor; flex: none; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   button { appearance: none; font-family: var(--font-body); font-size: 0.78rem; line-height: 1.3; color: var(--mint);
     background: rgba(7, 20, 43, 0.72); border: 1px solid var(--mint-dim); border-radius: 3px; padding: 0.4em 0.8em;
@@ -102,7 +89,7 @@
   .count .unit { display: block; font-size: 0.74rem; letter-spacing: 0.1em; color: var(--text); }
   .count-break { margin-top: 4px; font-size: 0.7rem; color: var(--text-dim); letter-spacing: 0.04em; }
   .count-break span { display: block; }
-  .count .count-break b { font-family: var(--font-mono); font-size: 1.05em; font-weight: 700; color: var(--text); margin-left: 4px; letter-spacing: 0; }
+  .count-break b { font-family: var(--font-mono); font-size: 1.05em; font-weight: 700; color: var(--text); margin-left: 4px; letter-spacing: 0; }
   .count-break small { font-size: 0.9em; margin-left: 2px; }
   .count-break i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin: 0 5px 1px 0; vertical-align: middle; }
   .count-break i.o { background: var(--amber); box-shadow: 0 0 6px var(--amber-dim); } .count-break i.c { background: var(--sky); }
@@ -260,51 +247,105 @@
   .nm { flex: 1 1 0 !important; min-width: 0; }
   .st dd { font-weight: 700; }
   .credit { border-top: 0 !important; text-align: center; }
-  @media (max-width: 899px), (max-aspect-ratio: 1/1) {
-    .top { justify-content: space-between; height: auto; margin-top: 2px; }
-    .top .brand img { height: 15px; }
-    /* ボタンの幅は固定（街の名前で帯が広がらない）。長い名前は字を小さく */
-    .pill { height: 36px; padding: 0 24px 0 12px; justify-content: flex-start; } .pill::after { right: 11px; }
-    .pill-o { width: 112px; } .pill-f { width: 134px; }
-    .pill select { font-size: 0.8rem; letter-spacing: 0.02em; width: 100%; min-width: 0; text-overflow: ellipsis; }
-    .pill-f.long select { font-size: 0.72rem; letter-spacing: -0.01em; }
-  }
-  @media (max-width: 404px) {
-    .top { padding-left: 12px !important; }
-    .top .brand img { height: 12px; }
-    .pills { gap: 6px; }
-    .pill-o { width: 100px; } .pill-f { width: 122px; }
-    .pill { padding: 0 20px 0 10px; } .pill::after { right: 9px; }
-    .pill select { font-size: 0.74rem; } .pill-f.long select { font-size: 0.66rem; }
-  }
   @media (max-width: 339px) {
-    .top .brand img { height: 10px; }
-    .pill-o { width: 90px; } .pill-f { width: 110px; }
-    .pill { padding: 0 18px 0 8px; } .pill::after { right: 8px; width: 5px; height: 5px; }
-    .pill select { font-size: 0.68rem; } .pill-f.long select { font-size: 0.6rem; }
-    .pill .pin { width: 9px; height: 12px; }
-    .where { flex: 1 1 auto; text-align: center; }
-    .top .spacer { display: none; }
     .panel-wrap { padding: 8px 8px 4px; }
     .nm-name { font-size: 0.95rem !important; line-height: 1.3rem; height: 1.3rem; }
+  }
+
+  /* ===== 改修（2026-11-28 オーナーの改修案 Main.dc.html）：上部の2行・投影窓を最大化・四隅に統計とボタン ===== */
+  .top { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
+  .brandbar { height: 22px; display: flex; align-items: center; gap: 12px; }
+  .logo { display: inline-block; font-family: var(--font-body); font-size: 13px; line-height: 22px; font-weight: 400; letter-spacing: 0.32em; color: #cfe0f2; text-decoration: none;
+    padding: 11px 0; margin: -11px 0; }
+  /* 「出典と注記」：字は小さいまま、押せる範囲を 44px に広げる */
+  .credit button#srcBtn { position: relative; }
+  .credit button#srcBtn::after { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 64px); height: 44px; transform: translate(-50%, -50%); } /* 押せる高さ 44px（字の行は 22px のまま） */
+  .logo:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .mw { margin-left: auto; font-size: 10px; letter-spacing: 0.18em; color: #8ea3c2; }
+  .ctl { display: flex; align-items: center; gap: 8px; }
+  .place { position: relative; flex: 1 1 auto; min-width: 0; height: 48px; border-radius: 24px; background: #8ff0c8; color: #06231a;
+    display: flex; align-items: center; gap: 8px; padding: 0 16px; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .place:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .place .ic { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2.2; }
+  .place .chev { stroke-width: 2.4; }
+  .place-label { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.02em; }
+  /* 端末の選択画面（iPhone はホイール）を出す透明の select をチップ全体に重ねる。シートは段階2で */
+  .place select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; border: 0; appearance: none; -webkit-appearance: none; }
+  .place select option { color: #000; }
+  .icon-btn { flex: none; width: 48px; height: 48px; min-height: 0; border-radius: 50%; padding: 0; border: 1.5px solid #2f6f5d; background: #0b1a2c; color: #8ff0c8;
+    display: inline-flex; align-items: center; justify-content: center; }
+  .icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; }
+  .icon-btn:hover { background: #10263a; }
+  .icon-btn[aria-pressed="true"] { background: var(--mint); color: var(--navy-800); border-color: var(--mint); }
+  #calBtn[aria-disabled="true"], #constBtn[aria-disabled="true"] { cursor: default; }
+  #viewReset[aria-disabled="true"] { opacity: 0.4; cursor: default; }
+  #constBtn svg circle { fill: currentColor; stroke: none; }
+  #constBtn svg { width: 22px; height: 22px; stroke-width: 1.6; }
+  .corners { position: absolute; z-index: 3; pointer-events: none; }
+  .corners .icon-btn { position: absolute; bottom: 0; width: 44px; height: 44px; pointer-events: auto; color: #a9e9cf; }
+  #constBtn { left: 0; } #viewReset { right: 0; }
+  .stats { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; text-shadow: 0 0 8px #02060f, 0 0 2px #02060f; }
+  .stats .count { position: static; }
+  @media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+    .top { flex-direction: row; align-items: center; gap: 24px; }
+    .brandbar { flex: 1 1 auto; }
+    .ctl { flex: none; width: 460px; }
+  }
+  @media (max-width: 899px), (max-aspect-ratio: 1/1) {
+    /* スマホ：縦に流す（ドームの大きさは画面の幅で決める。アドレスバーの出入りで変わらない）。低い画面ではページを送る */
+    html, body { height: auto; min-height: 100%; overflow-x: hidden; overflow-y: auto; }
+    .app { position: relative; inset: auto; min-height: 100vh; min-height: 100dvh; display: flex !important; flex-direction: column;
+      padding: calc(env(safe-area-inset-top) + 14px) 16px env(safe-area-inset-bottom) !important; gap: 0; }
+    .ctl { margin-top: 0; }
+    .dome { display: block; flex: none; margin-top: 8px; overflow-x: clip; overflow-y: visible; margin-left: -16px; margin-right: -16px; padding: 0 16px; }
+    .dome-box { position: absolute; }
+    .corners { left: 16px !important; right: 16px !important; }
+    .stats { left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .count { line-height: 1; }
+    .count .cnt-row { gap: 0; }
+    .dome .count svg.cnt-ic { display: none; }
+    .count b { font-size: 40px; color: #f2f7fc; }
+    .count .unit { margin-top: 4px; font-size: 12px; letter-spacing: 0.04em; color: #b9c8dc; }
+    .count-break { margin-top: 2px; text-align: right; font-size: 12px; color: #b9c8dc; line-height: 1.5; }
+    .count-break span { display: block; }
+    .count-break span.leo { display: inline-block; margin: 0 0 3px; }
+    .count .count-break b, .count-break b { font-family: var(--font-mono); font-weight: 700; color: var(--text); margin-left: 4px; }
+    .panel-wrap { margin-top: 12px; }
+    .time { margin-top: 4px; }
+    .rim-log { display: none; } /* METEOR WATCH は上の行に出したので、輪のまわりからは外す */
   }
 </style>
 </head>
 <body>
 <div class="app">
+  <!-- 上部：ロゴの細い行 ＋ 操作の行（場所チップ・カレンダー）。2026-11-28 オーナーの改修案（Main.dc.html） -->
   <header class="top">
-    <div class="brand"><a href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a><span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span></div>
-    <div class="pills">
-      <label class="pill pill-o"><span class="sr">国・地域</span><select id="regionSel" aria-label="国・地域"><option value="japan">日本</option><option value="namerica">北アメリカ</option><option value="europe">ヨーロッパ</option></select></label>
-      <label class="pill pill-f"><svg class="pin" viewBox="0 0 12 16" aria-hidden="true"><path d="M6 0C2.7 0 0 2.6 0 5.9 0 10.3 6 16 6 16s6-5.7 6-10.1C12 2.6 9.3 0 6 0zm0 8.2a2.3 2.3 0 1 1 0-4.6 2.3 2.3 0 0 1 0 4.6z"/></svg><span class="sr">見上げる場所</span><select id="citySel" aria-label="見上げる場所"></select></label>
+    <div class="brandbar">
+      <a class="logo" href="../" aria-label="VOYASCOPE のトップへ">VOYASCOPE</a>
+      <span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span>
+      <span class="mw mono">METEOR WATCH</span>
+    </div>
+    <div class="ctl">
+      <label class="place">
+        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        <span class="place-label" id="placeLabel" aria-hidden="true">—</span>
+        <svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        <select id="citySel" aria-label="見上げる場所（国・地域と街）"></select>
+      </label>
+      <!-- 日付の選択は段階3で。いまは見た目だけ -->
+      <button type="button" class="icon-btn" id="calBtn" aria-label="流星群の日を選ぶ（準備中）" aria-disabled="true" title="準備中">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+      </button>
     </div>
   </header>
 
   <div class="dome" id="dome">
-    <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="cnt-row"><svg class="cnt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 L15 9" /><path d="M8 22 L20 10" opacity=".55"/><circle cx="15.5" cy="8.5" r="1.8"/><circle cx="20.5" cy="9.5" r="1.4" opacity=".55"/></svg><b id="count">0</b></span><span class="unit">個の流星を観測</span><div class="count-break" id="countBreak"></div></div>
+    <div class="stats">
+      <div class="count" title="日本のまわりで GMN のカメラが記録した流星（日没から いまの時刻まで）"><span class="cnt-row"><svg class="cnt-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21 L15 9" /><path d="M8 22 L20 10" opacity=".55"/><circle cx="15.5" cy="8.5" r="1.8"/><circle cx="20.5" cy="9.5" r="1.4" opacity=".55"/></svg><b id="count">0</b></span><span class="unit">個の流星を観測</span></div>
+      <div class="count-break" id="countBreak"></div>
+    </div>
     <div class="dome-box" id="domeBox">
       <canvas id="sky" aria-label="見上げた空の魚眼の図。はじめは中心が真上、円のふちが地平線、北が上、東が左。スワイプで見る方向を変えられる"></canvas>
-      <button type="button" class="view-reset" id="viewReset" hidden>真上に戻す</button>
       <svg id="rim" viewBox="0 0 1000 1000" aria-hidden="true">
         <defs>
           <!-- 日付・時刻は左下（約195°〜256°）。外周の光の弧はここにかからないように置く（2026-11-22） -->
@@ -337,6 +378,15 @@
         <text class="rim-time" dominant-baseline="hanging"><textPath href="#arcBL" startOffset="16%" id="rimTime">--:--</textPath></text>
         <text class="rim-log"><textPath href="#arcTR" startOffset="14%">METEOR WATCH · OBSERVATION LOG · <tspan class="live" id="rimLive">観測中</tspan></textPath></text>
       </svg>
+    </div>
+    <div class="corners" id="corners">
+      <!-- 星座線は段階4で。いまは見た目だけ -->
+      <button type="button" class="icon-btn" id="constBtn" aria-label="星座線を表示（準備中）" aria-pressed="false" aria-disabled="true" title="準備中">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17L9 12L14 14L20 6"/><circle cx="4" cy="17" r="1.8"/><circle cx="9" cy="12" r="1.8"/><circle cx="14" cy="14" r="1.8"/><circle cx="20" cy="6" r="1.8"/></svg>
+      </button>
+      <button type="button" class="icon-btn" id="viewReset" aria-label="視点を真上に戻す" aria-disabled="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4"/></svg>
+      </button>
     </div>
   </div>
 
@@ -596,13 +646,13 @@ function updateRim() {
     el.style.display = '';
     const [px, py] = projV(d[0], d[1], d[2]), X = (px - cx) * 1000 / S, Y = (py - cy) * 1000 / S, r = Math.hypot(X, Y) || 1, a = Math.atan2(-Y, X);
     // 円のふちの近くなら外側に、円の中（傾けて地平線が中に入ったとき）なら地平線のすぐ下に
-    const rl = r > 415 ? 474 : r + 30;
+    const rl = r > 415 ? (narrowLayout() ? 402 : 474) : r + 30; // スマホは輪が画面の端に近いので、方角の字は輪の内側に
     el.setAttribute('x', (500 + rl * Math.cos(a)).toFixed(1)); el.setAttribute('y', (500 - rl * Math.sin(a)).toFixed(1));
     if (r > 415) card.push(`M${(500 + 430 * Math.cos(a)).toFixed(1)} ${(500 - 430 * Math.sin(a)).toFixed(1)}L${(500 + 462 * Math.cos(a)).toFixed(1)} ${(500 - 462 * Math.sin(a)).toFixed(1)}`);
   }
   document.querySelector('#rim .rim-card').setAttribute('d', card.join(' '));
   document.querySelector('#rim .rim-tick').style.display = z ? '' : 'none'; // 方角の目盛りは真上を見ているときだけ
-  document.getElementById('viewReset').hidden = z;
+  document.getElementById('viewReset').setAttribute('aria-disabled', z ? 'true' : 'false'); // 真上を見ているときは押せない見た目
 }
 
 function sunAlt(ms, c) { const s = sunRaDec(ms); return eqToHor(s.ra, s.dec, ms, c.lat, c.lon).alt; }
@@ -650,21 +700,41 @@ function prepare() {
 }
 
 // ---------- 魚眼 ----------
-const domeEl = document.getElementById('dome'), boxEl = document.getElementById('domeBox'), sky = document.getElementById('sky'), ctx = sky.getContext('2d');
+const cornersEl = document.getElementById('corners'), domeEl = document.getElementById('dome'), boxEl = document.getElementById('domeBox'), sky = document.getElementById('sky'), ctx = sky.getContext('2d');
 let S = 300, DPR = Math.min(devicePixelRatio || 1, 3), /* スマホの多くは 3倍。2倍で止めるとにじむ（2026-11-22 オーナー「ファジー」） */ cx = 0, cy = 0, R = 0;
+// 光の輪（外周のぼかし）の外径。箱の大きさ S に対する直径の割合（輪は半径 0.44・ぼかしは約 0.467）
+const OUTER = 0.934;
 function layout() {
   const r = domeEl.getBoundingClientRect();
   if (narrowLayout()) {
-    // スマホ：画面の高さから、上の帯・計器・タイムラインのぶんを引いた残りと、幅の小さいほう
-    const used = ['.top', '.panel-wrap', '.time'].reduce((a, q) => a + document.querySelector(q).getBoundingClientRect().height, 0);
-    S = Math.max(160, Math.floor(Math.min(r.width, innerHeight - used - 40)));
-    domeEl.style.height = ''; 
-  } else { domeEl.style.height = ''; S = Math.max(160, Math.floor(Math.min(r.width, r.height))); }
+    // スマホ：ドームの直径（光の輪の外径）＝画面の幅 − 約10px（2026-11-28 オーナー）。画面の高さでは決めない（アドレスバーで変わらない）。
+    // タブレットや横向きのように高さが足りないときだけ抑える
+    const D = Math.floor(Math.min(innerWidth - 10, 560, Math.max(260, innerHeight - 200)));
+    S = Math.round(D / OUTER);
+    const inset = (S - D) / 2, statsH = 60; // 統計（総数・内訳）はドームの上の 60px（見本と同じ）
+    domeEl.style.height = (statsH + D) + 'px';
+    boxEl.style.left = `calc(50% - ${S / 2}px)`; boxEl.style.top = (statsH - inset) + 'px';
+    // 四隅のボタン：左右は外の余白（16px）にそろえ、下はドームの外径の下端に
+    cornersEl.style.top = statsH + 'px'; cornersEl.style.height = D + 'px';
+  } else {
+    domeEl.style.height = ''; boxEl.style.left = ''; boxEl.style.top = '';
+    S = Math.max(160, Math.floor(Math.min(r.width, r.height)));
+  }
   boxEl.style.width = S + 'px'; boxEl.style.height = S + 'px';
   const resized = sky.width !== S * DPR;
   if (resized) { sky.width = S * DPR; sky.height = S * DPR; } // 板を作り直すと中身が消えるので、大きさが変わったときだけ
   cx = S / 2; cy = S / 2; R = S * 0.44;
   centerDome();
+  if (!narrowLayout()) { // 広い画面：四隅のボタンは光の輪の外径の正方形の角に
+    const b = boxEl.getBoundingClientRect(), d = domeEl.getBoundingClientRect(), D = S * OUTER, ins = (S - D) / 2;
+    Object.assign(cornersEl.style, { left: (b.left - d.left + ins) + 'px', right: (d.right - b.right + ins) + 'px', top: (b.top - d.top + ins) + 'px', height: D + 'px' });
+  }
+  // 日付・時刻の弧：スマホは輪の内側（輪が画面の端に近いので外に出すと切れる）。左下（東と南のあいだ）に
+  document.getElementById('arcBL').setAttribute('d', narrowLayout() ? 'M 84.3 543.7 A 418 418 0 0 0 470.8 917.0' : 'M 22 500 A 478 478 0 0 0 500 978');
+  const rt = document.querySelector('#rim .rim-time');
+  if (narrowLayout()) { rt.removeAttribute('dominant-baseline'); rt.querySelector('textPath').setAttribute('startOffset', '3%'); }
+  else { rt.setAttribute('dominant-baseline', 'hanging'); rt.querySelector('textPath').setAttribute('startOffset', '16%'); }
+  rimVer = -1;
   if (resized && meteors.length) drawSky(performance.now()); // 消えた板をすぐ描き直す（一瞬の黒を出さない）
   // ふちの文字：viewBox（1000）を画面の大きさに直すと小さくなるので、画面の上での最小の大きさを守る
   const k = 1000 / S, px = (min, base) => Math.max(base, min * k) + 'px';
@@ -676,18 +746,8 @@ function layout() {
   log.querySelector('textPath').setAttribute('startOffset', k > 2 ? '7%' : '14%');
   layoutTl();
 }
-// スマホ：投影の窓（空の円）を画面の真ん中に。上の帯・計器にかからない範囲で（2026-11-22 オーナー）
-function centerDome() {
-  // 上の帯と計器のあいだの余白のなかで、上の空き：下の空き ＝ 4：5（目で見た真ん中は少し上。Apple・Google の画面でもよく使う置き方）
-  if (!narrowLayout()) { boxEl.style.transform = ''; return; }
-  // いまのずらし量を引いて、もとの位置から計算する（一度もとに戻すと、1コマだけ円がずれて見える）
-  const cur = parseFloat((boxEl.style.transform.match(/-?[\d.]+/) || [0])[0]) || 0;
-  const b = boxEl.getBoundingClientRect(), top = document.querySelector('.top').getBoundingClientRect().bottom;
-  const bot = document.querySelector('.panel-wrap').getBoundingClientRect().top;
-  const free = Math.max(0, (bot - top) - b.height), want = top + free * 4 / 9;
-  const next = Math.round(want - (b.top - cur));
-  if (next !== cur) boxEl.style.transform = `translateY(${next}px)`;
-}
+// 投影の窓の位置は layout() で決める（スマホの 4：5 の中央寄せは 2026-11-28 にやめた：ドームを画面の幅いっぱいに）
+function centerDome() { boxEl.style.transform = ''; }
 const narrowLayout = () => matchMedia('(max-width: 899px), (max-aspect-ratio: 1/1)').matches;
 // 星・流星の大きさの倍率。スマホ（空の円が小さい）でも小さくなりすぎないように下限を置く
 const SC = () => Math.max(1.15, S / 700 + 0.4), WC = () => Math.max(1.05, S / 700 + 0.35);
@@ -1175,7 +1235,7 @@ sky.addEventListener('pointermove', e => {
 });
 const endDrag = () => { if (skyDrag) { skyDrag = false; mw.key = ''; } }; // 指を離したら天の川を細かく描き直す
 sky.addEventListener('pointerup', endDrag); sky.addEventListener('pointercancel', endDrag);
-document.getElementById('viewReset').addEventListener('click', () => { setView([0, 0, 1], [0, 1, 0]); VIEW.up = [0, 1, 0]; VIEW.rt = [-1, 0, 0]; VIEW.ver++; mw.key = ''; });
+document.getElementById('viewReset').addEventListener('click', () => { if (isZenith()) return; setView([0, 0, 1], [0, 1, 0]); VIEW.up = [0, 1, 0]; VIEW.rt = [-1, 0, 0]; VIEW.ver++; mw.key = ''; });
 
 // ---------- 時間を進める ----------
 const rimTime = document.getElementById('rimTime');
@@ -1237,13 +1297,12 @@ async function setCity(key) {
     DATA_FROM = Date.parse(d.meta.filter.utc_from); DATA_TO = Date.parse(d.meta.filter.utc_to);
     document.getElementById('srcFiles').innerHTML = '使ったファイル：' + d.meta.files.map(u => `<a href="${u}" target="_blank" rel="noopener">${u.split('/').pop()}</a>`).join('、');
     document.getElementById('srcGen').textContent = (d.meta.files_generated_utc || []).map(x => String(x).slice(0, 16)).join('・') + ' UTC';
-    renderCityButtons(rk);
   }
   const regionChanged = rk !== curRegion; curRegion = rk;
   city = nc;
   skyline = buildSkyline(city.seed * 7919);
-  document.getElementById('citySel').value = key; document.getElementById('regionSel').value = rk;
-  document.getElementById('citySel').parentElement.classList.toggle('long', city.ja.length >= 5); // ニューヨークなど長い名前は字を小さく
+  document.getElementById('citySel').value = key;
+  document.getElementById('placeLabel').textContent = `${REGIONS[rk].ja} · ${city.ja}`; // 「国・地域 · 街」（町の段は段階2で）
   document.querySelector('.count').title = `${REGIONS[rk].area}で GMN のカメラが記録した流星（日没から いまの時刻まで）`;
   // その街の 11/18 の日の入り（現地の正午から探す）と、次の日の出
   const noon = Date.UTC(2026, 10, 18, 12) - city.lon / 15 * 3600000;
@@ -1255,13 +1314,9 @@ async function setCity(key) {
   active = []; sparks = []; trains = []; lastIdx = idxAt(simT);
   updateCount(); showLast(lastVisibleBefore(simT));
 }
-function renderCityButtons(rk) {
-  const sel = document.getElementById('citySel');
-  sel.innerHTML = REGIONS[rk].cities.map(k => `<option value="${k}">${CITIES[k].ja}</option>`).join('');
-  document.getElementById('regionSel').value = rk;
-
-}
-document.getElementById('regionSel').addEventListener('change', e => { if (e.target.value !== curRegion) setCity(REGIONS[e.target.value].def); });
+// 場所の選択：1つの select に「国・地域」ごとのまとまりで街を並べる（シートは段階2で）
+document.getElementById('citySel').innerHTML = Object.entries(REGIONS).map(([rk, R]) =>
+  `<optgroup label="${R.ja}">${R.cities.map(k => `<option value="${k}">${CITIES[k].ja}</option>`).join('')}</optgroup>`).join('');
 document.getElementById('citySel').addEventListener('change', e => setCity(e.target.value));
 
 const src = document.getElementById('sources');
