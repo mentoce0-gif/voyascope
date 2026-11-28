@@ -255,8 +255,9 @@
   /* ===== 改修（2026-11-28 オーナーの改修案 Main.dc.html）：上部の2行・投影窓を最大化・四隅に統計とボタン ===== */
   .top { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
   .brandbar { height: 22px; display: flex; align-items: center; gap: 12px; }
-  .logo { display: inline-block; font-family: var(--font-body); font-size: 13px; line-height: 22px; font-weight: 400; letter-spacing: 0.32em; color: #cfe0f2; text-decoration: none;
-    padding: 11px 0; margin: -11px 0; }
+  /* ロゴは VOYASCOPE 本体と同じ画像（2026-11-28 オーナー）。押せる高さは 44px（行は 22px のまま） */
+  .logo { display: flex; align-items: center; height: 44px; margin: -11px 0; }
+  .logo img { display: block; height: 15px; width: auto; }
   /* 「出典と注記」：字は小さいまま、押せる範囲を 44px に広げる */
   .credit button#srcBtn { position: relative; }
   .credit button#srcBtn::after { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 64px); height: 44px; transform: translate(-50%, -50%); } /* 押せる高さ 44px（字の行は 22px のまま） */
@@ -281,6 +282,9 @@
   #viewReset[aria-disabled="true"] { opacity: 0.4; cursor: default; }
   #constBtn svg circle { fill: currentColor; stroke: none; }
   #constBtn svg { width: 22px; height: 22px; stroke-width: 1.6; }
+  /* .dome svg（空の上の輪の図）の「左上に広げる」指定がボタンのアイコンにかからないように（アイコンが左上にずれていた） */
+  .dome .corners .icon-btn svg { position: static; inset: auto; display: block; width: 20px; height: 20px; }
+  .dome .corners #constBtn svg { width: 22px; height: 22px; }
   .corners { position: absolute; z-index: 3; pointer-events: none; }
   .corners .icon-btn { position: absolute; bottom: 0; width: 44px; height: 44px; pointer-events: auto; color: #a9e9cf; }
   #constBtn { left: 0; } #viewReset { right: 0; }
@@ -290,6 +294,7 @@
     .top { flex-direction: row; align-items: center; gap: 24px; }
     .brandbar { flex: 1 1 auto; }
     .ctl { flex: none; width: 460px; }
+    .logo img { height: 18px; }
   }
   @media (max-width: 899px), (max-aspect-ratio: 1/1) {
     /* スマホ：縦に流す（ドームの大きさは画面の幅で決める。アドレスバーの出入りで変わらない）。低い画面ではページを送る */
@@ -321,7 +326,7 @@
   <!-- 上部：ロゴの細い行 ＋ 操作の行（場所チップ・カレンダー）。2026-11-28 オーナーの改修案（Main.dc.html） -->
   <header class="top">
     <div class="brandbar">
-      <a class="logo" href="../" aria-label="VOYASCOPE のトップへ">VOYASCOPE</a>
+      <a class="logo" href="../" aria-label="VOYASCOPE のトップへ"><img src="../assets/brand/logo-600.webp" alt="VOYASCOPE" width="600" height="104"></a>
       <span class="brand-sub">流星を眺める｜見上げる ・ 試験版</span>
       <span class="mw mono">METEOR WATCH</span>
     </div>
