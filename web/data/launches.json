@@ -2,7 +2,7 @@
   "$comment": "Launch Library 2（The Space Devs）の打ち上げ予定から scripts/fetch-launches.mjs が作る。手で編集しない。宇宙機関の公式の発表ではない（画面では「参考」の印を付ける）",
   "source": "https://thespacedevs.com/llapi",
   "source_label": "Launch Library 2（The Space Devs）",
-  "fetched_at": "2026-11-28T07:49:00.468Z",
+  "fetched_at": "2026-11-28T20:06:29.433Z",
   "days_ahead": 45,
   "launches": [
     {
@@ -46,13 +46,13 @@
     },
     {
       "id": "b0d27def-0a88-44c3-a947-1fd5b8503e2c",
-      "net": "2026-11-29T04:39:03.000Z",
+      "net": "2026-11-29T06:26:45.000Z",
       "precision": "sec",
       "window_end": "2026-11-29T08:39:00.000Z",
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-28T05:57:19Z",
+      "updated": "2026-11-28T18:39:31Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
@@ -85,13 +85,13 @@
     },
     {
       "id": "d74afbc7-0de5-491c-be05-4e9c31f736ac",
-      "net": "2026-11-29T15:47:00.000Z",
-      "precision": "min",
+      "net": "2026-11-29T15:47:23.000Z",
+      "precision": "sec",
       "window_end": null,
       "status": "go",
       "status_label": "Go",
       "status_ja": "日時が確かめられている",
-      "updated": "2026-11-27T21:54:09Z",
+      "updated": "2026-11-28T17:57:49Z",
       "rocket": {
         "name": "Falcon 9",
         "full_name": "Falcon 9 Block 5"
