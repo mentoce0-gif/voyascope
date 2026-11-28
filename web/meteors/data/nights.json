@@ -1,0 +1,126 @@
+{
+ "note": "GMN が実際に多く記録した夜（流星群ごと・地域ごと）。極大の予報ではない。fetch_and_filter.py --auto で作る",
+ "min_shower": 150,
+ "span": 2,
+ "generated_at_utc": "2026-11-28T17:31:11Z",
+ "regions": {
+  "japan": [
+   {
+    "night": "2025-12-14",
+    "shower": "GEM",
+    "count": 2403,
+    "count_shower": 1848,
+    "file": "meteors_20251214_japan.json"
+   },
+   {
+    "night": "2026-08-12",
+    "shower": "PER",
+    "count": 1069,
+    "count_shower": 879,
+    "file": "meteors_20260812_japan.json"
+   },
+   {
+    "night": "2026-10-21",
+    "shower": "ORI",
+    "count": 672,
+    "count_shower": 186,
+    "file": "meteors_20261021_japan.json"
+   },
+   {
+    "night": "2026-11-18",
+    "shower": "LEO",
+    "count": 426,
+    "count_shower": 173,
+    "file": "meteors_20261118_japan.json"
+   }
+  ],
+  "europe": [
+   {
+    "night": "2025-12-13",
+    "shower": "GEM",
+    "count": 14891,
+    "count_shower": 11621,
+    "file": "meteors_20251213_europe.json"
+   },
+   {
+    "night": "2026-01-03",
+    "shower": "QUA",
+    "count": 4056,
+    "count_shower": 3280,
+    "file": "meteors_20260103_europe.json"
+   },
+   {
+    "night": "2026-04-22",
+    "shower": "LYR",
+    "count": 2469,
+    "count_shower": 1234,
+    "file": "meteors_20260422_europe.json"
+   },
+   {
+    "night": "2026-08-12",
+    "shower": "PER",
+    "count": 16693,
+    "count_shower": 13264,
+    "file": "meteors_20260812_europe.json"
+   },
+   {
+    "night": "2026-10-20",
+    "shower": "ORI",
+    "count": 2520,
+    "count_shower": 660,
+    "file": "meteors_20261020_europe.json"
+   },
+   {
+    "night": "2026-11-18",
+    "shower": "LEO",
+    "count": 2034,
+    "count_shower": 689,
+    "file": "meteors_20261118_europe.json"
+   }
+  ],
+  "namerica": [
+   {
+    "night": "2025-12-13",
+    "shower": "GEM",
+    "count": 5128,
+    "count_shower": 4088,
+    "file": "meteors_20251213_namerica.json"
+   },
+   {
+    "night": "2026-01-02",
+    "shower": "QUA",
+    "count": 320,
+    "count_shower": 195,
+    "file": "meteors_20260102_namerica.json"
+   },
+   {
+    "night": "2026-04-21",
+    "shower": "LYR",
+    "count": 632,
+    "count_shower": 347,
+    "file": "meteors_20260421_namerica.json"
+   },
+   {
+    "night": "2026-08-11",
+    "shower": "PER",
+    "count": 1961,
+    "count_shower": 1352,
+    "file": "meteors_20260811_namerica.json"
+   },
+   {
+    "night": "2026-10-20",
+    "shower": "ORI",
+    "count": 2077,
+    "count_shower": 584,
+    "file": "meteors_20261020_namerica.json"
+   },
+   {
+    "night": "2026-11-18",
+    "shower": "LEO",
+    "count": 1644,
+    "count_shower": 540,
+    "file": "meteors_20261118_namerica.json"
+   }
+  ]
+ }
+}

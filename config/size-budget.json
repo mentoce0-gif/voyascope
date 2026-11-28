@@ -1,5 +1,5 @@
 {
-  "$comment": "読み込み量の上限（KB）。スマホで重くならないように scripts/check-size.mjs が CI で確かめる。文字のファイル（html・css・js・json）は gzip 後、画像はそのままの大きさで数える。パスは web/ から。* は1階層だけ。@craft-index は data/craft-index.json が指すファイル（カード・軌道・乗員・運用状況）。Google Fonts（外のサイト）は数えていない。上限を上げるときは、理由を PR に書く（docs/tasks/012-mobile-weight.md）。動画（.mp4）は押すまで読み込まない（preload=none）ので max_file_kb ではなく max_video_kb で数える（2026-11-02）",
+  "$comment": "読み込み量の上限（KB）。スマホで重くならないように scripts/check-size.mjs が CI で確かめる。文字のファイル（html・css・js・json）は gzip 後、画像はそのままの大きさで数える。パスは web/ から。* は1階層だけ。@craft-index は data/craft-index.json が指すファイル（カード・軌道・乗員・運用状況）。Google Fonts（外のサイト）は数えていない。上限を上げるときは、理由を PR に書く（docs/tasks/012-mobile-weight.md）。動画（.mp4）は押すまで読み込まない（preload=none）ので max_file_kb ではなく max_video_kb で数える（2026-11-02）。max_file_kb は 2026-11-28 に 600 → 700（流星を眺めるのヨーロッパのペルセウス座の夜が gzip で 643KB。オーナー：案A）",
   "groups": [
     {
       "id": "boot",
@@ -53,9 +53,9 @@
     },
     {
       "id": "meteors",
-      "label": "流星を眺める（meteors/・試験版）を開いたときに読むもの（ページ・流星のデータ・星の位置〈ヒッパルコス 6等未満〉・天の川〈ESO 2048×1024〉・ロゴ）。流星のデータは開いた地域の1つだけ読むので、いちばん大きいヨーロッパで数える（2026-11-22）。2026-11-21。2026-11-22 に天の川の画像（約180KB）を足すので 120 → 320KB（オーナー：パノラマを入れる）",
-      "max_kb": 320,
-      "files": ["meteors/index.html", "meteors/data/meteors_20261118_europe.json", "meteors/data/stars-hipparcos.json", "meteors/data/milkyway-eso0932a-2048.jpg", "assets/brand/logo-600.webp"]
+      "label": "流星を眺める（meteors/・試験版）を開いたときに読むもの（ページ・流星のデータ・夜の一覧・星の位置〈ヒッパルコス 6等未満〉・天の川〈ESO 2048×1024〉・ロゴ）。流星のデータは開いた夜の1つだけ読むので、いちばん大きい夜（ヨーロッパのペルセウス座 2026-08-12・16,693個）で数える。2026-11-21。2026-11-22 に天の川の画像（約180KB）を足すので 120 → 320KB（オーナー：パノラマを入れる）。2026-11-28 に流星群の夜を足すので 320 → 950KB（オーナー：案A。ふつうの夜は 300KB 前後）",
+      "max_kb": 950,
+      "files": ["meteors/index.html", "meteors/data/meteors_20260812_europe.json", "meteors/data/nights.json", "meteors/data/stars-hipparcos.json", "meteors/data/milkyway-eso0932a-2048.jpg", "assets/brand/logo-600.webp"]
     },
     {
       "id": "meteors-space",
@@ -76,7 +76,7 @@
       "files": ["mmx/partners/*", "mmx/mmx.css", "data/land-minimap.json", "vendor/three-r128.min.js", "js/far/models.js"]
     }
   ],
-  "max_file_kb": 600,
+  "max_file_kb": 700,
   "max_video_kb": 2500,
   "preload": ["vendor/globe.gl.min.js"]
 }
